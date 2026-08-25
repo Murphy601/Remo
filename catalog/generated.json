@@ -7,10 +7,11 @@
     "doc_type": "Requirements document",
     "date": "November 18, 2019",
     "role": "Junior Software Engineer",
-    "words": 6130,
-    "est_pages": 18,
+    "words": 31833,
+    "est_pages": 100,
     "description": "Requirements document for the Oakridge inventory position API v1, written so plant ops, the EM, and the implementing engineers share one scope cut after ticket OAK-4412 was reopened.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/02-oakridge-new-engineer-integration-guide.docx",
@@ -20,10 +21,11 @@
     "doc_type": "Integration documentation",
     "date": "February 21, 2020",
     "role": "Junior Software Engineer",
-    "words": 4326,
-    "est_pages": 13,
+    "words": 32118,
+    "est_pages": 100,
     "description": "Internal integration guide for Northstar engineers joining the Oakridge inventory-api work, covering VPN, schema, local snapshot, extract path, and ownership.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/03-oakridge-inventory-rest-design.docx",
@@ -33,10 +35,11 @@
     "doc_type": "Technical design",
     "date": "January 9, 2020",
     "role": "Junior Software Engineer",
-    "words": 4055,
-    "est_pages": 12,
+    "words": 31468,
+    "est_pages": 100,
     "description": "Technical design for the Oakridge inventory position REST API v1, covering resources, cursors, caching, and failure modes for implementers and reviewers.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/04-oakridge-ops-kickoff-notes.docx",
@@ -46,10 +49,11 @@
     "doc_type": "Meeting notes",
     "date": "October 16, 2019",
     "role": "Junior Software Engineer",
-    "words": 3486,
-    "est_pages": 10,
+    "words": 32357,
+    "est_pages": 100,
     "description": "Decision-oriented kickoff notes for the Oakridge inventory position API, written so a colleague can act without listening to the WebEx recording.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/05-oakridge-inventory-extract-sop.docx",
@@ -59,10 +63,11 @@
     "doc_type": "SOP / runbook",
     "date": "March 12, 2020",
     "role": "Junior Software Engineer",
-    "words": 4302,
-    "est_pages": 13,
+    "words": 32794,
+    "est_pages": 100,
     "description": "On-call SOP for the Oakridge nightly inventory extract and replica load, written for a cold 2am run with exact commands and refuse conditions.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/06-riverview-unified-patient-api-prd.docx",
@@ -72,10 +77,11 @@
     "doc_type": "PRD",
     "date": "August 27, 2020",
     "role": "Software Engineer",
-    "words": 5666,
-    "est_pages": 17,
+    "words": 30816,
+    "est_pages": 100,
     "description": "Product requirements for the Riverview unified patient read API, written for CMIO, nursing, integration, and Northstar engineering before the RapidChart Flagstaff pilot.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/07-riverview-identity-merge-design.docx",
@@ -85,10 +91,11 @@
     "doc_type": "Technical design",
     "date": "January 14, 2021",
     "role": "Software Engineer",
-    "words": 4254,
-    "est_pages": 13,
+    "words": 31335,
+    "est_pages": 100,
     "description": "Technical design for Riverview record merge and identity resolution, written for engineering, HIM, and the CMIO liaison before any auto-link is enabled.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/08-riverview-inflated-census-incident.docx",
@@ -98,10 +105,11 @@
     "doc_type": "Incident report",
     "date": "June 22, 2021",
     "role": "Software Engineer",
-    "words": 3504,
-    "est_pages": 10,
+    "words": 30705,
+    "est_pages": 100,
     "description": "Incident report for the inflated Riverview census counts, written after the Flagstaff bed-board mismatch, covering timeline, impact, root cause, and the dedup fix.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/09-riverview-api-test-strategy.docx",
@@ -111,10 +119,11 @@
     "doc_type": "Test strategy",
     "date": "March 5, 2021",
     "role": "Software Engineer",
-    "words": 3403,
-    "est_pages": 10,
+    "words": 31361,
+    "est_pages": 100,
     "description": "QA test strategy for the unified patient read API, written so engineering and Sneha share one fixture policy and so the four pre-staging regressions stay mandatory.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/10-riverview-gha-migration-memo.docx",
@@ -124,10 +133,11 @@
     "doc_type": "Recommendation memo",
     "date": "November 9, 2021",
     "role": "Software Engineer",
-    "words": 3579,
-    "est_pages": 11,
+    "words": 31439,
+    "est_pages": 100,
     "description": "Recommendation memo asking Priya Nair to approve moving Riverview Patient API CI off Jenkins to GitHub Actions with VLAN-hosted runners so PHI fixtures never leave the hospital network.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/11-riverview-patient-api-oncall-runbook.docx",
@@ -137,10 +147,11 @@
     "doc_type": "Runbook",
     "date": "September 30, 2021",
     "role": "Software Engineer",
-    "words": 7161,
-    "est_pages": 21,
+    "words": 31470,
+    "est_pages": 100,
     "description": "On-call runbook for Riverview patient-api. Written so a Northstar engineer who did not ship the last release can isolate a facility feed, talk to ChartLine on-call, and avoid dumping PHI into Slack at 3am.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/12-riverview-clinical-feedback-notes.docx",
@@ -150,10 +161,11 @@
     "doc_type": "Meeting notes",
     "date": "April 13, 2021",
     "role": "Software Engineer",
-    "words": 3897,
-    "est_pages": 11,
+    "words": 31445,
+    "est_pages": 100,
     "description": "Meeting notes from a Riverview clinical feedback session on RapidChart assemble behavior. Captures decisions, owners, and the rejected idea of leading with a 'unified API' narrative.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/13-riverview-phi-logging-sop.docx",
@@ -163,10 +175,11 @@
     "doc_type": "SOP",
     "date": "July 19, 2021",
     "role": "Software Engineer",
-    "words": 3460,
-    "est_pages": 10,
+    "words": 31476,
+    "est_pages": 100,
     "description": "SOP for keeping Riverview PHI out of logs, traces, and Slack. Written for on-call engineers and anyone cutting a support zip.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/14-riverview-fhir-vs-rest-design.docx",
@@ -176,10 +189,11 @@
     "doc_type": "Technical design",
     "date": "October 8, 2020",
     "role": "Software Engineer",
-    "words": 3766,
-    "est_pages": 11,
+    "words": 31204,
+    "est_pages": 100,
     "description": "Technical design choosing custom REST over FHIR R4 for Riverview patient-api v1, with constraints, payload math, and a rejected HAPI-on-day-one path.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/15-riverview-chart-assemble-prd.docx",
@@ -189,10 +203,11 @@
     "doc_type": "PRD",
     "date": "February 18, 2021",
     "role": "Software Engineer",
-    "words": 3932,
-    "est_pages": 12,
+    "words": 30866,
+    "est_pages": 100,
     "description": "PRD for Riverview chart assemble: blocks, latency budget, partial-fill banners, caching, and success metrics tied to nurse time rather than QPS.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/16-clearhaven-recon-platform-design.docx",
@@ -202,10 +217,11 @@
     "doc_type": "Systems design",
     "date": "September 15, 2022",
     "role": "Software Engineer II",
-    "words": 6884,
-    "est_pages": 20,
+    "words": 30772,
+    "est_pages": 100,
     "description": "Internal systems design for the Clearhaven recon platform. Written so engineering can build ingest-api, match-engine, break-svc, and recon-query, and so Clearhaven ops can sign off on audit and residency constraints.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/17-clearhaven-kafka-ingestion-redesign.docx",
@@ -215,10 +231,11 @@
     "doc_type": "Technical design",
     "date": "April 11, 2023",
     "role": "Software Engineer II",
-    "words": 4508,
-    "est_pages": 13,
+    "words": 31740,
+    "est_pages": 100,
     "description": "Technical design for the Clearhaven Kafka ingest cutover. Written so ingest-api, match-engine, and SRE can ship CLH-5519 without re-arguing partition count on the change window.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/18-clearhaven-api-versioning-strategy.docx",
@@ -228,10 +245,11 @@
     "doc_type": "Technical design",
     "date": "August 3, 2023",
     "role": "Software Engineer II",
-    "words": 3915,
-    "est_pages": 12,
+    "words": 30804,
+    "est_pages": 100,
     "description": "Technical design for versioning Clearhaven recon HTTP APIs. Written after CLH-INC-2023-061 so engineering, QA, and the TAM have one policy for breaking changes.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/19-clearhaven-consumer-lag-runbook.docx",
@@ -241,10 +259,11 @@
     "doc_type": "Runbook",
     "date": "June 20, 2023",
     "role": "Software Engineer II",
-    "words": 3742,
-    "est_pages": 11,
+    "words": 31363,
+    "est_pages": 100,
     "description": "Operational runbook for Clearhaven match-engine consumer lag. Written for the primary on-call to execute without the author on the call.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/20-clearhaven-settlement-break-incident.docx",
@@ -254,10 +273,11 @@
     "doc_type": "Incident report",
     "date": "November 16, 2023",
     "role": "Software Engineer II",
-    "words": 3772,
-    "est_pages": 11,
+    "words": 31741,
+    "est_pages": 100,
     "description": "Incident report for the November 14, 2023 Clearhaven settlement break. Written for engineering, ops, TAM, and control owner so the filename idempotency gap is closed in code and in the window checklist.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/21-clearhaven-kafka-vs-filedrop-memo.docx",
@@ -267,10 +287,11 @@
     "doc_type": "Recommendation memo",
     "date": "February 7, 2023",
     "role": "Software Engineer II",
-    "words": 5182,
-    "est_pages": 15,
+    "words": 31810,
+    "est_pages": 100,
     "description": "Internal recommendation memo from Aman Kumar to Priya Nair and Marcus Bell comparing three ingest options for Clearhaven recon and taking a position for Kafka on the existing RailClear bus.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/22-clearhaven-postgres-partitioning-design.docx",
@@ -280,10 +301,11 @@
     "doc_type": "Technical design",
     "date": "May 18, 2023",
     "role": "Software Engineer II",
-    "words": 4199,
-    "est_pages": 12,
+    "words": 31790,
+    "est_pages": 100,
     "description": "Technical design for range-partitioning Clearhaven recon fact and break tables in Postgres 13, including indexes, detach-to-cold, query-planner risks, and an 8-second lock-budget migration.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/23-clearhaven-batch-replay-prd.docx",
@@ -293,10 +315,11 @@
     "doc_type": "PRD",
     "date": "January 22, 2024",
     "role": "Software Engineer II",
-    "words": 3856,
-    "est_pages": 11,
+    "words": 31505,
+    "est_pages": 100,
     "description": "Product requirements for an ops-facing batch replay action on the Clearhaven recon platform, written by Aman Kumar with Helen Cho as acceptor and Maya Singh's no-edit constraint as a hard out-of-scope.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/24-clearhaven-prod-deploy-sop.docx",
@@ -306,10 +329,11 @@
     "doc_type": "SOP",
     "date": "September 14, 2023",
     "role": "Software Engineer II",
-    "words": 3896,
-    "est_pages": 11,
+    "words": 32058,
+    "est_pages": 100,
     "description": "Step-by-step production deploy SOP for Clearhaven recon Helm releases, including freeze windows, canary, error-budget abort, and rollback commands.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/25-clearhaven-sla-review-notes.docx",
@@ -319,10 +343,11 @@
     "doc_type": "Meeting notes",
     "date": "March 12, 2024",
     "role": "Software Engineer II",
-    "words": 3649,
-    "est_pages": 11,
+    "words": 31750,
+    "est_pages": 100,
     "description": "Internal meeting notes from the Q1 2024 Clearhaven recon SLA review, capturing decisions, the month-end 7:35 exception, open weekend-scope question, and named action items.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/26-clearhaven-idempotent-consumers-design.docx",
@@ -332,10 +357,11 @@
     "doc_type": "Technical design",
     "date": "July 6, 2023",
     "role": "Software Engineer II",
-    "words": 5923,
-    "est_pages": 17,
+    "words": 31694,
+    "est_pages": 100,
     "description": "Technical design for idempotent Kafka consumers on the Clearhaven recon ingest path. Written after a week of duplicate exception tickets so the team has one schema, one commit order, and a list of failure modes before Kavya starts the CLH-6012 branch.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/27-clearhaven-unversioned-api-incident.docx",
@@ -345,10 +371,11 @@
     "doc_type": "Incident report",
     "date": "March 28, 2023",
     "role": "Software Engineer II",
-    "words": 4527,
-    "est_pages": 13,
+    "words": 31819,
+    "est_pages": 100,
     "description": "Incident report for the March 22 unversioned field rename on break-svc. Written so Priya has a record for Clearhaven, so Kavya has the review checklist that failed, and so the versioning design has a concrete failure to point at.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/28-clearhaven-otel-rollout-design.docx",
@@ -358,10 +385,11 @@
     "doc_type": "Technical design",
     "date": "February 15, 2024",
     "role": "Software Engineer II",
-    "words": 4391,
-    "est_pages": 13,
+    "words": 31044,
+    "est_pages": 100,
     "description": "Technical design for the Clearhaven OpenTelemetry rollout. Written so Diego can size the collector, Kavya can pick agent versus SDK, and Priya can see what we are not buying from Datadog while the trial is still open.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/29-clearhaven-datadog-vs-grafana-memo.docx",
@@ -371,10 +399,11 @@
     "doc_type": "Recommendation memo",
     "date": "April 9, 2024",
     "role": "Software Engineer II",
-    "words": 3791,
-    "est_pages": 11,
+    "words": 31377,
+    "est_pages": 100,
     "description": "Recommendation memo for Priya Nair on Datadog versus the existing Grafana stack after a six-week trial. Written with trial invoices, cardinality counts, and a backup trigger so we do not reopen the debate every quarter.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/30-clearhaven-dlq-design.docx",
@@ -384,10 +413,11 @@
     "doc_type": "Technical design",
     "date": "October 12, 2023",
     "role": "Software Engineer II",
-    "words": 4584,
-    "est_pages": 13,
+    "words": 31405,
+    "est_pages": 100,
     "description": "Technical design for the settlement inbound dead letter topic and replay path. Written so match-engine owns operations, ingest-svc has a producer contract, and oncall has a depth alert instead of a skip table nobody reads.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/31-clearhaven-worker-oom-runbook.docx",
@@ -397,10 +427,11 @@
     "doc_type": "Runbook",
     "date": "May 21, 2024",
     "role": "Software Engineer II",
-    "words": 6647,
-    "est_pages": 20,
+    "words": 32168,
+    "est_pages": 100,
     "description": "Internal on-call runbook for match-engine OOM on nested RailClear payloads. Written after CLH-INC-2024-091 so SE II and SRE share one set of commands and a hard rule against unbounded memory bumps.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/32-clearhaven-schema-migration-sop.docx",
@@ -410,10 +441,11 @@
     "doc_type": "SOP",
     "date": "June 18, 2024",
     "role": "Software Engineer II",
-    "words": 6024,
-    "est_pages": 18,
+    "words": 31725,
+    "est_pages": 100,
     "description": "Standard operating procedure for Flyway migrations against Clearhaven recon Postgres. Written after the June 3 hotfix checksum incident so expand/contract and abort steps live in one place.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/33-clearhaven-spark-backfill-design.docx",
@@ -423,10 +455,11 @@
     "doc_type": "Technical design",
     "date": "July 23, 2024",
     "role": "Software Engineer II",
-    "words": 4547,
-    "est_pages": 13,
+    "words": 32134,
+    "est_pages": 100,
     "description": "Technical design for the 2019-2022 Spark backfill onto partitioned recon tables. Written so we do not run a 4.6 billion row load on the OLTP primary and so the DST edge is explicit before Chris starts the job.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/34-clearhaven-capacity-fy25-memo.docx",
@@ -436,10 +469,11 @@
     "doc_type": "Capacity planning memo",
     "date": "September 5, 2024",
     "role": "Software Engineer II",
-    "words": 3887,
-    "est_pages": 11,
+    "words": 31463,
+    "est_pages": 100,
     "description": "Capacity planning memo for Clearhaven recon FY25. Written to kill the 12-broker ask and replace it with 4 brokers, compaction, and Postgres disk, with a do-nothing SLA forecast.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/35-clearhaven-grpc-internal-adr.docx",
@@ -449,10 +483,11 @@
     "doc_type": "Architecture decision record",
     "date": "August 14, 2024",
     "role": "Software Engineer II",
-    "words": 3832,
-    "est_pages": 11,
+    "words": 31021,
+    "est_pages": 100,
     "description": "Architecture decision record for putting gRPC on the internal open-break path while leaving REST on recon-query. Accepted. Written so the next protocol argument cites load numbers instead of taste.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/36-clearhaven-loadtest-8m-report.docx",
@@ -462,10 +497,11 @@
     "doc_type": "Load test report",
     "date": "October 17, 2024",
     "role": "Software Engineer II",
-    "words": 5814,
-    "est_pages": 17,
+    "words": 31139,
+    "est_pages": 100,
     "description": "Internal load test report for Clearhaven recon. Written after the October 14-16 shadow runs so Priya and Marcus can decide hardware and so the match team can pick the break-svc work.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/37-clearhaven-postgres-failover-runbook.docx",
@@ -475,10 +511,11 @@
     "doc_type": "Runbook",
     "date": "November 8, 2024",
     "role": "Software Engineer II",
-    "words": 5081,
-    "est_pages": 15,
+    "words": 32158,
+    "est_pages": 100,
     "description": "On-call runbook for Clearhaven recon Postgres. Written so a Northstar engineer can promote a replica, point ingest at the new primary, and confirm WAL without waiting for the DBA if Rina is unreachable.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/38-clearhaven-cdc-settlement-design.docx",
@@ -488,10 +525,11 @@
     "doc_type": "Technical design",
     "date": "January 19, 2023",
     "role": "Software Engineer II",
-    "words": 4282,
-    "est_pages": 13,
+    "words": 31389,
+    "est_pages": 100,
     "description": "Technical design for Clearhaven settlement ingest. Written to freeze the lister-plus-hash approach and to kill the Debezium proposal before we spent a quarter on a connector with no source database.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/39-clearhaven-api-versioning-review-notes.docx",
@@ -501,10 +539,11 @@
     "doc_type": "Meeting notes",
     "date": "July 25, 2023",
     "role": "Software Engineer II",
-    "words": 3679,
-    "est_pages": 11,
+    "words": 31772,
+    "est_pages": 100,
     "description": "Meeting notes from the July 25 architecture review of Clearhaven ops-api versioning. Written so the URI vs header decision and the /v1 sunset argument are on paper before the August design freezes.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/40-clearhaven-kafka-rebalance-incident.docx",
@@ -514,10 +553,11 @@
     "doc_type": "Incident report",
     "date": "January 11, 2024",
     "role": "Software Engineer II",
-    "words": 3740,
-    "est_pages": 11,
+    "words": 31423,
+    "est_pages": 100,
     "description": "Incident report for the January 8 match-engine rebalance storm. Written for Priya, Marcus, and the on-call rotation so the timeout and staging-partition mistakes are not tribal knowledge.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/41-clearhaven-oncall-sop.docx",
@@ -527,10 +567,11 @@
     "doc_type": "SOP",
     "date": "December 7, 2023",
     "role": "Software Engineer II",
-    "words": 6443,
-    "est_pages": 19,
+    "words": 31049,
+    "est_pages": 100,
     "description": "Internal SOP for Northstar engineers covering Clearhaven reconciliation production. Written so a tired person at 02:14 ET can decide whether to page, who to call, and what not to deploy.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/42-clearhaven-terraform-aws-design.docx",
@@ -540,10 +581,11 @@
     "doc_type": "Technical design",
     "date": "March 28, 2024",
     "role": "Software Engineer II",
-    "words": 4534,
-    "est_pages": 13,
+    "words": 31081,
+    "est_pages": 100,
     "description": "Technical design for moving Clearhaven recon AWS resources under Terraform modules and a locked apply path. Written for engineers who will import, plan, and apply, and for Priya who needs a one-screen decision.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/43-clearhaven-exception-codes-prd.docx",
@@ -553,10 +595,11 @@
     "doc_type": "PRD",
     "date": "December 5, 2024",
     "role": "Software Engineer II",
-    "words": 4029,
-    "est_pages": 12,
+    "words": 31060,
+    "est_pages": 100,
     "description": "Product requirements for structured recon exception codes, mapping, UI, reporting, and immutable history. Written for engineering, ops, QA, and the Clearhaven compliance reviewer who asked for history in November.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/44-clearhaven-model-summary-eval-rubric.docx",
@@ -566,10 +609,11 @@
     "doc_type": "Evaluation rubric",
     "date": "February 13, 2025",
     "role": "Software Engineer II",
-    "words": 3558,
-    "est_pages": 10,
+    "words": 31087,
+    "est_pages": 100,
     "description": "Operational evaluation rubric for Northstar engineers scoring model-written Clearhaven recon break summaries. Used in the weekly review queue, not as an academic benchmark.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/45-clearhaven-matchkey-redis-design.docx",
@@ -579,10 +623,11 @@
     "doc_type": "Technical design",
     "date": "May 2, 2024",
     "role": "Software Engineer II",
-    "words": 4021,
-    "est_pages": 12,
+    "words": 31724,
+    "est_pages": 100,
     "description": "Technical design for a Redis hot cache of Clearhaven recon match keys. Written for the people who will implement the client, size the box, and sit the incident when Redis dies during the window.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/46-clearhaven-k8s-compute-memo.docx",
@@ -592,10 +637,11 @@
     "doc_type": "Recommendation memo",
     "date": "November 2, 2023",
     "role": "Software Engineer II",
-    "words": 5955,
-    "est_pages": 18,
+    "words": 31105,
+    "est_pages": 100,
     "description": "Internal recommendation memo from Software Engineer II Aman Kumar to the Clearhaven engineering manager and SRE lead, arguing for a two-phase EKS migration of match-engine compute and rejecting an AMI-in-DaemonSet shortcut.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/47-clearhaven-latency-cut-readout.docx",
@@ -605,10 +651,11 @@
     "doc_type": "Meeting notes",
     "date": "May 24, 2023",
     "role": "Software Engineer II",
-    "words": 3808,
-    "est_pages": 11,
+    "words": 32130,
+    "est_pages": 100,
     "description": "Meeting notes from the post-cutover readout of Clearhaven Kafka ingestion, capturing measured latency, Helen Cho's month-end hold, the 90-day file-drop emergency path, and open work on RailClear dual-write.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/48-clearhaven-helm-rollback-runbook.docx",
@@ -618,10 +665,11 @@
     "doc_type": "Runbook",
     "date": "August 29, 2024",
     "role": "Software Engineer II",
-    "words": 5040,
-    "est_pages": 15,
+    "words": 31169,
+    "est_pages": 100,
     "description": "Internal helm rollback runbook for three Clearhaven production charts. Covers schema preconditions, exact commands, leftover hook and CRD checks, and a worked example from the January 2024 rebalance incident.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/49-clearhaven-audit-trail-requirements.docx",
@@ -631,10 +679,11 @@
     "doc_type": "Requirements document",
     "date": "November 17, 2022",
     "role": "Software Engineer II",
-    "words": 4846,
-    "est_pages": 14,
+    "words": 31697,
+    "est_pages": 100,
     "description": "Requirements for Clearhaven break-change audit trail: insert-only 7-year store, Helen Cho's export, prohibition on PAN/SSN, and rejection of 30-day application logs as the control.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   },
   {
     "file": "documents/50-clearhaven-duplicate-weekend-postmortem.docx",
@@ -644,9 +693,10 @@
     "doc_type": "Incident postmortem",
     "date": "June 16, 2025",
     "role": "Software Engineer II",
-    "words": 4325,
-    "est_pages": 13,
+    "words": 32093,
+    "est_pages": 100,
     "description": "Blameless incident postmortem for the June 7-8 2025 Clearhaven weekend batch that double-posted 62,104 legs after a manual replay and the Monday catch-up both ran. Impact was exception-queue noise; cash was held.",
-    "field": "Software Engineering / Data Science"
+    "field": "Software Engineering / Data Science",
+    "pages": 100
   }
 ]

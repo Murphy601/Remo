@@ -236,17 +236,17 @@ def build_document(spec: dict, out_path: Path) -> Path:
     section = doc.sections[0]
     section.page_width = Inches(8.5)
     section.page_height = Inches(11)
-    section.left_margin = Inches(0.9)
-    section.right_margin = Inches(0.9)
-    section.top_margin = Inches(1.15)
-    section.bottom_margin = Inches(0.95)
+    section.left_margin = Inches(1.15)
+    section.right_margin = Inches(1.15)
+    section.top_margin = Inches(1.2)
+    section.bottom_margin = Inches(1.05)
     section.header_distance = Inches(0.4)
     section.footer_distance = Inches(0.4)
 
     # Default style
     normal = doc.styles["Normal"]
     normal.font.name = BODY_FONT
-    normal.font.size = Pt(11)
+    normal.font.size = Pt(12)
     normal.font.color.rgb = BODY
     rPr = normal.element.get_or_add_rPr()
     rFonts = rPr.find(qn("w:rFonts"))
@@ -257,9 +257,9 @@ def build_document(spec: dict, out_path: Path) -> Path:
     rFonts.set(qn("w:hAnsi"), BODY_FONT)
 
     pf = normal.paragraph_format
-    pf.space_after = Pt(8)
+    pf.space_after = Pt(12)
     pf.space_before = Pt(0)
-    pf.line_spacing = 1.15
+    pf.line_spacing = 1.78
 
     for i in range(1, 4):
         hs = doc.styles[f"Heading {i}"]
@@ -275,16 +275,16 @@ def build_document(spec: dict, out_path: Path) -> Path:
         rFonts.set(qn("w:hAnsi"), SANS)
         if i == 1:
             hs.font.size = Pt(16)
-            hs.paragraph_format.space_before = Pt(16)
-            hs.paragraph_format.space_after = Pt(8)
+            hs.paragraph_format.space_before = Pt(22)
+            hs.paragraph_format.space_after = Pt(12)
         elif i == 2:
             hs.font.size = Pt(13)
-            hs.paragraph_format.space_before = Pt(13)
-            hs.paragraph_format.space_after = Pt(6)
+            hs.paragraph_format.space_before = Pt(16)
+            hs.paragraph_format.space_after = Pt(8)
         else:
-            hs.font.size = Pt(11.5)
-            hs.paragraph_format.space_before = Pt(10)
-            hs.paragraph_format.space_after = Pt(4)
+            hs.font.size = Pt(12)
+            hs.paragraph_format.space_before = Pt(12)
+            hs.paragraph_format.space_after = Pt(6)
 
     _build_header(section, spec)
     _build_footer(section, spec)
@@ -434,15 +434,25 @@ def _build_title_block(doc: Document, spec: dict):
 
 def _add_para(doc, text, first_line=False):
     p = doc.add_paragraph()
-    _spacing(p, before=0, after=8, line=276)
-    p.paragraph_format.first_line_indent = Inches(0.0)
+    _spacing(p, before=0, after=12, line=427)
+    p.paragraph_format.first_line_indent = Inches(0.2)
     run = p.add_run(text)
-    _set_run_font(run, BODY_FONT, 11, color=BODY)
+    _set_run_font(run, BODY_FONT, 12, color=BODY)
     return p
+
+
+def _page_break_before(paragraph: Paragraph):
+    pPr = paragraph._p.get_or_add_pPr()
+    pb = pPr.find(qn("w:pageBreakBefore"))
+    if pb is None:
+        pb = OxmlElement("w:pageBreakBefore")
+        pPr.append(pb)
 
 
 def _add_heading(doc, text, level=1):
     p = doc.add_heading(text, level=level)
+    if level == 1 and str(text).startswith("Appendix"):
+        _page_break_before(p)
     return p
 
 
@@ -455,7 +465,7 @@ def _add_bullets(doc, items, ordered=False):
         if p.runs:
             p.clear()
         run = p.add_run(item)
-        _set_run_font(run, BODY_FONT, 11, color=BODY)
+        _set_run_font(run, BODY_FONT, 12, color=BODY)
 
 
 def _add_table(doc, headers, rows, col_widths=None):

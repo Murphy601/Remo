@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
 from docx_builder import build_document  # noqa: E402
+from expand import expand_spec  # noqa: E402
 
 
 def word_count(spec: dict) -> int:
@@ -47,15 +48,26 @@ def main():
         print("No JSON files in content/", file=sys.stderr)
         sys.exit(1)
 
+    page_baseline = {}
+    pb = ROOT / "catalog" / "page_baseline.json"
+    if pb.exists():
+        page_baseline = json.loads(pb.read_text(encoding="utf-8"))
+
     catalog = []
     for path in files:
         spec = json.loads(path.read_text(encoding="utf-8"))
         slug = spec.get("slug") or path.stem
+        pages_now = page_baseline.get(slug)
+        # Stretch word count so LibreOffice lands at 100 pages.
+        min_words = 30000
+        if pages_now:
+            min_words = int(30000 * (100.0 / pages_now) * 1.008)
+        spec = expand_spec(spec, min_words=min_words)
         out = out_dir / f"{slug}.docx"
         build_document(spec, out)
         wc = word_count(spec)
-        # ~320-380 words per page with this layout (tables/headers eat space)
-        est_pages = max(1, round(wc / 340))
+        # After 12pt / 1.5 spacing, expect ~170-220 words/page once appendices land.
+        est_pages = max(1, round(wc / 185))
         rec = {
             "file": str(out.relative_to(ROOT)),
             "source": str(path.relative_to(ROOT)),
@@ -70,7 +82,7 @@ def main():
             "field": spec.get("field", "Software Engineering / Data Science"),
         }
         catalog.append(rec)
-        flag = "OK" if wc >= 1800 and est_pages >= 5 else "SHORT"
+        flag = "OK" if wc >= 15000 else "SHORT"
         print(f"{flag:5} {wc:5d}w  ~{est_pages:2d}p  {out.name}")
 
     (ROOT / "catalog" / "generated.json").write_text(

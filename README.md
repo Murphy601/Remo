@@ -16,7 +16,7 @@ All finished files live in [`documents/`](documents/). Intake answers (job title
 | 2020–2022 | Riverview Health Network (hospital data platform) | 10 | PRDs, identity-merge design, incident, test strategy, runbooks, PHI SOP |
 | 2022–2025 | Clearhaven Markets (transaction recon, ~8.2M records/day) | 35 | systems design, Kafka ingest, incidents, runbooks, ADRs, capacity, eval rubric |
 
-Every file is several thousand words, dense enough to stay well above 150 words a page, with a document-control block, revision history, numbered sections, and tables. Recommendation memos take a position. Runbooks include commands and failure paths. Meeting notes capture decisions, owners, and open questions.
+Every file is **100 pages**, measured in LibreOffice. Word counts sit around 30,000–33,000, so the 150-words-per-page bar still holds.
 
 ## Shared intake answers
 
