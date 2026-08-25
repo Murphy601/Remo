@@ -62,7 +62,7 @@ Author on every document: Aman Kumar, Software Engineer II, Northstar Engineerin
 | 43 | `43-clearhaven-exception-codes-prd.docx` | 44 | 12125 | 05-12-2024 | Product requirements for structured recon exception codes, mapping, UI, reporting, and immutable history. Written for engineering, ops, QA, and the Clearhave... |
 | 44 | `44-clearhaven-model-summary-eval-rubric.docx` | 45 | 11959 | 13-02-2025 | Operational evaluation rubric for Northstar engineers scoring model-written Clearhaven recon break summaries. Used in the weekly review queue, not as an acad... |
 | 45 | `45-clearhaven-matchkey-redis-design.docx` | 43 | 14198 | 02-05-2024 | Technical design for a Redis hot cache of Clearhaven recon match keys. Written for the people who will implement the client, size the box, and sit the incide... |
-| 46 | `46-clearhaven-k8s-compute-memo.docx` | 47 | 12035 | 02-11-2023 | Internal recommendation memo from Software Engineer II Aman Kumar to the Clearhaven engineering manager and SRE lead, arguing for a two-phase EKS migration o... |
+| 46 | `46-clearhaven-k8s-compute-memo.docx` | 47 | 12036 | 02-11-2023 | Internal recommendation memo from Software Engineer II Aman Kumar to the Clearhaven engineering manager and SRE lead, arguing for a two-phase EKS migration o... |
 | 47 | `47-clearhaven-latency-cut-readout.docx` | 46 | 12011 | 24-05-2023 | Meeting notes from the post-cutover readout of Clearhaven Kafka ingestion, capturing measured latency, Helen Cho's month-end hold, the 90-day file-drop emerg... |
 | 48 | `48-clearhaven-helm-rollback-runbook.docx` | 42 | 14261 | 29-08-2024 | Internal helm rollback runbook for three Clearhaven production charts. Covers schema preconditions, exact commands, leftover hook and CRD checks, and a worke... |
 | 49 | `49-clearhaven-audit-trail-requirements.docx` | 43 | 13871 | 17-11-2022 | Requirements for Clearhaven break-change audit trail: insert-only 7-year store, Helen Cho's export, prohibition on PAN/SSN, and rejection of 30-day applicati... |
@@ -527,7 +527,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/46-clearhaven-k8s-compute-memo.docx`
 - **Doc ID:** CLH-MEM-2023-027
 - **Type:** Recommendation memo
-- **4. Pages:** 47 (LibreOffice), 12035 words
+- **4. Pages:** 47 (LibreOffice), 12036 words
 - **6. Description:** Internal recommendation memo from Software Engineer II Aman Kumar to the Clearhaven engineering manager and SRE lead, arguing for a two-phase EKS migration of match-engine compute and rejecting an AMI-in-DaemonSet shortcut.
 - **7. Written:** 02-11-2023 (November 2, 2023)
 - **Role at the time:** Software Engineer II

@@ -592,7 +592,7 @@
     "doc_type": "Recommendation memo",
     "date": "November 2, 2023",
     "role": "Software Engineer II",
-    "words": 12035,
+    "words": 12036,
     "est_pages": 48,
     "description": "Internal recommendation memo from Software Engineer II Aman Kumar to the Clearhaven engineering manager and SRE lead, arguing for a two-phase EKS migration of match-engine compute and rejecting an AMI-in-DaemonSet shortcut.",
     "field": "Software Engineering / Data Science"

@@ -350,7 +350,7 @@
     },
     {
       "type": "p",
-      "text": "Commands fail. Your SSO token is dead, kubectl context is still stg, psql hangs because you pointed at the primary during a lock. Failures have boring recoveries. SSO: aws sso login --profile clh-recon-prod, wait the 8-12 seconds, retry. Wrong context: kubectl config use-context clh-recon-prod-eks, then get pods again. psql hang: Ctrl-C, use the cluster-ro endpoint, never the cluster writer during an incident unless Diego is on the call and you are looking at pg_stat_activity with him. If MSK SASL handshake fails, you are probably on the wrong bootstrap or your client.properties expired. Diego owns the MSK client cert rotation (every 90 days, last done October 3). Do not regenerate a cert at 02:00. Use the runbook in CLH-RB-2023-012 appendix B to copy the current cert from the match-worker secret."
+      "text": "Commands fail. Your SSO token is dead, kubectl context is still stg, psql hangs because you pointed at the primary during a lock. Failures have boring recoveries. SSO: aws sso login --profile clh-recon-prod, wait the 8-12 seconds, retry. Wrong context: kubectl config use-context clh-recon-prod-eks, then get pods again. psql hang: Ctrl-C, use the cluster-ro endpoint, never the cluster writer during an incident unless Diego is on the call and you are looking at pg_stat_activity with him. If MSK SASL auth fails, you are probably on the wrong bootstrap or your client.properties expired. Diego owns the MSK client cert rotation (every 90 days, last done October 3). Do not regenerate a cert at 02:00. Use the runbook in CLH-RB-2023-012 appendix B to copy the current cert from the match-worker secret."
     },
     {
       "type": "p",

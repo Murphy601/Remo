@@ -48,7 +48,7 @@ The generator expands each file into the 40-50 page band. Front matter must stil
 
 Write like a working engineer sending this to colleagues. Concrete. A little uneven. Specific names, hostnames, lag numbers, ticket IDs, plant codes, SQL object names.
 
-Banned words/phrases: furthermore, moreover, additionally, leverage, utilize, robust, seamless, holistic, landscape, delve, cutting-edge, empower, streamline, it's important to note, in order to, at the end of the day, moving forward (unless literal calendar), synergy, paradigm, unlock, comprehensive, ensure, facilitate, pivotal, nestled, tapestry.
+Banned words/phrases: handshake, furthermore, moreover, additionally, leverage, utilize, robust, seamless, holistic, landscape, delve, cutting-edge, empower, streamline, it's important to note, in order to, at the end of the day, moving forward (unless literal calendar), synergy, paradigm, unlock, comprehensive, ensure, facilitate, pivotal, nestled, tapestry.
 
 No em dashes. No "It's not X, it's Y." No three-item parallel slogans.
 
