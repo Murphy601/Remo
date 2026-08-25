@@ -518,7 +518,7 @@
     },
     {
       "type": "p",
-      "text": "Prod deploy during business hours: CLH-SOP-2023-019. Consumer lag deep dive: CLH-RB-2023-012. Settlement break incident that made the window real for management: CLH-INC-2023-204. Kafka ingestion design if you need to know why there are three consumer groups: CLH-TDD-2023-008. Worker OOM when that runbook lands: CLH-RB-2024-007. Datadog dashboard 1842. Grafana folder CLH Recon. PD service clh-recon-prod. Notion RecOncallHandoff. 1Password vault CLH-Recon-Oncall. Calendar CLH Recon Oncall."
+      "text": "Prod deploy during business hours: CLH-SOP-2023-019. Consumer lag runbook: CLH-RB-2023-012. Settlement break incident that made the window real for management: CLH-INC-2023-204. Kafka ingestion design if you need to know why there are three consumer groups: CLH-TDD-2023-008. Worker OOM when that runbook lands: CLH-RB-2024-007. Datadog dashboard 1842. Grafana folder CLH Recon. PD service clh-recon-prod. Notion RecOncallHandoff. 1Password vault CLH-Recon-Oncall. Calendar CLH Recon Oncall."
     },
     {
       "type": "p",

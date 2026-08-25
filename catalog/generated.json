@@ -527,7 +527,7 @@
     "doc_type": "SOP",
     "date": "December 7, 2023",
     "role": "Software Engineer II",
-    "words": 6444,
+    "words": 6443,
     "est_pages": 19,
     "description": "Internal SOP for Northstar engineers covering Clearhaven reconciliation production. Written so a tired person at 02:14 ET can decide whether to page, who to call, and what not to deploy.",
     "field": "Software Engineering / Data Science"

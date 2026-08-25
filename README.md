@@ -2,6 +2,8 @@
 
 Fifty original internal engineering documents in Word format (`.docx`), written in the voice of **Aman Kumar**, Software Engineer II, across six years of backend and data-platform work.
 
+**Download:** [DOWNLOADS.md](DOWNLOADS.md) has a direct link for each file. [documents.zip](documents.zip) is all 50 in one archive.
+
 They are **fiction**. The employer (Northstar Engineering) and the three clients are made up so nothing here is a real customer file, a public filing, or a copy of something on the internet.
 
 ## What you actually open

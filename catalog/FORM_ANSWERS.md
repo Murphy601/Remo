@@ -2,6 +2,8 @@
 
 These answers map to the intake questions. They apply to this portfolio of original writing samples, not to a third-party submission portal.
 
+Direct file links: [DOWNLOADS.md](../DOWNLOADS.md). All 50 as a zip: [documents.zip](../documents.zip).
+
 ## Answers that are the same for every file
 
 1. **Current or most recent job title:** Software Engineer II
