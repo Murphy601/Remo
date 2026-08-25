@@ -4,11 +4,9 @@
 from __future__ import annotations
 
 import json
-import os
 import shutil
 import subprocess
 import sys
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -29,26 +27,21 @@ def pdfinfo_pages(pdf: Path) -> int:
     raise RuntimeError(f"no Pages: in pdfinfo for {pdf}")
 
 
-def convert_one(docx: Path, pdf_dir: Path) -> tuple[str, int]:
-    subprocess.run(
-        [
-            "soffice",
-            "--headless",
-            "--norestore",
-            "--convert-to",
-            "pdf",
-            "--outdir",
-            str(pdf_dir),
-            str(docx),
-        ],
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    pdf = pdf_dir / (docx.stem + ".pdf")
-    pages = pdfinfo_pages(pdf)
-    pdf.unlink(missing_ok=True)
-    return docx.stem, pages
+def convert_batch(files: list[Path], pdf_dir: Path) -> None:
+    cmd = [
+        "soffice",
+        "--headless",
+        "--norestore",
+        "--convert-to",
+        "pdf",
+        "--outdir",
+        str(pdf_dir),
+    ] + [str(f) for f in files]
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    if proc.returncode != 0:
+        sys.stderr.write(proc.stderr)
+        sys.stderr.write(proc.stdout)
+        raise RuntimeError(f"soffice failed: {proc.returncode}")
 
 
 def main() -> int:
@@ -60,15 +53,20 @@ def main() -> int:
     if pdf_dir.exists():
         shutil.rmtree(pdf_dir)
     pdf_dir.mkdir(parents=True)
-    workers = min(4, os.cpu_count() or 2)
+    # One soffice process at a time. Concurrent profiles collide.
+    batch = 8
+    for i in range(0, len(files), batch):
+        chunk = files[i : i + batch]
+        convert_batch(chunk, pdf_dir)
+        print(f"converted {i + len(chunk)}/{len(files)}", flush=True)
     counts = {}
-    with ThreadPoolExecutor(max_workers=workers) as ex:
-        futs = [ex.submit(convert_one, f, pdf_dir) for f in files]
-        for fut in as_completed(futs):
-            stem, pages = fut.result()
-            counts[stem] = pages
-            flag = "OK" if 40 <= pages <= 50 else "OUT"
-            print(f"{flag:3} {pages:3d}p  {stem}")
+    for docx in files:
+        pdf = pdf_dir / (docx.stem + ".pdf")
+        pages = pdfinfo_pages(pdf)
+        counts[docx.stem] = pages
+        flag = "OK" if 40 <= pages <= 50 else "OUT"
+        print(f"{flag:3} {pages:3d}p  {docx.stem}")
+        pdf.unlink(missing_ok=True)
     ordered = {k: counts[k] for k in sorted(counts)}
     OUT_JSON.write_text(json.dumps(ordered, indent=2) + "\n", encoding="utf-8")
     vals = list(ordered.values())

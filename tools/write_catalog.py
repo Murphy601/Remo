@@ -80,9 +80,11 @@ def main() -> None:
         "Riverview Health Network, Clearhaven Markets)."
     )
     lines.append("")
-    lines.append("These files were written here as decision-grade samples. They are not ")
-    lines.append("production documents taken from a real engagement. They are not a claim ")
-    lines.append("that a reviewer will stamp them. Approval is a human call.")
+    lines.append(
+        "These files were written here as decision-grade samples. "
+        "They are not production documents taken from a real engagement. "
+        "They are not a claim that a reviewer will stamp them. Approval is a human call."
+    )
     lines.append("")
     lines.append("## Per-document answers (questions 4–7)")
     lines.append("")
