@@ -57,16 +57,12 @@ def main():
     for path in files:
         spec = json.loads(path.read_text(encoding="utf-8"))
         slug = spec.get("slug") or path.stem
-        pages_now = page_baseline.get(slug)
-        min_words = 34500
-        if pages_now:
-            min_words = int(34500 * (100.0 / pages_now) * 0.997)
-        spec = expand_spec(spec, min_words=min_words)
+        spec = expand_spec(spec, min_words=14200, max_words=15400)
         out = out_dir / f"{slug}.docx"
         build_document(spec, out)
         wc = word_count(spec)
-        # After 12pt / 1.5 spacing, expect ~170-220 words/page once appendices land.
-        est_pages = max(1, round(wc / 185))
+        # 12pt / 1.78 spacing historically ~310 words/page. 40-50 pages => ~12.4k-15.5k.
+        est_pages = max(1, round(wc / 310))
         rec = {
             "file": str(out.relative_to(ROOT)),
             "source": str(path.relative_to(ROOT)),
@@ -81,7 +77,7 @@ def main():
             "field": spec.get("field", "Software Engineering / Data Science"),
         }
         catalog.append(rec)
-        flag = "OK" if wc >= 15000 else "SHORT"
+        flag = "OK" if 12400 <= wc <= 15500 else "CHECK"
         print(f"{flag:5} {wc:5d}w  ~{est_pages:2d}p  {out.name}")
 
     (ROOT / "catalog" / "generated.json").write_text(
