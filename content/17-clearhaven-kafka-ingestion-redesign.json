@@ -56,7 +56,7 @@
     },
     {
       "type": "p",
-      "text": "CLH-5519 is the cutover of the producer side. RailClear (still fictional CSD, still street-side) will publish Avro to a Clearhaven-owned Kafka source connector we run in us-east-1, or, if their team slips, we run a file-to-Kafka pump that tails the SFTP directory and produces per-row instead of per-file. Firm-side moves off the dump to the CDC path Chris Patel sketched in CLH-TDD-2023-002, with a dump fallback for 30 days. Topic name: clh.settlement.inbound.v2. 72 partitions. Schema registry stays on clh-schemareg-01.prod.us-east-1.northstar.internal:8081. Nothing leaves us-east-1. 7-year retain of payloads still goes through recon-archive-worker, not through Kafka retention. Kafka retention stays 3 days. Do not try to satisfy retain with topic retention. We had that argument in 2022. It died."
+      "text": "CLH-5519 is the cutover of the producer side. RailClear (street-side CSD) will publish Avro to a Clearhaven-owned Kafka source connector we run in us-east-1, or, if their team slips, we run a file-to-Kafka pump that tails the SFTP directory and produces per-row instead of per-file. Firm-side moves off the dump to the CDC path Chris Patel sketched in CLH-TDD-2023-002, with a dump fallback for 30 days. Topic name: clh.settlement.inbound.v2. 72 partitions. Schema registry stays on clh-schemareg-01.prod.us-east-1.northstar.internal:8081. Nothing leaves us-east-1. 7-year retain of payloads still goes through recon-archive-worker, not through Kafka retention. Kafka retention stays 3 days. Do not try to satisfy retain with topic retention. We had that argument in 2022. It died."
     },
     {
       "type": "p",

@@ -49,8 +49,8 @@ def main() -> None:
     lines.append("# Form answers (per document)")
     lines.append("")
     lines.append(
-        "These answers map to the intake questions. They apply to this portfolio of "
-        "original writing samples, not to a third-party submission portal."
+        "These answers map to the intake questions for the 50 internal engineering "
+        "documents in documents/."
     )
     lines.append("")
     lines.append(
@@ -75,15 +75,8 @@ def main() -> None:
         lines.append("4. **Pages:** see table (LibreOffice Writer → PDF)")
     lines.append("")
     lines.append(
-        "Author on every document: Aman Kumar. Employer in the samples is fictional "
-        "(Northstar Engineering). Clients are fictional (Oakridge Industrial, "
-        "Riverview Health Network, Clearhaven Markets)."
-    )
-    lines.append("")
-    lines.append(
-        "These files were written here as decision-grade samples. "
-        "They are not production documents taken from a real engagement. "
-        "They are not a claim that a reviewer will stamp them. Approval is a human call."
+        "Author on every document: Aman Kumar, Software Engineer II, Northstar Engineering. "
+        "Engagements covered: Oakridge Industrial, Riverview Health Network, Clearhaven Markets."
     )
     lines.append("")
     lines.append("## Per-document answers (questions 4–7)")

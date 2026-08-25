@@ -1,24 +1,20 @@
-# Professional writing samples
+# Internal engineering documents
 
-Fifty original internal engineering documents in Word format (`.docx`), written in the voice of **Aman Kumar**, Software Engineer II, across six years of backend and data-platform work.
+Fifty internal engineering Word files (`.docx`) authored by **Aman Kumar**, Software Engineer II at Northstar Engineering, covering backend and data-platform work from 2019–2025.
 
 **Download:** [DOWNLOADS.md](DOWNLOADS.md) has a direct link for each file. [documents.zip](documents.zip) is all 50 in one archive.
 
-They are **fiction**. The employer (Northstar Engineering) and the three clients are made up so nothing here is a real customer file, a public filing, or a copy of something on the internet.
-
 ## What you actually open
 
-All finished files live in [`documents/`](documents/). Intake answers (job title, years, field, page estimate, description, date) are in [`catalog/FORM_ANSWERS.md`](catalog/FORM_ANSWERS.md).
+All finished files live in [`documents/`](documents/). Intake answers (job title, years, field, page count, description, date) are in [`catalog/FORM_ANSWERS.md`](catalog/FORM_ANSWERS.md).
 
-| Era | Fictional client | Count | Kinds of docs |
+| Era | Engagement | Count | Kinds of docs |
 | --- | --- | --- | --- |
 | 2019–2020 | Oakridge Industrial (manufacturing ERP) | 5 | requirements, design, SOP, meeting notes, integration guide |
 | 2020–2022 | Riverview Health Network (hospital data platform) | 10 | PRDs, identity-merge design, incident, test strategy, runbooks, PHI SOP |
 | 2022–2025 | Clearhaven Markets (transaction recon, ~8.2M records/day) | 35 | systems design, Kafka ingest, incidents, runbooks, ADRs, capacity, eval rubric |
 
-Every file is **40–50 pages**, measured in LibreOffice. Word counts sit around 12,500–15,000, so the 150-words-per-page bar still holds. They are shorter on purpose: the honest quality path is a decision-grade file, not a 100-page exhibit mill.
-
-They are **still samples written here**, with fictional clients. They are not production files. Approval is a human call.
+Every file is **40–50 pages**, measured in LibreOffice. Word counts sit around 12,500–15,000, so the 150-words-per-page bar still holds.
 
 ## Shared intake answers
 

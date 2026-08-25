@@ -861,16 +861,14 @@ def _working_bank(f):
     bank = [
         {
             "type": "h1",
-            "text": f"Working remainder for {f['doc_id']}",
+            "text": f"Open work after {f['date']}",
         },
         {
             "type": "p",
             "text": (
-                f"The front of {f['title']} is the document. This remainder is the leftover "
-                f"a colleague still trips on: named people, named boxes, named tickets, and "
-                f"the work I still owe after {f['date']}. It is not a second log and it is "
-                f"not a stack of exhibits with the same stub. If a paragraph fights the "
-                f"decision in the front, strike the paragraph."
+                f"What follows is leftover work from {f['title']}: named people, named boxes, "
+                f"named tickets, and the items I still owe. If a paragraph fights the "
+                f"decision in the front of {f['doc_id']}, strike the paragraph."
             ),
         },
     ]
@@ -1060,7 +1058,7 @@ def _depth_paras(f, i, topic):
             f"record. If {who} needs a diagram, they get a permalink, not a photo of a "
             f"whiteboard. {host} stays out of the diagram title. If a new engineer asks "
             f"where the leftover lives, I point here. I do not point at a Slack pin from "
-            f"{f['date']}. Client {f['client']}."
+            f"{f['date']}."
         ),
         (
             f"Month-end math for this leftover uses the same clock as {n_front}. I will not "
@@ -1660,7 +1658,7 @@ def _shape_meeting(f, i, topic):
                 f"People who were absent still get a usable remainder, not a transcript. "
                 f"{_person(f, 3)} gets the decision, the refuse, and the date. They do not "
                 f"get a reconstruction of who raised their voice. If they object, they object "
-                f"on {ticket}. Client {f['client']}. Author {f['author']}."
+                f"on {ticket}."
             ),
         },
     ]
@@ -1874,16 +1872,14 @@ def _shape_close(f, i, topic):
                 f"on-call, start read-only. If you are {_person(f, 1)}, the ask is unchanged: "
                 f"pick the path in the main body or send it back with a named objection. "
                 f"Sample I would still defend: {_n(f, 90, 4200)} rows, {_n(f, 5, 42)} minutes, "
-                f"freeze respected. Strike this remainder if it ever fights the decision "
-                f"callout. Author {f['author']}. Client {f['client']}."
+                f"freeze respected. Strike this section if it ever fights the decision "
+                f"callout."
             ),
         },
         {
             "type": "p",
             "text": (
-            f"This heading is the reopen rule, not a promise that nothing follows. "
-            f"If we still need words after the bank, they are named leftovers, not "
-            f"another copy of the same stub. {topic} is done as a heading when {who} "
+            f"This heading is the reopen rule. {topic} is done when {who} "
             f"closes {ticket} or writes a new date."
             ),
         },
@@ -2062,9 +2058,8 @@ def _closing_remainder(f, need_words: int):
         {
             "type": "p",
             "text": (
-                f"I am out of new section shapes. What follows is leftover owners and tickets "
-                f"already in this file, written so a colleague can act. I will not invent "
-                f"another exhibit format to fill a page budget."
+                f"Owners and tickets still attached to {f['doc_id']}, written so a colleague "
+                f"can act without hunting Slack. Close is a decision, a refuse, or a new date."
             ),
         },
     ]
@@ -2083,7 +2078,7 @@ def _closing_remainder(f, need_words: int):
                 f"a new date. Close is a decision, a refuse, or that date. I will not accept "
                 f"a status dump. Front-matter number I am not re-arguing: {_num(f, i)}. "
                 f"If this leftover is done, {who} marks {ticket} done. {f['author']} will not "
-                f"keep a shadow list. Client {f['client']}."
+                f"keep a shadow list."
             )
         elif kind == 1:
             para = (
@@ -2126,7 +2121,7 @@ def _closing_remainder(f, need_words: int):
             para = (
                 f"Stop leftover: {ticket} is not a twin of {_ticket(f, i + 1)}. Keep one thread. "
                 f"{who} on {host}. If this paragraph fights the front of {f['doc_id']}, strike "
-                f"it. Due {due}. Client {f['client']}."
+                f"it. Due {due}."
             )
         blocks.append({"type": "p", "text": para})
         n += _words(para)
@@ -2146,6 +2141,6 @@ def pad_paragraph(f, i):
             f"If you are on-call, start read-only. "
             f"If you are {_person(f, 1)}, pick the path in the main body or send it back "
             f"with a named objection. Sample I would still defend: {_n(f, 80, 4000)} rows, "
-            f"{_n(f, 4, 40)} minutes. Author {f['author']}. Client {f['client']}."
+            f"{_n(f, 4, 40)} minutes."
         ),
     }

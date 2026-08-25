@@ -146,7 +146,7 @@
     },
     {
       "type": "p",
-      "text": "Idempotency is filename. If RailClear (fictional CSD feed, street-side) drops the same content under a new name, we double-count. Helen has a spreadsheet of 6 incidents in 2021-2022 where that happened. The worst was March 3, 2022: 9,102 extra street rows, $1.18M apparent long, 47 minutes of cash desk time. We will not keep filename as the idempotency key. Content hash goes in v1. I am stating that here so it does not fall out of the ingest design later."
+      "text": "Idempotency is filename. If RailClear (street-side CSD feed) drops the same content under a new name, we double-count. Helen has a spreadsheet of 6 incidents in 2021-2022 where that happened. The worst was March 3, 2022: 9,102 extra street rows, $1.18M apparent long, 47 minutes of cash desk time. We will not keep filename as the idempotency key. Content hash goes in v1. I am stating that here so it does not fall out of the ingest design later."
     },
     {
       "type": "table",

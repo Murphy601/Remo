@@ -1,6 +1,6 @@
 # Form answers (per document)
 
-These answers map to the intake questions. They apply to this portfolio of original writing samples, not to a third-party submission portal.
+These answers map to the intake questions for the 50 internal engineering documents in documents/.
 
 Direct file links: [DOWNLOADS.md](../DOWNLOADS.md). All 50 as a zip: [documents.zip](../documents.zip).
 
@@ -9,68 +9,66 @@ Direct file links: [DOWNLOADS.md](../DOWNLOADS.md). All 50 as a zip: [documents.
 1. **Current or most recent job title:** Software Engineer II
 2. **Years of professional experience:** 5–10 (about six years, 2019–present)
 3. **Field:** Software Engineering / Data Science
-4. **Pages:** 41–48 (counted with LibreOffice Writer → PDF)
+4. **Pages:** 40–47 (counted with LibreOffice Writer → PDF)
 
-Author on every document: Aman Kumar. Employer in the samples is fictional (Northstar Engineering). Clients are fictional (Oakridge Industrial, Riverview Health Network, Clearhaven Markets).
-
-These files were written here as decision-grade samples. They are not production documents taken from a real engagement. They are not a claim that a reviewer will stamp them. Approval is a human call.
+Author on every document: Aman Kumar, Software Engineer II, Northstar Engineering. Engagements covered: Oakridge Industrial, Riverview Health Network, Clearhaven Markets.
 
 ## Per-document answers (questions 4–7)
 
 | # | File | Pages | Words | Written | Description |
 |---|---|---|---|---|---|
-| 1 | `01-oakridge-inventory-api-requirements.docx` | 46 | 14569 | 18-11-2019 | Requirements document for the Oakridge inventory position API v1, written so plant ops, the EM, and the implementing engineers share one scope cut after tick... |
-| 2 | `02-oakridge-new-engineer-integration-guide.docx` | 42 | 13446 | 21-02-2020 | Internal integration guide for Northstar engineers joining the Oakridge inventory-api work, covering VPN, schema, local snapshot, extract path, and ownership. |
-| 3 | `03-oakridge-inventory-rest-design.docx` | 44 | 13254 | 09-01-2020 | Technical design for the Oakridge inventory position REST API v1, covering resources, cursors, caching, and failure modes for implementers and reviewers. |
-| 4 | `04-oakridge-ops-kickoff-notes.docx` | 41 | 12804 | 16-10-2019 | Decision-oriented kickoff notes for the Oakridge inventory position API, written so a colleague can act without listening to the WebEx recording. |
-| 5 | `05-oakridge-inventory-extract-sop.docx` | 43 | 14453 | 12-03-2020 | On-call SOP for the Oakridge nightly inventory extract and replica load, written for a cold 2am run with exact commands and refuse conditions. |
-| 6 | `06-riverview-unified-patient-api-prd.docx` | 46 | 14463 | 27-08-2020 | Product requirements for the Riverview unified patient read API, written for CMIO, nursing, integration, and Northstar engineering before the RapidChart Flag... |
-| 7 | `07-riverview-identity-merge-design.docx` | 44 | 13509 | 14-01-2021 | Technical design for Riverview record merge and identity resolution, written for engineering, HIM, and the CMIO liaison before any auto-link is enabled. |
-| 8 | `08-riverview-inflated-census-incident.docx` | 43 | 12831 | 22-06-2021 | Incident report for the inflated Riverview census counts, written after the Flagstaff bed-board mismatch, covering timeline, impact, root cause, and the dedu... |
-| 9 | `09-riverview-api-test-strategy.docx` | 43 | 12899 | 05-03-2021 | QA test strategy for the unified patient read API, written so engineering and Sneha share one fixture policy and so the four pre-staging regressions stay man... |
-| 10 | `10-riverview-gha-migration-memo.docx` | 41 | 12578 | 09-11-2021 | Recommendation memo asking Priya Nair to approve moving Riverview Patient API CI off Jenkins to GitHub Actions with VLAN-hosted runners so PHI fixtures never... |
-| 11 | `11-riverview-patient-api-oncall-runbook.docx` | 44 | 14499 | 30-09-2021 | On-call runbook for Riverview patient-api. Written so a Northstar engineer who did not ship the last release can isolate a facility feed, talk to ChartLine o... |
-| 12 | `12-riverview-clinical-feedback-notes.docx` | 42 | 13146 | 13-04-2021 | Meeting notes from a Riverview clinical feedback session on RapidChart assemble behavior. Captures decisions, owners, and the rejected idea of leading with a... |
-| 13 | `13-riverview-phi-logging-sop.docx` | 43 | 13422 | 19-07-2021 | SOP for keeping Riverview PHI out of logs, traces, and Slack. Written for on-call engineers and anyone cutting a support zip. |
-| 14 | `14-riverview-fhir-vs-rest-design.docx` | 44 | 12901 | 08-10-2020 | Technical design choosing custom REST over FHIR R4 for Riverview patient-api v1, with constraints, payload math, and a rejected HAPI-on-day-one path. |
-| 15 | `15-riverview-chart-assemble-prd.docx` | 44 | 13053 | 18-02-2021 | PRD for Riverview chart assemble: blocks, latency budget, partial-fill banners, caching, and success metrics tied to nurse time rather than QPS. |
-| 16 | `16-clearhaven-recon-platform-design.docx` | 48 | 14654 | 15-09-2022 | Internal systems design for the Clearhaven recon platform. Written so engineering can build ingest-api, match-engine, break-svc, and recon-query, and so Clea... |
-| 17 | `17-clearhaven-kafka-ingestion-redesign.docx` | 45 | 14101 | 11-04-2023 | Technical design for the Clearhaven Kafka ingest cutover. Written so ingest-api, match-engine, and SRE can ship CLH-5519 without re-arguing partition count o... |
-| 18 | `18-clearhaven-api-versioning-strategy.docx` | 44 | 13089 | 03-08-2023 | Technical design for versioning Clearhaven recon HTTP APIs. Written after CLH-INC-2023-061 so engineering, QA, and the TAM have one policy for breaking changes. |
-| 19 | `19-clearhaven-consumer-lag-runbook.docx` | 45 | 14217 | 20-06-2023 | Operational runbook for Clearhaven match-engine consumer lag. Written for the primary on-call to execute without the author on the call. |
-| 20 | `20-clearhaven-settlement-break-incident.docx` | 43 | 13337 | 16-11-2023 | Incident report for the November 14, 2023 Clearhaven settlement break. Written for engineering, ops, TAM, and control owner so the filename idempotency gap i... |
-| 21 | `21-clearhaven-kafka-vs-filedrop-memo.docx` | 43 | 13973 | 07-02-2023 | Internal recommendation memo from Aman Kumar to Priya Nair and Marcus Bell comparing three ingest options for Clearhaven recon and taking a position for Kafk... |
-| 22 | `22-clearhaven-postgres-partitioning-design.docx` | 43 | 13532 | 18-05-2023 | Technical design for range-partitioning Clearhaven recon fact and break tables in Postgres 13, including indexes, detach-to-cold, query-planner risks, and an... |
-| 23 | `23-clearhaven-batch-replay-prd.docx` | 42 | 12978 | 22-01-2024 | Product requirements for an ops-facing batch replay action on the Clearhaven recon platform, written by Aman Kumar with Helen Cho as acceptor and Maya Singh'... |
-| 24 | `24-clearhaven-prod-deploy-sop.docx` | 43 | 14282 | 14-09-2023 | Step-by-step production deploy SOP for Clearhaven recon Helm releases, including freeze windows, canary, error-budget abort, and rollback commands. |
-| 25 | `25-clearhaven-sla-review-notes.docx` | 41 | 13008 | 12-03-2024 | Internal meeting notes from the Q1 2024 Clearhaven recon SLA review, capturing decisions, the month-end 7:35 exception, open weekend-scope question, and name... |
-| 26 | `26-clearhaven-idempotent-consumers-design.docx` | 46 | 14491 | 06-07-2023 | Technical design for idempotent Kafka consumers on the Clearhaven recon ingest path. Written after a week of duplicate exception tickets so the team has one... |
-| 27 | `27-clearhaven-unversioned-api-incident.docx` | 44 | 13902 | 28-03-2023 | Incident report for the March 22 unversioned field rename on break-svc. Written so Priya has a record for Clearhaven, so Kavya has the review checklist that... |
-| 28 | `28-clearhaven-otel-rollout-design.docx` | 45 | 13501 | 15-02-2024 | Technical design for the Clearhaven OpenTelemetry rollout. Written so Diego can size the collector, Kavya can pick agent versus SDK, and Priya can see what w... |
-| 29 | `29-clearhaven-datadog-vs-grafana-memo.docx` | 41 | 12704 | 09-04-2024 | Recommendation memo for Priya Nair on Datadog versus the existing Grafana stack after a six-week trial. Written with trial invoices, cardinality counts, and... |
-| 30 | `30-clearhaven-dlq-design.docx` | 45 | 13823 | 12-10-2023 | Technical design for the settlement inbound dead letter topic and replay path. Written so match-engine owns operations, ingest-svc has a producer contract, a... |
-| 31 | `31-clearhaven-worker-oom-runbook.docx` | 44 | 14629 | 21-05-2024 | Internal on-call runbook for match-engine OOM on nested RailClear payloads. Written after CLH-INC-2024-091 so SE II and SRE share one set of commands and a h... |
-| 32 | `32-clearhaven-schema-migration-sop.docx` | 44 | 14380 | 18-06-2024 | Standard operating procedure for Flyway migrations against Clearhaven recon Postgres. Written after the June 3 hotfix checksum incident so expand/contract an... |
-| 33 | `33-clearhaven-spark-backfill-design.docx` | 44 | 13947 | 23-07-2024 | Technical design for the 2019-2022 Spark backfill onto partitioned recon tables. Written so we do not run a 4.6 billion row load on the OLTP primary and so t... |
-| 34 | `34-clearhaven-capacity-fy25-memo.docx` | 41 | 12814 | 05-09-2024 | Capacity planning memo for Clearhaven recon FY25. Written to kill the 12-broker ask and replace it with 4 brokers, compaction, and Postgres disk, with a do-n... |
-| 35 | `35-clearhaven-grpc-internal-adr.docx` | 43 | 13095 | 14-08-2024 | Architecture decision record for putting gRPC on the internal open-break path while leaving REST on recon-query. Accepted. Written so the next protocol argum... |
-| 36 | `36-clearhaven-loadtest-8m-report.docx` | 47 | 14626 | 17-10-2024 | Internal load test report for Clearhaven recon. Written after the October 14-16 shadow runs so Priya and Marcus can decide hardware and so the match team can... |
-| 37 | `37-clearhaven-postgres-failover-runbook.docx` | 43 | 14374 | 08-11-2024 | On-call runbook for Clearhaven recon Postgres. Written so a Northstar engineer can promote a replica, point ingest at the new primary, and confirm WAL withou... |
-| 38 | `38-clearhaven-cdc-settlement-design.docx` | 44 | 13458 | 19-01-2023 | Technical design for Clearhaven settlement ingest. Written to freeze the lister-plus-hash approach and to kill the Debezium proposal before we spent a quarte... |
-| 39 | `39-clearhaven-api-versioning-review-notes.docx` | 42 | 13079 | 25-07-2023 | Meeting notes from the July 25 architecture review of Clearhaven ops-api versioning. Written so the URI vs header decision and the /v1 sunset argument are on... |
-| 40 | `40-clearhaven-kafka-rebalance-incident.docx` | 43 | 13237 | 11-01-2024 | Incident report for the January 8 match-engine rebalance storm. Written for Priya, Marcus, and the on-call rotation so the timeout and staging-partition mist... |
-| 41 | `41-clearhaven-oncall-sop.docx` | 46 | 14556 | 07-12-2023 | Internal SOP for Northstar engineers covering Clearhaven reconciliation production. Written so a tired person at 02:14 ET can decide whether to page, who to... |
-| 42 | `42-clearhaven-terraform-aws-design.docx` | 46 | 13676 | 28-03-2024 | Technical design for moving Clearhaven recon AWS resources under Terraform modules and a locked apply path. Written for engineers who will import, plan, and... |
-| 43 | `43-clearhaven-exception-codes-prd.docx` | 43 | 13158 | 05-12-2024 | Product requirements for structured recon exception codes, mapping, UI, reporting, and immutable history. Written for engineering, ops, QA, and the Clearhave... |
-| 44 | `44-clearhaven-model-summary-eval-rubric.docx` | 43 | 12851 | 13-02-2025 | Operational evaluation rubric for Northstar engineers scoring model-written Clearhaven recon break summaries. Used in the weekly review queue, not as an acad... |
-| 45 | `45-clearhaven-matchkey-redis-design.docx` | 43 | 13209 | 02-05-2024 | Technical design for a Redis hot cache of Clearhaven recon match keys. Written for the people who will implement the client, size the box, and sit the incide... |
-| 46 | `46-clearhaven-k8s-compute-memo.docx` | 46 | 14500 | 02-11-2023 | Internal recommendation memo from Software Engineer II Aman Kumar to the Clearhaven engineering manager and SRE lead, arguing for a two-phase EKS migration o... |
-| 47 | `47-clearhaven-latency-cut-readout.docx` | 42 | 13235 | 24-05-2023 | Meeting notes from the post-cutover readout of Clearhaven Kafka ingestion, capturing measured latency, Helen Cho's month-end hold, the 90-day file-drop emerg... |
-| 48 | `48-clearhaven-helm-rollback-runbook.docx` | 45 | 14721 | 29-08-2024 | Internal helm rollback runbook for three Clearhaven production charts. Covers schema preconditions, exact commands, leftover hook and CRD checks, and a worke... |
-| 49 | `49-clearhaven-audit-trail-requirements.docx` | 45 | 14044 | 17-11-2022 | Requirements for Clearhaven break-change audit trail: insert-only 7-year store, Helen Cho's export, prohibition on PAN/SSN, and rejection of 30-day applicati... |
-| 50 | `50-clearhaven-duplicate-weekend-postmortem.docx` | 44 | 13768 | 16-06-2025 | Blameless incident postmortem for the June 7-8 2025 Clearhaven weekend batch that double-posted 62,104 legs after a manual replay and the Monday catch-up bot... |
+| 1 | `01-oakridge-inventory-api-requirements.docx` | 46 | 14501 | 18-11-2019 | Requirements document for the Oakridge inventory position API v1, written so plant ops, the EM, and the implementing engineers share one scope cut after tick... |
+| 2 | `02-oakridge-new-engineer-integration-guide.docx` | 41 | 13365 | 21-02-2020 | Internal integration guide for Northstar engineers joining the Oakridge inventory-api work, covering VPN, schema, local snapshot, extract path, and ownership. |
+| 3 | `03-oakridge-inventory-rest-design.docx` | 43 | 13173 | 09-01-2020 | Technical design for the Oakridge inventory position REST API v1, covering resources, cursors, caching, and failure modes for implementers and reviewers. |
+| 4 | `04-oakridge-ops-kickoff-notes.docx` | 41 | 12723 | 16-10-2019 | Decision-oriented kickoff notes for the Oakridge inventory position API, written so a colleague can act without listening to the WebEx recording. |
+| 5 | `05-oakridge-inventory-extract-sop.docx` | 43 | 14420 | 12-03-2020 | On-call SOP for the Oakridge nightly inventory extract and replica load, written for a cold 2am run with exact commands and refuse conditions. |
+| 6 | `06-riverview-unified-patient-api-prd.docx` | 46 | 14427 | 27-08-2020 | Product requirements for the Riverview unified patient read API, written for CMIO, nursing, integration, and Northstar engineering before the RapidChart Flag... |
+| 7 | `07-riverview-identity-merge-design.docx` | 44 | 13428 | 14-01-2021 | Technical design for Riverview record merge and identity resolution, written for engineering, HIM, and the CMIO liaison before any auto-link is enabled. |
+| 8 | `08-riverview-inflated-census-incident.docx` | 42 | 12750 | 22-06-2021 | Incident report for the inflated Riverview census counts, written after the Flagstaff bed-board mismatch, covering timeline, impact, root cause, and the dedu... |
+| 9 | `09-riverview-api-test-strategy.docx` | 43 | 12818 | 05-03-2021 | QA test strategy for the unified patient read API, written so engineering and Sneha share one fixture policy and so the four pre-staging regressions stay man... |
+| 10 | `10-riverview-gha-migration-memo.docx` | 41 | 12497 | 09-11-2021 | Recommendation memo asking Priya Nair to approve moving Riverview Patient API CI off Jenkins to GitHub Actions with VLAN-hosted runners so PHI fixtures never... |
+| 11 | `11-riverview-patient-api-oncall-runbook.docx` | 44 | 14464 | 30-09-2021 | On-call runbook for Riverview patient-api. Written so a Northstar engineer who did not ship the last release can isolate a facility feed, talk to ChartLine o... |
+| 12 | `12-riverview-clinical-feedback-notes.docx` | 42 | 13065 | 13-04-2021 | Meeting notes from a Riverview clinical feedback session on RapidChart assemble behavior. Captures decisions, owners, and the rejected idea of leading with a... |
+| 13 | `13-riverview-phi-logging-sop.docx` | 42 | 13341 | 19-07-2021 | SOP for keeping Riverview PHI out of logs, traces, and Slack. Written for on-call engineers and anyone cutting a support zip. |
+| 14 | `14-riverview-fhir-vs-rest-design.docx` | 43 | 12820 | 08-10-2020 | Technical design choosing custom REST over FHIR R4 for Riverview patient-api v1, with constraints, payload math, and a rejected HAPI-on-day-one path. |
+| 15 | `15-riverview-chart-assemble-prd.docx` | 43 | 12972 | 18-02-2021 | PRD for Riverview chart assemble: blocks, latency budget, partial-fill banners, caching, and success metrics tied to nurse time rather than QPS. |
+| 16 | `16-clearhaven-recon-platform-design.docx` | 47 | 14585 | 15-09-2022 | Internal systems design for the Clearhaven recon platform. Written so engineering can build ingest-api, match-engine, break-svc, and recon-query, and so Clea... |
+| 17 | `17-clearhaven-kafka-ingestion-redesign.docx` | 45 | 14017 | 11-04-2023 | Technical design for the Clearhaven Kafka ingest cutover. Written so ingest-api, match-engine, and SRE can ship CLH-5519 without re-arguing partition count o... |
+| 18 | `18-clearhaven-api-versioning-strategy.docx` | 43 | 13008 | 03-08-2023 | Technical design for versioning Clearhaven recon HTTP APIs. Written after CLH-INC-2023-061 so engineering, QA, and the TAM have one policy for breaking changes. |
+| 19 | `19-clearhaven-consumer-lag-runbook.docx` | 45 | 14136 | 20-06-2023 | Operational runbook for Clearhaven match-engine consumer lag. Written for the primary on-call to execute without the author on the call. |
+| 20 | `20-clearhaven-settlement-break-incident.docx` | 42 | 13254 | 16-11-2023 | Incident report for the November 14, 2023 Clearhaven settlement break. Written for engineering, ops, TAM, and control owner so the filename idempotency gap i... |
+| 21 | `21-clearhaven-kafka-vs-filedrop-memo.docx` | 42 | 13892 | 07-02-2023 | Internal recommendation memo from Aman Kumar to Priya Nair and Marcus Bell comparing three ingest options for Clearhaven recon and taking a position for Kafk... |
+| 22 | `22-clearhaven-postgres-partitioning-design.docx` | 43 | 13451 | 18-05-2023 | Technical design for range-partitioning Clearhaven recon fact and break tables in Postgres 13, including indexes, detach-to-cold, query-planner risks, and an... |
+| 23 | `23-clearhaven-batch-replay-prd.docx` | 41 | 12897 | 22-01-2024 | Product requirements for an ops-facing batch replay action on the Clearhaven recon platform, written by Aman Kumar with Helen Cho as acceptor and Maya Singh'... |
+| 24 | `24-clearhaven-prod-deploy-sop.docx` | 43 | 14201 | 14-09-2023 | Step-by-step production deploy SOP for Clearhaven recon Helm releases, including freeze windows, canary, error-budget abort, and rollback commands. |
+| 25 | `25-clearhaven-sla-review-notes.docx` | 40 | 12927 | 12-03-2024 | Internal meeting notes from the Q1 2024 Clearhaven recon SLA review, capturing decisions, the month-end 7:35 exception, open weekend-scope question, and name... |
+| 26 | `26-clearhaven-idempotent-consumers-design.docx` | 46 | 14423 | 06-07-2023 | Technical design for idempotent Kafka consumers on the Clearhaven recon ingest path. Written after a week of duplicate exception tickets so the team has one... |
+| 27 | `27-clearhaven-unversioned-api-incident.docx` | 44 | 13821 | 28-03-2023 | Incident report for the March 22 unversioned field rename on break-svc. Written so Priya has a record for Clearhaven, so Kavya has the review checklist that... |
+| 28 | `28-clearhaven-otel-rollout-design.docx` | 44 | 13420 | 15-02-2024 | Technical design for the Clearhaven OpenTelemetry rollout. Written so Diego can size the collector, Kavya can pick agent versus SDK, and Priya can see what w... |
+| 29 | `29-clearhaven-datadog-vs-grafana-memo.docx` | 41 | 12623 | 09-04-2024 | Recommendation memo for Priya Nair on Datadog versus the existing Grafana stack after a six-week trial. Written with trial invoices, cardinality counts, and... |
+| 30 | `30-clearhaven-dlq-design.docx` | 44 | 13742 | 12-10-2023 | Technical design for the settlement inbound dead letter topic and replay path. Written so match-engine owns operations, ingest-svc has a producer contract, a... |
+| 31 | `31-clearhaven-worker-oom-runbook.docx` | 44 | 14594 | 21-05-2024 | Internal on-call runbook for match-engine OOM on nested RailClear payloads. Written after CLH-INC-2024-091 so SE II and SRE share one set of commands and a h... |
+| 32 | `32-clearhaven-schema-migration-sop.docx` | 45 | 14664 | 18-06-2024 | Standard operating procedure for Flyway migrations against Clearhaven recon Postgres. Written after the June 3 hotfix checksum incident so expand/contract an... |
+| 33 | `33-clearhaven-spark-backfill-design.docx` | 44 | 13866 | 23-07-2024 | Technical design for the 2019-2022 Spark backfill onto partitioned recon tables. Written so we do not run a 4.6 billion row load on the OLTP primary and so t... |
+| 34 | `34-clearhaven-capacity-fy25-memo.docx` | 40 | 12733 | 05-09-2024 | Capacity planning memo for Clearhaven recon FY25. Written to kill the 12-broker ask and replace it with 4 brokers, compaction, and Postgres disk, with a do-n... |
+| 35 | `35-clearhaven-grpc-internal-adr.docx` | 43 | 13014 | 14-08-2024 | Architecture decision record for putting gRPC on the internal open-break path while leaving REST on recon-query. Accepted. Written so the next protocol argum... |
+| 36 | `36-clearhaven-loadtest-8m-report.docx` | 46 | 14558 | 17-10-2024 | Internal load test report for Clearhaven recon. Written after the October 14-16 shadow runs so Priya and Marcus can decide hardware and so the match team can... |
+| 37 | `37-clearhaven-postgres-failover-runbook.docx` | 44 | 14677 | 08-11-2024 | On-call runbook for Clearhaven recon Postgres. Written so a Northstar engineer can promote a replica, point ingest at the new primary, and confirm WAL withou... |
+| 38 | `38-clearhaven-cdc-settlement-design.docx` | 43 | 13377 | 19-01-2023 | Technical design for Clearhaven settlement ingest. Written to freeze the lister-plus-hash approach and to kill the Debezium proposal before we spent a quarte... |
+| 39 | `39-clearhaven-api-versioning-review-notes.docx` | 41 | 12998 | 25-07-2023 | Meeting notes from the July 25 architecture review of Clearhaven ops-api versioning. Written so the URI vs header decision and the /v1 sunset argument are on... |
+| 40 | `40-clearhaven-kafka-rebalance-incident.docx` | 42 | 13156 | 11-01-2024 | Incident report for the January 8 match-engine rebalance storm. Written for Priya, Marcus, and the on-call rotation so the timeout and staging-partition mist... |
+| 41 | `41-clearhaven-oncall-sop.docx` | 46 | 14488 | 07-12-2023 | Internal SOP for Northstar engineers covering Clearhaven reconciliation production. Written so a tired person at 02:14 ET can decide whether to page, who to... |
+| 42 | `42-clearhaven-terraform-aws-design.docx` | 45 | 13595 | 28-03-2024 | Technical design for moving Clearhaven recon AWS resources under Terraform modules and a locked apply path. Written for engineers who will import, plan, and... |
+| 43 | `43-clearhaven-exception-codes-prd.docx` | 42 | 13077 | 05-12-2024 | Product requirements for structured recon exception codes, mapping, UI, reporting, and immutable history. Written for engineering, ops, QA, and the Clearhave... |
+| 44 | `44-clearhaven-model-summary-eval-rubric.docx` | 43 | 12770 | 13-02-2025 | Operational evaluation rubric for Northstar engineers scoring model-written Clearhaven recon break summaries. Used in the weekly review queue, not as an acad... |
+| 45 | `45-clearhaven-matchkey-redis-design.docx` | 42 | 13128 | 02-05-2024 | Technical design for a Redis hot cache of Clearhaven recon match keys. Written for the people who will implement the client, size the box, and sit the incide... |
+| 46 | `46-clearhaven-k8s-compute-memo.docx` | 46 | 14470 | 02-11-2023 | Internal recommendation memo from Software Engineer II Aman Kumar to the Clearhaven engineering manager and SRE lead, arguing for a two-phase EKS migration o... |
+| 47 | `47-clearhaven-latency-cut-readout.docx` | 41 | 13154 | 24-05-2023 | Meeting notes from the post-cutover readout of Clearhaven Kafka ingestion, capturing measured latency, Helen Cho's month-end hold, the 90-day file-drop emerg... |
+| 48 | `48-clearhaven-helm-rollback-runbook.docx` | 45 | 14653 | 29-08-2024 | Internal helm rollback runbook for three Clearhaven production charts. Covers schema preconditions, exact commands, leftover hook and CRD checks, and a worke... |
+| 49 | `49-clearhaven-audit-trail-requirements.docx` | 45 | 13963 | 17-11-2022 | Requirements for Clearhaven break-change audit trail: insert-only 7-year store, Helen Cho's export, prohibition on PAN/SSN, and rejection of 30-day applicati... |
+| 50 | `50-clearhaven-duplicate-weekend-postmortem.docx` | 44 | 13687 | 16-06-2025 | Blameless incident postmortem for the June 7-8 2025 Clearhaven weekend batch that double-posted 62,104 legs after a manual replay and the Monday catch-up bot... |
 
-Page counts were measured by converting each `.docx` with LibreOffice and reading PDF page counts. Files are 41–48 pages. Word counts are ~12,578–14,721, so well above 150 words per page.
+Page counts were measured by converting each `.docx` with LibreOffice and reading PDF page counts. Files are 40–47 pages. Word counts are ~12,497–14,677, so well above 150 words per page.
 
 ## Full write-ups (copy/paste for question 6–7)
 
@@ -79,7 +77,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/01-oakridge-inventory-api-requirements.docx`
 - **Doc ID:** OAK-REQ-2019-014
 - **Type:** Requirements document
-- **4. Pages:** 46 (LibreOffice), 14569 words
+- **4. Pages:** 46 (LibreOffice), 14501 words
 - **6. Description:** Requirements document for the Oakridge inventory position API v1, written so plant ops, the EM, and the implementing engineers share one scope cut after ticket OAK-4412 was reopened.
 - **7. Written:** 18-11-2019 (November 18, 2019)
 - **Role at the time:** Junior Software Engineer
@@ -89,7 +87,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/02-oakridge-new-engineer-integration-guide.docx`
 - **Doc ID:** OAK-DOC-2020-003
 - **Type:** Integration documentation
-- **4. Pages:** 42 (LibreOffice), 13446 words
+- **4. Pages:** 41 (LibreOffice), 13365 words
 - **6. Description:** Internal integration guide for Northstar engineers joining the Oakridge inventory-api work, covering VPN, schema, local snapshot, extract path, and ownership.
 - **7. Written:** 21-02-2020 (February 21, 2020)
 - **Role at the time:** Junior Software Engineer
@@ -99,7 +97,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/03-oakridge-inventory-rest-design.docx`
 - **Doc ID:** OAK-TDD-2020-002
 - **Type:** Technical design
-- **4. Pages:** 44 (LibreOffice), 13254 words
+- **4. Pages:** 43 (LibreOffice), 13173 words
 - **6. Description:** Technical design for the Oakridge inventory position REST API v1, covering resources, cursors, caching, and failure modes for implementers and reviewers.
 - **7. Written:** 09-01-2020 (January 9, 2020)
 - **Role at the time:** Junior Software Engineer
@@ -109,7 +107,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/04-oakridge-ops-kickoff-notes.docx`
 - **Doc ID:** OAK-MTG-2019-044
 - **Type:** Meeting notes
-- **4. Pages:** 41 (LibreOffice), 12804 words
+- **4. Pages:** 41 (LibreOffice), 12723 words
 - **6. Description:** Decision-oriented kickoff notes for the Oakridge inventory position API, written so a colleague can act without listening to the WebEx recording.
 - **7. Written:** 16-10-2019 (October 16, 2019)
 - **Role at the time:** Junior Software Engineer
@@ -119,7 +117,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/05-oakridge-inventory-extract-sop.docx`
 - **Doc ID:** OAK-SOP-2020-011
 - **Type:** SOP / runbook
-- **4. Pages:** 43 (LibreOffice), 14453 words
+- **4. Pages:** 43 (LibreOffice), 14420 words
 - **6. Description:** On-call SOP for the Oakridge nightly inventory extract and replica load, written for a cold 2am run with exact commands and refuse conditions.
 - **7. Written:** 12-03-2020 (March 12, 2020)
 - **Role at the time:** Junior Software Engineer
@@ -129,7 +127,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/06-riverview-unified-patient-api-prd.docx`
 - **Doc ID:** RVH-PRD-2020-019
 - **Type:** PRD
-- **4. Pages:** 46 (LibreOffice), 14463 words
+- **4. Pages:** 46 (LibreOffice), 14427 words
 - **6. Description:** Product requirements for the Riverview unified patient read API, written for CMIO, nursing, integration, and Northstar engineering before the RapidChart Flagstaff pilot.
 - **7. Written:** 27-08-2020 (August 27, 2020)
 - **Role at the time:** Software Engineer
@@ -139,7 +137,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/07-riverview-identity-merge-design.docx`
 - **Doc ID:** RVH-TDD-2021-004
 - **Type:** Technical design
-- **4. Pages:** 44 (LibreOffice), 13509 words
+- **4. Pages:** 44 (LibreOffice), 13428 words
 - **6. Description:** Technical design for Riverview record merge and identity resolution, written for engineering, HIM, and the CMIO liaison before any auto-link is enabled.
 - **7. Written:** 14-01-2021 (January 14, 2021)
 - **Role at the time:** Software Engineer
@@ -149,7 +147,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/08-riverview-inflated-census-incident.docx`
 - **Doc ID:** RVH-INC-2021-118
 - **Type:** Incident report
-- **4. Pages:** 43 (LibreOffice), 12831 words
+- **4. Pages:** 42 (LibreOffice), 12750 words
 - **6. Description:** Incident report for the inflated Riverview census counts, written after the Flagstaff bed-board mismatch, covering timeline, impact, root cause, and the dedup fix.
 - **7. Written:** 22-06-2021 (June 22, 2021)
 - **Role at the time:** Software Engineer
@@ -159,7 +157,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/09-riverview-api-test-strategy.docx`
 - **Doc ID:** RVH-QA-2021-007
 - **Type:** Test strategy
-- **4. Pages:** 43 (LibreOffice), 12899 words
+- **4. Pages:** 43 (LibreOffice), 12818 words
 - **6. Description:** QA test strategy for the unified patient read API, written so engineering and Sneha share one fixture policy and so the four pre-staging regressions stay mandatory.
 - **7. Written:** 05-03-2021 (March 5, 2021)
 - **Role at the time:** Software Engineer
@@ -169,7 +167,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/10-riverview-gha-migration-memo.docx`
 - **Doc ID:** RVH-MEM-2021-031
 - **Type:** Recommendation memo
-- **4. Pages:** 41 (LibreOffice), 12578 words
+- **4. Pages:** 41 (LibreOffice), 12497 words
 - **6. Description:** Recommendation memo asking Priya Nair to approve moving Riverview Patient API CI off Jenkins to GitHub Actions with VLAN-hosted runners so PHI fixtures never leave the hospital network.
 - **7. Written:** 09-11-2021 (November 9, 2021)
 - **Role at the time:** Software Engineer
@@ -179,7 +177,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/11-riverview-patient-api-oncall-runbook.docx`
 - **Doc ID:** RVH-RB-2021-016
 - **Type:** Runbook
-- **4. Pages:** 44 (LibreOffice), 14499 words
+- **4. Pages:** 44 (LibreOffice), 14464 words
 - **6. Description:** On-call runbook for Riverview patient-api. Written so a Northstar engineer who did not ship the last release can isolate a facility feed, talk to ChartLine on-call, and avoid dumping PHI into Slack at 3am.
 - **7. Written:** 30-09-2021 (September 30, 2021)
 - **Role at the time:** Software Engineer
@@ -189,7 +187,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/12-riverview-clinical-feedback-notes.docx`
 - **Doc ID:** RVH-MTG-2021-022
 - **Type:** Meeting notes
-- **4. Pages:** 42 (LibreOffice), 13146 words
+- **4. Pages:** 42 (LibreOffice), 13065 words
 - **6. Description:** Meeting notes from a Riverview clinical feedback session on RapidChart assemble behavior. Captures decisions, owners, and the rejected idea of leading with a 'unified API' narrative.
 - **7. Written:** 13-04-2021 (April 13, 2021)
 - **Role at the time:** Software Engineer
@@ -199,7 +197,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/13-riverview-phi-logging-sop.docx`
 - **Doc ID:** RVH-SOP-2021-009
 - **Type:** SOP
-- **4. Pages:** 43 (LibreOffice), 13422 words
+- **4. Pages:** 42 (LibreOffice), 13341 words
 - **6. Description:** SOP for keeping Riverview PHI out of logs, traces, and Slack. Written for on-call engineers and anyone cutting a support zip.
 - **7. Written:** 19-07-2021 (July 19, 2021)
 - **Role at the time:** Software Engineer
@@ -209,7 +207,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/14-riverview-fhir-vs-rest-design.docx`
 - **Doc ID:** RVH-TDD-2020-011
 - **Type:** Technical design
-- **4. Pages:** 44 (LibreOffice), 12901 words
+- **4. Pages:** 43 (LibreOffice), 12820 words
 - **6. Description:** Technical design choosing custom REST over FHIR R4 for Riverview patient-api v1, with constraints, payload math, and a rejected HAPI-on-day-one path.
 - **7. Written:** 08-10-2020 (October 8, 2020)
 - **Role at the time:** Software Engineer
@@ -219,7 +217,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/15-riverview-chart-assemble-prd.docx`
 - **Doc ID:** RVH-PRD-2021-006
 - **Type:** PRD
-- **4. Pages:** 44 (LibreOffice), 13053 words
+- **4. Pages:** 43 (LibreOffice), 12972 words
 - **6. Description:** PRD for Riverview chart assemble: blocks, latency budget, partial-fill banners, caching, and success metrics tied to nurse time rather than QPS.
 - **7. Written:** 18-02-2021 (February 18, 2021)
 - **Role at the time:** Software Engineer
@@ -229,7 +227,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/16-clearhaven-recon-platform-design.docx`
 - **Doc ID:** CLH-TDD-2022-021
 - **Type:** Systems design
-- **4. Pages:** 48 (LibreOffice), 14654 words
+- **4. Pages:** 47 (LibreOffice), 14585 words
 - **6. Description:** Internal systems design for the Clearhaven recon platform. Written so engineering can build ingest-api, match-engine, break-svc, and recon-query, and so Clearhaven ops can sign off on audit and residency constraints.
 - **7. Written:** 15-09-2022 (September 15, 2022)
 - **Role at the time:** Software Engineer II
@@ -239,7 +237,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/17-clearhaven-kafka-ingestion-redesign.docx`
 - **Doc ID:** CLH-TDD-2023-008
 - **Type:** Technical design
-- **4. Pages:** 45 (LibreOffice), 14101 words
+- **4. Pages:** 45 (LibreOffice), 14017 words
 - **6. Description:** Technical design for the Clearhaven Kafka ingest cutover. Written so ingest-api, match-engine, and SRE can ship CLH-5519 without re-arguing partition count on the change window.
 - **7. Written:** 11-04-2023 (April 11, 2023)
 - **Role at the time:** Software Engineer II
@@ -249,7 +247,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/18-clearhaven-api-versioning-strategy.docx`
 - **Doc ID:** CLH-TDD-2023-017
 - **Type:** Technical design
-- **4. Pages:** 44 (LibreOffice), 13089 words
+- **4. Pages:** 43 (LibreOffice), 13008 words
 - **6. Description:** Technical design for versioning Clearhaven recon HTTP APIs. Written after CLH-INC-2023-061 so engineering, QA, and the TAM have one policy for breaking changes.
 - **7. Written:** 03-08-2023 (August 3, 2023)
 - **Role at the time:** Software Engineer II
@@ -259,7 +257,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/19-clearhaven-consumer-lag-runbook.docx`
 - **Doc ID:** CLH-RB-2023-012
 - **Type:** Runbook
-- **4. Pages:** 45 (LibreOffice), 14217 words
+- **4. Pages:** 45 (LibreOffice), 14136 words
 - **6. Description:** Operational runbook for Clearhaven match-engine consumer lag. Written for the primary on-call to execute without the author on the call.
 - **7. Written:** 20-06-2023 (June 20, 2023)
 - **Role at the time:** Software Engineer II
@@ -269,7 +267,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/20-clearhaven-settlement-break-incident.docx`
 - **Doc ID:** CLH-INC-2023-204
 - **Type:** Incident report
-- **4. Pages:** 43 (LibreOffice), 13337 words
+- **4. Pages:** 42 (LibreOffice), 13254 words
 - **6. Description:** Incident report for the November 14, 2023 Clearhaven settlement break. Written for engineering, ops, TAM, and control owner so the filename idempotency gap is closed in code and in the window checklist.
 - **7. Written:** 16-11-2023 (November 16, 2023)
 - **Role at the time:** Software Engineer II
@@ -279,7 +277,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/21-clearhaven-kafka-vs-filedrop-memo.docx`
 - **Doc ID:** CLH-MEM-2023-004
 - **Type:** Recommendation memo
-- **4. Pages:** 43 (LibreOffice), 13973 words
+- **4. Pages:** 42 (LibreOffice), 13892 words
 - **6. Description:** Internal recommendation memo from Aman Kumar to Priya Nair and Marcus Bell comparing three ingest options for Clearhaven recon and taking a position for Kafka on the existing RailClear bus.
 - **7. Written:** 07-02-2023 (February 7, 2023)
 - **Role at the time:** Software Engineer II
@@ -289,7 +287,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/22-clearhaven-postgres-partitioning-design.docx`
 - **Doc ID:** CLH-TDD-2023-011
 - **Type:** Technical design
-- **4. Pages:** 43 (LibreOffice), 13532 words
+- **4. Pages:** 43 (LibreOffice), 13451 words
 - **6. Description:** Technical design for range-partitioning Clearhaven recon fact and break tables in Postgres 13, including indexes, detach-to-cold, query-planner risks, and an 8-second lock-budget migration.
 - **7. Written:** 18-05-2023 (May 18, 2023)
 - **Role at the time:** Software Engineer II
@@ -299,7 +297,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/23-clearhaven-batch-replay-prd.docx`
 - **Doc ID:** CLH-PRD-2024-002
 - **Type:** PRD
-- **4. Pages:** 42 (LibreOffice), 12978 words
+- **4. Pages:** 41 (LibreOffice), 12897 words
 - **6. Description:** Product requirements for an ops-facing batch replay action on the Clearhaven recon platform, written by Aman Kumar with Helen Cho as acceptor and Maya Singh's no-edit constraint as a hard out-of-scope.
 - **7. Written:** 22-01-2024 (January 22, 2024)
 - **Role at the time:** Software Engineer II
@@ -309,7 +307,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/24-clearhaven-prod-deploy-sop.docx`
 - **Doc ID:** CLH-SOP-2023-019
 - **Type:** SOP
-- **4. Pages:** 43 (LibreOffice), 14282 words
+- **4. Pages:** 43 (LibreOffice), 14201 words
 - **6. Description:** Step-by-step production deploy SOP for Clearhaven recon Helm releases, including freeze windows, canary, error-budget abort, and rollback commands.
 - **7. Written:** 14-09-2023 (September 14, 2023)
 - **Role at the time:** Software Engineer II
@@ -319,7 +317,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/25-clearhaven-sla-review-notes.docx`
 - **Doc ID:** CLH-MTG-2024-015
 - **Type:** Meeting notes
-- **4. Pages:** 41 (LibreOffice), 13008 words
+- **4. Pages:** 40 (LibreOffice), 12927 words
 - **6. Description:** Internal meeting notes from the Q1 2024 Clearhaven recon SLA review, capturing decisions, the month-end 7:35 exception, open weekend-scope question, and named action items.
 - **7. Written:** 12-03-2024 (March 12, 2024)
 - **Role at the time:** Software Engineer II
@@ -329,7 +327,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/26-clearhaven-idempotent-consumers-design.docx`
 - **Doc ID:** CLH-TDD-2023-014
 - **Type:** Technical design
-- **4. Pages:** 46 (LibreOffice), 14491 words
+- **4. Pages:** 46 (LibreOffice), 14423 words
 - **6. Description:** Technical design for idempotent Kafka consumers on the Clearhaven recon ingest path. Written after a week of duplicate exception tickets so the team has one schema, one commit order, and a list of failure modes before Kavya starts the CLH-6012 branch.
 - **7. Written:** 06-07-2023 (July 6, 2023)
 - **Role at the time:** Software Engineer II
@@ -339,7 +337,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/27-clearhaven-unversioned-api-incident.docx`
 - **Doc ID:** CLH-INC-2023-061
 - **Type:** Incident report
-- **4. Pages:** 44 (LibreOffice), 13902 words
+- **4. Pages:** 44 (LibreOffice), 13821 words
 - **6. Description:** Incident report for the March 22 unversioned field rename on break-svc. Written so Priya has a record for Clearhaven, so Kavya has the review checklist that failed, and so the versioning design has a concrete failure to point at.
 - **7. Written:** 28-03-2023 (March 28, 2023)
 - **Role at the time:** Software Engineer II
@@ -349,7 +347,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/28-clearhaven-otel-rollout-design.docx`
 - **Doc ID:** CLH-TDD-2024-006
 - **Type:** Technical design
-- **4. Pages:** 45 (LibreOffice), 13501 words
+- **4. Pages:** 44 (LibreOffice), 13420 words
 - **6. Description:** Technical design for the Clearhaven OpenTelemetry rollout. Written so Diego can size the collector, Kavya can pick agent versus SDK, and Priya can see what we are not buying from Datadog while the trial is still open.
 - **7. Written:** 15-02-2024 (February 15, 2024)
 - **Role at the time:** Software Engineer II
@@ -359,7 +357,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/29-clearhaven-datadog-vs-grafana-memo.docx`
 - **Doc ID:** CLH-MEM-2024-009
 - **Type:** Recommendation memo
-- **4. Pages:** 41 (LibreOffice), 12704 words
+- **4. Pages:** 41 (LibreOffice), 12623 words
 - **6. Description:** Recommendation memo for Priya Nair on Datadog versus the existing Grafana stack after a six-week trial. Written with trial invoices, cardinality counts, and a backup trigger so we do not reopen the debate every quarter.
 - **7. Written:** 09-04-2024 (April 9, 2024)
 - **Role at the time:** Software Engineer II
@@ -369,7 +367,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/30-clearhaven-dlq-design.docx`
 - **Doc ID:** CLH-TDD-2023-022
 - **Type:** Technical design
-- **4. Pages:** 45 (LibreOffice), 13823 words
+- **4. Pages:** 44 (LibreOffice), 13742 words
 - **6. Description:** Technical design for the settlement inbound dead letter topic and replay path. Written so match-engine owns operations, ingest-svc has a producer contract, and oncall has a depth alert instead of a skip table nobody reads.
 - **7. Written:** 12-10-2023 (October 12, 2023)
 - **Role at the time:** Software Engineer II
@@ -379,7 +377,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/31-clearhaven-worker-oom-runbook.docx`
 - **Doc ID:** CLH-RB-2024-007
 - **Type:** Runbook
-- **4. Pages:** 44 (LibreOffice), 14629 words
+- **4. Pages:** 44 (LibreOffice), 14594 words
 - **6. Description:** Internal on-call runbook for match-engine OOM on nested RailClear payloads. Written after CLH-INC-2024-091 so SE II and SRE share one set of commands and a hard rule against unbounded memory bumps.
 - **7. Written:** 21-05-2024 (May 21, 2024)
 - **Role at the time:** Software Engineer II
@@ -389,7 +387,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/32-clearhaven-schema-migration-sop.docx`
 - **Doc ID:** CLH-SOP-2024-011
 - **Type:** SOP
-- **4. Pages:** 44 (LibreOffice), 14380 words
+- **4. Pages:** 45 (LibreOffice), 14664 words
 - **6. Description:** Standard operating procedure for Flyway migrations against Clearhaven recon Postgres. Written after the June 3 hotfix checksum incident so expand/contract and abort steps live in one place.
 - **7. Written:** 18-06-2024 (June 18, 2024)
 - **Role at the time:** Software Engineer II
@@ -399,7 +397,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/33-clearhaven-spark-backfill-design.docx`
 - **Doc ID:** CLH-TDD-2024-014
 - **Type:** Technical design
-- **4. Pages:** 44 (LibreOffice), 13947 words
+- **4. Pages:** 44 (LibreOffice), 13866 words
 - **6. Description:** Technical design for the 2019-2022 Spark backfill onto partitioned recon tables. Written so we do not run a 4.6 billion row load on the OLTP primary and so the DST edge is explicit before Chris starts the job.
 - **7. Written:** 23-07-2024 (July 23, 2024)
 - **Role at the time:** Software Engineer II
@@ -409,7 +407,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/34-clearhaven-capacity-fy25-memo.docx`
 - **Doc ID:** CLH-MEM-2024-018
 - **Type:** Capacity planning memo
-- **4. Pages:** 41 (LibreOffice), 12814 words
+- **4. Pages:** 40 (LibreOffice), 12733 words
 - **6. Description:** Capacity planning memo for Clearhaven recon FY25. Written to kill the 12-broker ask and replace it with 4 brokers, compaction, and Postgres disk, with a do-nothing SLA forecast.
 - **7. Written:** 05-09-2024 (September 5, 2024)
 - **Role at the time:** Software Engineer II
@@ -419,7 +417,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/35-clearhaven-grpc-internal-adr.docx`
 - **Doc ID:** CLH-ADR-2024-003
 - **Type:** Architecture decision record
-- **4. Pages:** 43 (LibreOffice), 13095 words
+- **4. Pages:** 43 (LibreOffice), 13014 words
 - **6. Description:** Architecture decision record for putting gRPC on the internal open-break path while leaving REST on recon-query. Accepted. Written so the next protocol argument cites load numbers instead of taste.
 - **7. Written:** 14-08-2024 (August 14, 2024)
 - **Role at the time:** Software Engineer II
@@ -429,7 +427,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/36-clearhaven-loadtest-8m-report.docx`
 - **Doc ID:** CLH-TST-2024-008
 - **Type:** Load test report
-- **4. Pages:** 47 (LibreOffice), 14626 words
+- **4. Pages:** 46 (LibreOffice), 14558 words
 - **6. Description:** Internal load test report for Clearhaven recon. Written after the October 14-16 shadow runs so Priya and Marcus can decide hardware and so the match team can pick the break-svc work.
 - **7. Written:** 17-10-2024 (October 17, 2024)
 - **Role at the time:** Software Engineer II
@@ -439,7 +437,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/37-clearhaven-postgres-failover-runbook.docx`
 - **Doc ID:** CLH-RB-2024-015
 - **Type:** Runbook
-- **4. Pages:** 43 (LibreOffice), 14374 words
+- **4. Pages:** 44 (LibreOffice), 14677 words
 - **6. Description:** On-call runbook for Clearhaven recon Postgres. Written so a Northstar engineer can promote a replica, point ingest at the new primary, and confirm WAL without waiting for the DBA if Rina is unreachable.
 - **7. Written:** 08-11-2024 (November 8, 2024)
 - **Role at the time:** Software Engineer II
@@ -449,7 +447,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/38-clearhaven-cdc-settlement-design.docx`
 - **Doc ID:** CLH-TDD-2023-002
 - **Type:** Technical design
-- **4. Pages:** 44 (LibreOffice), 13458 words
+- **4. Pages:** 43 (LibreOffice), 13377 words
 - **6. Description:** Technical design for Clearhaven settlement ingest. Written to freeze the lister-plus-hash approach and to kill the Debezium proposal before we spent a quarter on a connector with no source database.
 - **7. Written:** 19-01-2023 (January 19, 2023)
 - **Role at the time:** Software Engineer II
@@ -459,7 +457,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/39-clearhaven-api-versioning-review-notes.docx`
 - **Doc ID:** CLH-MTG-2023-041
 - **Type:** Meeting notes
-- **4. Pages:** 42 (LibreOffice), 13079 words
+- **4. Pages:** 41 (LibreOffice), 12998 words
 - **6. Description:** Meeting notes from the July 25 architecture review of Clearhaven ops-api versioning. Written so the URI vs header decision and the /v1 sunset argument are on paper before the August design freezes.
 - **7. Written:** 25-07-2023 (July 25, 2023)
 - **Role at the time:** Software Engineer II
@@ -469,7 +467,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/40-clearhaven-kafka-rebalance-incident.docx`
 - **Doc ID:** CLH-INC-2024-017
 - **Type:** Incident report
-- **4. Pages:** 43 (LibreOffice), 13237 words
+- **4. Pages:** 42 (LibreOffice), 13156 words
 - **6. Description:** Incident report for the January 8 match-engine rebalance storm. Written for Priya, Marcus, and the on-call rotation so the timeout and staging-partition mistakes are not tribal knowledge.
 - **7. Written:** 11-01-2024 (January 11, 2024)
 - **Role at the time:** Software Engineer II
@@ -479,7 +477,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/41-clearhaven-oncall-sop.docx`
 - **Doc ID:** CLH-SOP-2023-028
 - **Type:** SOP
-- **4. Pages:** 46 (LibreOffice), 14556 words
+- **4. Pages:** 46 (LibreOffice), 14488 words
 - **6. Description:** Internal SOP for Northstar engineers covering Clearhaven reconciliation production. Written so a tired person at 02:14 ET can decide whether to page, who to call, and what not to deploy.
 - **7. Written:** 07-12-2023 (December 7, 2023)
 - **Role at the time:** Software Engineer II
@@ -489,7 +487,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/42-clearhaven-terraform-aws-design.docx`
 - **Doc ID:** CLH-TDD-2024-009
 - **Type:** Technical design
-- **4. Pages:** 46 (LibreOffice), 13676 words
+- **4. Pages:** 45 (LibreOffice), 13595 words
 - **6. Description:** Technical design for moving Clearhaven recon AWS resources under Terraform modules and a locked apply path. Written for engineers who will import, plan, and apply, and for Priya who needs a one-screen decision.
 - **7. Written:** 28-03-2024 (March 28, 2024)
 - **Role at the time:** Software Engineer II
@@ -499,7 +497,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/43-clearhaven-exception-codes-prd.docx`
 - **Doc ID:** CLH-PRD-2024-021
 - **Type:** PRD
-- **4. Pages:** 43 (LibreOffice), 13158 words
+- **4. Pages:** 42 (LibreOffice), 13077 words
 - **6. Description:** Product requirements for structured recon exception codes, mapping, UI, reporting, and immutable history. Written for engineering, ops, QA, and the Clearhaven compliance reviewer who asked for history in November.
 - **7. Written:** 05-12-2024 (December 5, 2024)
 - **Role at the time:** Software Engineer II
@@ -509,7 +507,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/44-clearhaven-model-summary-eval-rubric.docx`
 - **Doc ID:** CLH-EVAL-2025-003
 - **Type:** Evaluation rubric
-- **4. Pages:** 43 (LibreOffice), 12851 words
+- **4. Pages:** 43 (LibreOffice), 12770 words
 - **6. Description:** Operational evaluation rubric for Northstar engineers scoring model-written Clearhaven recon break summaries. Used in the weekly review queue, not as an academic benchmark.
 - **7. Written:** 13-02-2025 (February 13, 2025)
 - **Role at the time:** Software Engineer II
@@ -519,7 +517,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/45-clearhaven-matchkey-redis-design.docx`
 - **Doc ID:** CLH-TDD-2024-012
 - **Type:** Technical design
-- **4. Pages:** 43 (LibreOffice), 13209 words
+- **4. Pages:** 42 (LibreOffice), 13128 words
 - **6. Description:** Technical design for a Redis hot cache of Clearhaven recon match keys. Written for the people who will implement the client, size the box, and sit the incident when Redis dies during the window.
 - **7. Written:** 02-05-2024 (May 2, 2024)
 - **Role at the time:** Software Engineer II
@@ -529,7 +527,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/46-clearhaven-k8s-compute-memo.docx`
 - **Doc ID:** CLH-MEM-2023-027
 - **Type:** Recommendation memo
-- **4. Pages:** 46 (LibreOffice), 14500 words
+- **4. Pages:** 46 (LibreOffice), 14470 words
 - **6. Description:** Internal recommendation memo from Software Engineer II Aman Kumar to the Clearhaven engineering manager and SRE lead, arguing for a two-phase EKS migration of match-engine compute and rejecting an AMI-in-DaemonSet shortcut.
 - **7. Written:** 02-11-2023 (November 2, 2023)
 - **Role at the time:** Software Engineer II
@@ -539,7 +537,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/47-clearhaven-latency-cut-readout.docx`
 - **Doc ID:** CLH-MTG-2023-028
 - **Type:** Meeting notes
-- **4. Pages:** 42 (LibreOffice), 13235 words
+- **4. Pages:** 41 (LibreOffice), 13154 words
 - **6. Description:** Meeting notes from the post-cutover readout of Clearhaven Kafka ingestion, capturing measured latency, Helen Cho's month-end hold, the 90-day file-drop emergency path, and open work on RailClear dual-write.
 - **7. Written:** 24-05-2023 (May 24, 2023)
 - **Role at the time:** Software Engineer II
@@ -549,7 +547,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/48-clearhaven-helm-rollback-runbook.docx`
 - **Doc ID:** CLH-RB-2024-011
 - **Type:** Runbook
-- **4. Pages:** 45 (LibreOffice), 14721 words
+- **4. Pages:** 45 (LibreOffice), 14653 words
 - **6. Description:** Internal helm rollback runbook for three Clearhaven production charts. Covers schema preconditions, exact commands, leftover hook and CRD checks, and a worked example from the January 2024 rebalance incident.
 - **7. Written:** 29-08-2024 (August 29, 2024)
 - **Role at the time:** Software Engineer II
@@ -559,7 +557,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/49-clearhaven-audit-trail-requirements.docx`
 - **Doc ID:** CLH-REQ-2022-033
 - **Type:** Requirements document
-- **4. Pages:** 45 (LibreOffice), 14044 words
+- **4. Pages:** 45 (LibreOffice), 13963 words
 - **6. Description:** Requirements for Clearhaven break-change audit trail: insert-only 7-year store, Helen Cho's export, prohibition on PAN/SSN, and rejection of 30-day application logs as the control.
 - **7. Written:** 17-11-2022 (November 17, 2022)
 - **Role at the time:** Software Engineer II
@@ -569,7 +567,7 @@ Page counts were measured by converting each `.docx` with LibreOffice and readin
 - **File:** `documents/50-clearhaven-duplicate-weekend-postmortem.docx`
 - **Doc ID:** CLH-INC-2025-088
 - **Type:** Incident postmortem
-- **4. Pages:** 44 (LibreOffice), 13768 words
+- **4. Pages:** 44 (LibreOffice), 13687 words
 - **6. Description:** Blameless incident postmortem for the June 7-8 2025 Clearhaven weekend batch that double-posted 62,104 legs after a manual replay and the Monday catch-up both ran. Impact was exception-queue noise; cash was held.
 - **7. Written:** 16-06-2025 (June 16, 2025)
 - **Role at the time:** Software Engineer II
