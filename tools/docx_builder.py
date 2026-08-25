@@ -5,8 +5,10 @@ from __future__ import annotations
 import datetime as dt
 import hashlib
 import io
+import random
 import re
 import zipfile
+from dataclasses import dataclass
 from pathlib import Path
 from xml.sax.saxutils import escape
 
@@ -35,6 +37,174 @@ WARN_BG = "F8EDE8"
 BODY_FONT = "Liberation Serif"
 SANS = "Liberation Sans"
 MONO = "Liberation Mono"
+
+
+@dataclass
+class Theme:
+    body_font: str
+    sans: str
+    mono: str
+    body_pt: float
+    line_spacing: float
+    line_twips: int
+    para_after: int
+    first_indent_in: float
+    accent: RGBColor
+    steel: RGBColor
+    accent_hex: str
+    header_bg: str
+    row_alt: str
+    left_in: float
+    right_in: float
+    top_in: float
+    bottom_in: float
+    header_layout: str
+    footer_layout: str
+    footer_sep: str
+    title_pt: float
+    heading1_pt: float
+    wpp: float
+    version_prefix: str
+
+
+_THEME: Theme | None = None
+
+
+def _hex_rgb(h: str) -> RGBColor:
+    h = h.lstrip("#")
+    return RGBColor(int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
+
+
+def theme_for(spec: dict) -> Theme:
+    """Per-file chrome. Engagement sets the palette; slug hash picks the rest.
+
+    Keep body at 12pt and spacing in a working-notes band (tighter than 1.78)
+    so 40-50 pages still hold without bringing back an exhibit mill.
+    """
+    slug = spec.get("slug") or "doc"
+    rng = random.Random(int(hashlib.md5(slug.encode()).hexdigest()[:8], 16))
+    dt = (spec.get("doc_type") or "").lower()
+    if "oakridge" in slug:
+        palettes = [
+            ("3D4F5F", "4A5A6A", "4A5560", "E8ECF0"),
+            ("4A545C", "5A646C", "3F474E", "EEEFEF"),
+            ("3E4A43", "52615A", "3A4540", "E7EDE8"),
+        ]
+        faces = [
+            ("Liberation Serif", "Liberation Sans", "Liberation Mono"),
+            ("DejaVu Serif", "DejaVu Sans", "DejaVu Sans Mono"),
+        ]
+    elif "riverview" in slug:
+        palettes = [
+            ("1A5F6A", "2A6B74", "1A5F6A", "E6F0F1"),
+            ("215E5A", "2F6E69", "215E5A", "E5EFEE"),
+            ("164E63", "2A5F72", "164E63", "E4EEF2"),
+        ]
+        faces = [
+            ("Noto Serif", "Noto Sans", "Noto Mono"),
+            ("Liberation Serif", "Liberation Sans", "Liberation Mono"),
+            ("DejaVu Serif", "Liberation Sans", "Liberation Mono"),
+        ]
+    else:
+        palettes = [
+            ("1B365D", "2F4A6E", "1B365D", "EEF2F6"),
+            ("1E3A5F", "334E72", "1E3A5F", "EDF1F6"),
+            ("243447", "3A4C5F", "243447", "E8ECF0"),
+        ]
+        faces = [
+            ("Liberation Serif", "Liberation Sans", "Liberation Mono"),
+            ("Noto Serif", "Liberation Sans", "Liberation Mono"),
+            ("DejaVu Serif", "DejaVu Sans", "DejaVu Sans Mono"),
+        ]
+    # Working notes often sit in sans. Designs/memos stay serif.
+    if any(k in dt for k in ("meeting", "notes", "readout", "runbook", "sop")):
+        faces = faces + [
+            ("Liberation Sans", "Liberation Sans", "Liberation Mono"),
+        ]
+    accent_hex, steel_hex, header_bg, row_alt = rng.choice(palettes)
+    body_font, sans, mono = rng.choice(faces)
+    spacing = rng.choice([1.58, 1.60, 1.62, 1.65, 1.68, 1.70, 1.72])
+    left = rng.choice([1.05, 1.10, 1.15, 1.20])
+    right = rng.choice([1.05, 1.10, 1.15, 1.20])
+    top = rng.choice([1.05, 1.10, 1.15, 1.20])
+    bottom = rng.choice([0.95, 1.00, 1.05, 1.10])
+    indent = rng.choice([0.0, 0.12, 0.18, 0.20, 0.22])
+    if body_font == "Noto Serif":
+        font_factor = 0.76
+    elif body_font == "DejaVu Serif":
+        font_factor = 0.86
+    elif "Sans" in body_font and "Serif" not in body_font:
+        font_factor = 1.02
+    else:
+        font_factor = 1.0
+    width_factor = (8.5 - left - right) / 6.2
+    wpp = 310.0 * (1.78 / spacing) * width_factor * font_factor
+    return Theme(
+        body_font=body_font,
+        sans=sans,
+        mono=mono,
+        body_pt=12.0,
+        line_spacing=spacing,
+        line_twips=int(round(spacing * 240)),
+        para_after=rng.choice([10, 11, 12]),
+        first_indent_in=indent,
+        accent=_hex_rgb(accent_hex),
+        steel=_hex_rgb(steel_hex),
+        accent_hex=accent_hex,
+        header_bg=header_bg,
+        row_alt=row_alt,
+        left_in=left,
+        right_in=right,
+        top_in=top,
+        bottom_in=bottom,
+        header_layout=rng.choice(["bar", "split", "stacked"]),
+        footer_layout=rng.choice(["dots", "pipe", "short"]),
+        footer_sep=rng.choice(["  ·  ", "  |  ", "  /  "]),
+        title_pt=rng.choice([20, 21, 22]),
+        heading1_pt=rng.choice([15, 16]),
+        wpp=wpp,
+        version_prefix=rng.choice(["v", "Rev ", ""]),
+    )
+
+
+def apply_theme(theme: Theme) -> None:
+    global NAVY, STEEL, HEADER_BG, ROW_ALT, BODY_FONT, SANS, MONO, _THEME
+    _THEME = theme
+    NAVY = theme.accent
+    STEEL = theme.steel
+    HEADER_BG = theme.header_bg
+    ROW_ALT = theme.row_alt
+    BODY_FONT = theme.body_font
+    SANS = theme.sans
+    MONO = theme.mono
+
+
+def issue_meta(spec: dict) -> dict:
+    """Version from last revision row. Status follows the document kind, not a house stamp."""
+    out = dict(spec)
+    hist = out.get("revision_history") or []
+    if hist:
+        out["version"] = str(hist[-1][0])
+    dt = (out.get("doc_type") or "").lower()
+    slug = out.get("slug") or "doc"
+    seed = int(hashlib.md5(slug.encode()).hexdigest()[:8], 16)
+    if any(k in dt for k in ("incident", "postmortem")):
+        out["status"] = ("Closed", "Final", "Recorded")[seed % 3]
+    elif any(k in dt for k in ("runbook", "sop")):
+        out["status"] = ("In force", "Current", "Issued")[seed % 3]
+    elif any(k in dt for k in ("memo", "capacity", "recommendation")):
+        out["status"] = ("For decision", "Requested", "Position")[seed % 3]
+    elif any(k in dt for k in ("meeting", "notes", "readout")):
+        out["status"] = ("Issued", "Circulated", "Posted")[seed % 3]
+    elif any(k in dt for k in ("prd", "requirement")):
+        out["status"] = ("Signed", "Baseline", "Accepted")[seed % 3]
+    elif any(k in dt for k in ("test", "load", "eval", "rubric")):
+        out["status"] = ("In use", "Current", "Issued")[seed % 3]
+    elif "adr" in dt:
+        out["status"] = ("Accepted", "In effect")[seed % 2]
+    else:
+        out["status"] = ("Accepted", "In effect", "Current")[seed % 3]
+    return out
 
 
 def _set_run_font(run, name, size_pt=None, bold=None, italic=None, color=None):
@@ -236,22 +406,25 @@ def _paragraph_text(cell, text, font=SANS, size=9, bold=False, color=BODY, align
 
 
 def build_document(spec: dict, out_path: Path) -> Path:
+    theme = theme_for(spec)
+    apply_theme(theme)
+
     doc = Document()
 
     section = doc.sections[0]
     section.page_width = Inches(8.5)
     section.page_height = Inches(11)
-    section.left_margin = Inches(1.15)
-    section.right_margin = Inches(1.15)
-    section.top_margin = Inches(1.2)
-    section.bottom_margin = Inches(1.05)
-    section.header_distance = Inches(0.4)
-    section.footer_distance = Inches(0.4)
+    section.left_margin = Inches(theme.left_in)
+    section.right_margin = Inches(theme.right_in)
+    section.top_margin = Inches(theme.top_in)
+    section.bottom_margin = Inches(theme.bottom_in)
+    section.header_distance = Inches(0.38 if theme.header_layout == "stacked" else 0.4)
+    section.footer_distance = Inches(0.36 if theme.footer_layout == "short" else 0.4)
 
     # Default style
     normal = doc.styles["Normal"]
     normal.font.name = BODY_FONT
-    normal.font.size = Pt(12)
+    normal.font.size = Pt(theme.body_pt)
     normal.font.color.rgb = BODY
     rPr = normal.element.get_or_add_rPr()
     rFonts = rPr.find(qn("w:rFonts"))
@@ -262,9 +435,9 @@ def build_document(spec: dict, out_path: Path) -> Path:
     rFonts.set(qn("w:hAnsi"), BODY_FONT)
 
     pf = normal.paragraph_format
-    pf.space_after = Pt(12)
+    pf.space_after = Pt(theme.para_after)
     pf.space_before = Pt(0)
-    pf.line_spacing = 1.78
+    pf.line_spacing = theme.line_spacing
 
     for i in range(1, 4):
         hs = doc.styles[f"Heading {i}"]
@@ -279,21 +452,21 @@ def build_document(spec: dict, out_path: Path) -> Path:
         rFonts.set(qn("w:ascii"), SANS)
         rFonts.set(qn("w:hAnsi"), SANS)
         if i == 1:
-            hs.font.size = Pt(16)
-            hs.paragraph_format.space_before = Pt(22)
-            hs.paragraph_format.space_after = Pt(12)
+            hs.font.size = Pt(theme.heading1_pt)
+            hs.paragraph_format.space_before = Pt(20)
+            hs.paragraph_format.space_after = Pt(10)
         elif i == 2:
             hs.font.size = Pt(13)
-            hs.paragraph_format.space_before = Pt(16)
-            hs.paragraph_format.space_after = Pt(8)
+            hs.paragraph_format.space_before = Pt(14)
+            hs.paragraph_format.space_after = Pt(7)
         else:
             hs.font.size = Pt(12)
-            hs.paragraph_format.space_before = Pt(12)
+            hs.paragraph_format.space_before = Pt(11)
             hs.paragraph_format.space_after = Pt(6)
 
-    _build_header(section, spec)
-    _build_footer(section, spec)
-    _build_title_block(doc, spec)
+    _build_header(section, spec, theme)
+    _build_footer(section, spec, theme)
+    _build_title_block(doc, spec, theme)
 
     for block in spec.get("blocks", []):
         _render_block(doc, block)
@@ -305,62 +478,119 @@ def build_document(spec: dict, out_path: Path) -> Path:
     return out_path
 
 
-def _build_header(section, spec):
+def _build_header(section, spec, theme: Theme):
     header = section.header
     header.is_linked_to_previous = False
-    # wipe default empty para content by using it
     p = header.paragraphs[0]
     p.clear()
+    org = spec.get("org", "Northstar Engineering")
+    kind = spec.get("doc_type", "Internal Document")
+    klass = spec.get("classification", "INTERNAL")
+    title = spec.get("title", "")
+    rule = theme.accent_hex
+
+    if theme.header_layout == "split":
+        _spacing(p, before=0, after=0, line=200)
+        run = p.add_run(org)
+        _set_run_font(run, SANS, 9, bold=True, color=NAVY)
+        run = p.add_run(" " * 6)
+        run = p.add_run(klass)
+        _set_run_font(run, SANS, 8, bold=True, color=NAVY)
+        p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        p2 = header.add_paragraph()
+        _spacing(p2, before=0, after=2, line=200)
+        _horizontal_line(p2, color=rule, sz="10")
+        run = p2.add_run(kind)
+        _set_run_font(run, SANS, 8, color=STEEL)
+        run = p2.add_run("  ·  ")
+        _set_run_font(run, SANS, 8, color=MUTED)
+        run = p2.add_run(title)
+        _set_run_font(run, SANS, 8, italic=True, color=MUTED)
+        return
+
+    if theme.header_layout == "stacked":
+        _spacing(p, before=0, after=0, line=200)
+        run = p.add_run(org)
+        _set_run_font(run, SANS, 8, bold=True, color=NAVY)
+        p2 = header.add_paragraph()
+        _spacing(p2, before=0, after=2, line=200)
+        _horizontal_line(p2, color=rule, sz="8")
+        run = p2.add_run(title)
+        _set_run_font(run, SANS, 8, italic=True, color=MUTED)
+        return
+
     _spacing(p, before=0, after=2, line=200)
-    _horizontal_line(p, color="1B365D", sz="18")
-
-    run = p.add_run(spec.get("org", "Northstar Engineering"))
+    _horizontal_line(p, color=rule, sz="18")
+    run = p.add_run(org)
     _set_run_font(run, SANS, 9, bold=True, color=NAVY)
-
     run = p.add_run("   |   ")
     _set_run_font(run, SANS, 9, color=MUTED)
-
-    run = p.add_run(spec.get("doc_type", "Internal Document"))
+    run = p.add_run(kind)
     _set_run_font(run, SANS, 9, color=STEEL)
-
     run = p.add_run(" " * 8)
-    run = p.add_run(spec.get("classification", "INTERNAL"))
+    run = p.add_run(klass)
     _set_run_font(run, SANS, 8, bold=True, color=NAVY)
-
     p2 = header.add_paragraph()
     _spacing(p2, before=0, after=0, line=200)
-    run = p2.add_run(spec.get("title", ""))
+    run = p2.add_run(title)
     _set_run_font(run, SANS, 8, italic=True, color=MUTED)
 
 
-def _build_footer(section, spec):
+def _build_footer(section, spec, theme: Theme):
     footer = section.footer
     footer.is_linked_to_previous = False
     p = footer.paragraphs[0]
     p.clear()
     _spacing(p, before=4, after=0, line=200)
-    _horizontal_line(p, color="1B365D", sz="12")
+    _horizontal_line(p, color=theme.accent_hex, sz="12" if theme.footer_layout != "short" else "8")
+    sep = theme.footer_sep
+    ver = theme.version_prefix + str(spec.get("version", "1.0"))
+    doc_id = spec.get("doc_id", "DOC-000")
+    date = spec.get("date", "")
+    klass = spec.get("classification", "INTERNAL")
 
-    run = p.add_run(spec.get("doc_id", "DOC-000"))
-    _set_run_font(run, SANS, 8, color=MUTED)
-    run = p.add_run("  ·  v" + str(spec.get("version", "1.0")))
-    _set_run_font(run, SANS, 8, color=MUTED)
-    run = p.add_run("  ·  " + spec.get("date", ""))
-    _set_run_font(run, SANS, 8, color=MUTED)
-    run = p.add_run("  ·  Page ")
-    _set_run_font(run, SANS, 8, color=MUTED)
-    _add_page_number(p)
+    if theme.footer_layout == "short":
+        run = p.add_run(doc_id)
+        _set_run_font(run, SANS, 8, color=MUTED)
+        run = p.add_run(sep + date + sep + "Page ")
+        _set_run_font(run, SANS, 8, color=MUTED)
+        _add_page_number(p)
+        run = p.add_run(" of ")
+        _set_run_font(run, SANS, 8, color=MUTED)
+        _add_numpages(p)
+    elif theme.footer_layout == "pipe":
+        run = p.add_run(doc_id + sep + ver + sep + spec.get("status", "") + sep)
+        _set_run_font(run, SANS, 8, color=MUTED)
+        run = p.add_run("Page ")
+        _set_run_font(run, SANS, 8, color=MUTED)
+        _add_page_number(p)
+        run = p.add_run(" of ")
+        _set_run_font(run, SANS, 8, color=MUTED)
+        _add_numpages(p)
+        run = p.add_run(sep + klass)
+        _set_run_font(run, SANS, 8, color=MUTED)
+    else:
+        run = p.add_run(doc_id)
+        _set_run_font(run, SANS, 8, color=MUTED)
+        run = p.add_run(sep + ver)
+        _set_run_font(run, SANS, 8, color=MUTED)
+        run = p.add_run(sep + date)
+        _set_run_font(run, SANS, 8, color=MUTED)
+        run = p.add_run(sep + "Page ")
+        _set_run_font(run, SANS, 8, color=MUTED)
+        _add_page_number(p)
+        run = p.add_run(" of ")
+        _set_run_font(run, SANS, 8, color=MUTED)
+        _add_numpages(p)
+        run = p.add_run(sep + klass)
+        _set_run_font(run, SANS, 8, color=MUTED)
     for run in p.runs:
         if run.font.size is None:
             _set_run_font(run, SANS, 8, color=MUTED)
-    run = p.add_run(" of ")
-    _set_run_font(run, SANS, 8, color=MUTED)
-    _add_numpages(p)
-    run = p.add_run("  ·  " + spec.get("classification", "INTERNAL"))
-    _set_run_font(run, SANS, 8, color=MUTED)
 
 
-def _build_title_block(doc: Document, spec: dict):
+def _build_title_block(doc: Document, spec: dict, theme: Theme | None = None):
+    theme = theme or _THEME
     kicker = doc.add_paragraph()
     _spacing(kicker, before=0, after=2, line=200)
     run = kicker.add_run(spec.get("kicker", spec.get("doc_type", "")).upper())
@@ -369,7 +599,7 @@ def _build_title_block(doc: Document, spec: dict):
     title = doc.add_paragraph()
     _spacing(title, before=0, after=4, line=240)
     run = title.add_run(spec.get("title", ""))
-    _set_run_font(run, SANS, 22, bold=True, color=NAVY)
+    _set_run_font(run, SANS, theme.title_pt if theme else 22, bold=True, color=NAVY)
 
     subtitle = spec.get("subtitle")
     if subtitle:
@@ -380,7 +610,7 @@ def _build_title_block(doc: Document, spec: dict):
 
     rule = doc.add_paragraph()
     _spacing(rule, before=0, after=10, line=80)
-    _horizontal_line(rule, color="1B365D", sz="16")
+    _horizontal_line(rule, color=(_THEME.accent_hex if _THEME else "1B365D"), sz="16")
 
     meta_rows = [
         ("Document ID", spec.get("doc_id", "")),
@@ -440,8 +670,12 @@ def _build_title_block(doc: Document, spec: dict):
 
 def _add_para(doc, text, first_line=False):
     p = doc.add_paragraph()
-    _spacing(p, before=0, after=12, line=427)
-    p.paragraph_format.first_line_indent = Inches(0.2)
+    line = _THEME.line_twips if _THEME else 427
+    after = _THEME.para_after if _THEME else 12
+    _spacing(p, before=0, after=after, line=line)
+    indent = _THEME.first_indent_in if _THEME else 0.2
+    if indent:
+        p.paragraph_format.first_line_indent = Inches(indent)
     run = p.add_run(text)
     _set_run_font(run, BODY_FONT, 12, color=BODY)
     return p
@@ -482,7 +716,7 @@ def _add_table(doc, headers, rows, col_widths=None):
     for j, h in enumerate(headers):
         cell = table.rows[0].cells[j]
         _shade_cell(cell, HEADER_BG)
-        _set_cell_borders(cell, "1B365D", "4")
+        _set_cell_borders(cell, _THEME.accent_hex if _THEME else "1B365D", "4")
         _set_cell_margins(cell, 50, 50, 70, 70)
         _paragraph_text(cell, str(h), font=SANS, size=9, bold=True, color=RGBColor(0xFF, 0xFF, 0xFF))
         if col_widths and j < len(col_widths):
@@ -509,7 +743,7 @@ def _add_callout(doc, label, text, kind="decision"):
     table = doc.add_table(rows=1, cols=1)
     cell = table.rows[0].cells[0]
     _shade_cell(cell, bg)
-    _set_cell_borders(cell, "1B365D" if kind != "warn" else "A15C46", "10")
+    _set_cell_borders(cell, (_THEME.accent_hex if _THEME else "1B365D") if kind != "warn" else "A15C46", "10")
     _set_cell_margins(cell, 80, 90, 120, 120)
     cell.text = ""
     p0 = cell.paragraphs[0]
@@ -645,7 +879,7 @@ def stamp_docx_metadata(path: Path, spec: dict, words: int | None = None, pages:
         f"<cp:keywords>{escape(spec.get('doc_id') or '')}</cp:keywords>"
         "<dc:description/>"
         f"<cp:lastModifiedBy>{escape(author)}</cp:lastModifiedBy>"
-        "<cp:revision>4</cp:revision>"
+        "<cp:revision>" + str(3 + (seed % 5)) + "</cp:revision>"
         f'<dcterms:created xsi:type="dcterms:W3CDTF">{iso(created)}</dcterms:created>'
         f'<dcterms:modified xsi:type="dcterms:W3CDTF">{iso(modified)}</dcterms:modified>'
         f"<cp:category>{escape(subject)}</cp:category>"

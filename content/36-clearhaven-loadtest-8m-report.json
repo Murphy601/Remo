@@ -625,7 +625,7 @@
     },
     {
       "type": "code",
-      "text": "# abort switch, same as run B1 when Jules thought WAL would tip over\nkubectl -n clh-shadow scale deploy/clh-loadgen --replicas=0\nkubectl -n clh-shadow annotate kafka/clh-match-inbound \\\n  clh.northstar.example/loadtest=aborted-$(date -u +%Y%m%dT%H%M%SZ)\n# lag drain check\nkafka-consumer-groups.sh --bootstrap-server kafka-shadow-01.chi.northstar.internal:9092 \\\n  --group match-engine-prod-shadow --describe | awk '$6+0 > 10000 {print}'\n",
+      "text": "# abort switch, same as run B1 when Jules thought WAL would tip over\nkubectl -n clh-shadow scale deploy/clh-loadgen --replicas=0\nkubectl -n clh-shadow annotate kafka/clh-match-inbound \\\n  clh.northstar.internal/loadtest=aborted-$(date -u +%Y%m%dT%H%M%SZ)\n# lag drain check\nkafka-consumer-groups.sh --bootstrap-server kafka-shadow-01.chi.northstar.internal:9092 \\\n  --group match-engine-prod-shadow --describe | awk '$6+0 > 10000 {print}'\n",
       "caption": "Abort and lag drain. We used the scale-to-zero on the harness at 11:07 on B1 when replica lag kissed 3.8s. We then let it drain and continued. We did not abort the day."
     },
     {

@@ -398,7 +398,7 @@
     },
     {
       "type": "code",
-      "text": "# baseline Diego wants, run from ops-bastion-03\n# Kafka disk by broker\nfor b in 01 02 03 04 05 06 07 08 09 10 11 12; do\n  echo -n \"kafka-clh-prod-$b \"\n  ssh kafka-clh-prod-$b.internal.northstar.example \\\n    df -B1 /var/lib/kafka | awk 'NR==2{print $3,$2,$5}'\ndone\n\n# topic bytes (worst offenders)\nkubectl -n clearhaven-prod exec deploy/kafka-tools -- \\\n  kafka-log-dirs.sh --bootstrap-server kafka-clh-prod-01.internal.northstar.example:9092 \\\n  --describe --json | python3 /opt/ns/logdirs-summary.py | head -40\n\n# Postgres free\nkubectl -n clearhaven-prod exec deploy/pg-toolbox -- \\\n  psql -c \"SELECT pg_size_pretty(pg_database_size('clearhaven_recon')) AS db,\n                   pg_size_pretty(pg_tablespace_size('pg_default')) AS ts;\"\n",
+      "text": "# baseline Diego wants, run from ops-bastion-03\n# Kafka disk by broker\nfor b in 01 02 03 04 05 06 07 08 09 10 11 12; do\n  echo -n \"kafka-clh-prod-$b \"\n  ssh kafka-clh-prod-$b.northstar.internal \\\n    df -B1 /var/lib/kafka | awk 'NR==2{print $3,$2,$5}'\ndone\n\n# topic bytes (worst offenders)\nkubectl -n clearhaven-prod exec deploy/kafka-tools -- \\\n  kafka-log-dirs.sh --bootstrap-server kafka-clh-prod-01.northstar.internal:9092 \\\n  --describe --json | python3 /opt/ns/logdirs-summary.py | head -40\n\n# Postgres free\nkubectl -n clearhaven-prod exec deploy/pg-toolbox -- \\\n  psql -c \"SELECT pg_size_pretty(pg_database_size('clearhaven_recon')) AS db,\n                   pg_size_pretty(pg_tablespace_size('pg_default')) AS ts;\"\n",
       "caption": "Baseline commands for the September 5 snapshot. The python helper already exists in the tools image."
     },
     {

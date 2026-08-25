@@ -59,7 +59,7 @@
     {
       "type": "callout",
       "label": "Decision",
-      "text": "OpenBreak between match-engine and break-svc becomes gRPC, service break.v1.BreakInternal, method OpenBreak, on port 8443 with mTLS. recon-query, which Clearhaven and Helen's Metabase-adjacent tools call, stays REST/JSON on api.clearhaven-recon.internal.northstar.example. No GraphQL. No gRPC to the world. Feature flag match.engine.openbreak.grpc=true ships off in 1.45, on in 1.46 after a month-end in staging. Rollback is the flag, not a schema migration.",
+      "text": "OpenBreak between match-engine and break-svc becomes gRPC, service break.v1.BreakInternal, method OpenBreak, on port 8443 with mTLS. recon-query, which Clearhaven and Helen's Metabase-adjacent tools call, stays REST/JSON on api.clearhaven-recon.northstar.internal. No GraphQL. No gRPC to the world. Feature flag match.engine.openbreak.grpc=true ships off in 1.45, on in 1.46 after a month-end in staging. Rollback is the flag, not a schema migration.",
       "kind": "decision"
     },
     {
@@ -225,7 +225,7 @@
     },
     {
       "type": "p",
-      "text": "mTLS via the existing mesh (Envoy, SPIFFE ids spiffe://northstar.example/ns/clearhaven-prod/sa/match-engine and .../sa/break-svc). Diego already has the cluster. gRPC is just another HTTP/2 route. We will not put break.v1 on the public ALB. NetworkPolicy already denies cross-namespace to break-svc except from match-engine, replay-worker, and Diego's debug SA. Add replay-worker to the gRPC allow list before we enable the flag in prod or replay will silently REST-fallback, which is fine for a day and then becomes a second protocol in prod forever."
+      "text": "mTLS via the existing mesh (Envoy, SPIFFE ids spiffe://northstar.internal/ns/clearhaven-prod/sa/match-engine and .../sa/break-svc). Diego already has the cluster. gRPC is just another HTTP/2 route. We will not put break.v1 on the public ALB. NetworkPolicy already denies cross-namespace to break-svc except from match-engine, replay-worker, and Diego's debug SA. Add replay-worker to the gRPC allow list before we enable the flag in prod or replay will silently REST-fallback, which is fine for a day and then becomes a second protocol in prod forever."
     },
     {
       "type": "p",

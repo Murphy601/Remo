@@ -86,7 +86,7 @@
     },
     {
       "type": "p",
-      "text": "On-call is not a license to redesign the matcher. On-call is not a license to \"quickly\" change partition counts on MSK. On-call is not customer support. Clearhaven advisors who email aman.kumar@northstar.example at 21:00 ET about a single account's break go to Helen's queue, not to PD. If Helen is offline and the email says the whole book is unreconciled, that is a page. One account is a ticket. We had this argument in October. The rule is now in this file so we stop having it."
+      "text": "On-call is not a license to redesign the matcher. On-call is not a license to \"quickly\" change partition counts on MSK. On-call is not customer support. Clearhaven advisors who email aman.kumar@northstar.internal at 21:00 ET about a single account's break go to Helen's queue, not to PD. If Helen is offline and the email says the whole book is unreconciled, that is a page. One account is a ticket. We had this argument in October. The rule is now in this file so we stop having it."
     },
     {
       "type": "h1",
@@ -94,7 +94,7 @@
     },
     {
       "type": "p",
-      "text": "Primary week runs Thursday 10:00 ET to the next Thursday 10:00 ET. Secondary is the person who was primary last week, which gives you a warm handoff and means you are not dumped into someone else's half-written Grafana folder. The calendar is Google Calendar \"CLH Recon Oncall\" owned by Priya, invite recon-oncall@northstar.example. Northstar PD escalation policy clh-recon-ep-primary is bound to that calendar via the PD + Google sync Diego set up in ticket NS-PD-441. If the calendar and PD disagree, PD wins for who gets the phone buzz, and you fix the calendar the next morning. Do not edit PD users by hand during a shift. Diego will notice because the audit log pages him, which is a joke until it is not."
+      "text": "Primary week runs Thursday 10:00 ET to the next Thursday 10:00 ET. Secondary is the person who was primary last week, which gives you a warm handoff and means you are not dumped into someone else's half-written Grafana folder. The calendar is Google Calendar \"CLH Recon Oncall\" owned by Priya, invite recon-oncall@northstar.internal. Northstar PD escalation policy clh-recon-ep-primary is bound to that calendar via the PD + Google sync Diego set up in ticket NS-PD-441. If the calendar and PD disagree, PD wins for who gets the phone buzz, and you fix the calendar the next morning. Do not edit PD users by hand during a shift. Diego will notice because the audit log pages him, which is a joke until it is not."
     },
     {
       "type": "table",
@@ -150,7 +150,7 @@
     },
     {
       "type": "p",
-      "text": "Compensation and hours are Priya's problem, not this SOP. What this SOP cares about: you are reachable on the PD mobile app, your laptop can VPN to ns-prod-vpn.northstar.example, and you have aws sso login working for profile clh-recon-prod. If your SSO token dies at 01:00 ET you will spend 14 minutes in a browser on a phone. Test it on Thursday afternoon. I am not kidding. Test it."
+      "text": "Compensation and hours are Priya's problem, not this SOP. What this SOP cares about: you are reachable on the PD mobile app, your laptop can VPN to ns-prod-vpn.northstar.internal, and you have aws sso login working for profile clh-recon-prod. If your SSO token dies at 01:00 ET you will spend 14 minutes in a browser on a phone. Test it on Thursday afternoon. I am not kidding. Test it."
     },
     {
       "type": "h2",
@@ -283,7 +283,7 @@
     },
     {
       "type": "p",
-      "text": "After 19:00 ET Helen's backup is ops-night@clearhaven.example plus the night desk number labeled \"CLH Ops Night\" in 1Password. That night desk is staffed for Clearhaven's other products, not for recon nuance. They can confirm \"file arrived\" or \"DTCC blast says delay.\" They cannot tell you why CUSIP 91282CHT1 is unmatched. Do not walk them through match_key SQL. If you need recon nuance after 19:00, that is you, plus Kavya or me as secondary, plus Helen at 07:00. The night desk is a file-presence oracle, not a matcher."
+      "text": "After 19:00 ET Helen's backup is ops-night@clearhaven.internal plus the night desk number labeled \"CLH Ops Night\" in 1Password. That night desk is staffed for Clearhaven's other products, not for recon nuance. They can confirm \"file arrived\" or \"DTCC blast says delay.\" They cannot tell you why CUSIP 91282CHT1 is unmatched. Do not walk them through match_key SQL. If you need recon nuance after 19:00, that is you, plus Kavya or me as secondary, plus Helen at 07:00. The night desk is a file-presence oracle, not a matcher."
     },
     {
       "type": "quote",
@@ -337,7 +337,7 @@
     },
     {
       "type": "code",
-      "text": "# VPN first\nns-vpn status || ns-vpn connect ns-prod-vpn.northstar.example\n\nexport AWS_PROFILE=clh-recon-prod\naws sts get-caller-identity\n\n# Inbound file present?\naws s3 ls s3://clh-recon-inbound-prod/nscc/ --recursive | tail -n 20\n\n# Matcher pods\nkubectl --context clh-recon-prod-eks -n recon get pods -l app=match-worker\n\n# Lag via the consumer group (MSK)\nkafka-consumer-groups.sh --bootstrap-server b-1.msk-clh-recon-1.c8k2.kafka.us-east-1.amazonaws.com:9092 \\\n  --command-config /etc/clh/msk-client.properties \\\n  --group clh.recon.match.consumer --describe\n\n# Match rate for today (read replica, not primary)\npsql \"host=clh-pg-recon.cluster-ro-c8k2.us-east-1.rds.amazonaws.com dbname=recon user=recon_ro sslmode=require\" \\\n  -c \"select settle_date, match_rate_pct, unmatched_cnt, file_row_cnt\n      from recon.match_run_daily\n      where settle_date = current_date;\"\n",
+      "text": "# VPN first\nns-vpn status || ns-vpn connect ns-prod-vpn.northstar.internal\n\nexport AWS_PROFILE=clh-recon-prod\naws sts get-caller-identity\n\n# Inbound file present?\naws s3 ls s3://clh-recon-inbound-prod/nscc/ --recursive | tail -n 20\n\n# Matcher pods\nkubectl --context clh-recon-prod-eks -n recon get pods -l app=match-worker\n\n# Lag via the consumer group (MSK)\nkafka-consumer-groups.sh --bootstrap-server b-1.msk-clh-recon-1.c8k2.kafka.us-east-1.amazonaws.com:9092 \\\n  --command-config /etc/clh/msk-client.properties \\\n  --group clh.recon.match.consumer --describe\n\n# Match rate for today (read replica, not primary)\npsql \"host=clh-pg-recon.cluster-ro-c8k2.us-east-1.rds.amazonaws.com dbname=recon user=recon_ro sslmode=require\" \\\n  -c \"select settle_date, match_rate_pct, unmatched_cnt, file_row_cnt\n      from recon.match_run_daily\n      where settle_date = current_date;\"\n",
       "caption": "First-look commands. recon_ro is in 1Password. Do not use recon_app on the primary for ad hoc SELECT during the window."
     },
     {

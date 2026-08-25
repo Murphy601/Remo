@@ -1,10 +1,9 @@
-# Writer instructions (read this first)
+# House style for Northstar engineering Word files
 
-You are writing original fictional internal engineering documents for Aman Kumar's portfolio of professional writing samples. They are NOT real client deliverables. Never mention Infosys, Wipro, HCL, Handshake, or any real bank/hospital.
-
-World file: `/workspace/catalog/world.json`
-Schema: `/workspace/catalog/SCHEMA.txt`
-Output: `/workspace/content/<slug>.json`  (one file per document)
+World file: `catalog/world.json`
+Schema: `catalog/SCHEMA.txt`
+Source: `content/<slug>.json` (one file per document)
+Output: `documents/<slug>.docx`
 
 ## JSON top-level (every file)
 
@@ -18,8 +17,8 @@ Output: `/workspace/content/<slug>.json`  (one file per document)
   "kicker": "...",
   "org": "Northstar Engineering",
   "classification": "INTERNAL",
-  "version": "1.2",
-  "status": "Approved",
+  "version": "last revision row",
+  "status": "matches the kind of document",
   "date": "November 18, 2019",
   "author": "Aman Kumar",
   "role": "...",
@@ -37,9 +36,13 @@ Output: `/workspace/content/<slug>.json`  (one file per document)
 
 Date in the JSON `date` field must be English: "April 11, 2023".
 
+Status follows the document kind (runbook In force, incident Closed, memo For decision, notes Issued, design Accepted). Do not stamp every file Approved / v1.2.
+
+Hosts use `.internal` (northstar.internal, riverview.internal, and the rest). Do not use the RFC documentation TLD `.example` except in a Spring filename such as `application-local.yml.example`.
+
 ## Length
 
-Minimum 2800 words in the combined text of summary + all block text/items/table cells. Target 3200-4200. If you finish under 2800, add another failure-mode section, not filler.
+The generator expands each file into the 40-50 page band. Front matter must still carry the real decisions. Remainder sections have to be in-genre and file-local. Do not mill the same exhibit stub, and do not reuse the same leftover headings or leftover sentences across files.
 
 ## Voice (non-negotiable)
 
@@ -51,7 +54,7 @@ No em dashes. No "It's not X, it's Y." No three-item parallel slogans.
 
 Every document must include:
 - at least one rejected alternative and why it died
-- at least two named people from the world file plus 1-2 extra fictional colleagues
+- at least two named people from the world file plus 1-2 extra colleagues
 - open questions with owners
 - numbers that are not round (8.2M, 7.4 min, 12-40s, $14.6k)
 - one section a VP could skim (decision / recommendation) AND one section a working engineer could execute (commands, schemas, failure modes)
@@ -68,4 +71,4 @@ Incidents: timeline, impact, contributing factors, what you will actually change
 
 Designs: constraints, trade-offs, edge cases, failure modes.
 
-Do not invent public-company filings or copy public docs. Keep it internal and fictional.
+Do not invent public-company filings or copy public docs. Keep it internal. Never Infosys, Wipro, HCL, or real bank/hospital names.

@@ -16,7 +16,7 @@
   "audience": "Primary on-call for patient-api, backup engineers, and anyone covering a weekend or holiday shift on riverview-chart",
   "owners": "Aman Kumar (runbook), Kavya Menon (feed flags and Redis), Luis Ortega (LDAP path)",
   "related": "RVH-PRD-2021-006, RVH-SOP-2021-009, RVH-INC-2021-118, RVH-TDD-2021-004, PD:patient-api-prod, Jira RVH-2411 / RVH-2388 / RVH-2294",
-  "summary": "This is the page-one runbook for patient-api in Kubernetes namespace riverview-chart. If you are holding the pager, start here: confirm the symptom, decide whether a single facility feed should be taken offline, and do not page Dr. Anita Shah. Night and weekend ChartLine failures go to Slack #rvh-interface-oncall. The procedures below are the ones we actually run from jump-rvh-01.northstar.example against cluster rvh-prod-eks-01. They cover 5xx bursts, stale RapidChart payloads, hospital LDAP auth failures, and a dead ChartLine interface, plus the break-glass path when Redis or the ConfigMap write is blocked.",
+  "summary": "This is the page-one runbook for patient-api in Kubernetes namespace riverview-chart. If you are holding the pager, start here: confirm the symptom, decide whether a single facility feed should be taken offline, and do not page Dr. Anita Shah. Night and weekend ChartLine failures go to Slack #rvh-interface-oncall. The procedures below are the ones we actually run from jump-rvh-01.northstar.internal against cluster rvh-prod-eks-01. They cover 5xx bursts, stale RapidChart payloads, hospital LDAP auth failures, and a dead ChartLine interface, plus the break-glass path when Redis or the ConfigMap write is blocked.",
   "form_description": "On-call runbook for Riverview patient-api. Written so a Northstar engineer who did not ship the last release can isolate a facility feed, talk to ChartLine on-call, and avoid dumping PHI into Slack at 3am.",
   "field": "Software Engineering / Data Science",
   "revision_history": [
@@ -62,7 +62,7 @@
     },
     {
       "type": "p",
-      "text": "This runbook assumes you already have Teleport access to jump-rvh-01.northstar.example and the kube context rvh-prod. If you do not, stop. Do not copy kubeconfigs into Slack. Priya Nair (EM) can grant a 4-hour break-glass kube role; that is a different procedure, listed near the end. Diego Alvarez is joining as SRE in November 2021. Until his first rotation on November 8, there is no dedicated SRE on this pager. After 20 minutes of unresolved Sev-1, page Kavya Menon, then Priya."
+      "text": "This runbook assumes you already have Teleport access to jump-rvh-01.northstar.internal and the kube context rvh-prod. If you do not, stop. Do not copy kubeconfigs into Slack. Priya Nair (EM) can grant a 4-hour break-glass kube role; that is a different procedure, listed near the end. Diego Alvarez is joining as SRE in November 2021. Until his first rotation on November 8, there is no dedicated SRE on this pager. After 20 minutes of unresolved Sev-1, page Kavya Menon, then Priya."
     },
     {
       "type": "h2",
@@ -151,10 +151,10 @@
     {
       "type": "steps",
       "items": [
-        "From your laptop: tsh login --proxy=teleport.northstar.example --auth=okta. Then tsh ssh aman.kumar@jump-rvh-01.northstar.example (substitute your user). Do not SSH as ubuntu.",
+        "From your laptop: tsh login --proxy=teleport.northstar.internal --auth=okta. Then tsh ssh aman.kumar@jump-rvh-01.northstar.internal (substitute your user). Do not SSH as ubuntu.",
         "On the jump box: export KUBECONFIG=/home/shared/kube/rvh-prod.kubeconfig && kubectl config current-context. Expected: arn:aws:eks:us-east-1:554129001:cluster/rvh-prod-eks-01.",
         "Confirm namespace: kubectl -n riverview-chart get deploy patient-api. You want READY at least 6/6 on nights, 8/8 weekday mornings. If the deploy is missing you are in the wrong cluster or the Helm release was deleted, which is a Sev-1 of a different shape.",
-        "Open Grafana folder Riverview / patient-api (grafana.northstar.example, dashboard uid rvh-papi-17). Do not use the old uid rvh-chart-03; it still graphs the 2020 census-only service.",
+        "Open Grafana folder Riverview / patient-api (grafana.northstar.internal, dashboard uid rvh-papi-17). Do not use the old uid rvh-chart-03; it still graphs the 2020 census-only service.",
         "If you need logs, use the commands in this runbook. Do not kubectl logs | grep MRN. PHI handling is RVH-SOP-2021-009. On-call may not paste chart bodies, MRNs, DOBs, or full Authorization headers into Slack."
       ]
     },
@@ -228,7 +228,7 @@
     },
     {
       "type": "p",
-      "text": "Rejected alternative, recorded so nobody revives it during an incident: we used to have a Jenkins job Stop patient-api (all facilities) that scaled the deploy to 0. Rahul liked it because the status page went quiet. Denise Howell (nursing informatics) did not like it because RapidChart showed a generic 'service unavailable' on every floor. We killed the job on September 9 (RVH-2388). If you find a bookmark to jenkins.northstar.example/job/rvh-stop-papi, it 404s on purpose. Facility feed flags replaced it."
+      "text": "Rejected alternative, recorded so nobody revives it during an incident: we used to have a Jenkins job Stop patient-api (all facilities) that scaled the deploy to 0. Rahul liked it because the status page went quiet. Denise Howell (nursing informatics) did not like it because RapidChart showed a generic 'service unavailable' on every floor. We killed the job on September 9 (RVH-2388). If you find a bookmark to jenkins.northstar.internal/job/rvh-stop-papi, it 404s on purpose. Facility feed flags replaced it."
     },
     {
       "type": "h1",
@@ -643,7 +643,7 @@
     },
     {
       "type": "p",
-      "text": "Teleport down: page Priya, not Anita, not Nate. There is a backup jump jump-rvh-02.northstar.example with the same kubeconfig path. tsh ssh aman.kumar@jump-rvh-02.northstar.example. If both jumps are dead, you are in a Northstar access incident and you should not try to kubectl from a coffee-shop laptop against the public EKS endpoint. We closed that endpoint in May. There is no public kube. Wait for Teleport."
+      "text": "Teleport down: page Priya, not Anita, not Nate. There is a backup jump jump-rvh-02.northstar.internal with the same kubeconfig path. tsh ssh aman.kumar@jump-rvh-02.northstar.internal. If both jumps are dead, you are in a Northstar access incident and you should not try to kubectl from a coffee-shop laptop against the public EKS endpoint. We closed that endpoint in May. There is no public kube. Wait for Teleport."
     },
     {
       "type": "h2",
@@ -768,7 +768,7 @@
         ],
         [
           "Grafana blank",
-          "grafana.northstar.example SSO",
+          "grafana.northstar.internal SSO",
           "Use kubectl and curl; Grafana is not required to isolate a feed",
           "Fix Okta"
         ],
@@ -839,8 +839,8 @@
       "type": "bullets",
       "items": [
         "Grafana uid rvh-papi-17, folder Riverview / patient-api. Panels 12 (5xx ratio), 19 (chart_age_seconds), 22 (per-facility 5xx), 28 (ldap bind ms), 31 (redis evicted_keys).",
-        "Alertmanager: http://am.northstar.example, route team=riverview.",
-        "Hosts: jump-rvh-01/02.northstar.example, chart-cache-01/02.rvh.internal, chart-pg-01.rvh.internal, ldap-west/east.rvh.internal, chartline-iface-prod.rvh.internal, sitenotes.rvh.internal.",
+        "Alertmanager: http://am.northstar.internal, route team=riverview.",
+        "Hosts: jump-rvh-01/02.northstar.internal, chart-cache-01/02.rvh.internal, chart-pg-01.rvh.internal, ldap-west/east.rvh.internal, chartline-iface-prod.rvh.internal, sitenotes.rvh.internal.",
         "Cluster: rvh-prod-eks-01, ns riverview-chart, deploy patient-api, cm patient-api-feed-flags, secret chart-cache-auth, secret chartline-client-tls.",
         "Tickets: RVH-2411 auto-reenable spike, RVH-2388 killed global stop job, RVH-2294 wrong kube context, RVH-2201 ED discharge lag, RVH-2189 Redis client leak, RVH-INC-2021-118 inflated census.",
         "Sibling docs: RVH-PRD-2021-006 assemble requirements, RVH-SOP-2021-009 PHI logging, RVH-MTG-2021-022 clinical feedback, RVH-TDD-2020-011 REST vs FHIR (why we have this API shape at all)."

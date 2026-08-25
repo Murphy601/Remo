@@ -57,7 +57,7 @@
     {
       "type": "callout",
       "label": "Decision",
-      "text": "On-call may not paste MRN, DOB, patient name, address, full Authorization headers, chart JSON, or RapidChart screenshots into Slack, Jira, PagerDuty, or email. Synthetic id SYNTH-000441 is the only patient identifier allowed in those channels. If you already pasted, stop typing, do not paste a 'redacted' follow-up of the same blob, and contact Helen Park (helen.park@riverview.example, PD service rvh-privacy). Priya Nair is the Northstar manager to notify. Dr. Anita Shah is not the privacy on-call.",
+      "text": "On-call may not paste MRN, DOB, patient name, address, full Authorization headers, chart JSON, or RapidChart screenshots into Slack, Jira, PagerDuty, or email. Synthetic id SYNTH-000441 is the only patient identifier allowed in those channels. If you already pasted, stop typing, do not paste a 'redacted' follow-up of the same blob, and contact Helen Park (helen.park@riverview.internal, PD service rvh-privacy). Priya Nair is the Northstar manager to notify. Dr. Anita Shah is not the privacy on-call.",
       "kind": "decision"
     },
     {
@@ -75,7 +75,7 @@
     {
       "type": "steps",
       "items": [
-        "You are on jump-rvh-01.northstar.example (or jump-rvh-02) via Teleport. Dumps pulled to a laptop Downloads folder are already a process fail, even if you later redact.",
+        "You are on jump-rvh-01.northstar.internal (or jump-rvh-02) via Teleport. Dumps pulled to a laptop Downloads folder are already a process fail, even if you later redact.",
         "Working directory is /var/tmp/papi-dumps/<pd-incident-or-ticket>/ with mode 0700. Not /tmp, not $HOME, not a Slack-synced folder.",
         "You have python3.8 and /opt/rvh/redact_dump.py version 1.4.2 or newer (python3 /opt/rvh/redact_dump.py --version). 1.3.x does not know dob_compact. Do not use a copy of the script from someone's home directory.",
         "LOG_REDACT=1 on the deploy (kubectl -n riverview-chart get deploy patient-api -o yaml | grep LOG_REDACT). If it is 0, you are in an incident inside the incident. Set it back to 1 before you gather logs, unless Helen has approved a time-boxed DEBUG in writing.",
@@ -227,7 +227,7 @@
     },
     {
       "type": "p",
-      "text": "We send traces to the internal collector otel-rvh.northstar.example:4317. Spans for assemble include facility, http.route, http.status, mrn_hash, timings for chartline/ldap/redis/sitenotes/pg. They must not include MRN. If you find one that does, that is Sev-2 privacy plus a drop-filter, not a 'debug win.'"
+      "text": "We send traces to the internal collector otel-rvh.northstar.internal:4317. Spans for assemble include facility, http.route, http.status, mrn_hash, timings for chartline/ldap/redis/sitenotes/pg. They must not include MRN. If you find one that does, that is Sev-2 privacy plus a drop-filter, not a 'debug win.'"
     },
     {
       "type": "h3",
@@ -235,7 +235,7 @@
     },
     {
       "type": "p",
-      "text": "You need tsh app login for Grafana Tempo (Explore > Tempo on grafana.northstar.example). You do not need kubectl for a trace pull if the collector is up. If the collector is down, you do not dump spans from pod stdout as a substitute, because stdout may still have the June debug shape on old ReplicaSets. Delete old ReplicaSets instead of scraping them."
+      "text": "You need tsh app login for Grafana Tempo (Explore > Tempo on grafana.northstar.internal). You do not need kubectl for a trace pull if the collector is up. If the collector is down, you do not dump spans from pod stdout as a substitute, because stdout may still have the June debug shape on old ReplicaSets. Delete old ReplicaSets instead of scraping them."
     },
     {
       "type": "steps",
@@ -324,7 +324,7 @@
       "items": [
         "Leave raw files in the 0700 directory. Do not copy them to /home/shared. Do not attach to Jira.",
         "Read report.json. Note the pattern keys with counts and the first 3 unmatched_samples which the script already masks to length/charset only (it should not reprint the PHI). If unmatched_samples looks like actual PHI, the script version is wrong. Stop using it.",
-        "Contact Helen Park: PD rvh-privacy if off-hours and you already know PHI left the jump box (Slack, email, vendor). If unmatched was caught on the jump box and nothing left, email helen.park@riverview.example and CC priya.nair@northstar.example, and put a one-liner in #rvh-privacy: 'unmatched redaction on jump-rvh-01 path ... ticket ... no paste.' Do not attach report.json if it contains samples that look live. 1.4.2 samples are masked; still prefer the one-liner.",
+        "Contact Helen Park: PD rvh-privacy if off-hours and you already know PHI left the jump box (Slack, email, vendor). If unmatched was caught on the jump box and nothing left, email helen.park@riverview.internal and CC priya.nair@northstar.internal, and put a one-liner in #rvh-privacy: 'unmatched redaction on jump-rvh-01 path ... ticket ... no paste.' Do not attach report.json if it contains samples that look live. 1.4.2 samples are masked; still prefer the one-liner.",
         "If you need ChartLine to debug, ask Nate to pull the encounter on their side with facility + time + mrn_hash. Give hash and window, not a dump.",
         "Engineering follow-up (weekday): Kavya adds a pattern or kills the emitting field. Aman updates this SOP if a new field is allowed. Sneha adds a fixture with the new shape to the redaction tests.",
         "Do not write a one-off sed to 'finish the job' and then share. sed is how DOB in a new format survives."

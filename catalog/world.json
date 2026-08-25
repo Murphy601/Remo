@@ -3,7 +3,7 @@
   "world": {
     "employer": "Northstar Engineering",
     "author": "Aman Kumar",
-    "author_email": "aman.kumar@northstar.example",
+    "author_email": "aman.kumar@northstar.internal",
     "clients": {
       "clearhaven": {
         "name": "Clearhaven Markets",
@@ -47,7 +47,7 @@
     "Do not use em dashes. Use commas, periods, or parentheses.",
     "Do not write 'It's not X, it's Y' constructions.",
     "US professional English. Dates like March 12, 2024.",
-    "Fictional only. Never Infosys, Wipro, HCL, or real bank/hospital names."
+    "Never Infosys, Wipro, HCL, or real bank/hospital names."
   ],
   "documents": [
     {"n": 1, "slug": "01-oakridge-inventory-api-requirements", "doc_id": "OAK-REQ-2019-014", "date": "2019-11-18", "role": "Junior Software Engineer", "doc_type": "Requirements document", "client": "oakridge"},

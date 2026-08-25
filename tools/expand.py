@@ -154,6 +154,15 @@ def expand_spec(spec: dict, min_words: int = 14200, max_words: int = 15400) -> d
         extra.pop()
     if _wc_blocks(spec, extra) < min_words:
         extra += _closing_remainder(f, min_words - _wc_blocks(spec, extra))
+    topics = _genre_topics(f)
+    i = 0
+    while _wc_blocks(spec, extra) < min_words and i < 80:
+        extra += _take_paras(f, 1, topics[i % len(topics)])
+        i += 1
+    j = 0
+    while _wc_blocks(spec, extra) < min_words and j < 50:
+        extra.append(pad_paragraph(f, j))
+        j += 1
     out = dict(spec)
     out["blocks"] = list(spec.get("blocks", [])) + extra
     return out
@@ -832,334 +841,470 @@ def _num(f, i=0, default="the number already in the front"):
     return default
 
 
+def _remainder_h1(f):
+    g = f["genre"]
+    table = {
+        "notes": [
+            f"Action items from {f['date']}",
+            f"Owners still on the hook after {f['doc_id']}",
+            f"What I wrote down after the call",
+        ],
+        "runbook": [
+            f"Stops that are not on page one ({f['doc_id']})",
+            f"Extra on-call branches, {f['date']}",
+            f"If the happy path already failed",
+        ],
+        "incident": [
+            f"Work the postmortem still owes ({f['doc_id']})",
+            f"Detection and follow-through after {f['date']}",
+            f"What we change so this does not repeat",
+        ],
+        "memo": [
+            f"Checkpoints if {_person(f, 1)} says yes",
+            f"Cost of delay, restated for {f['doc_id']}",
+            f"After the ask in the front of this memo",
+        ],
+        "prd": [
+            f"Acceptance leftovers for {f['doc_id']}",
+            f"Stories the screenshots skip",
+            f"What {_person(f, 1)} still has to sign",
+        ],
+        "test": [
+            f"Cases that stay in CI ({f['doc_id']})",
+            f"Fixture rules Sneha will not relitigate",
+            f"Regressions we already paid for",
+        ],
+        "design": [
+            f"Edges that did not fit the front ({f['doc_id']})",
+            f"Lock budget, blast radius, leftovers",
+            f"What implementers steal from the back",
+        ],
+    }
+    return f["rng"].choice(table.get(g, table["design"]))
+
+
+def _ht(f, kind, topic):
+    ticket = _ticket(f, 0)
+    host = _host(f, 0)
+    opts = {
+        "refuse": [
+            f"Still out: {topic}",
+            f"{ticket} does not include this",
+            f"Keep {topic} dead",
+        ],
+        "numbers": [
+            f"Working numbers on {host}",
+            f"What I would quote for {topic}",
+            f"Counts tied to {ticket}",
+        ],
+        "comms": [
+            f"Outbound vs internal on {topic}",
+            f"What {_person(f, 3)} can send",
+            f"No hostnames in the customer line",
+        ],
+        "handoff": [
+            f"Who carries {ticket} next",
+            f"Access that has to move off me",
+            f"Handoff for {topic}",
+        ],
+        "commands": [
+            f"Read-only on {host} first",
+            f"Commands if {topic} is the tell",
+            f"Stop after the unexpected line",
+        ],
+        "question": [
+            f"{_person(f, 1)} still owes a close",
+            f"Open: {topic}",
+            f"Yes, no, or a new date on {ticket}",
+        ],
+        "paid_failure": [
+            f"Last time {topic} cost us",
+            f"The tell on {host} we argued past",
+            f"Do not widen retries for this",
+        ],
+        "schema": [
+            f"Expand then contract ({topic})",
+            f"Column order for {ticket}",
+            f"Do not drop readers in the same release",
+        ],
+        "meeting": [
+            f"After-call note: {topic}",
+            f"People who missed the room",
+            f"Quotes stay quotes",
+        ],
+        "fixture": [
+            f"Smallest failing row ({topic})",
+            f"Hash gate for {ticket}",
+            f"No production dump on a laptop",
+        ],
+        "capacity": [
+            f"Queue and disk on {host}",
+            f"Spend I can defend for {topic}",
+            f"Do not hide a buy in a memory limit",
+        ],
+        "access": [
+            f"Grants for {topic}",
+            f"Secrets stay off {ticket} descriptions",
+            f"Zero-row success on {host}",
+        ],
+        "timeline": [
+            f"Which clock I am using",
+            f"{topic} vs the ops clock",
+            f"NTP on {host} before the argument",
+        ],
+        "close": [
+            f"When {f['doc_id']} gets reopened",
+            f"Evidence, not a booked meeting",
+            f"Hold the front-matter call",
+        ],
+        "qa": [
+            f"Short answers I am tired of repeating",
+            f"FAQ for {topic}",
+            f"This file is the FAQ, not a second wiki",
+        ],
+        "freeze": [
+            f"Calendar vs {topic}",
+            f"A small apply is still an apply",
+            f"Freeze leftover for {ticket}",
+        ],
+        "raci": [
+            f"Person names for {topic}",
+            f"RACI that is not a team alias",
+            f"Who gets the page",
+        ],
+        "dry_run": [
+            f"Print a count before a write",
+            f"Dry-run on {host}",
+            f"Abort beats a lying dual-run",
+        ],
+    }
+    return f["rng"].choice(opts[kind])
+
+
 def _working_bank(f):
-    """At most one pass of differently shaped sections. Shape index is the
-    position in this list, never modulo-wrapped, so the back half cannot
-    settle into rule / owner / fail-closed."""
-    shapes = [
-        _shape_refuse,
-        _shape_numbers,
-        _shape_comms,
-        _shape_handoff,
-        _shape_commands,
-        _shape_question,
-        _shape_paid_failure,
-        _shape_schema,
-        _shape_meeting,
-        _shape_fixture,
-        _shape_capacity,
-        _shape_access,
-        _shape_timeline,
-        _shape_close,
-        _shape_qa,
-        _shape_freeze,
-        _shape_raci,
-        _shape_dry_run,
+    """Subset of shapes, shuffled, file-local headings. No shared remainder banner."""
+    named = [
+        ("refuse", _shape_refuse),
+        ("numbers", _shape_numbers),
+        ("comms", _shape_comms),
+        ("handoff", _shape_handoff),
+        ("commands", _shape_commands),
+        ("question", _shape_question),
+        ("paid_failure", _shape_paid_failure),
+        ("schema", _shape_schema),
+        ("meeting", _shape_meeting),
+        ("fixture", _shape_fixture),
+        ("capacity", _shape_capacity),
+        ("access", _shape_access),
+        ("timeline", _shape_timeline),
+        ("close", _shape_close),
+        ("qa", _shape_qa),
+        ("freeze", _shape_freeze),
+        ("raci", _shape_raci),
+        ("dry_run", _shape_dry_run),
     ]
+    f["rng"].shuffle(named)
+    keep = 9 + (f["rng"].randint(0, 3))
+    named = named[:keep]
     topics = _genre_topics(f)
     f["rng"].shuffle(topics)
+    intros = [
+        (
+            f"Leftover work from {f['title']}. Names, boxes, tickets. "
+            f"If a paragraph fights the front of {f['doc_id']}, strike it."
+        ),
+        (
+            f"I am dumping the after-work for {f['doc_id']} here so it is not in Slack. "
+            f"{_person(f, 1)} can skim headings. Implementers can steal the commands."
+        ),
+        (
+            f"Back of {f['title']}: execution only. The decision in the front does not move. "
+            f"Date on this pack is {f['date']}."
+        ),
+        (
+            f"Working remainder for {f['client']} on {f['doc_id']}. "
+            f"I would rather this live here than get rebuilt from a thread next week."
+        ),
+        (
+            f"{f['author']} parked the leftover execution for {f['date']} in this section. "
+            f"Headings are the index. {_person(f, 1)} still owns the call in the front."
+        ),
+    ]
     bank = [
-        {
-            "type": "h1",
-            "text": f"Open work after {f['date']}",
-        },
-        {
-            "type": "p",
-            "text": (
-                f"What follows is leftover work from {f['title']}: named people, named boxes, "
-                f"named tickets, and the items I still owe. If a paragraph fights the "
-                f"decision in the front of {f['doc_id']}, strike the paragraph."
-            ),
-        },
+        {"type": "h1", "text": _remainder_h1(f)},
+        {"type": "p", "text": f["rng"].choice(intros)},
     ]
     groups = [bank]
-    for i, shape in enumerate(shapes):
+    for i, (kind, shape) in enumerate(named):
         topic = topics[i % len(topics)]
         blocks = shape(f, i, topic)
-        blocks += _depth_paras(f, i, topic)
+        if blocks and blocks[0].get("type") == "h2":
+            blocks[0]["text"] = _ht(f, kind, topic)
+        p_idxs = [j for j, b in enumerate(blocks) if b.get("type") == "p"]
+        if len(p_idxs) >= 3:
+            blocks.pop(p_idxs[f["rng"].randrange(len(p_idxs))])
+        blocks += _take_paras(f, 2, topic)
         groups.append(blocks)
     return groups
 
 
-def _depth_paras(f, i, topic):
-    """Two extra working paragraphs. Pair index matches section index so
-    adjacent remainders do not grow the same tail."""
-    who = _person(f, i + 1)
-    other = _person(f, i + 2)
-    ticket = _ticket(f, i)
-    host = _host(f, i)
-    due = _parse_anchor(f["date"]) + timedelta(days=6 + i)
-    due_s = due.strftime("%B %-d, %Y")
-    n_front = _num(f, i)
-    pairs = [
-        (
-            f"How I would explain {topic} to {_person(f, 1)} in one minute: the front of "
-            f"{f['doc_id']} already made the call. This leftover is execution. {who} owns "
-            f"{ticket}. {host} is the box I would open first. The number I would put on the "
-            f"table is {n_front}, and if that is stale I would say so instead of performing "
-            f"precision. I would ask whether we are still inside the freeze and whether {who} "
-            f"can hit {due_s}.",
-            f"{other} asked whether we could 'just' keep a side path for {topic} until the "
-            f"window ends. No. Side paths are how the last exception file grew. If we need "
-            f"a carve-out, it expires, it lives on {ticket}, and rollback is delete-and-restart "
-            f"on {host}, not 'leave it until someone notices.'",
+def _take_paras(f, n, topic):
+    out = []
+    for _ in range(n):
+        i = f.get("_compose_i", 0)
+        f["_compose_i"] = i + 1
+        out.append({"type": "p", "text": _compose_para(f, topic, i)})
+    return out
+
+
+def _compose_para(f, topic, salt):
+    """File-local leftover sentences. Fragments are shuffled per file so the
+    same three-part line does not land in every document."""
+    bag = f.setdefault("_frag", _frag_bag(f))
+    who = _person(f, salt + 1)
+    ticket = _ticket(f, salt)
+    host = _host(f, salt)
+    due = (_parse_anchor(f["date"]) + timedelta(days=6 + (salt % 11))).strftime("%B %-d, %Y")
+    lead = bag["lead"][salt % len(bag["lead"])]
+    mid = bag["mid"][(salt * 3 + 1) % len(bag["mid"])]
+    tail = bag["tail"][(salt * 5 + 2) % len(bag["tail"])]
+    return (
+        lead.format(who=who, ticket=ticket, host=host, topic=topic, due=due, doc=f["doc_id"], author=f["author"], client=f["client"], title=f["title"], num=_num(f, salt)).rstrip(". ")
+        + ", "
+        + mid.format(who=who, ticket=ticket, host=host, topic=topic, due=due, doc=f["doc_id"], author=f["author"], client=f["client"], title=f["title"], num=_num(f, salt)).rstrip(". ")
+        + ", and "
+        + tail.format(who=who, ticket=ticket, host=host, topic=topic, due=due, doc=f["doc_id"], author=f["author"], client=f["client"], title=f["title"], num=_num(f, salt)).rstrip(". ")
+        + "."
+    )
+
+
+def _frag_bag(f):
+    lead = [
+        "{who} still has {topic} on {ticket}",
+        "I parked {topic} on {ticket} so it is not Slack archaeology",
+        "{author} owes a close on {topic} by {due}, not a status emoji",
+        "if {topic} is still fuzzy, {ticket} is the place to say so",
+        "{client} can wait on {topic} until {who} writes the cut",
+        "leftover {topic} sits with {who} on {ticket}",
+        "I will not reopen {title} to smuggle {topic} back in",
+        "{who} asked for a one-line version of {topic}",
+        "date pressure on {topic} is not a date, {due} is if {who} keeps it",
+        "the front of {doc} already named {topic}, this paragraph is execution",
+        "I bounced a hallway yes on {topic}",
+        "{host} is the box I would open first for {topic}",
+        "do not treat {topic} as polish, {who} either owns it or we drop it",
+        "after {due}, leftover access for {topic} is a bug, not a courtesy",
+    ]
+    mid = [
+        "the first check is a read on {host}",
+        "the freeze still applies and a small apply is still an apply",
+        "the number I will quote is {num}, and if it is stale I will say so",
+        "no hostname belongs in the customer line, {who} drafts and I review",
+        "a poison record gets fenced, not more retries",
+        "a PNG is not a close on {ticket}",
+        "grant expiry is a date {who} writes on {ticket}",
+        "a green job with no rows still pages",
+        "schema order stays expand then backfill then contract",
+        "staging that cannot replay the old wrong success is not a gate",
+        "weekend coverage is not implied unless {who} signs it",
+        "polling faster is not a substitute for fixing {topic}",
+        "pages go to a person, not a muted channel",
+        "a dry-run has to print the count on {host} before anyone writes",
+    ]
+    tail = [
+        "close is yes, no, or a new date on {ticket} by {due}",
+        "if this fights the front of {doc}, strike it",
+        "{author} will not keep a shadow list",
+        "object on {ticket}, not in a side thread",
+        "I ping once and after that {who} is late, not blocked",
+        "the sample I would still defend uses the same clock as {num}",
+        "{client} does not get {host} in an outbound sentence",
+        "a skip is a ticket and a flake is a capture",
+        "I will drop my leftover role the day {who} takes {ticket}",
+        "abort beats a lying dual-run",
+        "a vendor discount is not evidence",
+        "config, Helm, and a flag flip are all changes",
+        "I will not mix clocks to make {topic} look healthier",
+        "the call in the front still holds and this is leftover work only",
+    ]
+    f["rng"].shuffle(lead)
+    f["rng"].shuffle(mid)
+    f["rng"].shuffle(tail)
+    return {"lead": lead[:9], "mid": mid[:9], "tail": tail[:9]}
+
+
+def _para_deck(f):
+    """Callables, shuffled per file, consumed without replacement."""
+    who = lambda i=0: _person(f, i)
+    ticket = lambda i=0: _ticket(f, i)
+    host = lambda i=0: _host(f, i)
+    due = lambda i=0: (_parse_anchor(f["date"]) + timedelta(days=6 + i)).strftime("%B %-d, %Y")
+
+    fns = [
+        lambda topic: (
+            f"{who(1)} gets a one-minute version of {topic}: the front of {f['doc_id']} "
+            f"already called it. Execution sits on {ticket(0)}. First box I would open is "
+            f"{host(0)}. If {_num(f, 0)} is stale I will say so. Freeze check before any write."
         ),
-        (
-            f"Cost I can defend for {topic} is the spend on {host} and this job. I will not "
-            f"average it into a team number. If finance asks why we skipped the cheaper look, "
-            f"the answer is the page and the miss rate, not a deck. {who} can disagree on "
-            f"{ticket}. Sample I still like: {_n(f, 180, 6400)} rows, {_n(f, 7, 44)} minutes.",
-            f"I keep the receipt: ticket {ticket}, merge, and the bill line. I will not argue "
-            f"from a screenshot of a dashboard. Permalink or it did not happen. {f['author']} "
-            f"will reject a status update that is only a graph PNG in Slack.",
+        lambda topic: (
+            f"Carve-outs for {topic} expire. They live on {ticket(1)}, not in a wiki. "
+            f"Rollback on {host(1)} is delete-and-restart. {who(2)} does not get an open-ended "
+            f"side path because the window is ugly."
         ),
-        (
-            f"Customer-facing sentence for {topic} if {_person(f, 3)} asks today: we are "
-            f"inside the window already named, the user-visible effect is the one in the front, "
-            f"and we are not done until {who} closes {ticket}. I will not add {host} to that "
-            f"sentence. I will not promise {due_s} in outbound mail unless we can hit it.",
-            f"Internal sentence can name {host} and the last error class. It still does not "
-            f"paste identifiers. Legal reads outbound mail that names money or medical data. "
-            f"I will not get clever about that because {topic} is loud.",
+        lambda topic: (
+            f"Spend for {topic} is the bill line on {host(2)}, not a team average. "
+            f"{who(1)} can disagree on {ticket(2)}. I will quote {_n(f, 200, 7000)} rows "
+            f"and {_n(f, 6, 40)} minutes, same clock as {_num(f, 1)}."
         ),
-        (
-            f"Access that still has my name on it for {topic}: if I can still kubectl to "
-            f"{host} after {due_s}, the handoff failed. {who} accepts in writing on {ticket} "
-            f"or we keep paging me, which is the same as not handing off. {other} is backup "
-            f"only if named on that ticket the same day.",
-            f"I will drop the IAM grant instead of leaving it 'just in case.' Temporary grants "
-            f"expire. A copied kubeconfig is not a grant. {f['author']} will not keep a "
-            f"personal break-glass for convenience.",
+        lambda topic: (
+            f"A PNG of a graph is not a status. Permalink or it did not happen. "
+            f"{f['author']} will bounce a Slack screenshot that is supposed to close {ticket(0)} "
+            f"for {topic}."
         ),
-        (
-            f"First command on {host} for {topic} is still a read. Second is the last error "
-            f"line. Third is whether the front-matter rule is still true. I will not restart "
-            f"to silence a page. Restart is a listed step. {who} gets the one-line diagnosis "
-            f"before a write. Ticket {ticket} is open first.",
-            f"If the tell is poison, fence. If the tell is lag with every partition moving, "
-            f"scale only the way {who} would scale. If the tell is empty-success, page. Green "
-            f"plus zero rows is a lie we have already paid for.",
+        lambda topic: (
+            f"Customer line for {topic}: window, user-visible effect, done or not. "
+            f"No {host(0)}. No promise of {due(2)} unless we can hit it. {who(3)} sends that. "
+            f"I review."
         ),
-        (
-            f"Close for {topic} is yes, no, or a new date on {ticket} by {due_s}. {who} writes "
-            f"it. I ping once. Late is late. I will not convert this into a standing meeting. "
-            f"I will not hide a scope change inside a 'quick align.' {_person(f, 1)} is in "
-            f"the thread if the product changes.",
-            f"If {topic} collides with a freeze, the date moves and the scope does not. That "
-            f"is the whole rule. {host} does not get a special thaw because someone booked a "
-            f"demo. Number I will cite: {n_front}.",
+        lambda topic: (
+            f"Internal line can name {host(3)} and the error class. It still does not paste "
+            f"identifiers. Money and medical data in outbound mail go through legal. "
+            f"{topic} being loud is not an exception."
         ),
-        (
-            f"The last time {topic} bit us, the tell showed up on {host} and we argued about "
-            f"CPU. CPU was late. Queue was the tell. I want the next page to name queue. "
-            f"{who} owns that alert text. {ticket} is where the wording lives, not a wiki "
-            f"that drifts.",
-            f"Verification is a replay that used to succeed at being wrong. If staging cannot "
-            f"run that replay, staging is lying and we do not ship. {other} does not get to "
-            f"waive it because the calendar is tight.",
+        lambda topic: (
+            f"If I can still write to {host(0)} after {due(3)}, the handoff for {topic} failed. "
+            f"{who(1)} accepts {ticket(1)} in writing or we keep paging me. Backup is a name "
+            f"on that ticket the same day, not a channel."
         ),
-        (
-            f"Schema leftover for {topic}: expand, backfill, contract. {host} is not the place "
-            f"to drop a column the same day readers still need it. {who} signs the count on "
-            f"{ticket} before contract. Lock budget is {_n(f, 4, 12)}s. Abort and retry "
-            f"off-peak if we miss it.",
-            f"Helm rollback after a migrate that expanded is the wrong instinct. Roll forward. "
-            f"I will say that again because we have already tried the wrong instinct. "
-            f"{f['author']} will not approve a chart rollback that leaves Postgres ahead.",
+        lambda topic: (
+            f"Temporary access for {topic} expires. I will drop my own leftover role the day "
+            f"{who(2)} takes {ticket(2)}. Break-glass is a path with a log, not a file on a laptop."
         ),
-        (
-            f"People who missed the room still need {topic} in a form they can act on. Decision, "
-            f"refuse, date, owner {who}, ticket {ticket}. Not a reconstruction of tone. "
-            f"{other} gets that pack. If they object, they object on the ticket.",
-            f"A quote is a quote. It is not scope. I will not launder a hallway yes into v1 "
-            f"because it was vivid. Parking lot stays parked until {_person(f, 1)} signs a "
-            f"new slice.",
+        lambda topic: (
+            f"On {host(1)} the first move for {topic} is a read. Then the last error line. "
+            f"Then whether the front-matter rule still holds. Restarts are listed steps. "
+            f"{who(1)} hears a one-line diagnosis before a mutate."
         ),
-        (
-            f"Fixture for {topic} is the smallest failing row, next to the test, hashed. "
-            f"No production dump. No PHI. If the hash moves without {ticket}, CI fails. "
-            f"{who} owns the fixture. Soak host if we must: {host}. I will not record from "
-            f"a laptop against prod.",
-            f"If someone deletes the test, they delete the incident mapping in review, not "
-            f"in a drive-by. Skip needs a ticket. Flakes need a capture, not a shrug about "
-            f"the network.",
+        lambda topic: (
+            f"Poison on {topic}: fence, do not crank retries. Lag with every partition moving: "
+            f"scale the way {who(2)} would. Empty success still pages. A green job with no "
+            f"rows was how the last window got away from us."
         ),
-        (
-            f"{host} pages because of {topic} more than because of CPU. I write queue and disk. "
-            f"Headroom I want on a Tuesday is about {_n(f, 22, 38)} percent. Below that I "
-            f"file for hardware or I shed load, not both. {who} picks on {ticket}.",
-            f"Do-nothing through month-end still has a miss rate. I will write it. I will not "
-            f"hide a buy inside a temporary memory limit. Front-matter volume I am using: "
-            f"{n_front}.",
+        lambda topic: (
+            f"Close for {topic} is yes, no, or a new date on {ticket(0)} by {due(1)}. "
+            f"{who(1)} writes it. I ping once. I will not turn it into a standing meeting "
+            f"or hide a product change inside a 'quick align.'"
         ),
-        (
-            f"Secrets for {topic} stay out of git, tickets, and screenshots. Zero-row success "
-            f"on {host} is the tell that the secret is wrong. Alert on that. {who} owns the "
-            f"grant. {ticket} owns the expiry. I query the replica and I log the query id.",
-            f"403 versus 401 stays split. Break-glass is separate. I will not collapse them "
-            f"for a prettier UI. Support zips go through redaction. {f['author']} rejects "
-            f"the zip if identifiers remain.",
+        lambda topic: (
+            f"If {topic} lands inside a freeze, the date on {ticket(3)} moves. The scope does not. "
+            f"{host(2)} does not thaw for a demo. I will cite {_num(f, 2)} if someone asks "
+            f"whether this is blocking."
         ),
-        (
-            f"Clock for {topic}: ops/customer clock and match/extract clock are different. "
-            f"I will say which one I am using. {host} NTP gets checked before I argue about "
-            f"{n_front}. {who} can brief {_person(f, 1)} without calling me if this table "
-            f"in the heading above is right.",
-            f"{f['client']} can have the user-visible clock. They cannot have {host}. I will "
-            f"not reconstruct a minute novel. I will reconstruct enough to act.",
+        lambda topic: (
+            f"Last time {topic} hurt us, {host(0)} looked fine on CPU while the queue grew. "
+            f"The next page body should name the queue. {who(1)} owns that wording on {ticket(0)}."
         ),
-        (
-            f"I reopen {f['doc_id']} for {topic} only if the measurement on {host} says the "
-            f"cutover is lying, a freeze and a migrate disagree, or {who} puts a new date on "
-            f"{ticket} that the EM accepts. I do not reopen for a booked meeting or a vendor "
-            f"discount.",
-            f"Evidence is a dry-run count, a replay that used to be wrong, or a miss rate "
-            f"worse than do-nothing. Everything else is noise. Strike this remainder if it "
-            f"fights the front callout.",
+        lambda topic: (
+            f"Staging that cannot replay the old wrong success is lying. We do not ship {topic} "
+            f"on a calendar waiver from {who(3)}. {ticket(1)} holds the replay note."
         ),
-        (
-            f"Questions I still get about {topic}, with the short answers: Is v1 smaller "
-            f"than people want? Yes. Is that a bug? No. Can we add it in the same release? "
-            f"Only if {_person(f, 1)} signs a new slice. Can {host} be a special case? No. "
-            f"Owner on the FAQ is {who} via {ticket}.",
-            f"I will not publish a second FAQ in Confluence that drifts. This file is the "
-            f"FAQ. If the answer changes, the front matter changes in review, not a comment "
-            f"thread.",
+        lambda topic: (
+            f"Schema leftover for {topic}: add, backfill, then drop. Lock budget {_n(f, 4, 12)}s "
+            f"on {host(3)}. {who(2)} signs the count on {ticket(2)} before contract. Helm "
+            f"rollback after an expand is the wrong instinct."
         ),
-        (
-            f"Freeze math for {topic}: if the window is already named in the front, a small "
-            f"apply is still an apply. {host} does not get a courtesy thaw. SEV1 is the "
-            f"definition in the SOP, not a feeling. {who} can argue SEV1 on {ticket} with "
-            f"a count.",
-            f"I will not Helm-apply from a laptop because the freeze 'is almost over.' Almost "
-            f"over is still freeze. {due_s} is a date for leftover work, not a freeze exception.",
+        lambda topic: (
+            f"People who missed the room get decision, refuse, date, owner {who(1)}, "
+            f"ticket {ticket(0)}. Not a reconstruction of tone. {topic} is not a hallway yes."
         ),
-        (
-            f"RACI I will actually use for {topic}: responsible {who}, accountable "
-            f"{_person(f, 1)}, consulted {other}, informed {_person(f, 3)}. Ticket {ticket}. "
-            f"A team name in any of those slots is a defect. I will rewrite it as a person.",
-            f"If two people think they are accountable, {_person(f, 1)} picks one. If nobody "
-            f"is, the work is not started. {f['author']} is consulted on the writeup, not "
-            f"accountable for {topic} unless the front already said so.",
+        lambda topic: (
+            f"Fixture for {topic} is invented, hashed, next to the test. If the hash moves "
+            f"without {ticket(3)}, CI fails. Soak on {host(0)} is ticketed. Skip is a ticket."
         ),
-        (
-            f"Dry-run for {topic} has to print a count before a write. If we cannot show "
-            f"that count on {host}, we abort. {who} keeps the output on {ticket}. I will "
-            f"not accept 'it looked fine in the UI' as a dry-run.",
-            f"Abort is cheaper than a dual-run that violates the unique key. Dual-run that "
-            f"breaks uniqueness is a data incident, not a milestone. {other} does not get "
-            f"to redefine uniqueness to hit {due_s}.",
+        lambda topic: (
+            f"Headroom I want on {host(1)} for {topic} is about {_n(f, 20, 38)} percent on a "
+            f"Tuesday. Below that I file or I shed, not both. {who(1)} picks on {ticket(1)}."
+        ),
+        lambda topic: (
+            f"Wrong secret on {host(2)} looks like no work. Alert on zero rows for {topic}. "
+            f"{who(2)} owns the grant expiry on {ticket(2)}. Replica queries get a query id."
+        ),
+        lambda topic: (
+            f"Support zip for {topic} goes through redaction. Identifiers still in it come back. "
+            f"{f['author']} will reject it on {ticket(0)}. Pressure is not a reason to paste an MRN."
+        ),
+        lambda topic: (
+            f"If the clock on {host(3)} jumped, I will not debate {_num(f, 3)} for {topic}. "
+            f"Fix NTP, then measure. {who(1)} owns that check before we brief {_person(f, 1)}."
+        ),
+        lambda topic: (
+            f"Reopen {f['doc_id']} for {topic} only with a dry-run count, a replay that used "
+            f"to be wrong, or a miss rate worse than do-nothing. A vendor discount is not evidence."
+        ),
+        lambda topic: (
+            f"I will keep answering {topic} from this file until {ticket(1)} closes. "
+            f"Two FAQs is how we shipped the last wrong field name. Front matter changes in review."
+        ),
+        lambda topic: (
+            f"Config, Helm, and a flag flip on {host(0)} are all changes. {topic} does not "
+            f"get a courtesy thaw. {who(1)} argues SEV1 on {ticket(0)} with a count or waits."
+        ),
+        lambda topic: (
+            f"If the RACI for {topic} still says a team name, it is not staffed. {who(2)} "
+            f"puts a person on {ticket(3)} or we do not start. Pages go to a person."
+        ),
+        lambda topic: (
+            f"Dry-run for {topic}: print the count on {host(1)}, write it on {ticket(1)}, "
+            f"then maybe write. If it disagrees with {_num(f, 0)} and we cannot explain it "
+            f"in one sentence, we stop."
+        ),
+        lambda topic: (
+            f"{f['client']} still owns the business clock on {topic}. We own the engineering one. "
+            f"If they disagree, the first sentence of the update says so. {who(3)} does not "
+            f"get {host(2)} in that sentence."
+        ),
+        lambda topic: (
+            f"I parked a dashboard request that does not unblock {ticket(2)}. {topic} stays "
+            f"the work. {who(1)} can file a new ticket for pretty graphs after this closes."
+        ),
+        lambda topic: (
+            f"Weekend coverage is not implied by {topic}. If {_person(f, 1)} wants it in the "
+            f"SLA, they sign it. Until then {ticket(0)} is weekday scope."
+        ),
+        lambda topic: (
+            f"I will not poll faster as a substitute for fixing {topic}. More polls turn a "
+            f"bad record into CPU on {host(0)}. Fence it. {who(2)} gets the fence note on {ticket(1)}."
+        ),
+        lambda topic: (
+            f"Field rename in place is how {topic} becomes a client mapping death. Version it "
+            f"or do not ship. {ticket(3)} is not a cleanup PR."
+        ),
+        lambda topic: (
+            f"Partition count in staging has to be high enough to catch a rebalance or {topic} "
+            f"will bless a bad build. {who(1)} owns that check before we call staging green."
+        ),
+        lambda topic: (
+            f"I want the last error line from {host(3)} in {ticket(2)} before anyone says they "
+            f"restarted {topic} just in case. Restart without a tell wasted the last incident."
+        ),
+        lambda topic: (
+            f"Do-nothing through month-end still has a miss rate. I will write it next to {topic}. "
+            f"{who(1)} picks a path on {ticket(0)} or they are picking do-nothing."
+        ),
+        lambda topic: (
+            f"I will not mix clocks to make {topic} look healthier. Same clock as {_num(f, 1)}. "
+            f"{who(2)} corrects it on {ticket(1)} if I used the wrong one."
+        ),
+        lambda topic: (
+            f"Absent people get the pack for {topic} the same day: decision, refuse, date. "
+            f"{who(3)} is on that list if they were missing. Ticket {ticket(0)}. Object there."
         ),
     ]
-    a, b = pairs[i % len(pairs)]
-    thirds = [
-        (
-            f"I will not put {topic} on a wiki that drifts. {ticket} and this file are the "
-            f"record. If {who} needs a diagram, they get a permalink, not a photo of a "
-            f"whiteboard. {host} stays out of the diagram title. If a new engineer asks "
-            f"where the leftover lives, I point here. I do not point at a Slack pin from "
-            f"{f['date']}."
-        ),
-        (
-            f"Month-end math for this leftover uses the same clock as {n_front}. I will not "
-            f"mix clocks to make {topic} look healthier. {who} can correct the clock on "
-            f"{ticket}. If finance or the EM wants a single slide, they get this paragraph "
-            f"plus the decision callout, not a new model I made up to look precise."
-        ),
-        (
-            f"If {_person(f, 3)} forwards a customer thread about {topic}, I answer from the "
-            f"comms leftover. I do not paste {host}. I do not paste a stack trace. I do not "
-            f"promise {due_s} unless we can hit it. User-visible effect, window, done or not. "
-            f"That is the whole outbound mail."
-        ),
-        (
-            f"Grant review date for {topic} is {due_s}. If we miss it, the grant dies, the "
-            f"work waits. {who} can renew on {ticket} with an expiry. I will not silently "
-            f"extend. A copied kubeconfig on a laptop is not a grant. {f['author']} will "
-            f"revoke my own leftover access the same day the handoff is accepted."
-        ),
-        (
-            f"I want the last error line from {host} in {ticket} before anyone says they "
-            f"'restarted just in case.' Restart without a tell is how we lost time last "
-            f"incident. {who} can restart after the read-only commands and a one-line "
-            f"diagnosis. Not before. Memory bump is a ticket, not a one-liner."
-        ),
-        (
-            f"Scope leftover: {topic} is not a place to sneak serial, WIP, weekend, or "
-            f"identifier work back in. New slice, new signature from {_person(f, 1)}. "
-            f"Hallway yes is not a signature. I will not hide that inside {ticket} as a "
-            f"subtask so it looks small."
-        ),
-        (
-            f"Alert text for {topic} names the tell in plain words. {who} writes it. I will "
-            f"not accept 'check the dashboard' as a page body. If uniqueness is red and "
-            f"freshness is green, the page says that. If rows are zero and the job is green, "
-            f"the page says that. {host} can be in the internal page. Not in the customer one."
-        ),
-        (
-            f"Backfill leftover: not on the OLTP primary, not during freeze, not without a "
-            f"stop condition on {ticket}. {who} writes the stop condition first. Batch size "
-            f"I would start at {_n(f, 5, 40)}k. Pause on replication lag. Contract only after "
-            f"the count is signed."
-        ),
-        (
-            f"Absent people get the pack for {topic} the same day, not after they ask. "
-            f"{other} is on that list if they were missing. Decision, refuse, date, owner, "
-            f"ticket {ticket}. Not a reconstruction of tone. If they object, they object "
-            f"on the ticket."
-        ),
-        (
-            f"CI leftover: fixture hash is the gate. If someone needs a one-off on {host}, "
-            f"that is a soak, and it is ticketed. It is not a reason to skip CI. Skip reason "
-            f"is a ticket. Flake reason is a capture. {who} owns golden fixtures. "
-            f"{f['author']} owns the case list."
-        ),
-        (
-            f"I will not buy my way out of {topic} with a round hardware number. Queue and "
-            f"disk on {host} first. Then a ticket. Then a buy if {who} still needs it. "
-            f"Headroom I want on a Tuesday is about {_n(f, 22, 38)} percent. Below that I "
-            f"file or I shed, not both in one change."
-        ),
-        (
-            f"Redaction leftover: if a zip for {topic} still has identifiers, it comes back. "
-            f"No 'just this once.' {f['author']} will reject it on {ticket}. Support pressure "
-            f"is not a reason to paste MRN, PAN, or a secret. The SOP already says this. "
-            f"Repeating it is for the person who has not opened the SOP."
-        ),
-        (
-            f"If NTP on {host} is wrong, I will not debate {n_front}. Fix the clock, then "
-            f"measure. {who} owns that check. Window math is garbage if the clock jumped. "
-            f"I will not reconstruct a minute novel to hide that."
-        ),
-        (
-            f"Reopen leftover is evidence, not volume of Slack. Dry-run count, bad replay, "
-            f"or miss rate worse than do-nothing. {who} brings one of those or we stay "
-            f"closed. A booked meeting is not evidence. A vendor discount is not evidence."
-        ),
-        (
-            f"I will keep answering {topic} from this file until {ticket} closes. I will not "
-            f"fork a FAQ. Two truths is how we shipped the last wrong field name. If the "
-            f"answer changes, the front of {f['doc_id']} changes in review."
-        ),
-        (
-            f"Freeze leftover: config is a change. Helm is a change. A tiny flag flip on "
-            f"{host} is a change. {who} can wait or they can argue SEV1 with a count on "
-            f"{ticket}. Almost over is still freeze. I will not apply from a laptop."
-        ),
-        (
-            f"If a row in the RACI still says a team name next week, {topic} is not staffed. "
-            f"{who} fixes the row on {ticket} or we do not start. Pages go to a person. "
-            f"A muted channel is not an owner. Backup is a name written the same day."
-        ),
-        (
-            f"Dry-run leftover: print the count, write it on {ticket}, then maybe write. "
-            f"{who} does not get to invert that order because {due_s} is close. If the count "
-            f"disagrees with {n_front} and we cannot explain it in one sentence, we stop. "
-            f"We do not split the difference."
-        ),
-    ]
-    c = thirds[i % len(thirds)]
-    return [{"type": "p", "text": a}, {"type": "p", "text": b}, {"type": "p", "text": c}]
+    f["rng"].shuffle(fns)
+    # Drop a handful so neighboring files do not share the same set.
+    drop = 6 + f["rng"].randint(0, 6)
+    return fns[drop:]
+
 
 
 def _genre_topics(f):
@@ -1232,7 +1377,7 @@ def _shape_refuse(f, i, topic):
     ticket = _ticket(f, i)
     host = _host(f, i)
     return [
-        {"type": "h2", "text": f"What we are still refusing ({topic})"},
+        {"type": "h2", "text": f"Still out: {topic}"},
         {
             "type": "callout",
             "kind": "warn",
@@ -1755,6 +1900,14 @@ def _shape_access(f, i, topic):
     who = _person(f, i + 1)
     ticket = _ticket(f, i)
     host = _host(f, i)
+    grant_line = _choice(
+        f,
+        [
+            f"IRSA or the equivalent role on {host} is the grant. A laptop copy of the kube file is not.",
+            f"The grant is the cluster role already named for {host}. A home-directory kube file is leftover access to revoke.",
+            f"Break-glass is the path with a log. A local kube file sitting on a laptop is not that path.",
+        ],
+    )
     return [
         {"type": "h2", "text": f"Secrets, grants, and {topic}"},
         {
@@ -1773,8 +1926,7 @@ def _shape_access(f, i, topic):
                 f"Break-glass is a separate path. Missing role is 403, missing token is 401. "
                 f"I will not collapse those because the UI looks nicer. {_person(f, 1)} "
                 f"accepted that split in the front matter. I am not reopening it here. "
-                f"IRSA or the equivalent role on {host} is the grant. A copied kubeconfig "
-                f"on a laptop is not."
+                f"{grant_line}"
             ),
         },
         {
@@ -2053,7 +2205,15 @@ def _closing_remainder(f, need_words: int):
     blocks = [
         {
             "type": "h1",
-            "text": f"Named leftovers still on {f['doc_id']}",
+            "text": _choice(
+                f,
+                [
+                    f"Named leftovers still on {f['doc_id']}",
+                    f"Close-outs {f['author']} still owes on {f['doc_id']}",
+                    f"Short list after {f['date']}",
+                    f"What is still attached to {f['doc_id']}",
+                ],
+            ),
         },
         {
             "type": "p",
@@ -2063,66 +2223,12 @@ def _closing_remainder(f, need_words: int):
             ),
         },
     ]
-    n = 0
+    n = _words(blocks[1]["text"])
     i = 0
-    templates = 8
-    while n < need_words and i < 12:
-        who = _person(f, i + 1)
-        ticket = _ticket(f, i)
-        host = _host(f, i)
-        due = (_parse_anchor(f["date"]) + timedelta(days=11 + i * 2)).strftime("%B %-d, %Y")
-        kind = i % templates
-        if kind == 0:
-            para = (
-                f"{ticket} still sits with {who}. Host {host}. Due {due} unless they write "
-                f"a new date. Close is a decision, a refuse, or that date. I will not accept "
-                f"a status dump. Front-matter number I am not re-arguing: {_num(f, i)}. "
-                f"If this leftover is done, {who} marks {ticket} done. {f['author']} will not "
-                f"keep a shadow list."
-            )
-        elif kind == 1:
-            para = (
-                f"I still owe {who} a usable remainder on {ticket}, not a transcript. "
-                f"The leftover on {host} is whether we keep the path the front already named. "
-                f"Due {due}. If they need a user-visible line, it goes through the comms leftover, "
-                f"not this sentence. Number in play: {_num(f, i)}."
-            )
-        elif kind == 2:
-            para = (
-                f"Access leftover: if I can still write to {host} after {due}, revoke it. "
-                f"{who} either has the grant or the work is not theirs yet. Ticket {ticket}. "
-                f"I will not leave a personal kubeconfig as a backup plan."
-            )
-        elif kind == 3:
-            para = (
-                f"Measurement leftover on {host}: reprint the count before anyone claims "
-                f"{ticket} is done. {who} pastes it. If it disagrees with {_num(f, i)} and "
-                f"we cannot explain that in one sentence, we are not done. Due {due}."
-            )
-        elif kind == 4:
-            para = (
-                f"Comms leftover for {ticket}: no hostname, no payload. {who} drafts, I review. "
-                f"If we are not done by {due}, the outbound line says we are not done and names "
-                f"the next update we can hit. {f['client']} does not get {host}."
-            )
-        elif kind == 5:
-            para = (
-                f"Test leftover: the case that maps to {ticket} still has to fail if someone "
-                f"cleans the fixture. {who} owns that fixture. Host if we soak: {host}. Due {due}. "
-                f"Skip is a ticket, not a comment."
-            )
-        elif kind == 6:
-            para = (
-                f"Calendar leftover: {due} versus the freeze already in the front. If they "
-                f"collide, {who} moves {ticket}, not the freeze. {host} does not get a thaw "
-                f"for a demo. {f['author']} will not 'just apply config.'"
-            )
-        else:
-            para = (
-                f"Stop leftover: {ticket} is not a twin of {_ticket(f, i + 1)}. Keep one thread. "
-                f"{who} on {host}. If this paragraph fights the front of {f['doc_id']}, strike "
-                f"it. Due {due}."
-            )
+    topics = _genre_topics(f)
+    while n < need_words and i < 28:
+        topic = topics[i % len(topics)]
+        para = _compose_para(f, topic, 200 + i)
         blocks.append({"type": "p", "text": para})
         n += _words(para)
         i += 1
@@ -2131,16 +2237,5 @@ def _closing_remainder(f, need_words: int):
 
 def pad_paragraph(f, i):
     """Last-page trim helper for the page fitter. Not an exhibit mill."""
-    return {
-        "type": "p",
-        "text": (
-            f"Close-out line {i + 1} for {f['doc_id']}. "
-            f"{_person(f, i + 1)} still owns {_ticket(f, i)} on {_host(f, i)}. "
-            f"The front of {f['title']} does not move. "
-            f"If you are implementing, keep the rejected alternative dead. "
-            f"If you are on-call, start read-only. "
-            f"If you are {_person(f, 1)}, pick the path in the main body or send it back "
-            f"with a named objection. Sample I would still defend: {_n(f, 80, 4000)} rows, "
-            f"{_n(f, 4, 40)} minutes."
-        ),
-    }
+    topic = _genre_topics(f)[i % len(_genre_topics(f))]
+    return {"type": "p", "text": _compose_para(f, topic, 400 + i)}

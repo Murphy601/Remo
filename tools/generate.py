@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
-from docx_builder import build_document, stamp_docx_metadata  # noqa: E402
+from docx_builder import build_document, stamp_docx_metadata, theme_for, issue_meta  # noqa: E402
 from expand import expand_spec  # noqa: E402
 
 
@@ -57,12 +57,17 @@ def main():
     for path in files:
         spec = json.loads(path.read_text(encoding="utf-8"))
         slug = spec.get("slug") or path.stem
-        spec = expand_spec(spec, min_words=14200, max_words=15400)
+        spec = issue_meta(spec)
+        theme = theme_for(spec)
+        min_words = int(42.0 * theme.wpp)
+        max_words = int(47.5 * theme.wpp)
+        min_words = max(11800, min(min_words, 15500))
+        max_words = max(min_words + 600, min(max_words, 16500))
+        spec = expand_spec(spec, min_words=min_words, max_words=max_words)
         out = out_dir / f"{slug}.docx"
         build_document(spec, out)
         wc = word_count(spec)
-        # 12pt / 1.78 spacing historically ~310 words/page. 40-50 pages => ~12.4k-15.5k.
-        est_pages = max(1, round(wc / 310))
+        est_pages = max(1, round(wc / theme.wpp))
         stamp_docx_metadata(out, spec, words=wc, pages=est_pages)
         rec = {
             "file": str(out.relative_to(ROOT)),
@@ -78,8 +83,8 @@ def main():
             "field": spec.get("field", "Software Engineering / Data Science"),
         }
         catalog.append(rec)
-        flag = "OK" if 12400 <= wc <= 15500 else "CHECK"
-        print(f"{flag:5} {wc:5d}w  ~{est_pages:2d}p  {out.name}")
+        flag = "OK" if 40 <= est_pages <= 50 else "CHECK"
+        print(f"{flag:5} {wc:5d}w  ~{est_pages:2d}p  {theme.body_font}/{theme.line_spacing:.2f}  {out.name}")
 
     (ROOT / "catalog" / "generated.json").write_text(
         json.dumps(catalog, indent=2), encoding="utf-8"

@@ -103,7 +103,7 @@
     },
     {
       "type": "p",
-      "text": "The Spark UI is only reachable from ops-bastion-03 via the internal ALB spark-ui.batch.internal.northstar.example. Do not poke a hole. Event logs: s3://ns-clh-history-prod/spark-events/clh-leg-history-backfill/. Diego will delete them after 90 days."
+      "text": "The Spark UI is only reachable from ops-bastion-03 via the internal ALB spark-ui.batch.northstar.internal. Do not poke a hole. Event logs: s3://ns-clh-history-prod/spark-events/clh-leg-history-backfill/. Diego will delete them after 90 days."
     },
     {
       "type": "table",
@@ -170,7 +170,7 @@
     },
     {
       "type": "code",
-      "text": "# spark-submit shape. Operator YAML is in deploy/batch/clh-leg-history-backfill.yaml\n# Do not run this on ns-eks-clh-prod-01.\n\nspark-submit \\\n  --master k8s://https://ns-eks-batch-01.internal.northstar.example \\\n  --deploy-mode cluster \\\n  --name clh-leg-history-backfill \\\n  --conf spark.kubernetes.namespace=clearhaven-batch \\\n  --conf spark.kubernetes.container.image=111111111111.dkr.ecr.us-east-1.amazonaws.com/ns-clh/leg-backfill:0.6.1 \\\n  --conf spark.executor.instances=24 \\\n  --conf spark.executor.cores=2 \\\n  --conf spark.executor.memory=24g \\\n  --conf spark.driver.memory=12g \\\n  --conf spark.sql.shuffle.partitions=672 \\\n  --conf spark.hadoop.fs.s3a.aws.credentials.provider=com.amazonaws.auth.WebIdentityTokenCredentialsProvider \\\n  --class com.northstar.clearhaven.backfill.LegHistoryJob \\\n  local:///opt/ns/leg-backfill.jar \\\n  --src s3a://ns-clh-history-prod/legs/ \\\n  --dst s3a://ns-clh-history-prod/legs-load/ \\\n  --start 2019-01-02 \\\n  --end 2022-12-30 \\\n  --tz America/New_York \\\n  --dst-shift-file s3a://ns-clh-history-prod/fixes/dst_shift_2019_ids.parquet\n",
+      "text": "# spark-submit shape. Operator YAML is in deploy/batch/clh-leg-history-backfill.yaml\n# Do not run this on ns-eks-clh-prod-01.\n\nspark-submit \\\n  --master k8s://https://ns-eks-batch-01.northstar.internal \\\n  --deploy-mode cluster \\\n  --name clh-leg-history-backfill \\\n  --conf spark.kubernetes.namespace=clearhaven-batch \\\n  --conf spark.kubernetes.container.image=111111111111.dkr.ecr.us-east-1.amazonaws.com/ns-clh/leg-backfill:0.6.1 \\\n  --conf spark.executor.instances=24 \\\n  --conf spark.executor.cores=2 \\\n  --conf spark.executor.memory=24g \\\n  --conf spark.driver.memory=12g \\\n  --conf spark.sql.shuffle.partitions=672 \\\n  --conf spark.hadoop.fs.s3a.aws.credentials.provider=com.amazonaws.auth.WebIdentityTokenCredentialsProvider \\\n  --class com.northstar.clearhaven.backfill.LegHistoryJob \\\n  local:///opt/ns/leg-backfill.jar \\\n  --src s3a://ns-clh-history-prod/legs/ \\\n  --dst s3a://ns-clh-history-prod/legs-load/ \\\n  --start 2019-01-02 \\\n  --end 2022-12-30 \\\n  --tz America/New_York \\\n  --dst-shift-file s3a://ns-clh-history-prod/fixes/dst_shift_2019_ids.parquet\n",
       "caption": "Submit is via the operator in practice. The flags are the contract. --tz America/New_York is mandatory; UTC default is the 2019 bug all over again."
     },
     {

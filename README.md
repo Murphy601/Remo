@@ -14,7 +14,7 @@ All finished files live in [`documents/`](documents/). Intake answers (job title
 | 2020–2022 | Riverview Health Network (hospital data platform) | 10 | PRDs, identity-merge design, incident, test strategy, runbooks, PHI SOP |
 | 2022–2025 | Clearhaven Markets (transaction recon, ~8.2M records/day) | 35 | systems design, Kafka ingest, incidents, runbooks, ADRs, capacity, eval rubric |
 
-Every file is **40–50 pages**, measured in LibreOffice. Word counts sit around 12,500–15,000, so the 150-words-per-page bar still holds.
+Every file is **40–50 pages**, measured in LibreOffice. Word counts sit around 12,000–15,500, so the 150-words-per-page bar still holds.
 
 ## Shared intake answers
 
