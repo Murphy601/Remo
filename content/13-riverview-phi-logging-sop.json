@@ -1,0 +1,501 @@
+{
+  "slug": "13-riverview-phi-logging-sop",
+  "doc_id": "RVH-SOP-2021-009",
+  "title": "PHI in logs, traces, and support dumps",
+  "subtitle": "What patient-api may write, what on-call may paste, and how redact_dump.py fails closed",
+  "doc_type": "SOP",
+  "kicker": "Riverview Health Network / privacy",
+  "org": "Northstar Engineering",
+  "classification": "INTERNAL",
+  "version": "1.2",
+  "status": "Approved",
+  "date": "July 19, 2021",
+  "author": "Aman Kumar",
+  "role": "Software Engineer",
+  "team": "Riverview chart platform (Northstar)",
+  "audience": "patient-api on-call, anyone producing a support zip for ChartLine or RapidChart, QA capturing traces",
+  "owners": "Aman Kumar (SOP), Kavya Menon (log schema), Helen Park (Riverview privacy office)",
+  "related": "RVH-RB-2021-016, RVH-1903, RVH-1928, RVH-QA-2021-007, PD:rvh-privacy, #rvh-privacy",
+  "summary": "Standard operating procedure for logs and support dumps on patient-api after a near-miss on June 29: a debug line printed MRN and DOB together for SYNTH-000441 in staging, then the same logger was briefly enabled on a canary pod in prod. Nothing left Northstar Slack, but it was close. This SOP lists allowed log fields, the redaction script redact_dump.py, the rule that on-call never pastes chart-shaped text into Slack, and how to pull a sanitized trace. If the redaction script reports unmatched patterns, you stop and call Helen Park. You do not 'fix it in the paste.'",
+  "form_description": "SOP for keeping Riverview PHI out of logs, traces, and Slack. Written for on-call engineers and anyone cutting a support zip.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.7",
+      "July 2, 2021",
+      "Aman Kumar",
+      "Draft after RVH-1903 near-miss"
+    ],
+    [
+      "1.0",
+      "July 12, 2021",
+      "Helen Park",
+      "Privacy office review; AUTH_OFF leftover discussion recorded as rejected"
+    ],
+    [
+      "1.1",
+      "July 15, 2021",
+      "Kavya Menon",
+      "Field allowlist aligned with 1.14.2 logger"
+    ],
+    [
+      "1.2",
+      "July 19, 2021",
+      "Aman Kumar",
+      "redact_dump.py exit codes, Slack rule, sanitized trace steps"
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Purpose and near-miss"
+    },
+    {
+      "type": "p",
+      "text": "On June 29, 2021 at 16:07 Eastern, Luis Ortega enabled LOG_LEVEL=DEBUG on a single patient-api canary in namespace riverview-chart to chase a 401 that only reproduced with RapidChart's token cache warm. The debug formatter in 1.14.0 printed auth.subject_mrn and auth.dob next to the bind timing. The MRN was a real one from a support session earlier that day, not SYNTH-000441. Luis caught it in kubectl logs after 3.4 min, flipped the canary back, and did not paste the line into Slack. He filed RVH-1903. Helen Park (Riverview privacy office) asked Northstar for a written SOP before she would close the near-miss. This is that SOP. It is not a HIPAA lecture. It is the field list, the script, and the failure path."
+    },
+    {
+      "type": "callout",
+      "label": "Decision",
+      "text": "On-call may not paste MRN, DOB, patient name, address, full Authorization headers, chart JSON, or RapidChart screenshots into Slack, Jira, PagerDuty, or email. Synthetic id SYNTH-000441 is the only patient identifier allowed in those channels. If you already pasted, stop typing, do not paste a 'redacted' follow-up of the same blob, and contact Helen Park (helen.park@riverview.example, PD service rvh-privacy). Priya Nair is the Northstar manager to notify. Dr. Anita Shah is not the privacy on-call.",
+      "kind": "decision"
+    },
+    {
+      "type": "p",
+      "text": "Sneha Iyer's QA traces must go through the same script. 'It is staging' is not an exception. Staging has been restored from prod snapshots twice this year (RVH-1928, February and May). Treat riverview-chart in rvh-stage-eks-01 as PHI-capable."
+    },
+    {
+      "type": "h1",
+      "text": "Preconditions"
+    },
+    {
+      "type": "p",
+      "text": "Do not collect dumps until these are true. If they are not, you will produce a zip Helen cannot accept and you will have another incident."
+    },
+    {
+      "type": "steps",
+      "items": [
+        "You are on jump-rvh-01.northstar.example (or jump-rvh-02) via Teleport. Dumps pulled to a laptop Downloads folder are already a process fail, even if you later redact.",
+        "Working directory is /var/tmp/papi-dumps/<pd-incident-or-ticket>/ with mode 0700. Not /tmp, not $HOME, not a Slack-synced folder.",
+        "You have python3.8 and /opt/rvh/redact_dump.py version 1.4.2 or newer (python3 /opt/rvh/redact_dump.py --version). 1.3.x does not know dob_compact. Do not use a copy of the script from someone's home directory.",
+        "LOG_REDACT=1 on the deploy (kubectl -n riverview-chart get deploy patient-api -o yaml | grep LOG_REDACT). If it is 0, you are in an incident inside the incident. Set it back to 1 before you gather logs, unless Helen has approved a time-boxed DEBUG in writing.",
+        "You know whether you are on prod (rvh-prod-eks-01) or stage. Write it on the ticket before you attach anything."
+      ]
+    },
+    {
+      "type": "callout",
+      "label": "Warn",
+      "text": "kubectl -n riverview-chart logs deploy/patient-api --since=30m | pbcopy or piping to Slack is how the near-miss becomes a real one. There is no 'I'll redact in the Slack edit.' Slack keeps edits. Helen was clear.",
+      "kind": "warn"
+    },
+    {
+      "type": "h1",
+      "text": "Allowed and banned log fields"
+    },
+    {
+      "type": "p",
+      "text": "patient-api 1.14.2 logger allowlists fields. If you add a field in a hotfix, you add it here the same day or you do not ship. Kavya owns the allowlist in code (package com.northstar.rvh.papi.log.Fields). This table is the human copy."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Field",
+        "Allowed in prod logs",
+        "Allowed in Slack after redact_dump.py",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "ts, level, msg, build, pod",
+          "Yes",
+          "Yes",
+          "Always"
+        ],
+        [
+          "http.method, http.route, http.status, http.bytes, http.ms",
+          "Yes",
+          "Yes",
+          "route must be templated (/v1/chart/assemble not /v1/chart/assemble?mrn=)"
+        ],
+        [
+          "facility",
+          "Yes",
+          "Yes",
+          "Codes like RVH-MAIN, not site display names with town"
+        ],
+        [
+          "trace_id, span_id",
+          "Yes",
+          "Yes",
+          "These are ULIDs, not MRNs. If you see a 8-digit numeric trace_id you have the wrong tracer."
+        ],
+        [
+          "mrn_hash",
+          "Yes (sha256 truncated 12 hex, salted)",
+          "Yes",
+          "Never log raw MRN. Salt is in secret papi-hash-salt, rotated March 8."
+        ],
+        [
+          "enc_id_hash",
+          "Yes, same hashing",
+          "Yes",
+          "Same"
+        ],
+        [
+          "auth.ok, auth.ms, auth.src (west|east|cached)",
+          "Yes",
+          "Yes",
+          "No bind DN of the nurse, no token"
+        ],
+        [
+          "auth.subject_mrn, auth.dob, auth.name",
+          "No",
+          "No",
+          "Removed in 1.14.1 after RVH-1903. If you see them, you are on a bad build."
+        ],
+        [
+          "payload (chart body), blocks.*, allergy.*, med.*",
+          "No",
+          "No",
+          "Never. Debug used to dump 'small' allergy lists. That path is gone."
+        ],
+        [
+          "Authorization, Cookie, Set-Cookie",
+          "No",
+          "No",
+          "Length of header is ok as auth.hdr_bytes"
+        ],
+        [
+          "query string raw",
+          "No",
+          "No",
+          "Parsed facility= is ok as facility"
+        ],
+        [
+          "exception.stack",
+          "Yes, if message scrubbed",
+          "Only after redact_dump.py exit 0",
+          "Java toString on ChartLine exceptions sometimes embeds XML with names. Script must pass."
+        ],
+        [
+          "SYNTH-000441 as an id in msg",
+          "Yes",
+          "Yes",
+          "Only synth id"
+        ]
+      ],
+      "caption": "Log field policy for patient-api 1.14.2+. Older pods in CrashLoop may still emit banned fields; do not copy those logs off the box."
+    },
+    {
+      "type": "p",
+      "text": "Rejected alternative: 'log raw MRN in DEBUG only, gated by a ConfigMap.' Luis proposed it on July 1 because hash-only made the 401 hunt slower. Helen rejected it in the July 12 review. DEBUG in our setup is one kubectl set env away from a canary, which is how RVH-1903 happened. There is no DEBUG exception for MRN. If you need to correlate with ChartLine, give them mrn_hash and facility and let Nate Okonkwo's team map it on their side, which already stores the MRN. We do not become a second copy."
+    },
+    {
+      "type": "h1",
+      "text": "What on-call may paste in Slack"
+    },
+    {
+      "type": "p",
+      "text": "Short version: almost nothing that came out of a chart. The allowed list is boring on purpose."
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "HTTP status, route template, latency ms, facility code, pod name, build, trace_id after you have confirmed it looks like a ULID.",
+        "Output of /opt/rvh/bin/papi-synth-assemble --facility RVH-MAIN --id SYNTH-000441 (status and banner flags only).",
+        "healthz and healthz/deps JSON. Those must not contain identifiers; if they do, that is a code bug, do not paste, file a ticket.",
+        "Counts from Grafana (5xx ratio 6.2%, chart_age 11.4 min). Grafana panels should already be aggregated. If you open a table panel that lists MRNs, close it.",
+        "redact_dump.py summaries: 'lines_in=4002 lines_out=4002 unmatched=0'.",
+        "The words 'a real MRN was in the log, see RVH-1903 process, not pasting.' That sentence is enough for #riverview-eng."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Never: kubectl logs raw. Never: a 'just this one allergy string.' Never: a screenshot of RapidChart, even if you drew a box over the name. Denise Howell sent a cropped screenshot to #riverview-eng in March and Helen still had to inventory Slack retention. Never: forwarding a ChartLine XML sample from email into Slack 'so engineering can see the schema.' Put it in the 0700 dump directory, redact, attach the .redacted.zip to the Jira ticket if Helen's rule for that ticket says attachments are ok (default: not ok until she says so)."
+    },
+    {
+      "type": "h2",
+      "text": "Jira and PagerDuty"
+    },
+    {
+      "type": "p",
+      "text": "Same rule as Slack. Ticket titles may say facility codes and '401 storm' and 'ChartLine 504.' Ticket descriptions may not include pasted chart bodies. PagerDuty alert bodies are wired from Alertmanager and should already be aggregate. If you customize a PD note while the incident is open, do not paste logs. Link the jump-box path: /var/tmp/papi-dumps/pd-12345/redacted/ and tell the next on-call it is on jump-rvh-01."
+    },
+    {
+      "type": "h1",
+      "text": "Pulling a sanitized trace"
+    },
+    {
+      "type": "p",
+      "text": "We send traces to the internal collector otel-rvh.northstar.example:4317. Spans for assemble include facility, http.route, http.status, mrn_hash, timings for chartline/ldap/redis/sitenotes/pg. They must not include MRN. If you find one that does, that is Sev-2 privacy plus a drop-filter, not a 'debug win.'"
+    },
+    {
+      "type": "h3",
+      "text": "Preconditions specific to traces"
+    },
+    {
+      "type": "p",
+      "text": "You need tsh app login for Grafana Tempo (Explore > Tempo on grafana.northstar.example). You do not need kubectl for a trace pull if the collector is up. If the collector is down, you do not dump spans from pod stdout as a substitute, because stdout may still have the June debug shape on old ReplicaSets. Delete old ReplicaSets instead of scraping them."
+    },
+    {
+      "type": "steps",
+      "items": [
+        "From laptop (Okta): open Grafana Explore, datasource Tempo, query {service.name=\"patient-api\" && http.status_code>=500} with a 15 min window. Copy a trace_id that is 26-char Crockford ULID, not a number.",
+        "On the jump box: /opt/rvh/bin/papi-trace-fetch --trace-id <ULID> --out /var/tmp/papi-dumps/<ticket>/trace.json . The helper strips span attributes not in the allowlist (it uses the same field file as the logger).",
+        "Run redaction on the fetch output even though it should already be clean: python3 /opt/rvh/redact_dump.py --in trace.json --out trace.redacted.json --fail-on-unmatched . Exit 0 only.",
+        "If you must share with Kavya or Luis, copy trace.redacted.json to /home/shared/rvh/traces/<ticket>/ (mode 0770, group rvh-eng). Do not Slack-attach the JSON.",
+        "If RapidChart needs the trace, give them the ULID only. Their APM is separate. Do not export our trace store to a vendor."
+      ]
+    },
+    {
+      "type": "code",
+      "text": "# jump-rvh-01\nmkdir -p /var/tmp/papi-dumps/RVH-1903 && chmod 700 /var/tmp/papi-dumps/RVH-1903\ncd /var/tmp/papi-dumps/RVH-1903\n\n# logs, last 10 min, one pod (replace name)\nkubectl -n riverview-chart logs patient-api-7f2c9d8b4-xk2q1 --since=10m \\\n  > raw-logs.txt\n\npython3 /opt/rvh/redact_dump.py \\\n  --in raw-logs.txt \\\n  --out logs.redacted.txt \\\n  --fail-on-unmatched \\\n  --report report.json\n\necho $?   # must be 0\ncat report.json\n# expected: {\"lines_in\":..., \"lines_out\":..., \"unmatched\":0, \"patterns_hit\":{\"mrn_like\":0,\"dob_like\":0,...}}\n\n# trace\n/opt/rvh/bin/papi-trace-fetch --trace-id 01F8H2K4M6N8PQRSTVWXYZ1234 --out trace.json\npython3 /opt/rvh/redact_dump.py --in trace.json --out trace.redacted.json --fail-on-unmatched\n",
+      "caption": "Sanitized log + trace pull. Exit code 0 required before anyone else reads the out files."
+    },
+    {
+      "type": "h1",
+      "text": "redact_dump.py"
+    },
+    {
+      "type": "p",
+      "text": "The script lives at /opt/rvh/redact_dump.py on both jump boxes, packaged from the northstar/rvh-privacy-tools repo, tag 1.4.2. It is not a toy grep. It applies known patterns, replaces hits with tokens like {{MRN}}, {{DOB}}, {{NAME}}, {{ADDR}}, and exits non-zero if it sees leftover shapes it does not know. That unmatched path is the point. Engineers wanted a 'best effort' mode that always exits 0. Helen said no. Best effort is how MRN+DOB rides along in a stack trace you did not look at."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Exit",
+        "Meaning",
+        "What you do"
+      ],
+      "rows": [
+        [
+          "0",
+          "All lines processed, unmatched=0",
+          "You may share .redacted files per this SOP (shared dir, not Slack paste of bodies)"
+        ],
+        [
+          "1",
+          "Usage / file missing / version check fail",
+          "Fix the command. Do not cat raw."
+        ],
+        [
+          "2",
+          "unmatched > 0",
+          "Stop. Do not share raw or redacted. Follow unmatched procedure below."
+        ],
+        [
+          "3",
+          "Script found a banned field name (auth.subject_mrn, etc.) even if value looked hashed",
+          "Treat as exit 2 plus file RVH ticket 'logger emitting banned field'. Page Kavya weekday, Priya if it is prod and ongoing."
+        ]
+      ],
+      "caption": "redact_dump.py exit codes as of 1.4.2"
+    },
+    {
+      "type": "h3",
+      "text": "Patterns it knows (do not treat this as complete)"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "mrn_like: 7-10 digit tokens near keys mrn, MRN, medicalRecord, subject_mrn",
+        "dob_like: YYYY-MM-DD or M/D/YYYY within 10 tokens of dob, DOB, birthDate",
+        "name_like: JSON keys lastName, firstName, patientName, family, given",
+        "addr_like: keys address1, line1, postal, zip",
+        "ssn_like: 3-2-4 with optional dashes (should never appear; ChartLine sometimes puts SSN in a junk extension)",
+        "token_like: Bearer [A-Za-z0-9._-]{20,}",
+        "xml_name: <PatientName> and ChartLine's <DOB> elements"
+      ]
+    },
+    {
+      "type": "p",
+      "text": "If ChartLine invents <PatId> tomorrow, that is unmatched, exit 2. Good. You will not quietly ship <PatId> to Slack because our regex was stale."
+    },
+    {
+      "type": "h2",
+      "text": "Failure: unmatched patterns"
+    },
+    {
+      "type": "p",
+      "text": "This is the procedure people will try to skip because it is 03:00 and Nate wants a sample. Do not skip it. Nate would rather wait than receive PHI in Slack. He said so in the July 12 review. Elena Voss said the same."
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Leave raw files in the 0700 directory. Do not copy them to /home/shared. Do not attach to Jira.",
+        "Read report.json. Note the pattern keys with counts and the first 3 unmatched_samples which the script already masks to length/charset only (it should not reprint the PHI). If unmatched_samples looks like actual PHI, the script version is wrong. Stop using it.",
+        "Contact Helen Park: PD rvh-privacy if off-hours and you already know PHI left the jump box (Slack, email, vendor). If unmatched was caught on the jump box and nothing left, email helen.park@riverview.example and CC priya.nair@northstar.example, and put a one-liner in #rvh-privacy: 'unmatched redaction on jump-rvh-01 path ... ticket ... no paste.' Do not attach report.json if it contains samples that look live. 1.4.2 samples are masked; still prefer the one-liner.",
+        "If you need ChartLine to debug, ask Nate to pull the encounter on their side with facility + time + mrn_hash. Give hash and window, not a dump.",
+        "Engineering follow-up (weekday): Kavya adds a pattern or kills the emitting field. Aman updates this SOP if a new field is allowed. Sneha adds a fixture with the new shape to the redaction tests.",
+        "Do not write a one-off sed to 'finish the job' and then share. sed is how DOB in a new format survives."
+      ]
+    },
+    {
+      "type": "callout",
+      "label": "Warn",
+      "text": "Exit 2 plus 'I grepped out the unmatched lines by hand' is still a fail. You are not a HIPAA filter. The script either passes or the dump stays on the jump box.",
+      "kind": "warn"
+    },
+    {
+      "type": "h1",
+      "text": "Support zips for vendors"
+    },
+    {
+      "type": "p",
+      "text": "ChartLine TAM Mei Chen will ask for a 'HAR plus logs' when an interface ticket stalls. RapidChart (Gita Raman) will ask for the assemble JSON. Default answer is no JSON. Default answer for HAR is: capture on a workstation using SYNTH-000441 only, then redact_dump.py on the HAR. HAR files contain query strings and sometimes response bodies. 1.4.2 knows enough HAR to blank response.content.text when MIME is json or xml. If exit 2, the HAR does not leave the box."
+    },
+    {
+      "type": "code",
+      "text": "# on jump box, after someone scp'd a HAR into the 0700 dir (from a synth session)\npython3 /opt/rvh/redact_dump.py --in synth.har --out synth.redacted.har --fail-on-unmatched --kind har\n# only if exit 0 AND Helen or Priya has approved vendor share for this ticket:\n# use Riverview's vendor upload, not Slack DMs to Mei. Nate owns that path.\n",
+      "caption": "HAR redaction. Synth-only capture."
+    },
+    {
+      "type": "p",
+      "text": "Rejected alternative: a shared Google Drive folder 'rvh-debug' that the TAM can see. Priya killed it July 8. Drive sharing at Riverview already had one leftover link from 2020 with census CSVs. Helen's office is still cleaning that. We do not add a Northstar Drive."
+    },
+    {
+      "type": "h1",
+      "text": "DEBUG and canaries"
+    },
+    {
+      "type": "p",
+      "text": "LOG_LEVEL=INFO in prod. DEBUG is allowed on stage with synth traffic only, or on a prod canary with written approval from Priya plus a 30 min timer, plus Helen if the canary will handle real patients. RVH-1903 was DEBUG on a canary that received real 401s. The 401 was a real nurse. That is the pattern we will not repeat."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Knob",
+        "Prod default",
+        "Who may change",
+        "Max duration"
+      ],
+      "rows": [
+        [
+          "LOG_LEVEL",
+          "INFO",
+          "On-call for a canary only with Priya text in PD",
+          "30 min, then set env back"
+        ],
+        [
+          "LOG_REDACT",
+          "1",
+          "Nobody sets 0 without Helen",
+          "n/a"
+        ],
+        [
+          "PAYLOAD_SNIPPET",
+          "removed in 1.14.1",
+          "Do not reintroduce",
+          "n/a"
+        ],
+        [
+          "ldap_probe / chartline_probe",
+          "timing only",
+          "On-call, see runbook",
+          "n/a"
+        ]
+      ],
+      "caption": "Debug knobs. If a knob is not in this table, it does not exist for on-call."
+    },
+    {
+      "type": "p",
+      "text": "kubectl -n riverview-chart set env deploy/patient-api LOG_LEVEL=DEBUG without a canary split hits all pods. Do not do that. Use the canary ReplicaSet procedure in the deploy SOP if we still have one; as of 1.14.2 the practical method is: annotate a single pod is not enough because the process reads env at start. Scale a preview deploy patient-api-canary if it exists (it exists on prod, 0 replicas by default). Kavya's notes: helm -n riverview-chart upgrade --reuse-values --set canary.replicas=1. Then send 401-reproduction using synth. Then scale back to 0. If you do not know helm canary, wait for Kavya. A full-deploy DEBUG is worse than waiting."
+    },
+    {
+      "type": "h1",
+      "text": "Who to notify"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Event",
+        "Notify",
+        "Do not notify as first line"
+      ],
+      "rows": [
+        [
+          "Unmatched redaction, dump never left jump box",
+          "Email Helen + Priya, one-liner #rvh-privacy",
+          "Anita, Denise, Slack #riverview-eng with files"
+        ],
+        [
+          "PHI pasted to Slack/Jira/PD/email",
+          "PD rvh-privacy immediately, Priya, then Helen's instructions",
+          "The vendor TAM, 'reply-all' on the original paste"
+        ],
+        [
+          "Banned field in current prod build",
+          "Kavya, Priya, ticket, consider rollback",
+          "Quiet hotfix without a ticket"
+        ],
+        [
+          "Nurse reports their chart in a screenshot in a ticket",
+          "Helen (Riverview may already have a process); do not re-host the image in our Slack",
+          "Engineering 'analysis' threads on the image"
+        ],
+        [
+          "Questions about clinical meaning of a field",
+          "Anita next business day",
+          "Privacy on-call"
+        ]
+      ],
+      "caption": "Notification matrix. Privacy and CMIO are different people."
+    },
+    {
+      "type": "p",
+      "text": "Helen Park's office hours are 08:00-17:30 Eastern. PD rvh-privacy is staffed after hours for confirmed exfiltration, not for 'I am about to run the script, wish me luck.' If you are unsure whether something left the box, treat it as left and page. She would rather close a false alarm than read about a paste in the morning standup."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Question",
+        "Owner",
+        "Default until answered"
+      ],
+      "rows": [
+        [
+          "May Sneha keep raw staging HARs for 7 days on the QA NAS?",
+          "Helen Park + Sneha Iyer",
+          "No. Redact immediately. QA NAS is not in the allowlist."
+        ],
+        [
+          "Should Tempo drop spans with extra attributes rather than relying on papi-trace-fetch?",
+          "Kavya Menon, Diego Alvarez after he starts (SRE, Nov 2021)",
+          "Fetch helper is required now. Collector-side filter is a Q4 spike."
+        ],
+        [
+          "Vendor HAR upload: Riverview box or ChartLine's box?",
+          "Nate Okonkwo + Helen",
+          "Neither until they write it down. We do not email zips."
+        ],
+        [
+          "Hash salt rotation cadence",
+          "Luis Ortega + Helen",
+          "Last rotation March 8. Next proposed September. Do not rotate during an incident."
+        ]
+      ],
+      "caption": "Open questions. Defaults are conservative."
+    },
+    {
+      "type": "h2",
+      "text": "Related commands cheat sheet"
+    },
+    {
+      "type": "code",
+      "text": "python3 /opt/rvh/redact_dump.py --version   # want 1.4.2+\nkubectl -n riverview-chart get deploy patient-api -o jsonpath='{.spec.template.spec.containers[0].env}' | python3 -m json.tool | grep -E 'LOG_|REDACT'\n/opt/rvh/bin/papi-synth-assemble --facility RVH-MAIN --id SYNTH-000441\n# never:\n# kubectl -n riverview-chart logs deploy/patient-api | grep -i mrn\n",
+      "caption": "Commands that are safe vs the one that is not."
+    },
+    {
+      "type": "p",
+      "text": "Anita asked to be CC'd on the July 12 privacy review so clinical leadership knew we were not 'hiding' the near-miss. She is a liaison, not a dump reviewer. Do not send her raw files. Denise Howell does not want PHI in nursing informatics Slack either; send her banner copy and timings, not charts. This SOP is the engineering half of that deal."
+    },
+    {
+      "type": "p",
+      "text": "Owner of the living file: Aman Kumar. Privacy sign-off: Helen Park, July 12, 2021, confirmed on the 1.2 text July 19. Next review when 1.15 logger ships or when Diego Alvarez joins and wants collector-side filters, whichever first."
+    }
+  ]
+}

@@ -1,0 +1,565 @@
+{
+  "slug": "41-clearhaven-oncall-sop",
+  "doc_id": "CLH-SOP-2023-028",
+  "title": "Clearhaven Reconciliation On-Call SOP",
+  "subtitle": "Rotation, Northstar PD paging, severity, Helen vs Marcus, and the after-hours deploy freeze",
+  "doc_type": "SOP",
+  "kicker": "Recon on-call, as actually practiced",
+  "org": "Northstar Engineering",
+  "classification": "INTERNAL",
+  "version": "1.2",
+  "status": "Approved",
+  "date": "December 7, 2023",
+  "author": "Aman Kumar",
+  "role": "Software Engineer II",
+  "team": "Clearhaven Reconciliation",
+  "audience": "Primary and secondary on-call, Priya Nair, Diego Alvarez, Jordan Hale, and anyone covering a recon shift",
+  "owners": "Aman Kumar (SOP), Diego Alvarez (Northstar PD + monitors), Priya Nair (rotation calendar)",
+  "related": "CLH-SOP-2023-019 (prod deploy), CLH-RB-2023-012 (consumer lag), CLH-INC-2023-204 (settlement break), CLH-RB-2024-007 (worker OOM), NS-PD-441, CLH-ONCALL-118, CLH-TDD-2023-008",
+  "summary": "This SOP is the working rulebook for Clearhaven recon on-call. It covers the Thursday 10:00 ET rotation, the handoff doc in Notion page RecOncallHandoff, severity definitions that treat a blocked settlement window as SEV1 and daytime consumer lag under 45.2 min as SEV3, paging through Northstar PD service clh-recon-prod, when to call Helen Cho versus when not to wake Marcus Bell, the handoff template, and the after-hours deploy freeze (the answer is no). Read it before you take a shift. Priya Nair owns the calendar. Diego Alvarez owns the PD escalation policy. I own the words in this file because the October 2023 Bangalore follow-the-sun trial burned two people who could not read an NSCC header.",
+  "form_description": "Internal SOP for Northstar engineers covering Clearhaven reconciliation production. Written so a tired person at 02:14 ET can decide whether to page, who to call, and what not to deploy.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "October 19, 2023",
+      "Aman Kumar",
+      "Draft after CLH-ONCALL-118, two false SEV1 pages on lag"
+    ],
+    [
+      "0.9",
+      "November 14, 2023",
+      "Aman Kumar",
+      "Helen Cho comments on ops-night number and late-file handling"
+    ],
+    [
+      "1.0",
+      "November 28, 2023",
+      "Aman Kumar",
+      "Priya approved rotation; Diego signed PD policy clh-recon-ep-primary"
+    ],
+    [
+      "1.2",
+      "December 7, 2023",
+      "Aman Kumar",
+      "After-hours deploy freeze made explicit. No weekend deploys. Marcus wake rules tightened."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Decision (read this if you are a VP or you just got paged)"
+    },
+    {
+      "type": "p",
+      "text": "Recon on-call is a weekly primary plus secondary rotation, handoff Thursday 10:00 ET, paged through Northstar PD (our internal paging product, not a vendor name you put in a slide). Settlement window failures are SEV1. Daytime consumer lag that is ugly but not eating the window is SEV3 and does not get a 02:00 ET page unless lag crosses 45.2 minutes on clh.recon.match.consumer or the match worker replica count has dropped below 3. After-hours deploys are forbidden. Helen Cho is the Clearhaven ops person you call about files and break queues. Marcus Bell is the TAM. Do not wake Marcus for lag, restarts, or \"is the NSCC file late.\" Wake Marcus only when Clearhaven needs an exec-facing story and Helen or Priya has already said so in writing in #clh-recon-ops."
+    },
+    {
+      "type": "callout",
+      "label": "After-hours deploy policy",
+      "text": "No. No application deploys, no Terraform applies, no Helm upgrades, no schema migrations after 16:00 ET on weekdays, none on Saturday or Sunday, none on DTCC settlement holidays listed in clh_settlement_calendar. Exception requires written yes from Priya Nair, Diego Alvarez, and Helen Cho in the same Slack thread. A thumbs-up emoji is not written yes. CLH-SOP-2023-019 still applies during business hours. This SOP overrules it after 16:00 ET.",
+      "kind": "decision"
+    },
+    {
+      "type": "p",
+      "text": "That paragraph exists because on November 9, 2023, a well-meaning secondary (Jordan Hale, covering for Kavya Menon) shipped match-worker 1.18.4 at 17:41 ET to \"clear a lag spike.\" The image pulled a Flyway migration that took 11.7 minutes on clh-pg-recon.cluster-c8k2.us-east-1.rds.amazonaws.com, held AccessExclusiveLock on recon.match_break, and the 18:05 ET NSCC drop sat in S3 for 22.4 minutes with nobody matching. Helen Cho opened 47 tickets before we rolled back. The deploy was not evil. The clock was wrong. We write the freeze here so nobody has to reconstruct that Slack thread at 2 a.m."
+    },
+    {
+      "type": "h1",
+      "text": "Scope and who this binds"
+    },
+    {
+      "type": "p",
+      "text": "This SOP covers production Clearhaven reconciliation in us-east-1: EKS cluster clh-recon-prod-eks, MSK cluster msk-clh-recon-1, RDS clh-pg-recon, inbound bucket s3://clh-recon-inbound-prod, and the Datadog monitors tagged service:clh-recon. It does not cover Clearhaven's own desktop apps, their FIX gateway, or Northstar payroll. Staging (clh-recon-stg-eks) is not on-call. If staging is on fire, file CLH-STG-* in Linear and mention Priya in standup. Do not page Northstar PD for staging. We burned $1,840 in PD overage in August 2023 on staging Kafka lag because someone copied the prod monitor JSON and forgot the env tag."
+    },
+    {
+      "type": "p",
+      "text": "Bound roles: primary on-call (ack in 12 minutes, own the incident), secondary (ack if primary misses, pair on SEV1), Priya Nair (EM, escalation after 35 minutes of a still-open SEV1), Diego Alvarez (SRE, PD policy and Datadog, not first-line recon debugger), Helen Cho (Clearhaven ops, files and break queue), Marcus Bell (TAM, client comms only). Kavya Menon and I rotate as the two people who can actually read match_key SQL without a crib sheet. Jordan Hale and Lena Park are on the rotation for pages that are ops-shaped (pod crashloop, node drain, certificate expiry) and they escalate to Kavya or me when the page is match-shaped."
+    },
+    {
+      "type": "p",
+      "text": "If you are covering and you do not know whether a page is match-shaped or ops-shaped, treat it as match-shaped until you prove otherwise. The cost of waking Kavya for a CrashLoopBackOff is 8 minutes of grouchy Slack. The cost of sitting on a match_key collision during the window is CLH-INC-2023-204 again, and nobody wants that writeup."
+    },
+    {
+      "type": "h2",
+      "text": "What \"on-call\" is not"
+    },
+    {
+      "type": "p",
+      "text": "On-call is not a license to redesign the matcher. On-call is not a license to \"quickly\" change partition counts on MSK. On-call is not customer support. Clearhaven advisors who email aman.kumar@northstar.example at 21:00 ET about a single account's break go to Helen's queue, not to PD. If Helen is offline and the email says the whole book is unreconciled, that is a page. One account is a ticket. We had this argument in October. The rule is now in this file so we stop having it."
+    },
+    {
+      "type": "h1",
+      "text": "Rotation"
+    },
+    {
+      "type": "p",
+      "text": "Primary week runs Thursday 10:00 ET to the next Thursday 10:00 ET. Secondary is the person who was primary last week, which gives you a warm handoff and means you are not dumped into someone else's half-written Grafana folder. The calendar is Google Calendar \"CLH Recon Oncall\" owned by Priya, invite recon-oncall@northstar.example. Northstar PD escalation policy clh-recon-ep-primary is bound to that calendar via the PD + Google sync Diego set up in ticket NS-PD-441. If the calendar and PD disagree, PD wins for who gets the phone buzz, and you fix the calendar the next morning. Do not edit PD users by hand during a shift. Diego will notice because the audit log pages him, which is a joke until it is not."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Seat",
+        "Who this week (example week of Dec 7)",
+        "Ack SLA",
+        "What they actually do"
+      ],
+      "rows": [
+        [
+          "Primary",
+          "Aman Kumar",
+          "12 min",
+          "Ack PD, run this SOP, post in #clh-recon-ops, own the incident ticket"
+        ],
+        [
+          "Secondary",
+          "Jordan Hale",
+          "12 min after primary miss, or immediately on SEV1",
+          "Shadow, take ops-shaped work, cover if primary is in a tunnel"
+        ],
+        [
+          "EM escalation",
+          "Priya Nair",
+          "35 min open SEV1",
+          "Client-facing call with Marcus if needed, staffing, freeze exceptions"
+        ],
+        [
+          "SRE",
+          "Diego Alvarez",
+          "Not in the ack chain unless tagged",
+          "PD policy, Datadog, EKS node issues, RDS failover with you"
+        ],
+        [
+          "Ops (Clearhaven)",
+          "Helen Cho 07:00-19:00 ET",
+          "N/A, Slack then phone",
+          "File drops, break queue, NSCC/DTC late notices"
+        ],
+        [
+          "TAM (Clearhaven)",
+          "Marcus Bell",
+          "Do not page. Slack 08:00-18:00 ET",
+          "Exec comms after Helen or Priya asks"
+        ]
+      ],
+      "caption": "Rotation seats as of December 7, 2023. Swap names in the handoff doc each Thursday. Do not swap them only in your head."
+    },
+    {
+      "type": "p",
+      "text": "Swap protocol: if you need a day off, you find a volunteer first, then you edit the Google Calendar event (not a comment, the actual event), then you tell Diego in #clh-sre so PD sync has 2.1 hours to catch up. Last-minute swaps after 16:00 ET the day before your shift need Priya. We tried \"just tell Slack\" in September. PD kept paging the old primary. Lena Park got three SEV3 lag pages on a PTO Friday in the Berkshires. She was polite about it. The calendar is the source of truth, Slack is gossip."
+    },
+    {
+      "type": "p",
+      "text": "Compensation and hours are Priya's problem, not this SOP. What this SOP cares about: you are reachable on the PD mobile app, your laptop can VPN to ns-prod-vpn.northstar.example, and you have aws sso login working for profile clh-recon-prod. If your SSO token dies at 01:00 ET you will spend 14 minutes in a browser on a phone. Test it on Thursday afternoon. I am not kidding. Test it."
+    },
+    {
+      "type": "h2",
+      "text": "Handoff time and the handoff doc"
+    },
+    {
+      "type": "p",
+      "text": "Handoff is Thursday 10:00 ET, 25 minutes, Zoom link in the calendar, recorded only if both people agree. The artifact is the Notion page RecOncallHandoff (workspace Northstar Eng, id 8c2f1a9b). You do not invent a new Google Doc. You do not paste a novel into Slack. You update the same Notion page, you leave last week's section collapsed, and you fill the template in section 12 of this SOP. If the page is locked, ping Priya. If Notion is down, paste the template into #clh-recon-ops pinned message and copy it back when Notion returns. We lost a handoff on November 2 when Notion 502'd for 41 minutes and both people assumed the other had written it. Jordan walked into Friday with a 2.4 million message lag on topic clh.recon.nscc.inbound and no idea it was leftover from a paused consumer Kavya had left for a follow-up."
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Outgoing primary updates RecOncallHandoff by 09:45 ET Thursday. If you are in a live incident, write \"LIVE INCIDENT, see PD #N\" at the top and still fill lag numbers.",
+        "Both people join the 10:00 ET Zoom. Walk the page top to bottom. Do not skip Open PD incidents even if they are green.",
+        "Incoming primary confirms they can open Datadog dashboard 1842 (clh-recon-prod overview), Grafana folder CLH Recon, and the PD service clh-recon-prod.",
+        "Incoming primary acks a test page Diego sends at 10:18 ET. If the test page does not fire, stop the meeting and fix PD before you hang up.",
+        "Outgoing primary stays secondary. They do not disappear to a meeting at 10:30. Give the new primary 90 minutes of overlap for the first settlement file of their week if Thursday is a settlement day."
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "Severity definitions"
+    },
+    {
+      "type": "p",
+      "text": "We used to have five severities that meant whatever the person writing the Datadog monitor felt that afternoon. After CLH-INC-2023-204 and the two false SEV1s in October (CLH-ONCALL-118), Priya made us collapse to four and tie them to settlement. The settlement window for Clearhaven's book is 16:00-19:30 ET on US business days that appear in table clh_settlement_calendar (RDS, schema recon). If today is not a settlement day, a match outage is still bad, but it is not a window-blocker unless Helen says the file is being processed against a special-session calendar. Ask her. Do not guess from a federal holiday list. Columbus Day is a settlement day for this book. Good Friday is not. I got this wrong in 2022. Helen still brings it up."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Sev",
+        "Trigger (concrete)",
+        "Page?",
+        "Example",
+        "Who else"
+      ],
+      "rows": [
+        [
+          "SEV1",
+          "Settlement window blocked or about to be. Match rate on recon.match_run for today's settle_date below 91.4% after the NSCC file has been in S3 for 18 minutes. RDS primary down. MSK cluster unavailable. Inbound bucket 403. Matcher CrashLoop during 16:00-19:30 ET.",
+          "Yes, immediately, PD high-urgency",
+          "Nov 16 CLH-INC-2023-204, match_break lock during window",
+          "Helen now. Marcus only if Helen or Priya says client comms needed."
+        ],
+        [
+          "SEV2",
+          "Pipeline degraded, window still feedable. One of three match workers down. Lag 18-45 min but climbing during window. Replay job stuck with DLQ depth > 12k on clh.recon.dlq. Partial S3 drop (file size 0.4x last Tuesday).",
+          "Yes, PD high-urgency if inside window, low-urgency outside",
+          "Worker OOM on match-worker-2, see CLH-RB-2024-007 later sibling",
+          "Helen if file looks short. Not Marcus."
+        ],
+        [
+          "SEV3",
+          "Daytime lag, ugly but contained. Consumer lag on clh.recon.match.consumer between 8.2 min and 45.2 min during 07:00-18:00 ET, replica count healthy, window not open. Error rate 2.1-6.8% on match API. Single-account poison message.",
+          "No overnight page. Ticket + Slack #clh-recon-ops. Page only if lag crosses 45.2 min or it is inside the window.",
+          "Oct 11 lag 22.7 min after a GC pause, Jordan filed CLH-ONCALL-118 as SEV1, we walked it back",
+          "Helen only if she asks about a specific break aging past 14:00."
+        ],
+        [
+          "SEV4",
+          "Cosmetic, docs, a dashboard panel, a single account Helen can work around, cert expiry > 10 days out",
+          "No. Linear ticket, pick up next business morning",
+          "Grafana panel 12 on dashboard 1842 showing null after a rename",
+          "Nobody at 02:00 ET. Nobody."
+        ]
+      ],
+      "caption": "Severity is about the settlement window and whether Helen's queue is frozen, not about how embarrassed you feel."
+    },
+    {
+      "type": "p",
+      "text": "The 45.2 minute lag number is not a round marketing SLA. It is the p95 time from NSCC object-created in s3://clh-recon-inbound-prod to first match_run row, plus a 9-minute buffer Helen negotiated so her ops staff can still close the 14:00 ET aging report. If we page at 20 minutes we train people to ignore PD. If we wait until 90 minutes we miss the window. 45.2 is in the Datadog monitor clh-recon-consumer-lag-sev3 as a threshold, not a comment. Change the monitor and this SOP in the same PR. Diego will reject a monitor-only change."
+    },
+    {
+      "type": "callout",
+      "label": "SEV3 is daytime on purpose",
+      "text": "A 28-minute lag at 11:40 ET is a ticket. A 28-minute lag at 17:10 ET on a settlement day is SEV2 bordering SEV1. Same metric, different clock. The monitor uses a composite: lag AND (hour ET in 16-19 OR lag > 45.2). If you override the monitor to \"alert whenever lag > 15 min\" you will recreate October. Do not.",
+      "kind": "warn"
+    },
+    {
+      "type": "h3",
+      "text": "How to classify when you are unsure"
+    },
+    {
+      "type": "p",
+      "text": "If the page title contains match_rate or settlement or nscc or inbound, start at SEV1 and talk yourself down with evidence. If the page title contains lag or consumer_lag and the clock is before 16:00 ET, start at SEV3 and talk yourself up if the slope on dashboard 1842 timeseries clh.recon.lag.seconds will cross 45.2 before 16:00. Slope is visible. Use it. If you cannot see slope because Datadog is also sad, assume SEV1, page Diego for Datadog, and keep working the recon side."
+    },
+    {
+      "type": "h1",
+      "text": "Paging: Northstar PD"
+    },
+    {
+      "type": "p",
+      "text": "We page through Northstar PD. The product nickname in Slack is \"PD\" because everyone who has used a pager before types that. The service name is clh-recon-prod. The escalation policy is clh-recon-ep-primary: primary for 12 minutes, secondary for 12 minutes, then Priya, then Diego as a last-resort SRE. There is no round-robin through the whole company. There is no \"page the last person who committed.\" Kavya tried a Git blame pager idea in a joke RFC. It died in standup in 40 seconds, which is the correct lifetime for that idea."
+    },
+    {
+      "type": "p",
+      "text": "Datadog is the only producer of automated pages into this service. Alert channels: @northstar-pd-clh-recon. Slack #clh-recon-pages is a mirror, not an ack path. Acking in Slack does not ack PD. If you ack in Slack and walk away, you will get the 12-minute escalate anyway. I did this on my second week. The screenshot is in the PD postmortem NS-PD-441 comments. Learn from my humiliation."
+    },
+    {
+      "type": "code",
+      "text": "# Who is on call right now (from a laptop on VPN)\npd rest get -k $NS_PD_KEY /oncalls -m 'schedule_ids[]=P_CLH_RECON'\n\n# Ack the incident (id from the push or from the email)\npd rest post -k $NS_PD_KEY /incidents/${PD_INCIDENT_ID}/ack\n\n# Silence a flapping monitor for 45 minutes, not forever\ndatadog-ci monitor mute 88421 --duration 2700 --message \"CLH-ONCALL-tmp Aman investigating lag, not a delete\"\n\n# Confirm the composite window monitor still exists\ndatadog-ci monitor get 88417\n# Expect name: clh-recon-consumer-lag-window-or-45m\n",
+      "caption": "Northstar PD CLI and Datadog. Tokens live in 1Password vault CLH-Recon-Oncall, not in this repo."
+    },
+    {
+      "type": "p",
+      "text": "If PD itself is down (it happened for 17 minutes on August 22, 2023), Diego's backup is a Twilio SMS list named clh-recon-breakglass. Priya, Diego, Kavya, Jordan, Lena, and I are on it. Helen is not on it. Marcus is not on it. Using breakglass for a SEV3 is how you get a conversation with Priya that you will not enjoy. Using it for a silent SEV1 while PD is 500ing is correct. Document the use in the incident ticket within 30 minutes of PD returning."
+    },
+    {
+      "type": "h2",
+      "text": "When not to page"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Staging. Ever. Linear ticket.",
+        "A single account break Helen can see in her UI. She already has it.",
+        "Lag under 45.2 min before 16:00 ET on a settlement day, or any lag on a non-settlement day under 90 min, unless match_rate is also falling.",
+        "A Grafana annotation you do not understand. Look at the deploy channel first. Then ticket.",
+        "Certificate expiry more than 10 days out. Ticket CLH-CERT-*, assign Diego.",
+        "Marcus emailing you a question. That is email. Convert to a ticket. Do not open a PD incident so he \"sees urgency.\" He sees urgency when Helen tells him to."
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "When to call Helen Cho, and when not to wake Marcus Bell"
+    },
+    {
+      "type": "p",
+      "text": "Helen Cho runs Clearhaven ops for recon. Her desk hours are 07:00-19:00 ET. Slack @helen.cho, then the ops desk number in 1Password \"CLH Ops Desk\", then her cell which is also in 1Password and which you use only for SEV1 after Slack and the desk number missed. She wants to know about late NSCC/DTC files, inbound objects that are 0 bytes or 0.4x typical Tuesday size, match_rate below 91.4% after she expected the file to land, and any break queue older than 14:00 ET that is growing rather than shrinking. She does not want a call because a pod restarted and recovered in 90 seconds. She does not want a call because Datadog showed a blip during a GC. Write it in #clh-recon-ops and let her read it at 07:15 if it is overnight and recovered."
+    },
+    {
+      "type": "p",
+      "text": "After 19:00 ET Helen's backup is ops-night@clearhaven.example plus the night desk number labeled \"CLH Ops Night\" in 1Password. That night desk is staffed for Clearhaven's other products, not for recon nuance. They can confirm \"file arrived\" or \"DTCC blast says delay.\" They cannot tell you why CUSIP 91282CHT1 is unmatched. Do not walk them through match_key SQL. If you need recon nuance after 19:00, that is you, plus Kavya or me as secondary, plus Helen at 07:00. The night desk is a file-presence oracle, not a matcher."
+    },
+    {
+      "type": "quote",
+      "text": "Call me when the file is late, short, or the queue is not draining. Do not call me because Kafka looks \"spicy.\" I cannot restart your consumer. I can tell you NSCC missed the 17:10 drop and we are waiting on a 17:55 makeup. That sentence saves you forty minutes of debugging the wrong layer.",
+      "attrib": "Helen Cho, Slack, November 14, 2023 review of this SOP"
+    },
+    {
+      "type": "h3",
+      "text": "Marcus Bell"
+    },
+    {
+      "type": "p",
+      "text": "Marcus is the Clearhaven TAM. He is good at his job. His job is not paging. His job is translating a real outage into sentences Clearhaven's COO will tolerate. If you wake him at 01:12 ET because lag is 19 minutes, he will answer, he will be kind, and then he will ask Helen in the morning why engineering is using him as a night-shift debugger. Helen will then ask Priya. Priya will then ask you, with the SOP open. Do not wake Marcus for:"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Consumer lag, rebalances, worker restarts, OOMKills, node drains, disk on Kafka, RDS failover that completed, anything you can name with a kubectl or aws cli verb.",
+        "\"Is the file late?\" That is Helen or ops-night.",
+        "A single advisor complaining. Helen's queue.",
+        "A question about whether we should deploy a hotfix. That is Priya plus this SOP's freeze. Marcus does not override the freeze.",
+        "Curiosity. Curiosity is a Thursday 10:00 topic."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "You may Slack Marcus during 08:00-18:00 ET if Helen asked you to give him a status for a client call, or if Priya asked you to. Use #clh-recon-ops so Helen sees it. Do not DM him an incident dump at 17:50 on a Friday unless Priya is in the thread. Wake-Marcus criteria, all required:"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "SEV1 still open, or SEV1 resolved but Clearhaven's book did not finish settlement and a makeup session is in play.",
+        "Helen Cho or Priya Nair has said in #clh-recon-ops (or a PD note) that client/exec comms are needed.",
+        "You have two sentences: what is broken in business terms (\"NSCC file short, 18.6% of the book unmatched\"), and when the next update is (\"20 minutes\").",
+        "You call the number in 1Password \"Marcus Bell TAM\". You do not also tweet, email his personal Gmail, or page him via a PD user Diego added \"just in case.\" Diego removed that PD user on November 29. Leave it removed."
+      ]
+    },
+    {
+      "type": "callout",
+      "label": "Rejected: page Marcus on every SEV1",
+      "text": "Jordan proposed auto-adding Marcus as a PD responder on SEV1 so Clearhaven \"felt the urgency.\" Died in the November 28 review. Marcus is not an engineer on this system. Paging him creates a second incident of explanations while the first incident is still on fire. Helen is the ops path. Marcus is the comms path after someone who understands the book (Helen) or the staff (Priya) decides comms are needed.",
+      "kind": "decision"
+    },
+    {
+      "type": "h1",
+      "text": "First 15 minutes on a page"
+    },
+    {
+      "type": "p",
+      "text": "Ack PD. Say you have it in #clh-recon-ops with the PD id. Open dashboard 1842. Do not start applying Terraform. Do not start deploying. Look at three numbers: consumer lag seconds on clh.recon.match.consumer, match_rate for settle_date = current ET date from the Grafana Postgres panel, and the latest object timestamp in s3://clh-recon-inbound-prod/nscc/. Those three tell you if this is a file problem (Helen), a pipeline problem (you), or a database problem (you plus Diego)."
+    },
+    {
+      "type": "code",
+      "text": "# VPN first\nns-vpn status || ns-vpn connect ns-prod-vpn.northstar.example\n\nexport AWS_PROFILE=clh-recon-prod\naws sts get-caller-identity\n\n# Inbound file present?\naws s3 ls s3://clh-recon-inbound-prod/nscc/ --recursive | tail -n 20\n\n# Matcher pods\nkubectl --context clh-recon-prod-eks -n recon get pods -l app=match-worker\n\n# Lag via the consumer group (MSK)\nkafka-consumer-groups.sh --bootstrap-server b-1.msk-clh-recon-1.c8k2.kafka.us-east-1.amazonaws.com:9092 \\\n  --command-config /etc/clh/msk-client.properties \\\n  --group clh.recon.match.consumer --describe\n\n# Match rate for today (read replica, not primary)\npsql \"host=clh-pg-recon.cluster-ro-c8k2.us-east-1.rds.amazonaws.com dbname=recon user=recon_ro sslmode=require\" \\\n  -c \"select settle_date, match_rate_pct, unmatched_cnt, file_row_cnt\n      from recon.match_run_daily\n      where settle_date = current_date;\"\n",
+      "caption": "First-look commands. recon_ro is in 1Password. Do not use recon_app on the primary for ad hoc SELECT during the window."
+    },
+    {
+      "type": "p",
+      "text": "If inbound is missing and Helen's Slack says NSCC delay, you are in a wait. Stay in the channel. Do not \"warm up\" a replay. Replay against an empty prefix creates empty match_run rows and Helen's UI shows 0% in a way that looks like we lost the book. We did that on September 6. The screenshot lives in CLH-INC-adjacent notes. If inbound is present, lag is high, and pods are 0/1, you are in a crashloop. Jump to CLH-RB-2023-012 for lag and to kubectl logs. If inbound is present, lag is low, and match_rate is still trash, you are in a match_key or CUSIP problem. That is Kavya or me territory. Escalate inside 20 minutes rather than inventing a new join."
+    },
+    {
+      "type": "h2",
+      "text": "What to do when the first look fails"
+    },
+    {
+      "type": "p",
+      "text": "Commands fail. Your SSO token is dead, kubectl context is still stg, psql hangs because you pointed at the primary during a lock. Failures have boring recoveries. SSO: aws sso login --profile clh-recon-prod, wait the 8-12 seconds, retry. Wrong context: kubectl config use-context clh-recon-prod-eks, then get pods again. psql hang: Ctrl-C, use the cluster-ro endpoint, never the cluster writer during an incident unless Diego is on the call and you are looking at pg_stat_activity with him. If MSK SASL handshake fails, you are probably on the wrong bootstrap or your client.properties expired. Diego owns the MSK client cert rotation (every 90 days, last done October 3). Do not regenerate a cert at 02:00. Use the runbook in CLH-RB-2023-012 appendix B to copy the current cert from the match-worker secret."
+    },
+    {
+      "type": "p",
+      "text": "If Datadog is the thing that is down and you only have kubectl, you can still get lag from kafka-consumer-groups and match_rate from psql. If RDS is down, you cannot get match_rate from psql, and that itself is SEV1 during the window. Fail over only with Diego, using CLH-RB-2024-015 when that sibling exists; until then Diego's SRE doc NS-RDS-FAILOVER-CLH is the procedure. You do not run failover because a replica is lagging 12 seconds. Replica lag of 12-40s is normal on this instance class during the NSCC ingest burst."
+    },
+    {
+      "type": "h1",
+      "text": "After-hours deploy freeze"
+    },
+    {
+      "type": "p",
+      "text": "No deploys after 16:00 ET. That includes match-worker, ingest-api, the recon UI, Flyway, Liquibase, helm upgrade, kubectl set image, terraform apply, and \"I'll just scale the HPA maxReplicas.\" Scaling HPA is a deploy for the purpose of this SOP because it changes production behavior and we have no clean rollback story when the cluster then fails to pack pods. The freeze exists because the settlement window starts at 16:00 and because the November 9 17:41 ET deploy happened. Priya, Diego, and Helen all have to write yes in one Slack thread to break the freeze. \"Marcus said the client is upset\" is not a freeze break. Marcus can be upset at 10:00 ET tomorrow."
+    },
+    {
+      "type": "p",
+      "text": "Hotfix pressure will arrive anyway. The allowed move after 16:00 is: revert a bad change that is already in prod, using the previous image digest, with Diego on the call, and only if the bad change is causing the SEV1. Revert is not \"also ship the other PR while we are here.\" If you do not have the previous digest, it is in the helm history:"
+    },
+    {
+      "type": "code",
+      "text": "kubectl --context clh-recon-prod-eks -n recon get deploy match-worker -o jsonpath='{.spec.template.spec.containers[0].image}'\nhelm --kube-context clh-recon-prod-eks -n recon history match-worker\n# rollback to the last known good revision, example:\nhelm --kube-context clh-recon-prod-eks -n recon rollback match-worker 47\n# then confirm pods Ready and match_rate on the RO endpoint\n",
+      "caption": "Rollback is the only after-hours ship. Record the helm revision in the PD incident notes before you run it."
+    },
+    {
+      "type": "p",
+      "text": "Rejected alternative for the freeze: \"deploy windows until 18:00 because the team is west-coast adjacent.\" Died. Clearhaven's book is Eastern. Helen's desk is Eastern. The NSCC drop clock is Eastern. Jordan is in Chicago and still follows ET for this rotation. If you cannot think in ET for a week, trade the shift."
+    },
+    {
+      "type": "h1",
+      "text": "Handoff template"
+    },
+    {
+      "type": "p",
+      "text": "Copy this into RecOncallHandoff every Thursday. Replace the brackets. Delete the italic coaching if you want, but do not delete the headings. Incoming primary should be able to read this on a phone."
+    },
+    {
+      "type": "code",
+      "text": "# Recon on-call handoff\nWeek of: [Thursday date] ET\nOutgoing: [name]\nIncoming: [name]\nPD schedule matches calendar: yes/no (if no, Diego)\n\n## Live / last 24h\n- Open PD incidents: [ids or none]\n- Highest sev this week: [SEV#] [one line]\n- Unresolved Linear: [CLH-*]\n\n## Pipeline numbers at handoff (paste, do not summarize into vibes)\n- clh.recon.match.consumer lag seconds: [n]\n- match_rate_pct today: [n]\n- unmatched_cnt today: [n]\n- last NSCC object time UTC: [timestamp]\n- match-worker ready pods: [n]/[n]\n- RDS writer CPU % 1h avg: [n]\n- DLQ depth clh.recon.dlq: [n]\n\n## Files / Helen\n- Known late or short files: [or none]\n- Helen working any aging breaks overnight: [yes/no, ticket ids]\n- Makeup session expected: [yes/no]\n\n## Deploys\n- Anything shipped after 15:00 ET yesterday: [must be none, or freeze-exception thread URL]\n- Helm revisions currently live: match-worker [n], ingest-api [n]\n\n## Follow-ups I am handing you (not a wishlist)\n- [ticket] [one sentence] [due]\n\n## Do not\n- [thing that looks tempting, e.g. \"do not unpause consumer clh.recon.nscc.inbound, Kavya paused it for a reason\"]\n",
+      "caption": "Handoff template. Numbers over adjectives. If you write 'lag is fine' Aman will send you back to the page."
+    },
+    {
+      "type": "p",
+      "text": "I will be rude about vibes in the handoff. \"Lag is fine\" is not a number. \"Helen is aware\" is not a ticket id. \"Might need a deploy tomorrow\" is how freeze exceptions get socially engineered. Write the number, the ticket, or delete the line."
+    },
+    {
+      "type": "h1",
+      "text": "Failure modes we have already paid for"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "What happened",
+        "When",
+        "Wrong move",
+        "Right move now"
+      ],
+      "rows": [
+        [
+          "SEV3 lag paged as SEV1 at 02:14 ET",
+          "Oct 11, 2023, CLH-ONCALL-118",
+          "Jordan acked, woke Kavya, restarted consumers, lag was 22.7 min and falling",
+          "Ticket, Slack, sleep. Monitor composite should have held. If it did not, Diego."
+        ],
+        [
+          "Deploy at 17:41 ET during window",
+          "Nov 9, 2023",
+          "Ship 1.18.4 to clear lag, Flyway locked match_break 11.7 min",
+          "Freeze. Rollback only. Helen in channel."
+        ],
+        [
+          "Empty replay against missing NSCC prefix",
+          "Sep 6, 2023",
+          "Aman ran replay to \"warm\" the matcher, UI showed 0%",
+          "Wait for object, confirm size vs last Tuesday, then ingest"
+        ],
+        [
+          "Notion down, no handoff written",
+          "Nov 2, 2023",
+          "Both primaries assumed the other wrote it, 2.4M lag surprise Friday",
+          "Paste template in Slack, copy back later"
+        ],
+        [
+          "PD user for Marcus auto-added",
+          "Oct 2023 experiment",
+          "Marcus paged for a node drain",
+          "Removed Nov 29. Do not add him back."
+        ],
+        [
+          "Staging monitor copied to prod tags missing",
+          "Aug 2023",
+          "$1,840 PD overage, pages at 03:00 for stg lag",
+          "env:prod required on every monitor. Diego reviews JSON."
+        ]
+      ],
+      "caption": "If your incident rhymes with a row here, do the right-move column. Do not improvise a clever third thing."
+    },
+    {
+      "type": "p",
+      "text": "A failure mode we have not paid for yet, but almost: primary in an airplane mode flight through a settlement window. If you are flying on your primary week, you are not primary. Swap before wheels up. PD cannot ack itself. Secondary will get it after 12 minutes, which is a long time at 16:40 ET. Priya will not accept \"I had wifi on the plane\" as a staffing plan. Ask me how I know. The wifi was a lie and the ack was 19 minutes late. File was fine. The process was not."
+    },
+    {
+      "type": "h1",
+      "text": "Rejected alternatives"
+    },
+    {
+      "type": "p",
+      "text": "Follow-the-sun with a Bangalore contractor rotation, October 9-27, 2023. Priya wanted coverage without burning the US four. We tried it. The contractors were competent generalists. They were not competent at NSCC header records or at Helen's idea of a short file. Two pages went to people who restarted the wrong consumer group (clh.recon.ui.audit instead of clh.recon.match.consumer) because the names sort next to each other in the PD overlay. We ended the trial on October 27. Cost was 3.6 engineering-days of cleanup and one awkward call with Helen. The rotation stays US-hours people who have shipped code in this repo. If we hire a fifth, they shadow two settlement Thursdays before they go primary."
+    },
+    {
+      "type": "p",
+      "text": "24/7 primary without a secondary, proposed by finance as a cost cut. Died in Priya's staff meeting November 7. SEV1 during the window needs two humans: one on kubectl and one on Helen. A single primary on a phone in a rideshare is how you get a 41-minute ack-to-mitigate. We keep secondary."
+    },
+    {
+      "type": "p",
+      "text": "Auto-page Helen via PD. She refused, correctly. She is not a Northstar employee. Her phone is not on our escalation policy. Slack and the desk number are the interface. Putting her in PD would also page her for every flapping monitor, and she would disable notifications, and then we would have no ops path. Do not \"just add her.\""
+    },
+    {
+      "type": "h1",
+      "text": "Open questions"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Question",
+        "Owner",
+        "Due",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "Do we add a second Datadog composite for non-settlement Mondays when Clearhaven runs a makeup book? Helen says maybe 6 times a year.",
+          "Aman Kumar",
+          "January 12, 2024",
+          "Need clh_settlement_calendar flag makeup=true plumbed to the monitor. Diego to advise on composite limits."
+        ],
+        [
+          "Should ops-night get a one-page \"file present?\" runbook they can execute without us?",
+          "Helen Cho + Aman",
+          "January 19, 2024",
+          "Helen will draft Clearhaven-side. We will not give them AWS keys."
+        ],
+        [
+          "PD sync lag from Google Calendar is 2.1 hours worst case. Can Diego get it under 20 minutes?",
+          "Diego Alvarez",
+          "December 20, 2023",
+          "If not, Thursday handoff must include a manual PD override every week."
+        ],
+        [
+          "Is Lena Park ready for a match-shaped primary week in Q1, or still ops-shaped only?",
+          "Priya Nair",
+          "January 8, 2024",
+          "Shadow with Kavya on Jan 4 settlement Thursday."
+        ],
+        [
+          "After-hours freeze vs. urgent CVE on the ingest base image. Who is the real approver if Priya is camping?",
+          "Priya Nair",
+          "December 15, 2023",
+          "Need a named deputy. Do not default to Marcus."
+        ]
+      ],
+      "caption": "Open questions as of December 7, 2023. Owners, not committees."
+    },
+    {
+      "type": "h1",
+      "text": "Related docs and where the numbers live"
+    },
+    {
+      "type": "p",
+      "text": "Prod deploy during business hours: CLH-SOP-2023-019. Consumer lag deep dive: CLH-RB-2023-012. Settlement break incident that made the window real for management: CLH-INC-2023-204. Kafka ingestion design if you need to know why there are three consumer groups: CLH-TDD-2023-008. Worker OOM when that runbook lands: CLH-RB-2024-007. Datadog dashboard 1842. Grafana folder CLH Recon. PD service clh-recon-prod. Notion RecOncallHandoff. 1Password vault CLH-Recon-Oncall. Calendar CLH Recon Oncall."
+    },
+    {
+      "type": "p",
+      "text": "If this SOP conflicts with a monitor, the SOP is wrong or the monitor is wrong, and you change both in one PR. If this SOP conflicts with a verbal from Marcus, the SOP wins until Priya changes the SOP. If this SOP conflicts with Helen on a live file, Helen wins on the file, and you file a ticket to change the SOP the next morning. That last one is not us being soft. She sees NSCC blasts we do not."
+    },
+    {
+      "type": "h1",
+      "text": "Appendix: settlement calendar gotchas"
+    },
+    {
+      "type": "p",
+      "text": "Table recon.clh_settlement_calendar on the RO endpoint is the source of truth for whether today is a window day. Columns: settle_date, is_settlement_day, is_makeup, notes. Do not use the NYSE holiday calendar. Do not use your cousin's bond desk calendar. Columbus Day 2023 was a settlement day for this book. Good Friday 2023 was not. July 3, 2023 was a half-day for Clearhaven ops (Helen left at 14:00) but still a full settlement day for NSCC, which was a miserable combination and the reason the freeze starts at 16:00 even when Helen leaves early. If is_makeup is true, treat the window as live even if is_settlement_day is false. That combination has happened 4 times in 2023. The monitor does not yet understand makeup (see open questions). On a makeup day, primary watches lag as if it were 17:00 even at noon."
+    },
+    {
+      "type": "p",
+      "text": "Typical Tuesday NSCC object size in s3://clh-recon-inbound-prod/nscc/ is 184-262 MB depending on month-end. A 71 MB object on a Tuesday is short. A 0-byte object is a failed drop. A second object with suffix .retrans at 17:55 ET is a makeup file Helen will tell you about. Do not ingest .retrans before the original is in match_run or you will double-count. The ingest job is supposed to key on file_id. It mostly does. On October 31 a .retrans reused file_id because NSCC reused a header, and we double-counted 8.2k rows until Kavya patched the idempotency key to file_id + object_etag. If you see duplicate unmatched CUSIPs with the same account and settle_date, look at etag before you look at the matcher math."
+    },
+    {
+      "type": "p",
+      "text": "Month-end (last two settlement days of the month) lag baselines are worse. p95 ingest to first match_run goes from 11.4 min mid-month to 19.8 min on month-end. Do not SEV1 a 21-minute lag on month-end at 15:10 ET. Do SEV2 it if the slope still points at 45.2 before 16:30. Chris Patel has a month-end dashboard 1901 that shows last-12-month baselines. Use it. The regular dashboard 1842 will make month-end look like an incident when it is the book being the book."
+    },
+    {
+      "type": "h1",
+      "text": "Appendix: phone tree, written boringly"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "PD push. Ack in the app. If no push, email subject will contain [Northstar PD] clh-recon-prod.",
+        "Slack #clh-recon-ops: \"acking PD #N, looking at 1842.\"",
+        "Dashboard 1842 + three numbers (lag, match_rate, last S3 object time).",
+        "If file missing or short: Slack Helen (desk hours) or ops-night (after 19:00). Do not call Marcus.",
+        "If pipeline: kubectl, consumer group, RO psql. Secondary joins on SEV1.",
+        "If still SEV1 at 20 minutes: Priya. If client comms needed: Helen or Priya says so, then Marcus with two sentences.",
+        "No deploys. Rollback only, Diego on the call, previous digest.",
+        "Write the incident ticket before you go back to sleep. Future-you cannot reconstruct PD notes from a dream."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Last line, because someone will ask. Yes, the after-hours deploy policy is no. Yes, even if the build is green. Yes, even if Marcus is in the thread. Yes, even if you are the author of the PR. Thursday 10:00 ET, handoff, numbers not vibes. Call Helen about files. Do not wake Marcus about lag. If you remember only that, you will have a boring week, which is the goal of this SOP."
+    }
+  ]
+}

@@ -1,0 +1,467 @@
+{
+  "slug": "08-riverview-inflated-census-incident",
+  "doc_id": "RVH-INC-2021-118",
+  "title": "Inflated inpatient census from partial-sync duplicates",
+  "subtitle": "Flagstaff board showed 412 in-bed vs 287 actual on June 18, 2021. Missing dedup during lagged facility feeds. About 23 months.",
+  "doc_type": "Incident report",
+  "kicker": "Incident report",
+  "org": "Northstar Engineering",
+  "classification": "INTERNAL",
+  "version": "1.2",
+  "status": "Approved",
+  "date": "June 22, 2021",
+  "author": "Aman Kumar",
+  "role": "Software Engineer",
+  "team": "Clinical Integration / Patient API (Northstar at Riverview Health Network)",
+  "audience": "Priya Nair (EM), Dr. Anita Shah (CMIO liaison), Denise Howell (Flagstaff nursing), Chris Patel (data), Luis Ortega (feeds), Diego Alvarez (SRE), Sneha Iyer (QA)",
+  "owners": "Aman Kumar (write path fix), Chris Patel (warehouse grain), Luis Ortega (empty snapshot policy), Priya Nair (actions), Dr. Anita Shah (clinical impact)",
+  "related": "RVH-INC-2021-118, RVH-1044, RVH-1882, RVH-2119, RVH-PRD-2020-019, RVH-TDD-2021-004, jenkins census-adt-catchup",
+  "summary": "Flagstaff's census dashboard showed 412 inpatients against Denise Howell's floor count of 287 on June 18, 2021. Duplicate encounter rows had been written since July 2019 when lagged facility feeds hit a partial-sync job that upserted on a surrogate key. Monitors watched file freshness, not uniqueness. Impact was staffing requests, not bedside treatment. Fix is dedup on (facility, local_mrn, encounter_id) before upsert, a unique index, and a uniqueness panel.",
+  "form_description": "Incident report for the inflated Riverview census counts, written after the Flagstaff bed-board mismatch, covering timeline, impact, root cause, and the dedup fix.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "1.0",
+      "June 19, 2021",
+      "Aman Kumar",
+      "Detection notes and dry-run counts. Not yet a complete timeline."
+    ],
+    [
+      "1.1",
+      "June 21, 2021",
+      "Aman Kumar",
+      "Prod unique index shipped. Backfill numbers from Chris."
+    ],
+    [
+      "1.2",
+      "June 22, 2021",
+      "Aman Kumar",
+      "Board matches Denise's count. Actions opened. Shah sign-off pending."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "1. Summary for leadership"
+    },
+    {
+      "type": "p",
+      "text": "On June 18, 2021, Flagstaff's inpatient census dashboard showed 412 patients in beds. Denise Howell, nurse manager at Flagstaff, counted 287. The gap of 125 was not a one-day glitch. Duplicate encounter rows have been landing in the census store since a partial-sync path went live in July 2019, about 23 months. We treated feed freshness as the health of the pipeline. We did not treat uniqueness. Staffing used the inflated number for two years of float-pool requests. Clinical treatment decisions did not, luckily: RapidChart and ChartLine still keyed the live chart by (facility, local_mrn, encounter_id) at the bedside. The dashboard was the fiction. The MAR was not."
+    },
+    {
+      "type": "p",
+      "text": "Root cause: when a facility feed lagged, the sync job upserted incoming ADT as new rows because the lagging snapshot had no row to collide with, then the late snapshot arrived and inserted again under a different surrogate key. There was no dedup on (facility_id, local_mrn, encounter_id) before upsert. Fix is that dedup, a backfill that collapsed 18,442 duplicate encounter rows across eleven facilities, and monitors on uniqueness, not only on 'minutes since last file.' Priya Nair has the action list. This report is the record of what we know as of June 22."
+    },
+    {
+      "type": "callout",
+      "label": "Severity",
+      "text": "Operational / staffing integrity. Not a medication or allergy incident. Still a 23-month wrong number on a board nurses used to ask for bodies. Treat as Sev-2 for trust, Sev-4 for direct clinical harm. Shah asked us not to call it 'no harm' in the first sentence. The first sentence is the 412 vs 287.",
+      "kind": "warn"
+    },
+    {
+      "type": "quote",
+      "text": "The bed board is fiction. I just walked 287 patients. Your screen says 412. I am not floating two extra nurses for a ghost ward.",
+      "attrib": "Denise Howell, Flagstaff nursing station 2, June 18 2021 14:07"
+    },
+    {
+      "type": "h1",
+      "text": "2. Detection"
+    },
+    {
+      "type": "p",
+      "text": "June 18, 14:07 Arizona time. Denise Howell paged the nursing informatics on-call because the Flagstaff bed board on `census-dash.flagstaff.riverview.internal` disagreed with the floor. Informatics called Luis Ortega. Luis called me. I pulled `fact_inpatient_census` for FLG on 2021-06-18 and got 412 distinct `census_row_id` values with `in_bed=true`. I grouped by (local_mrn, encounter_id) and got 287. The extra 125 rows were exact duplicate natural keys with different `census_row_id` and `ingested_at` timestamps, often 6.4 hours apart, sometimes 22 hours apart, which matches the warehouse freshness we already documented in RVH-PRD-2020-019. Denise was not rounding wrong. The board was counting surrogate keys."
+    },
+    {
+      "type": "p",
+      "text": "Chris Patel confirmed CensusMart had no unique index on (facility_id, local_mrn, encounter_id). The table was built to answer 'how many rows did we load tonight,' which is a pipeline metric, and then someone pointed a dashboard at it as if it were occupancy. That someone was a 2019 quality request, ticket RVH-1044, closed as 'dashboard live' by a contractor who is gone. We inherited the grain. We did not look at it. RapidChart never read CensusMart for the live chart, which is the only reason this stayed a staffing problem."
+    },
+    {
+      "type": "h1",
+      "text": "3. Timeline"
+    },
+    {
+      "type": "p",
+      "text": "All times Arizona (America/Phoenix, no DST). Flagstaff follows Arizona. We are not going to relitigate Denver here; that lives in the test strategy. This incident is about rows, not clocks."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "When",
+        "What",
+        "Who / evidence"
+      ],
+      "rows": [
+        [
+          "2019-07-11",
+          "Partial-sync job `adt_catchup.py` shipped to cover lagged facility files. Upsert key is surrogate `census_row_id` (serial).",
+          "git northstar/census-sync@a91c2e, author contractor"
+        ],
+        [
+          "2019-07-22",
+          "First Flagstaff lag 11.4h after ChartLine SOAP pool bounce. Catchup writes 64 extra in-bed rows. Nobody notices; weekend census is noisy anyway.",
+          "Luis engine log `chartline-hl7` rotate 2019-07-22"
+        ],
+        [
+          "2019-11-03",
+          "Chris Patel adds Grafana panel 'minutes since last ADT file' per facility. Freshness becomes the SLO. Uniqueness is not a panel.",
+          "grafana census-feeds, panel 14"
+        ],
+        [
+          "2020-08-21",
+          "PRD RVH-PRD-2020-019 rejects Tableau-on-warehouse as a chart. Notes 6.4h freshness. Does not inspect grain of fact_inpatient_census. Missed chance.",
+          "Aman Kumar, this author"
+        ],
+        [
+          "2021-01-14",
+          "Identity-merge TDD calls partial sync a known smell for person tokens. Census path not changed. Second missed chance.",
+          "RVH-TDD-2021-004 section 8"
+        ],
+        [
+          "2021-06-16 01:15",
+          "Payson SiteNotes file drop misses. Catchup runs at 07:40 with empty snapshot for PAY, then Payson file lands 22h late.",
+          "Luis dropbox `sitenotes-in/PAY`"
+        ],
+        [
+          "2021-06-17 02:10",
+          "Payson VPN drop (known firewall restart). Flagstaff ChartLine pool slow, p95 1.9s. Catchup retries FLG.",
+          "Diego probe, patient-api source timeouts"
+        ],
+        [
+          "2021-06-18 06:00",
+          "Flagstaff dashboard shows 398 in-bed. Night shift already thought it felt high. No ticket.",
+          "census-dash screenshot in RVH-INC-2021-118 attachments"
+        ],
+        [
+          "2021-06-18 14:07",
+          "Denise Howell walks the floors, gets 287, pages informatics. Incident starts.",
+          "phone log, nursing station 2"
+        ],
+        [
+          "2021-06-18 14:41",
+          "Luis + Aman confirm duplicate natural keys. Priya opened the incident channel.",
+          "Slack #rvh-census-inc, now exported"
+        ],
+        [
+          "2021-06-18 16:12",
+          "Read-only freeze on census-dash public tiles. Nursing told to use ChartLine unit lists and RapidChart header, not the board, for staffing until further notice.",
+          "Priya Nair, Denise Howell"
+        ],
+        [
+          "2021-06-18 19:20",
+          "Dedup query dry-run on FLG: 125 extras that day, 4,118 extras historically at Flagstaff.",
+          "psql on edw-01"
+        ],
+        [
+          "2021-06-19 11:05",
+          "All-facility dry-run: 18,442 extra in-bed-or-discharged encounter clones since 2019-07.",
+          "Chris Patel notebook"
+        ],
+        [
+          "2021-06-20 09:30",
+          "Deploy dedup-before-upsert to census-sync staging. Sneha adds uniqueness tests.",
+          "RVH-2119"
+        ],
+        [
+          "2021-06-21 22:10",
+          "Prod deploy census-sync 1.4.2. Backfill collapse runs 3.7 hours.",
+          "Diego Alvarez window"
+        ],
+        [
+          "2021-06-22 08:00",
+          "Flagstaff board shows 281. Denise counts 281. This report.",
+          "sign-off pending Shah"
+        ]
+      ],
+      "caption": "Timeline of a slow-burn data bug that needed a nurse with a clipboard to find."
+    },
+    {
+      "type": "h1",
+      "text": "4. Impact"
+    },
+    {
+      "type": "h2",
+      "text": "4.1 What was wrong"
+    },
+    {
+      "type": "p",
+      "text": "CensusMart `fact_inpatient_census` over-counted in-bed patients whenever a facility feed lagged and `adt_catchup.py` wrote a second row for the same (facility_id, local_mrn, encounter_id). The dashboard `census-dash` counted rows. House supervisor used that count at 05:45 to request float pool. Flagstaff's June 18 board said 412 vs 287 actual, +43.6%. Looking back at Tuesdays only (cleaner than weekends), Flagstaff's median inflation from January 2020 to June 2021 was +18.7%, Phoenix Central +9.4%, Payson +31.2% (Payson lags the most). Cottonwood +6.1%. Eleven-facility combined extra rows: 18,442. Distinct encounters cloned: 11,906. Some cloned more than once when a feed lagged twice in one stay."
+    },
+    {
+      "type": "h2",
+      "text": "4.2 Staffing, not treatment"
+    },
+    {
+      "type": "p",
+      "text": "RapidChart assemble and ChartLine MAR do not read `fact_inpatient_census`. ED tracker reads patient-api header, which keys encounters on the source EMR id. Medication administration, allergy panels, and bed-level assignment at the ward were not driven by the inflated board. Shah's office pulled 30 random Flagstaff stays from June 1-18 and matched MAR timestamps to ChartLine; no treatment documented against a ghost census row. That is the luck. What was not luck: float pool. House supervisor logs show Flagstaff requested extra staff on 41 of 85 weekdays in Q1-Q2 2021 citing 'census > 360'. True occupancy on those days, reconstructed from ChartLine unit lists, sat between 268 and 312. We cannot prove how many extra shifts were worked solely because of the board. Denise says 'more than none, less than all 41.' Finance is running a separate look. That is not this report. This report says the number they used was wrong for 23 months."
+    },
+    {
+      "type": "h2",
+      "text": "4.3 Who saw it and who did not"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Surface",
+        "Read inflated rows?",
+        "Used for"
+      ],
+      "rows": [
+        [
+          "census-dash Flagstaff / Phoenix tiles",
+          "yes",
+          "05:45 staffing, midday house supervisor"
+        ],
+        [
+          "Tableau quality workbook 'Occupancy trend'",
+          "yes, same table",
+          "monthly ops review, board packet appendix"
+        ],
+        [
+          "RapidChart nursing assemble",
+          "no",
+          "chart"
+        ],
+        [
+          "ED tracker",
+          "no",
+          "ED beds"
+        ],
+        [
+          "ChartLine native unit list",
+          "no",
+          "bedside source of truth"
+        ],
+        [
+          "identity-merge idm.person_token",
+          "no",
+          "different key, upsert already unique"
+        ],
+        [
+          "patient-api assemble_log",
+          "no",
+          "hashed keys, not census"
+        ]
+      ],
+      "caption": "The live chart path we built in 2020 did not consume the broken grain. The 2019 dashboard did."
+    },
+    {
+      "type": "p",
+      "text": "Chris Patel's nightly email 'CensusMart load OK' went out 412 times in the inflated window with a green freshness number. I am on that email. I did not open the distinct-count. Sneha's API tests never touched CensusMart. Diego's probes watched patient-api, not the warehouse. Everyone was watching the pipe they owned. The dashboard sat in the crack."
+    },
+    {
+      "type": "h1",
+      "text": "5. Root cause"
+    },
+    {
+      "type": "p",
+      "text": "Three conditions had to be true. They were, for 23 months."
+    },
+    {
+      "type": "h3",
+      "text": "5.1 Weak upsert key"
+    },
+    {
+      "type": "p",
+      "text": "`adt_catchup.py` inserts a new `census_row_id` for every parsed ADT snapshot row. It 'upserts' by deleting rows older than 3 days for that facility, then inserting whatever the snapshot contains. When the snapshot is complete, this is ugly but roughly unique. When the snapshot is partial (lagging feed, empty Payson drop, ChartLine SOAP pool returning 40% of in-house), the delete+insert keeps yesterday's full set for the missing people... except it does not, because the delete is 'older than 3 days,' not 'not in this snapshot.' Stale in-bed rows linger. Then the late snapshot arrives and inserts the same encounters again with new serial ids. Two in-bed rows for one stay. The job comments say 'partial sync: keep what we have so the dashboard does not go to zero.' That comment is the incident. We optimized for a dark board, not a true board."
+    },
+    {
+      "type": "h3",
+      "text": "5.2 Monitors watched freshness, not uniqueness"
+    },
+    {
+      "type": "p",
+      "text": "Grafana panel 14: `now() - max(file_mtime)` per facility. Alert if > 90 minutes for ChartLine campuses, > 180 minutes for Payson. A lagged feed that later double-inserts looks healthy: the file arrived, mtime is fresh, row count even went up (duplicates). There is no panel for `count(*) vs count(distinct facility_id, local_mrn, encounter_id)`. Chris added row_count as a happiness metric. Row_count going up is what duplicates do. We would have needed a ratio. We did not have a ratio. Identity-merge TDD in January described this exact smell for person tokens and put UNIQUE (facility, source, local_mrn) in the schema. Census did not get the same discipline because it was 'just a warehouse table.' It was also a staffing number."
+    },
+    {
+      "type": "h3",
+      "text": "5.3 Dashboard grain was surrogate, not natural"
+    },
+    {
+      "type": "p",
+      "text": "The tile query was `select count(*) from fact_inpatient_census where facility_id='FLG' and in_bed and census_date = current_date`. Not distinct encounter. Not distinct MRN. Count star. RVH-1044's contractor used the same grain Tableau likes: one row per load event. Quality asked for a trend. They got a trend of load events. Nobody in 2019 wrote the sentence 'this tile must equal Denise walking the floor.' We wrote it in 2021 because Denise walked the floor."
+    },
+    {
+      "type": "callout",
+      "label": "Rejected during fix debate",
+      "text": "Chris floated 'just put a DISTINCT in the Tableau tile and leave the table dirty.' That died in the June 19 10:00 call. Distinct in the tile hides the next bug, breaks the monthly trend by silently dropping clones, and leaves 18,442 rows for the next person to count star. We collapse the table and put a unique index in the database, which is the only place a grain lives. Priya agreed. Shah agreed. Tableau stays a reader.",
+      "kind": "decision"
+    },
+    {
+      "type": "h1",
+      "text": "6. Technical detail an engineer can replay"
+    },
+    {
+      "type": "p",
+      "text": "Warehouse host `edw-01.phx.riverview.internal`, database `censusmart`, table `public.fact_inpatient_census`. Sync job on `jenkins-legacy-3.riverview.internal` (yes, still), job name `census-adt-catchup`, crontab 15/75 minutes. Source files from Luis's engines land on `fs-int-02.phx.riverview.internal:/intf/adt/{facility}/`. Partial sync code path: `census-sync/adt_catchup.py` function `apply_snapshot()`. Before 1.4.2 it hashed nothing. After 1.4.2 it dedups in memory on (facility_id, local_mrn, encounter_id) keeping the row with latest `event_ts`, then `INSERT ... ON CONFLICT (facility_id, local_mrn, encounter_id) DO UPDATE`."
+    },
+    {
+      "type": "code",
+      "text": "-- detection (read-only), run as census_ro\nSELECT facility_id,\n       COUNT(*) AS rows_in_bed,\n       COUNT(DISTINCT (local_mrn, encounter_id)) AS distinct_enc,\n       COUNT(*) - COUNT(DISTINCT (local_mrn, encounter_id)) AS extras\nFROM fact_inpatient_census\nWHERE in_bed AND census_date = DATE '2021-06-18'\nGROUP BY 1\nORDER BY extras DESC;\n\n-- Flagstaff that afternoon: 412 vs 287, extras 125\n\n-- historical clones (in-bed or discharged), 2019-07-11 forward\nSELECT COUNT(*) - COUNT(DISTINCT (facility_id, local_mrn, encounter_id)) AS extra_rows\nFROM fact_inpatient_census\nWHERE ingested_at >= TIMESTAMP '2019-07-11';\n-- 18442\n\n-- collapse (prod window 2021-06-21 22:10, take a snapshot first)\nBEGIN;\nCREATE TABLE fact_inpatient_census_pre_inc118 AS\n  TABLE fact_inpatient_census;\nDELETE FROM fact_inpatient_census a\n USING fact_inpatient_census b\n WHERE a.facility_id = b.facility_id\n   AND a.local_mrn = b.local_mrn\n   AND a.encounter_id = b.encounter_id\n   AND a.census_row_id < b.census_row_id;\n-- keep the higher serial, which is the later ingest\nCREATE UNIQUE INDEX fact_inpatient_census_nat_ux\n  ON fact_inpatient_census (facility_id, local_mrn, encounter_id);\nCOMMIT;\n",
+      "caption": "Replay queries. Snapshot table stayed until July 12, then dropped after Shah signed."
+    },
+    {
+      "type": "p",
+      "text": "Job change, also shipped 1.4.2:"
+    },
+    {
+      "type": "code",
+      "text": "# census-sync/adt_catchup.py (1.4.2), sketch of the guard\ndef dedup_snapshot(rows):\n    best = {}\n    for r in rows:\n        k = (r.facility_id, r.local_mrn, r.encounter_id)\n        prev = best.get(k)\n        if prev is None or r.event_ts >= prev.event_ts:\n            best[k] = r\n    return list(best.values())\n\n# apply_snapshot then:\n#   rows = dedup_snapshot(parsed)\n#   COPY into staging\n#   INSERT INTO fact_inpatient_census (...)\n#   SELECT ... FROM staging\n#   ON CONFLICT (facility_id, local_mrn, encounter_id)\n#   DO UPDATE SET ... = EXCLUDED ...\n# Partial snapshots no longer INSERT a second identity.\n# They UPDATE the existing natural key or leave it alone.\n",
+      "caption": "Dedup before upsert. Natural key is the conflict target. Surrogate census_row_id stops being a grain."
+    },
+    {
+      "type": "p",
+      "text": "Index build took 14.6 minutes on 2.1M rows. Backfill delete took 3.7 hours because we logged each cloned key to `census_inc118_dropped` for finance. We did not vacuum in the window; Diego ran VACUUM ANALYZE at 06:40 on June 22. Dashboard query time went from 1.8s to 0.42s on the Flagstaff tile, which is a side effect, not a victory lap."
+    },
+    {
+      "type": "h1",
+      "text": "7. Why we missed it"
+    },
+    {
+      "type": "p",
+      "text": "I listed missed chances in the timeline on purpose. The January identity design called partial sync a smell and then we scoped the smell to person tokens. The August 2020 PRD rejected Tableau as a chart and still left Tableau as occupancy. Grafana rewarded file arrival. Jenkins job `census-adt-catchup` is a yellow ball when the Python process exits 0, which it did while writing clones. Sneha does not own warehouse tests. Chris's contract with quality was 'load completed.' Denise's contract with reality was 'walk the floor.' Only one of those contracts counts patients."
+    },
+    {
+      "type": "p",
+      "text": "There is also a social miss. Flagstaff nurses joked about 'ghosts on the board' in 2020. Informatics filed RVH-1882 in October 2020, 'board high vs ChartLine.' It was closed as 'known delay, refresh Tableau.' That closer was not Northstar. We did not see the ticket until June 18 because it sat in the nursing informatics Jira project, not RVH-2109's epic. Priya has asked for a cross-project filter on 'census' and 'bed board.' Filters are not a root cause fix. They would have shortened 23 months to something smaller."
+    },
+    {
+      "type": "h1",
+      "text": "8. What we changed"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "census-sync 1.4.2: dedup on (facility_id, local_mrn, encounter_id) before upsert; ON CONFLICT natural key. Shipped June 21.",
+        "UNIQUE INDEX on fact_inpatient_census natural key. Inserting a clone now errors the job, which is what we want.",
+        "Grafana panel 31: extras ratio `1 - distinct(enc)/count(*)` per facility. Alert if > 0.4% for 2 hours. 0.4% is not zero because of in-flight updates; 18% would have fired every day of this incident.",
+        "Blackbox: nightly job compares Flagstaff tile to ChartLine unit-list count for FLG, tolerance 3. Emails Denise and #rvh-census if off. First mail went June 22 06:10, delta 0.",
+        "census-dash tile query now `count(distinct encounter_id)` as a belt, even with the unique index. Chris owns the workbook.",
+        "Jenkins job fails on unique_violation. Diego pages on that fail. We would rather a dark update than a fiction.",
+        "RVH-1882 reopened and closed as duplicate of this incident so the nursing project points here."
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "9. Action items"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Action",
+        "Owner",
+        "Due",
+        "Status"
+      ],
+      "rows": [
+        [
+          "Prod unique index + 1.4.2 (done)",
+          "Kavya Menon, Aman Kumar",
+          "June 21 2021",
+          "done"
+        ],
+        [
+          "Shah sign-off that treatment path was untouched",
+          "Dr. Anita Shah",
+          "June 25 2021",
+          "in review"
+        ],
+        [
+          "Denise daily board vs walk for 10 weekdays",
+          "Denise Howell, Sneha Iyer (log)",
+          "July 6 2021",
+          "started June 22"
+        ],
+        [
+          "Finance extract of extra float-pool days",
+          "Chris Patel",
+          "July 16 2021",
+          "open"
+        ],
+        [
+          "Move census-sync off jenkins-legacy-3 shared workspace",
+          "Aman Kumar, Diego Alvarez",
+          "see GHA memo Q4",
+          "open"
+        ],
+        [
+          "Cross-Jira search for bed board / census complaints",
+          "Priya Nair",
+          "July 2 2021",
+          "open"
+        ],
+        [
+          "Document grain of every public census tile",
+          "Chris Patel",
+          "July 9 2021",
+          "open"
+        ],
+        [
+          "Add uniqueness contract test in census-sync CI (no PHI)",
+          "Sneha Iyer",
+          "June 30 2021",
+          "open"
+        ],
+        [
+          "Payson 02:10 firewall: stop treating empty drop as a snapshot",
+          "Luis Ortega",
+          "July 12 2021",
+          "open"
+        ],
+        [
+          "Write this incident into new-hire packet for Patient API",
+          "Aman Kumar",
+          "July 2 2021",
+          "open"
+        ]
+      ],
+      "caption": "Action items as of June 22, 2021. Unique index is the actual fix. The rest is how we stop being smug about it."
+    },
+    {
+      "type": "h1",
+      "text": "10. Open questions"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Question",
+        "Owner",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "Do we reconstruct a 'true occupancy' time series for the board packet, or annotate the old trend as unusable?",
+          "Rahul Deshmukh, Chris Patel",
+          "I vote annotate. Reconstructing 23 months from ChartLine will miss SiteNotes gaps."
+        ],
+        [
+          "Was Phoenix ED ever staffed off the same tile?",
+          "Dr. Anita Shah",
+          "ED tracker was live with a flag in January; house supervisor still has a Tableau bookmark."
+        ],
+        [
+          "Should patient-api expose an occupancy count so nursing stops using CensusMart for today?",
+          "Priya Nair, Kavya Menon",
+          "Possible. Not a silent add. Needs a PRD. Do not rush it into assemble."
+        ],
+        [
+          "Empty snapshot: treat as skip vs treat as 'all discharged'?",
+          "Luis Ortega, Aman Kumar",
+          "Skip. All discharged would empty the board, which is the failure partial sync was written to avoid. We still cannot insert clones."
+        ]
+      ],
+      "caption": "Open questions. Empty snapshot behavior is the remaining engineering argument."
+    },
+    {
+      "type": "h1",
+      "text": "11. What I would like on the record"
+    },
+    {
+      "type": "p",
+      "text": "Partial sync without a natural key is a second copy of the world. We wrote it to keep a dashboard from going dark when Payson missed a drop. It kept the dashboard lit with the wrong number for two years. Identity-merge already refused to hash timestamps into person keys for this reason. Census did not get that sentence until Denise Howell made it a page. The fix is three lines of dedup and a unique index. The miss was cultural: freshness is not truth, row count is not occupancy, and Tableau distinct is not a constraint. We will not close this incident on a tile change. We closed the write path that created clones. Shah still has to sign the clinical-impact paragraph. Denise still has to walk the floor for ten days. If those two disagree with the board again, we reopen."
+    },
+    {
+      "type": "p",
+      "text": "Related: RVH-INC-2021-118 (this), RVH-1044 (2019 dashboard), RVH-1882 (2020 nurse complaint, closed wrong), RVH-PRD-2020-019, RVH-TDD-2021-004 section 8, RVH-2119 (sync patch), jenkins job `census-adt-catchup`."
+    }
+  ]
+}

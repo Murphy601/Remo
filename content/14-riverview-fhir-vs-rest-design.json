@@ -1,0 +1,577 @@
+{
+  "slug": "14-riverview-fhir-vs-rest-design",
+  "doc_id": "RVH-TDD-2020-011",
+  "title": "FHIR R4 vs purpose-built REST for year one",
+  "subtitle": "Custom JSON for RapidChart and CensusBoard; mapping layer only if a payer or HIE demands it",
+  "doc_type": "Technical design",
+  "kicker": "Riverview Health Network / patient-api",
+  "org": "Northstar Engineering",
+  "classification": "INTERNAL",
+  "version": "1.2",
+  "status": "Approved",
+  "date": "October 8, 2020",
+  "author": "Aman Kumar",
+  "role": "Software Engineer",
+  "team": "Riverview chart platform (Northstar)",
+  "audience": "Priya Nair (EM), Rahul Deshmukh (PM), backend engineers, Riverview architecture review",
+  "owners": "Aman Kumar (design), Kavya Menon (ChartLine adapters), Rahul Deshmukh (vendor pressure)",
+  "related": "RVH-PRD-2020-019, RVH-PRD-2021-006 (later assemble PRD), ChartLine vendor notes 2020-09-22, spike RVH-1744",
+  "summary": "Decision record for the first year of Riverview patient-api: we will not speak FHIR R4 as the primary contract. RapidChart and CensusBoard are two Java apps that want small, stable JSON. ChartLine cannot emit FHIR. The team is five people, none of us a FHIR specialist. Vendors will keep pushing R4. We will ship a purpose-built REST assemble and read API, and we will keep a door open for a mapping layer if a payer or HIE writes it into a contract. This document is the trade-off, the edges that would smash our payload budget (contained resources, Patient $everything), and the alternative we killed after spike RVH-1744.",
+  "form_description": "Technical design choosing custom REST over FHIR R4 for Riverview patient-api v1, with constraints, payload math, and a rejected HAPI-on-day-one path.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.6",
+      "September 24, 2020",
+      "Aman Kumar",
+      "After ChartLine FHIR workshop, first draft"
+    ],
+    [
+      "1.0",
+      "October 2, 2020",
+      "Kavya Menon",
+      "Adapter and payload numbers from spike RVH-1744"
+    ],
+    [
+      "1.1",
+      "October 6, 2020",
+      "Priya Nair",
+      "Team-of-five constraint made explicit; no backfill hire for FHIR"
+    ],
+    [
+      "1.2",
+      "October 8, 2020",
+      "Aman Kumar",
+      "Architecture review notes; $everything and contained resources called out"
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Decision"
+    },
+    {
+      "type": "callout",
+      "label": "Decision",
+      "text": "v1 of patient-api is purpose-built REST (JSON over HTTPS, our schemas, our error model). We do not expose FHIR R4 resources as the contract RapidChart and CensusBoard consume. We do not stand up HAPI FHIR as the system of record. If a payer, HIE, or state reporting feed later requires FHIR, we add a mapping service in front of the same assemble internals. ChartLine stays on its XML/JSON interface. We will not wait for ChartLine to grow a FHIR endpoint; their TAM said 2022 'maybe' on September 22, which is not a date.",
+      "kind": "decision"
+    },
+    {
+      "type": "p",
+      "text": "Priya signed this on October 6 with the staffing note: five people on the account through mid-2021 (Priya, Rahul, Aman, Kavya, Sneha; Luis Ortega joining in November for LDAP/identity, not FHIR). No FHIR specialist hire. Chris Patel can measure feeds; he is not writing StructureDefinitions. Diego Alvarez is not on this account yet. Dr. Anita Shah's ask from the CMIO office is a safer chart assemble for RapidChart, not a strategic FHIR platform. Denise Howell was not in the architecture review; nursing did not request R4."
+    },
+    {
+      "type": "h1",
+      "text": "Why this is even a question"
+    },
+    {
+      "type": "p",
+      "text": "Two vendor meetings in September (ChartLine workshop Sep 22, a payer IT intro Sep 29) used the same slide: 'FHIR R4, US Core, 2021.' Rahul needed an engineering answer that was not 'we will look into it.' RapidChart's app lead Gita Raman sent a one-pager on September 18 titled What we actually HTTP GET, which is four endpoints and a 50 KB JSON budget. CensusBoard's Omar Haddad wants a census row, not a Bundle. If we give them FHIR because a vendor room clapped, we will spend the year teaching Java teams to parse Bundles while ChartLine still hands us non-FHIR XML."
+    },
+    {
+      "type": "p",
+      "text": "Spike RVH-1744 (Kavya + Aman, Sep 28-Oct 1) ran HAPI FHIR 5.1.0 in stage against a fake Patient + AllergyIntolerance set derived from ChartLine fixtures. We did not connect prod ChartLine. Numbers below are from that spike, 1000 synthetic patients, last 5 encounters stuffed as contained Encounter resources because that is what every 'just use $everything' blog post does."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints we do not get to wish away"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Constraint",
+        "Detail",
+        "What it kills"
+      ],
+      "rows": [
+        [
+          "Team of 5",
+          "No FHIR author on staff; Sneha can test JSON schemas, not ImplementationGuides",
+          "A serious US Core conformance program in year one"
+        ],
+        [
+          "ChartLine cannot emit FHIR",
+          "Vendor TAM Mei Chen: native FHIR 'roadmap 2022 maybe'; current iface is XML + a thin JSON twin, neither is R4",
+          "Passthrough FHIR. Any R4 we speak, we map"
+        ],
+        [
+          "Two Java consumers",
+          "RapidChart, CensusBoard. Both want simple POJOs. Neither has a FHIR client library in prod",
+          "Surprising them with Bundles in Q1 2021"
+        ],
+        [
+          "Payload budget",
+          "RapidChart: 50 KB p95 for assemble on a typical med-surg patient; 120 KB hard cap before their parser warns",
+          "$everything and fat contained graphs"
+        ],
+        [
+          "Latency",
+          "Directionally 2s p95 assemble (later locked at 1.8s in RVH-PRD-2021-006). HAPI encode of a 180 KB Bundle in the spike was 220-410ms extra on a 2-core pod",
+          "FHIR as the hot path encoder"
+        ],
+        [
+          "Identity",
+          "Merge is not done (design will be RVH-TDD-2021-004 next quarter). FHIR Patient.id stability is a political object",
+          "Minting canonical FHIR ids this quarter"
+        ],
+        [
+          "Auth",
+          "Hospital LDAP, not SMART on FHIR. Riverview IAM (Jordan Hale) has no SMART timeline",
+          "Pretending we are a SMART server"
+        ]
+      ],
+      "caption": "Constraints as of October 8, 2020. If one changes, revisit; do not quietly add /fhir."
+    },
+    {
+      "type": "h1",
+      "text": "Consumers and what they want"
+    },
+    {
+      "type": "p",
+      "text": "Internal consumers for v1 are only those two Java apps. Nursing informatics (Denise) talks to RapidChart, not to our OpenAPI. Anita talks to Denise and to us. A future HIE would be a third consumer with a different SLA and a different legal wrapper. We will not design v1 as if the HIE is already in the room. That is how you ship a mediocre API for everyone."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Consumer",
+        "Calls they want in 2021",
+        "FHIR they think they want",
+        "What we will give them"
+      ],
+      "rows": [
+        [
+          "RapidChart",
+          "GET assemble (demo+allergy+med+enc+prob), GET patient header",
+          "Gita: 'if it is documented'; she does not want to parse Bundle.entry",
+          "GET /v1/chart/assemble, GET /v1/patient/{id}"
+        ],
+        [
+          "CensusBoard",
+          "GET census status by facility, discharge flags",
+          "Omar: none",
+          "GET /v1/census/status"
+        ],
+        [
+          "Payer / HIE (hypothetical)",
+          "Patient, Coverage, Encounter bulk",
+          "R4 US Core, probably $export later",
+          "Not v1. Mapping layer if contracted"
+        ],
+        [
+          "ChartLine",
+          "We call them; they do not call us",
+          "They cannot emit it",
+          "Adapters in our process, XML in, our JSON out"
+        ],
+        [
+          "SiteNotes",
+          "Encounter text; flaky Fridays",
+          "DocumentReference someday",
+          "Optional block in assemble, banners on fail"
+        ]
+      ],
+      "caption": "Consumer map. Hypothetical rows do not get backlog items without a contract."
+    },
+    {
+      "type": "h2",
+      "text": "Proposed v1 REST (sketch, not the full OpenAPI)"
+    },
+    {
+      "type": "p",
+      "text": "This is enough to argue the shape against FHIR. Detailed assemble fields live in the product requirements (RVH-PRD-2020-019 now; a tighter assemble PRD will follow when nursing timings land). IDs are our merge keys, not FHIR ids."
+    },
+    {
+      "type": "code",
+      "text": "GET /v1/chart/assemble?facility=RVH-MAIN&patient_id={merge_key}\n# 200 application/json\n# {\n#   \"patient_id\": \"mk_...\",\n#   \"facility\": \"RVH-MAIN\",\n#   \"partial\": false,\n#   \"banners\": [],\n#   \"blocks\": {\n#     \"demographics\": { \"display_name\": \"...\", \"age_years\": 62, ... },\n#     \"allergies\": [ { \"code\": \"x\", \"text\": \"...\", \"severity\": \"...\" } ],\n#     \"meds\": [ { \"name\": \"...\", \"dose\": \"...\", \"status\": \"active\" } ],\n#     \"encounters\": [ { \"enc_id\": \"...\", \"start\": \"...\", \"type\": \"...\" } ],  # last 5\n#     \"problems\": [ { \"code\": \"...\", \"text\": \"...\", \"status\": \"active\" } ]\n#   },\n#   \"source_ts\": { \"chartline\": \"...\", \"sitenotes\": \"...\" }\n# }\n# 504/502 on total ChartLine death if circuit closed; 200+partial if circuit open (runbook later)\n\nGET /v1/patient/{patient_id}\nGET /v1/census/status?facility=RVH-MAIN\n\n# errors: { \"code\": \"chartline_timeout\"|\"ldap_denied\"|\"bad_facility\", \"trace_id\": \"...\" }\n# no OperationOutcome in v1\n",
+      "caption": "v1 REST sketch. Field lists will tighten in the assemble PRD."
+    },
+    {
+      "type": "h1",
+      "text": "What FHIR R4 would have meant on the hot path"
+    },
+    {
+      "type": "p",
+      "text": "If RapidChart called GET /Patient/{id}/$everything, HAPI in our spike returned a Bundle with Patient, AllergyIntolerance x N, MedicationStatement x N, Encounter x 5, Condition x N, plus search metadata. For fixture PEDS-heavy allergy lists (14.2 allergies mean on the peds fixture, not typical med-surg), encoded JSON was 172-248 KB. RapidChart's 120 KB warn fired. Contained Encounter.location.managingOrganization.contained... we stopped counting. Contained resources are legal FHIR and a gift for people who want one HTTP round trip. They are how you smash a 50 KB p95 budget without noticing in a demo."
+    },
+    {
+      "type": "p",
+      "text": "$everything is the worst case, but even GET /AllergyIntolerance?patient=X as a separate resource type means RapidChart makes 5-7 HTTP calls where they currently want 1. Their app servers are not a browser. Gita's one-pager said one round trip for the opening chart view. FHIR's resource-oriented purity fights that. A FHIR _revinclude assemble is just us inventing a Bundle-shaped assemble anyway, with worse tooling for our team."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Approach",
+        "p95 encode+size on spike fixture MEDSURG-A",
+        "p95 on fixture PEDS-ALLERGY",
+        "RapidChart fit"
+      ],
+      "rows": [
+        [
+          "Custom assemble JSON (hand-built encoder)",
+          "18.4 KB, 11-16ms encode",
+          "41.7 KB, 14-22ms",
+          "Under 50 KB p95 target"
+        ],
+        [
+          "HAPI Bundle of discrete resources, no contained",
+          "96.2 KB, 80-140ms",
+          "188 KB, 160-240ms",
+          "Med-surg maybe, peds no"
+        ],
+        [
+          "HAPI $everything with contained",
+          "141 KB, 220-310ms",
+          "236 KB, 280-410ms",
+          "No"
+        ],
+        [
+          "US Core profiles + validation on every response",
+          "not fully measured; validator added 90-180ms in a 20-patient subset",
+          "worse",
+          "No on the hot path"
+        ]
+      ],
+      "caption": "Spike RVH-1744, HAPI 5.1.0, 2-core pod, 2Gi. Not a production forecast, enough to kill hot-path FHIR."
+    },
+    {
+      "type": "h3",
+      "text": "Other FHIR edges that bit the spike"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "AllergyIntolerance.clinicalStatus vs verificationStatus vs our ChartLine 'active/inactive/error' triad. We spent 6.5 hours arguing mapping for one vendor field. Nursing will not wait for that per field across meds and problems.",
+        "Contained resources: once you contain, clients must walk graph edges. RapidChart will write bugs. We will debug graphs at 3am. No.",
+        "Patient.$everything would include notes if we were honest, and notes are SiteNotes, flaky, large. Out of scope for assemble even in REST (text search explicitly later). FHIR makes it tempting to 'include DocumentReference' because the operation exists.",
+        "IDs: FHIR wants stable Patient.id. Our merge keys will move when identity merge ships. We would mint FHIR ids that then split or collide. That is a support nightmare for an HIE we do not have yet.",
+        "SMART scopes: we have LDAP groups. Mapping groups to patient/*.read is a year of IAM, not a library import."
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "Trade-offs (honest)"
+    },
+    {
+      "type": "p",
+      "text": "Custom REST is not free. We own versioning. We will be asked 'why not FHIR' in every vendor meeting until a mapping layer exists. New engineers will grep for Patient and find none. Sneha has to maintain our JSON schemas instead of downloading US Core. If Riverview signs an HIE contract in 2021, we will look late. That is a business risk Rahul is accepting in writing at the end of this doc."
+    },
+    {
+      "type": "p",
+      "text": "FHIR as v1 is not free either. We would still map ChartLine. We would still not have SMART. We would still blow RapidChart's budget on peds. We would spend Sneha on validator noise (the spike produced 40+ warning-level issues per patient, many from missing US Core Must Support fields ChartLine never had). We would hire or fake a FHIR specialist. Priya does not have budget. The 'interop win' would be a facade."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "",
+        "Custom REST v1",
+        "FHIR R4 hot path"
+      ],
+      "rows": [
+        [
+          "Time to RapidChart opening view",
+          "Matches their POJOs, one call",
+          "Bundle parse + size risk"
+        ],
+        [
+          "ChartLine work",
+          "Adapters we were writing anyway",
+          "Adapters plus resource mapping plus validation"
+        ],
+        [
+          "Payer/HIE later",
+          "Need a mapping layer",
+          "Closer, still not SMART or $export"
+        ],
+        [
+          "Staffing",
+          "Team can ship",
+          "Needs a specialist we will not hire"
+        ],
+        [
+          "3am debug",
+          "Our JSON, our logs (see later SOP)",
+          "HAPI internals + Bundle walk"
+        ],
+        [
+          "Politics",
+          "Vendors unhappy",
+          "Vendors happy, nursing wait longer"
+        ]
+      ],
+      "caption": "Side-by-side. Politics is real and is not the same as nurse time-to-allergy."
+    },
+    {
+      "type": "quote",
+      "text": "If the payer wants FHIR, they can put it in the contract and we will staff a mapper. Do not spend the allergy screen on a Bundle.",
+      "attrib": "Priya Nair, October 6 staffing review"
+    },
+    {
+      "type": "h2",
+      "text": "Rejected alternative: HAPI in front, REST a private impl"
+    },
+    {
+      "type": "p",
+      "text": "The attractive compromise from the Sep 22 workshop: expose FHIR publicly, keep internal assemble, translate at the edge. We rejected it for year one. Two public contracts means two test surfaces for Sneha, two auth stories, and someone (usually on-call) has to know which face is broken. RapidChart would be told to 'just use FHIR' by someone in a vendor meeting, then Gita would page us because Bundle.entry[3].resource.contained is null. A mapping layer later, behind a flag, for a named consumer, is different: one extra deploy, not the default path for the floor."
+    },
+    {
+      "type": "p",
+      "text": "A second rejected idea: FHIR only for Patient and Encounter, custom for allergies. That split is how you teach the worst of both. Killed in the Oct 2 working session. One assemble JSON for the opening view."
+    },
+    {
+      "type": "h1",
+      "text": "Mapping layer later (door, not a project)"
+    },
+    {
+      "type": "p",
+      "text": "If a payer or HIE demands R4, proposed shape (not staffed): a separate deploy fhir-map in namespace riverview-chart, read-only, calling the same internal assemble service patient-api-int:8080, emitting a small set of resources (Patient, AllergyIntolerance, MedicationStatement, Encounter, Condition). No $everything. No contained. No US Core validation on the hot path; batch validate in CI against fixtures. SMART out of scope until Jordan Hale has a timeline. This paragraph is permission to start a TDD later, not permission to open a /fhir route in 1.0."
+    },
+    {
+      "type": "p",
+      "text": "Triggers that would reopen this TDD: signed contract naming FHIR R4; ChartLine ships a real FHIR endpoint we can probe; Riverview hires a FHIR specialist onto this account. Tweets and webinars are not triggers. Rahul owns saying no in vendor rooms. Aman owns saying no in code reviews that add hapi as a dependency 'just to try.'"
+    },
+    {
+      "type": "h2",
+      "text": "Failure modes if we ignore this decision"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "If we...",
+        "What happens",
+        "Who feels it"
+      ],
+      "rows": [
+        [
+          "Add hapi-fhir-base because a spike is fun",
+          "Classpath and then a /fhir stub 'for later'",
+          "On-call, RapidChart"
+        ],
+        [
+          "Return Bundles when Accept: fhir+json appears",
+          "Two clients, two bugs",
+          "Sneha, Gita"
+        ],
+        [
+          "Put notes into assemble because DocumentReference is standard",
+          "SiteNotes Friday outage becomes a chart outage",
+          "Denise's floors"
+        ],
+        [
+          "Mint FHIR ids before merge is done",
+          "Duplicate Patient resources after merge",
+          "Anita, health information management"
+        ],
+        [
+          "Promise US Core in a QBR",
+          "Conformance homework for fields ChartLine lacks",
+          "Rahul, then us"
+        ]
+      ],
+      "caption": "Failure modes. Code review should cite this table."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Question",
+        "Owner",
+        "Default"
+      ],
+      "rows": [
+        [
+          "Exact assemble field list and 1.8s SLO",
+          "Rahul + Aman; nursing timings still incoming",
+          "This TDD does not freeze fields; it freezes protocol"
+        ],
+        [
+          "Will any 2021 contract actually name FHIR?",
+          "Rahul Deshmukh",
+          "Assume no until a PDF with a signature"
+        ],
+        [
+          "JSON Schema vs OpenAPI 3 for v1",
+          "Kavya Menon",
+          "OpenAPI 3, Sneha generates tests from it"
+        ],
+        [
+          "Can CensusBoard live on assemble only and drop a census endpoint?",
+          "Omar Haddad",
+          "Keep /v1/census/status; do not force them onto chart JSON"
+        ],
+        [
+          "Luis Ortega's identity work vs Patient.id",
+          "Luis when he starts in Nov, Aman",
+          "Merge keys stay internal; no FHIR ids"
+        ]
+      ],
+      "caption": "Open questions. Protocol decision does not wait on them."
+    },
+    {
+      "type": "h2",
+      "text": "What engineering does next"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Aman: freeze this decision in the architecture review notes (done Oct 8). Link RVH-PRD-2020-019.",
+        "Kavya: ChartLine adapters emit our JSON types, not org.hl7.fhir.r4.model.*. Remove hapi from the spike branch; do not merge it to main.",
+        "Sneha: test plan against OpenAPI, not against validator CLI. Allergy-before-meds is a product concern for later; protocol is REST.",
+        "Rahul: vendor slide with one sentence: 'R4 mapping if contracted; RapidChart remains custom JSON.' Anita has seen this and did not object.",
+        "Priya: no req for a FHIR hire in FY21 plan."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Anita's comment in the review, paraphrased with her ok: the CMIO office is tired of interface projects that optimize for the next conference. She will support a mapping layer when a counterparty is real. Until then she wants allergies and a chart that does not lie when SiteNotes is down. That is REST we control."
+    },
+    {
+      "type": "h1",
+      "text": "Failure modes if we pick REST and then half-implement FHIR anyway"
+    },
+    {
+      "type": "p",
+      "text": "This section exists because the spike branch still has a package org.northstar.rvh.fhir.scratch that someone will try to merge 'so we do not lose the work.' Kavya will delete it on October 9. If it comes back, treat it as a product change, not a cleanup."
+    },
+    {
+      "type": "callout",
+      "label": "Warn",
+      "text": "Do not add a hidden /fhir/Patient route behind an Accept header. RapidChart's RestTemplate will send */* and you will accidentally serve Bundles to the floor. If you need a mapper later, it is a different host name, different deploy, different auth allowlist.",
+      "kind": "warn"
+    },
+    {
+      "type": "p",
+      "text": "ChartLine XML for allergies on fixture MEDSURG-A is 6.1 KB. Our JSON block is 2.4 KB. The HAPI AllergyIntolerance for the same row was 4.8 KB each because of meta.profile, text.div narrative we did not ask for, and a CodeableConcept with three coding entries (SNOMED, a ChartLine local code, and a leftover ICD string that was not an allergy code). Multiply by 14.2 mean allergies on the peds fixture and you have already spent the RapidChart budget on narrative HTML. HAPI generates text.div by default. Turning it off is a flag nobody will remember in a hotfix."
+    },
+    {
+      "type": "p",
+      "text": "Identity is the other smash. We do not have a stable Patient.id. The current lookup key is ChartLine MRN plus facility, hashed into merge_key mk_<12 hex> which will change when RVH-TDD-2021-004 lands. If we had minted FHIR ids in October 2020, HIM would own a crosswalk table by March, and every HIE subscriber would cache the old id. Custom REST lets us call it patient_id and document that it is not durable yet. That sentence is awkward and is also true. FHIR would make the same awkwardness look like a spec violation."
+    },
+    {
+      "type": "h3",
+      "text": "Worked payload math (so this is not vibes)"
+    },
+    {
+      "type": "p",
+      "text": "RapidChart's 50 KB p95 target is for the whole assemble body, gzip off, because their Java parser reads the entity before gzip stats matter on the workstation. Gzip helps the wire, not Gita's 50 KB warn. Numbers from spike fixture MEDSURG-A (62-year-old, 3 allergies, 8 active meds, 5 encounters, 6 problems) and PEDS-ALLERGY (6-year-old, 14 allergies, 4 meds, 5 encounters, 2 problems)."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Fixture",
+        "Custom assemble bytes",
+        "HAPI discrete Bundle",
+        "HAPI $everything contained",
+        "Over 50 KB / 120 KB cap"
+      ],
+      "rows": [
+        [
+          "MEDSURG-A",
+          "18,412",
+          "96,201",
+          "141,088",
+          "custom under; both HAPI over 50, $everything over 120"
+        ],
+        [
+          "PEDS-ALLERGY",
+          "41,706",
+          "188,440",
+          "236,119",
+          "custom under 50; HAPI over both caps"
+        ],
+        [
+          "BH-SHORT (2 allergies, 1 med, 3 enc, 1 problem)",
+          "9,884",
+          "54,220",
+          "88,671",
+          "custom under; discrete HAPI over 50"
+        ],
+        [
+          "ASC-DAY (demo+enc heavy, 0 allergies, 0 meds)",
+          "12,110",
+          "61,004",
+          "99,230",
+          "custom under; HAPI over 50 on metadata"
+        ]
+      ],
+      "caption": "Bytes as UTF-8 JSON, no gzip. Spike RVH-1744, October 1 evening run."
+    },
+    {
+      "type": "p",
+      "text": "BH-SHORT is the case vendors use in demos ('FHIR is fine, look how small'). It is not MAIN ED at 16:00. If a future mapper ships, it should cap AllergyIntolerance count, strip text.div, and refuse $everything. Those rules are easier to enforce on a dedicated deploy than on the RapidChart hot path."
+    },
+    {
+      "type": "h2",
+      "text": "ChartLine adapter notes (why passthrough was never real)"
+    },
+    {
+      "type": "p",
+      "text": "The interface at chartline-iface-prod.rvh.internal:8443 (stage: chartline-iface-stage.rvh.internal:8443) speaks a vendor JSON twin that looks 'modern' in a slide and is not R4. Allergy rows use fields AllergenName, SeverityCode, StatusCd, OnsetText. There is no system|code pair. Medication rows use OrderName, DoseFreeText, FreqCode. Encounter rows use EncNbr, AdmitDtm, EncTypeCd. Kavya's adapter maps those to our block objects. A FHIR mapper would map the same fields a second time into CodeableConcepts with dummy systems like http://rvh.internal/chartline/allergen, which is not US Core and would fail any partner's validator. We would then get a project to 'clean the codes' that is actually a terminology service. Five people. No."
+    },
+    {
+      "type": "p",
+      "text": "SiteNotes is HTTP POST /fetchNotes with a facility+MRN body, 14.6s timeout on their side, our client timeout 800ms if we ever call it from assemble, which v1 will not. Friday 16:00-18:30 Eastern their index job holds locks. That is a REST banner problem. In FHIR it becomes a DocumentReference search timeout that $everything would drag into the opening view. Out of scope here except as a warning: do not 'include notes because FHIR has the type.'"
+    },
+    {
+      "type": "h2",
+      "text": "Auth and versioning under REST"
+    },
+    {
+      "type": "p",
+      "text": "v1 auth is hospital LDAP via bearer tokens RapidChart already has. We introspect group membership. SMART on FHIR would want launch context, scopes, and a different token. Jordan Hale said October 5 that SMART is 'on a list' behind two other IAM projects. Building SMART as a side effect of picking R4 is how we miss the RapidChart date. Custom REST lets us keep LDAP and document it."
+    },
+    {
+      "type": "p",
+      "text": "Versioning: URL prefix /v1/. Breaking field changes go to /v2/. Additive fields on assemble blocks are allowed in v1 if Sneha's tests permit unknown properties on the RapidChart side (Gita said they ignore extras as of 4.2.0). We will not use FHIR's meta.versionId as a substitute for API versioning. We will not put the word R4 in the URL to satisfy a procurement checklist."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Change",
+        "v1 REST handling",
+        "If we had been on FHIR"
+      ],
+      "rows": [
+        [
+          "Add banners[]",
+          "Additive, already planned",
+          "Extension or OperationOutcome, bikeshed"
+        ],
+        [
+          "Rename display_name",
+          "Wait for v2 or add a second field",
+          "HumanName.structure is already a maze"
+        ],
+        [
+          "Drop a problem field ChartLine stopped sending",
+          "Optional JSON, tests allow missing",
+          "Must Support vs optional becomes a conformance fight"
+        ],
+        [
+          "New consumer wants $export",
+          "New project",
+          "They would still want $export, which HAPI does not give you for free in our setup"
+        ]
+      ],
+      "caption": "Versioning examples. REST is not magically easier on every row; it is easier on the rows we will actually hit in 2021."
+    },
+    {
+      "type": "h2",
+      "text": "How to say no in a vendor room (Rahul's language)"
+    },
+    {
+      "type": "p",
+      "text": "Rahul asked for a paragraph he can read out. Here: Northstar is building a purpose-built REST assemble for RapidChart and CensusBoard in 2020-2021 because ChartLine does not emit FHIR, the consumers want small JSON, and the team does not include a FHIR specialist. If a payer or HIE contract requires R4, we will staff a mapping service against the same internals. We are not committing to US Core, SMART, or $everything on this account this fiscal year. Point them at this doc id RVH-TDD-2020-011. If they need a date, the honest one is 'after a signed requirement,' not Q2."
+    },
+    {
+      "type": "p",
+      "text": "Sneha's test strategy (RVH-QA-2021-007 will exist later) should assert JSON Schema for /v1/chart/assemble, not a FHIR validator. If someone adds a CI job hapifhir/validator, fail the PR that added it unless the mapping deploy is in the same PR with a named consumer. Priya will back that rule."
+    },
+    {
+      "type": "p",
+      "text": "Luis Ortega starts in November. His first identity work should not include FHIR Patient identifiers. Chris Patel may store assemble timings in the ops warehouse; he may not store assemble bodies. Denise and Anita do not need to re-approve this TDD unless the protocol changes. End of design."
+    }
+  ]
+}

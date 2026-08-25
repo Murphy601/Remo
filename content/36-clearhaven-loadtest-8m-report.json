@@ -1,0 +1,718 @@
+{
+  "slug": "36-clearhaven-loadtest-8m-report",
+  "doc_id": "CLH-TST-2024-008",
+  "title": "Load test report: match path at 8.2M and 11.4M daily",
+  "subtitle": "k6 plus Kafka producer harness against clh-prod-shadow, October 14-16, 2024",
+  "doc_type": "Load test report",
+  "kicker": "Clearhaven Markets / Reconciliation platform",
+  "org": "Northstar Engineering",
+  "classification": "INTERNAL",
+  "version": "1.2",
+  "status": "Approved",
+  "date": "October 17, 2024",
+  "author": "Aman Kumar",
+  "role": "Software Engineer II",
+  "team": "Clearhaven recon (match-engine, break-svc, ingest)",
+  "audience": "Priya Nair, Diego Alvarez, Kavya Menon, Helen Cho, Marcus Bell, Jules Park",
+  "owners": "Aman Kumar (harness and analysis), Diego Alvarez (cluster), Jules Park (k6 fleet)",
+  "related": "CLH-TDD-2022-021, CLH-TDD-2023-008, CLH-MEM-2024-018, CLH-MTG-2024-015, CLH-TCK-8841, CLH-TCK-8912, CLH-TCK-9020",
+  "summary": "We ran two production-shaped load tests against the shadow recon stack on October 14 and October 16, targeting 8.2 million and 11.4 million matched events in a trading day. Tooling was k6 on the Jules Park load fleet plus a Kafka producer harness I wrote against clh.match.inbound. At 8.2M, p95 match window was 7.4 minutes. At 11.4M it was 11.1 minutes on current hardware, which misses the 8-minute SLA Helen Cho holds us to. The bottleneck is break-svc primary-key lookups on breaks.break_open, not Kafka ingest and not match-engine CPU. This report is for Priya, Diego, and Marcus. It says what we will change before year-end and what we will not.",
+  "form_description": "Internal load test report for Clearhaven recon. Written after the October 14-16 shadow runs so Priya and Marcus can decide hardware and so the match team can pick the break-svc work.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "October 14, 2024",
+      "Aman Kumar",
+      "Notes from run A (8.2M) while k6 was still up."
+    ],
+    [
+      "0.9",
+      "October 16, 2024",
+      "Aman Kumar",
+      "Run B (11.4M) numbers, flamegraphs from break-svc."
+    ],
+    [
+      "1.0",
+      "October 17, 2024",
+      "Aman Kumar",
+      "Tables, change list, rejected Go rewrite."
+    ],
+    [
+      "1.2",
+      "October 17, 2024",
+      "Priya Nair",
+      "Approved after standup. Cut the hardware ask from 6 to 4 nodes."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "1. Decision for people who will not read the rest"
+    },
+    {
+      "type": "p",
+      "text": "We can clear an 8.2 million event day on the hardware we have, with a p95 match window of 7.4 minutes. That is inside Helen Cho's 8-minute SLA, but the margin is 36 seconds and I would not call that a comfortable night. We cannot clear an 11.4 million event day on the same hardware. p95 match window was 11.1 minutes. p99 was 14.8 minutes. The 11.4M shape is what Rahul Deshmukh's volume forecast puts on us for a busy options expiry Friday in Q1 2025, so this is not a toy number."
+    },
+    {
+      "type": "p",
+      "text": "The thing that breaks first is break-svc doing indexed PK lookups on breaks.break_open keyed by (acct_id, instr_id, settle_dt). At 11.4M the lookup p95 on that table went from 4.6 ms to 18.9 ms and the worker pool sat at 96.4 percent CPU on the four c6i.2xlarge pods. Kafka ingest on clh.match.inbound stayed under 1.2 seconds of produce p95 the whole time. match-engine CPU peaked at 61.3 percent. If you only remember one sentence: buy time with a covering index and a hotter cache on break-svc, do not rewrite the matcher, do not buy six more Kafka brokers."
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Recommendation",
+      "text": "Ship the covering index and the 8 GB Redis lookup cache on break-svc before November 22, 2024 (CLH-TCK-8912). Keep the current match-engine JVM. Do not rewrite break-svc in Go this quarter. Add two c6i.2xlarge pods only if the cache miss rate on the November 8 dry run stays above 11 percent. Tell Marcus the 8-minute SLA is at risk on expiry Fridays until that work lands."
+    },
+    {
+      "type": "p",
+      "text": "Priya asked me in Slack whether we should just scale the Deployment to 12 replicas and call it done. We tried 8 replicas in run B2. Match window improved 41 seconds. The extra pods piled onto the same Postgres primary (recon-pg-01.chi.northstar.internal) and the PK lookup p95 got worse, 21.4 ms. Scaling the stateless layer without fixing the lookup is how we spend money and still miss the SLA."
+    },
+    {
+      "type": "h1",
+      "text": "2. What we ran, who ran it, what we claimed we would measure"
+    },
+    {
+      "type": "p",
+      "text": "Diego Alvarez stood up the shadow cluster clh-prod-shadow in us-east-1b, cloned from the October 11 production snapshot. Same Kafka topic layout, same consumer groups, same Postgres Patroni cluster name recon-pg-shadow, same Helm values except replica counts and the Datadog env tag. Jules Park owned the k6 fleet (k6-load-01 through k6-load-04, each c6i.4xlarge in the chi office VLAN 172.18.40.0/24). I owned the Kafka producer harness in repo clh-loadgen, tag v0.4.2, which writes Avro to clh.match.inbound using the same schema the ingest path uses on a real day."
+    },
+    {
+      "type": "p",
+      "text": "We said we would measure match window, which Helen defines as wall time from the first inbound trade of a 1-minute slice until that slice reports match_complete=true in clh.match.status. We also said we would measure break-svc lookup latency, Kafka consumer lag on group match-engine-prod-shadow, Postgres CPU and WAL rate on recon-pg-01, and error rate on the three HTTP paths ops actually pages on. We did not measure settlement file landing time. That path was out of scope because RailClear files are not in this test, Chris Patel already has a separate Spark backfill design for them, and mixing file drop jitter into a Kafka load test makes the match window number lie."
+    },
+    {
+      "type": "h2",
+      "text": "2.1 Targets and why those two numbers"
+    },
+    {
+      "type": "p",
+      "text": "8.2 million is the 95th percentile trading day we saw between June 3 and September 27, 2024, counted as matched events in clh.match.fact, not as raw FIX messages. 11.4 million is Rahul's Q1 2025 expiry Friday forecast plus 8 percent headroom he asked for after the March SLA review (CLH-MTG-2024-015). We did not test 15 million. Kavya wanted that number on the whiteboard. We do not have a producer that can hold 15 million without the harness itself becoming the bottleneck, and I would rather ship a honest 11.4M result than a 15M result that is actually a producer stall."
+    },
+    {
+      "type": "p",
+      "text": "Traffic shape was not flat. Real Clearhaven days are lumpy. We used the October 4, 2024 production histogram, scaled, with the 9:32-9:47 ET open spike at 4.7x median and the 15:50-16:05 ET close spike at 3.1x. The harness replays that histogram in 1-minute buckets. k6 only hit the HTTP control plane (match status, break lookup, ops ack) at 220 rps steady, which is what Helen's ops terminals actually do, not a synthetic 2k rps that would make the API look worse than production."
+    },
+    {
+      "type": "h2",
+      "text": "2.2 Environment that actually ran"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Piece",
+        "Shadow (what we hit)",
+        "Prod (for comparison)",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "Kafka",
+          "clh-kafka-shadow, 6 brokers r6i.2xlarge",
+          "clh-kafka-prod, 6 brokers r6i.2xlarge",
+          "Same topic count. 48 partitions on clh.match.inbound vs 48 in prod."
+        ],
+        [
+          "match-engine",
+          "8 pods, 4 vCPU / 8 Gi, G1, heap 5.5g",
+          "8 pods, same requests",
+          "Image match-engine:1.19.4, same as prod Monday."
+        ],
+        [
+          "break-svc",
+          "4 pods, 2 vCPU / 4 Gi",
+          "4 pods, same",
+          "This is the box that caught fire."
+        ],
+        [
+          "Postgres",
+          "recon-pg-shadow Patroni, m6i.4xlarge primary + 1 replica",
+          "recon-pg m6i.4xlarge + 1 replica",
+          "Shared_buffers 8 GB both. No extra read replica."
+        ],
+        [
+          "Redis",
+          "clh-redis-shadow, cache.r6g.large, 13.07 Gi",
+          "cache.r6g.large",
+          "Used for session and a small instrument cache. Not for break lookups today."
+        ],
+        [
+          "k6 fleet",
+          "4 x c6i.4xlarge, k6 v0.52.0",
+          "n/a",
+          "Jules's VLAN. Not in the Clearhaven VPC."
+        ],
+        [
+          "Producer harness",
+          "2 x c6i.2xlarge, clh-loadgen v0.4.2",
+          "n/a",
+          "Acks=1, linger.ms=8, batch 64 KiB."
+        ]
+      ],
+      "caption": "Shadow vs production. We matched prod replica counts on purpose. Scaling the test cluster would have hidden the bottleneck."
+    },
+    {
+      "type": "p",
+      "text": "Diego cloned the October 11 snapshot rather than the October 13 one because October 13 had the half-applied partition migration on breaks.break_open (CLH-SOP-2024-011) and we did not want a half-migrated table in the numbers. I agree with that call. The clone finished at 02:14 ET on October 14. First k6 smoke (50k events) started at 06:05. We did not start the 8.2M run until 07:40 because the replica was still catching WAL, 14.6 GB behind, and a test against a lagging replica is a different test."
+    },
+    {
+      "type": "h1",
+      "text": "3. Method"
+    },
+    {
+      "type": "h2",
+      "text": "3.1 Kafka producer harness"
+    },
+    {
+      "type": "p",
+      "text": "The harness is a Go binary. I know how that sentence reads given the later section on not rewriting break-svc in Go. The harness is a load generator. It does not sit in the match path. It reads a JSON histogram, expands it into Avro records with account ids drawn from the top 12,400 Clearhaven accounts in the snapshot, and publishes to clh.match.inbound. Keys are acct_id so partition affinity matches production. I did not use k6's xk6-kafka because the last time Jules tried that on Riverview-shaped traffic the serializer fought the schema registry and we spent a day on it. k6 stays on HTTP. Kafka stays in the harness."
+    },
+    {
+      "type": "p",
+      "text": "Idempotency keys are loadtest-<run_id>-<seq>. The consumer already treats those as first-write-wins, so rerunning a slice does not double-count matches. That bit is from the idempotent consumers design (CLH-TDD-2023-014) and it worked. During run A we had to restart harness-02 after a disk fill on /var/tmp (12.4 GB of failed-produce logs, my fault, I left debug on). Restart replayed 188,400 keys. match-engine dropped them as duplicates. Good."
+    },
+    {
+      "type": "code",
+      "text": "# harness on loadgen-02.chi.northstar.internal\nexport SCHEMA_REGISTRY=http://schemareg-shadow.clh.internal:8081\nexport BOOTSTRAP=kafka-shadow-01.chi.northstar.internal:9092\n./clh-loadgen produce \\\n  --topic clh.match.inbound \\\n  --histogram ./hist/2024-10-04.json \\\n  --scale 8.2e6 \\\n  --run-id A-20241014 \\\n  --rate-limit-mbps 180 \\\n  --acks 1 \\\n  --linger-ms 8\n",
+      "caption": "Command actually used for run A. Run B swapped --scale 11.4e6 and --run-id B-20241016."
+    },
+    {
+      "type": "h2",
+      "text": "3.2 k6 HTTP"
+    },
+    {
+      "type": "p",
+      "text": "k6 script clh-match-status.js lives in the same repo. It polls GET /v2/match/status?slice={n} and GET /v2/breaks/{break_id} with a token from the shadow OIDC box. We did not hit /v1. /v1 is on the sunset clock and Helen does not want us pretending it is the path ops uses. Think time was 280-640 ms, copied from a tcpdump Priya pulled off Helen's terminal last March. Virtual users: 40 on run A, 55 on run B. That is ops load, not a DDoS."
+    },
+    {
+      "type": "h2",
+      "text": "3.3 What we refused to do"
+    },
+    {
+      "type": "p",
+      "text": "We refused Locust. Sneha Iyer still has a Locust tree from the 2023 Kafka ingest redesign and she offered it. Locust would have been fine for HTTP. It would not have produced Avro at 11.4M without us writing the same harness anyway. We refused to test against the production primary. Marcus asked, once, on the October 9 pre-brief, whether we could 'just run it Saturday on prod because Saturday is quiet.' Diego said no. I said no. Priya said no. Saturday quiet is 1.1M events, which teaches you nothing about 11.4M, and a runaway producer against clh.match.inbound on a real cluster is how you get a real incident report."
+    },
+    {
+      "type": "p",
+      "text": "We also refused the 'rewrite break-svc in Go this quarter' proposal that came back around during the October 10 planning huddle. I am putting that in its own section because people will look for it. Short version here: a language change is a six-week minimum with Kavya out on the API versioning follow-through, and the profiler says the time is in Postgres round trips, not in the JVM. Rewriting the client does not shrink the index."
+    },
+    {
+      "type": "h1",
+      "text": "4. Runs"
+    },
+    {
+      "type": "p",
+      "text": "Six numbered runs. A-smoke and B-smoke were 50k and 120k. They are in the table because Diego asked me not to hide them. The runs that matter are A1, A2, B1, B2. A2 is a repeat of A1 after I turned debug off and Jules pinned k6-load-03 which had been stealing cycles from a leftover Grafana agent. B2 is B1 plus break-svc scaled from 4 to 8 pods, which is the experiment Priya wanted."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Run",
+        "When (ET)",
+        "Target events",
+        "Duration",
+        "p50 match",
+        "p95 match",
+        "p99 match",
+        "Max lag (match-engine-prod-shadow)",
+        "Result"
+      ],
+      "rows": [
+        [
+          "A-smoke",
+          "Oct 14 06:05",
+          "50,400",
+          "4.2 min",
+          "0.8 min",
+          "1.1 min",
+          "1.4 min",
+          "12,400",
+          "Pass. Replica still catching WAL, ignored for SLA."
+        ],
+        [
+          "A1",
+          "Oct 14 07:40",
+          "8.20M",
+          "6.8 hr window / 1 trading-day shape",
+          "3.9 min",
+          "7.9 min",
+          "10.6 min",
+          "412,000",
+          "Fail vs 8 min SLA. Debug logging on harness-02, discarded."
+        ],
+        [
+          "A2",
+          "Oct 14 16:10",
+          "8.20M",
+          "same shape compressed into 5.1 hr",
+          "3.6 min",
+          "7.4 min",
+          "9.8 min",
+          "268,400",
+          "Pass. This is the 8.2M number we will quote."
+        ],
+        [
+          "B-smoke",
+          "Oct 16 05:55",
+          "120,800",
+          "6.1 min",
+          "0.9 min",
+          "1.3 min",
+          "1.7 min",
+          "18,900",
+          "Pass."
+        ],
+        [
+          "B1",
+          "Oct 16 07:20",
+          "11.40M",
+          "same 1-day shape, 6.4 hr",
+          "5.8 min",
+          "11.1 min",
+          "14.8 min",
+          "3.41M",
+          "Fail. SLA miss. Peak lag during 9:32 spike."
+        ],
+        [
+          "B2",
+          "Oct 16 15:05",
+          "11.40M",
+          "same, break-svc 8 pods",
+          "5.6 min",
+          "10.4 min",
+          "14.1 min",
+          "3.18M",
+          "Still fail. Extra pods made PK p95 worse."
+        ]
+      ],
+      "caption": "Primary run table. Match window is Helen's definition, 1-minute slices. Lag is consumer group match-engine-prod-shadow on clh.match.inbound."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Run",
+        "break-svc CPU p95",
+        "break-svc PK lookup p95",
+        "match-engine CPU p95",
+        "Postgres CPU (primary)",
+        "WAL rate",
+        "k6 HTTP p95 /v2/match/status",
+        "Error rate"
+      ],
+      "rows": [
+        [
+          "A2",
+          "71.4%",
+          "4.6 ms",
+          "48.2%",
+          "62.1%",
+          "41.8 MB/s",
+          "86 ms",
+          "0.04%"
+        ],
+        [
+          "B1",
+          "96.4%",
+          "18.9 ms",
+          "61.3%",
+          "88.7%",
+          "63.2 MB/s",
+          "142 ms",
+          "0.19%"
+        ],
+        [
+          "B2",
+          "81.6% (8 pods)",
+          "21.4 ms",
+          "60.8%",
+          "91.3%",
+          "64.1 MB/s",
+          "138 ms",
+          "0.17%"
+        ]
+      ],
+      "caption": "Resource table for the three runs we will argue about. B2 CPU per pod dropped. Lookup latency did not."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Slice (ET)",
+        "Inbound events (B1)",
+        "Match window p95",
+        "break-svc lookup p95",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "09:32-09:33",
+          "48,620",
+          "11.1 min",
+          "18.9 ms",
+          "Open spike. This slice set the day p95."
+        ],
+        [
+          "09:45-09:46",
+          "31,240",
+          "9.6 min",
+          "14.2 ms",
+          "Still draining 09:32."
+        ],
+        [
+          "12:14-12:15",
+          "8,140",
+          "4.1 min",
+          "5.8 ms",
+          "Lunch. Fine."
+        ],
+        [
+          "15:50-15:51",
+          "27,880",
+          "8.7 min",
+          "12.4 ms",
+          "Close spike. Did not set the day p95."
+        ],
+        [
+          "16:04-16:05",
+          "14,220",
+          "6.2 min",
+          "7.9 ms",
+          "Drain."
+        ]
+      ],
+      "caption": "B1 by slice. The day is lost at the open, not at the close. That matches what Helen already yells about on expiry Fridays."
+    },
+    {
+      "type": "p",
+      "text": "A1 is in the table as a fail because I will not pretend 7.9 minutes did not happen. The 0.5 minute gap between A1 and A2 is debug logging on the harness plus a noisy neighbor on k6-load-03. It is not a matcher mystery. If someone quotes 7.9 against us in a steering meeting, the answer is 'that run had debug on, look at A2.' I left A1 visible so the argument is short."
+    },
+    {
+      "type": "h1",
+      "text": "5. Where the time went"
+    },
+    {
+      "type": "h2",
+      "text": "5.1 break-svc PK lookups"
+    },
+    {
+      "type": "p",
+      "text": "break-svc, on a match, asks Postgres 'is there already an open break for this (acct_id, instr_id, settle_dt)?' via SELECT break_id, status, qty_open FROM breaks.break_open WHERE acct_id=$1 AND instr_id=$2 AND settle_dt=$3. That query uses pk_break_open, a btree on those three columns. At 8.2M the table has 2.14 million live rows in the shadow snapshot (production was 2.09 million the same morning). At 11.4M we insert faster than we close, so live rows peaked at 2.87 million during B1. Cache hit rate on shared_buffers for that index dropped from 98.4 percent in A2 to 91.1 percent in B1. That is the whole story, almost."
+    },
+    {
+      "type": "p",
+      "text": "I pulled a 45-second perf record off break-svc-2 during the 09:32 spike on B1. 38.6 percent of on-cpu time is in org.postgresql.core.v3.QueryExecutorImpl. 11.2 percent is JSON serde. 6.4 percent is the Redis session get. 4.1 percent is everything else we wrote. The JVM is waiting on the database. Kavya and I stared at this together on the call at 10:05. She asked whether we were missing a connection pool setting. Hikari pool is 24 per pod, 4 pods, 96 connections. Postgres max_connections on recon-pg-shadow is 200. We were at 118 during the spike including Patroni and Datadog. Pool is not the limiter. The query is."
+    },
+    {
+      "type": "p",
+      "text": "EXPLAIN ANALYZE on a replay of the hot query, run from my laptop against the replica at 11:40 while B1 was still draining: Index Scan using pk_break_open, actual time 0.084..12.440 ms, buffers 18 hit / 40 read. The 40 read is the smoking gun. Those 40 pages are not staying in shared_buffers because the working set of (acct, instr, date) at 11.4M is larger than 8 GB of shared_buffers plus whatever the OS has left after WAL. Diego confirmed pg_stat_statements total_exec_time for that query id 8140293312 was 61.4 percent of all database time during B1."
+    },
+    {
+      "type": "h2",
+      "text": "5.2 What was not the bottleneck"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Kafka produce p95 stayed at 1.14 seconds on B1, 0.88 seconds on A2. Under the 2.5 second budget from the ingest redesign (CLH-TDD-2023-008).",
+        "match-engine heap sat at 3.41 GB of 5.5 GB. GC p95 pause 28.4 ms. No allocation storm. Flamegraph does not show the matcher hot.",
+        "Network between k6 VLAN and shadow NLB: 1.8 ms p95. Jules checked. Not us.",
+        "Schema registry: 4.2 ms p95 fetches, almost all cached after the first minute.",
+        "Redis get for instrument cache: 0.41 ms p95. Tiny.",
+        "DLQ writes: 1,240 messages on B1, 0.011 percent. Almost all were the bad CUSIP fixture I left in the histogram for account 448192. I will take that fixture out. It is not a platform problem."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "5.3 Secondary pain: WAL and the replica"
+    },
+    {
+      "type": "p",
+      "text": "WAL rate 63.2 MB/s on B1 is inside what the m6i.4xlarge volume can take (gp3, 12,000 IOPS, 500 MB/s cap). Replica apply lag peaked at 3.8 seconds, which is inside the 3 second async window Rina Das and Marcus have been arguing about on the failover runbook, then briefly over it. I am not opening that argument in this report. I am noting that at 11.4M we nibble the replica lag budget, and a failover during an expiry Friday open would lose more than 3 seconds of breaks.break_open writes. Diego has a graph. Rina will not like it."
+    },
+    {
+      "type": "h1",
+      "text": "6. What we will change"
+    },
+    {
+      "type": "p",
+      "text": "This is the list Priya asked me to make 'boring and shippable.' Dates assume Kavya's API work stays on the August design and does not spill. If it spills, slip the cache, not the index. The index is a SQL file."
+    },
+    {
+      "type": "h2",
+      "text": "6.1 Covering index on breaks.break_open (CLH-TCK-8912)"
+    },
+    {
+      "type": "p",
+      "text": "CREATE INDEX CONCURRENTLY ix_break_open_lookup ON breaks.break_open (acct_id, instr_id, settle_dt) INCLUDE (break_id, status, qty_open); then drop the old pk-backed scan from the hot path by changing the query to an index-only scan. We cannot drop pk_break_open. It is the primary key. We can stop using it for this lookup. Expected: buffer reads per lookup from 40 toward 3-6, p95 from 18.9 ms toward 5-7 ms at 11.4M. I will not promise 4.6 ms. 4.6 ms was at 8.2M with a smaller live set. Sneha gets a replay of B1 against a restored snapshot with the index in place before we call it done. Target date November 8, which is the next shadow window Diego already booked."
+    },
+    {
+      "type": "h2",
+      "text": "6.2 Redis cache in front of the lookup (CLH-TCK-9020)"
+    },
+    {
+      "type": "p",
+      "text": "Key: brk:{acct_id}:{instr_id}:{settle_dt}. Value: the three INCLUDE columns, 24-hour TTL, write-through on insert and on close. Budget: 8 GB, which fits on a cache.r6g.xlarge (26.32 Gi). Jules will order the parameter group change. Miss path stays on Postgres so a cold cache is slow, not wrong. I want miss rate under 11 percent after 20 minutes of open, measured on the November 8 dry run. If we miss more than that, we add the two extra break-svc pods Priya already has in the FY25 capacity memo (CLH-MEM-2024-018) and we live with it through Q1."
+    },
+    {
+      "type": "h2",
+      "text": "6.3 Postgres shared_buffers bump, small"
+    },
+    {
+      "type": "p",
+      "text": "8 GB to 12 GB on the m6i.4xlarge. Diego is willing. That box has 64 GB RAM. We have been timid because the last time someone pushed shared_buffers on recon-pg (March 2023, before I was on this account) they forgot huge_pages and the box spent a night swapping. We will set huge_pages, we will change it in a change window, and we will not do it on an expiry Friday. Expected help: a few points of buffer hit rate. Not a substitute for the index."
+    },
+    {
+      "type": "h2",
+      "text": "6.4 k6 and harness hygiene so the next test is cheaper"
+    },
+    {
+      "type": "p",
+      "text": "Turn debug off by default. Cap /var/tmp. Pin the Grafana agent off the k6 boxes during a run. Add a --reject-cusip flag so I cannot leave 448192 in the histogram again. Jules will bake the k6 AMI. I will cut clh-loadgen v0.5.0 by October 25."
+    },
+    {
+      "type": "h1",
+      "text": "7. What we will not change"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Out of scope this quarter",
+      "text": "No match-engine rewrite. No break-svc rewrite in Go. No extra Kafka brokers. No partition count change on clh.match.inbound. No move of break_open off Postgres onto DynamoDB, Cassandra, or whatever landed in the Slack thread after B1. No 'just run it on prod Saturday' as a substitute for shadow."
+    },
+    {
+      "type": "p",
+      "text": "Kafka is fine. Adding brokers because lag hit 3.41M during B1 treats a symptom. That lag is match-engine waiting on break-svc waiting on Postgres. 48 partitions on clh.match.inbound is already more than the 8 match-engine pods can usefully own. Bumping to 96 would make the next rebalance worse, and we already have a January incident on that subject (CLH-INC-2024-017). Leave the topic alone."
+    },
+    {
+      "type": "p",
+      "text": "match-engine at 61.3 percent CPU is a healthy engine. Kavya and I talked about pulling the break lookup into the matcher process to save a network hop. That couples two deploys we have spent a year uncoupling, and the hop is 0.6 ms inside the VPC. The 18.9 ms is the database. Keep the hop."
+    },
+    {
+      "type": "h2",
+      "text": "7.1 Rejected: rewrite break-svc in Go this quarter"
+    },
+    {
+      "type": "p",
+      "text": "This came from a hallway conversation after B1, then a Slack thread with 19 messages, then Priya asking me to write it down so it dies on paper. The pitch: break-svc is a thin lookup plus a JSON mapper, Go would cut tail latency, we have clh-loadgen as proof we can ship Go. The pitch dies on three facts. One, the profiler puts the time in QueryExecutorImpl and in Postgres, not in JSON. Two, Kavya is the only other person on this account who has shipped Go to prod here, and she is on the versioning follow-through until at least November 15. Three, a rewrite of break-svc is also a rewrite of its idempotency, its metrics names, its runbook, and Sneha's test suite. That is not a quarter of work we have. It is a quarter of work we do not have. We can talk about Go in FY26 if the cache and the index do not get us under 8 minutes. We are not talking about it in the next six weeks."
+    },
+    {
+      "type": "quote",
+      "text": "If we rewrite it and the p95 is still 11 minutes I will be the one on the call with Marcus. Do the index.",
+      "attrib": "Priya Nair, October 16 standup"
+    },
+    {
+      "type": "h1",
+      "text": "8. SLA math Marcus will ask for"
+    },
+    {
+      "type": "p",
+      "text": "Helen's SLA is p95 match window under 8 minutes for any trading day under 9 million matched events, and 'best effort, page us at 12 minutes' above that. The contract language Marcus cites is the 2023 MSA exhibit C, which actually says 'end of day completeness by 18:30 ET' and does not mention 8 minutes. The 8 minutes is an ops agreement from the March 12, 2024 SLA review. We still treat it as binding because Helen pages us on it. At 8.2M we are 0.6 minutes inside. At 11.4M we are 3.1 minutes outside. Expiry Fridays in Q1 are Rahul's 11.4M shape. So: we are fine on a normal day, we are not fine on the days that make the quarterly review."
+    },
+    {
+      "type": "p",
+      "text": "Error rate 0.19 percent on B1 is under the 0.5 percent Helen said she can swallow. Almost all of that 0.19 percent is HTTP 429 from break-svc when the worker pool sat at 96.4 percent. The cache should cut that. If it does not, we add a queue timeout of 2.5 seconds and a 503 with Retry-After, which ops already knows how to handle, instead of a hung 30-second request. Sneha will write that case. Ticket CLH-TCK-9044, not started."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Day shape",
+        "Events",
+        "Current p95 (measured or scaled)",
+        "SLA",
+        "After index+cache (guess)",
+        "Confidence"
+      ],
+      "rows": [
+        [
+          "Median 2024",
+          "4.16M",
+          "~3.1 min (prod, last 60d)",
+          "8 min",
+          "~2.8 min",
+          "High. Prod already clears these."
+        ],
+        [
+          "p95 2024 (this test)",
+          "8.20M",
+          "7.4 min (A2)",
+          "8 min",
+          "5.2-6.0 min",
+          "Medium. Index helps less when we already fit."
+        ],
+        [
+          "Q1 expiry Friday (this test)",
+          "11.40M",
+          "11.1 min (B1)",
+          "best effort / 8 min ops target",
+          "7.1-8.4 min",
+          "Low-medium. Needs November 8 rerun."
+        ],
+        [
+          "Rahul +20% panic case",
+          "13.68M",
+          "not tested",
+          "unknown",
+          "do not quote a number",
+          "We do not have this run. Do not invent it."
+        ]
+      ],
+      "caption": "SLA view. The 13.68M row exists so nobody asks me to extrapolate a number I do not have."
+    },
+    {
+      "type": "h1",
+      "text": "9. Failure modes we hit or nearly hit"
+    },
+    {
+      "type": "p",
+      "text": "The load test is also a rehearsal. These are the things that went wrong or would have gone wrong if we had been on prod."
+    },
+    {
+      "type": "h3",
+      "text": "9.1 Harness disk fill"
+    },
+    {
+      "type": "p",
+      "text": "harness-02 filled /var/tmp at 09:58 on A1. 12.4 GB of JSON debug. Produce stalled, lag jumped, I restarted, 188,400 duplicates, matcher dropped them. If this had been a production producer we would have had a gap, not a stall, because the real ingest path does not debug-log every record. Still: the harness is now a thing Diego has to monitor during a test, and I owe him a disk alert. Added to Jules's AMI work."
+    },
+    {
+      "type": "h3",
+      "text": "9.2 Replica WAL catch-up"
+    },
+    {
+      "type": "p",
+      "text": "We almost started A1 against a replica 14.6 GB behind. Diego caught it. A test like that would have shown break-svc serving stale open-breaks and a fake-good match window. Precondition for any future run: SELECT EXTRACT(EPOCH FROM (now() - pg_last_xact_replay_timestamp())) on the replica under 5 seconds, or we wait."
+    },
+    {
+      "type": "h3",
+      "text": "9.3 Noisy neighbor on k6-load-03"
+    },
+    {
+      "type": "p",
+      "text": "Leftover grafana-agent from a Riverview dashboard Jules thought he had purged. Stole 1.4 vCPU. Skewed A1 HTTP p95. We would have shipped a lie about the API if we had not repeated the run. Check processes on the k6 boxes. Every time."
+    },
+    {
+      "type": "h3",
+      "text": "9.4 Bad CUSIP fixture"
+    },
+    {
+      "type": "p",
+      "text": "Account 448192, CUSIP 000000000. 1,240 DLQ writes. Harmless in shadow. In prod that CUSIP would have been a data incident and Helen would have been in the room. Histogram lint is now a gate in clh-loadgen v0.5.0."
+    },
+    {
+      "type": "h3",
+      "text": "9.5 Connection creep if we had scaled match-engine too"
+    },
+    {
+      "type": "p",
+      "text": "We did not scale match-engine. If we had, Hikari pools would have pushed Postgres toward max_connections. At 12 match-engine pods plus 8 break-svc we would have been at about 190 of 200. Patroni needs headroom. Do not scale both layers without bumping max_connections, and do not bump max_connections without looking at work_mem. I wrote that down because someone will suggest it in Q1."
+    },
+    {
+      "type": "h1",
+      "text": "10. How to rerun this (engineer section)"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Book clh-prod-shadow with Diego. Need the Patroni pair, the 6 Kafka brokers, Redis, and a snapshot no older than 7 days. Do not use a snapshot that still has a half-applied partition job.",
+        "Confirm replica apply lag under 5 seconds: kubectl -n clh-shadow exec recon-pg-replica-0 -- psql -c \"select extract(epoch from (now() - pg_last_xact_replay_timestamp()));\"",
+        "Disable grafana-agent on k6-load-01..04. Jules has the systemd unit name grafana-agent.service.",
+        "Cut a run-id. Put it in the Slack channel #clh-loadtest before you produce a single record.",
+        "Start clh-loadgen with debug off, --rate-limit-mbps 180, acks=1. Watch /var/tmp on both harness boxes.",
+        "Start k6 with 40 VUs for an 8.2M-shaped run, 55 VUs for 11.4M. Script clh-match-status.js. Do not hit /v1.",
+        "In Datadog, dashboard clh-shadow-match. Watch break-svc PK p95, Postgres CPU, consumer lag, WAL rate. Abort if replica lag exceeds 15 seconds or if Postgres CPU holds 95 percent for 10 minutes.",
+        "At end of histogram, wait for lag to drain under 10,000 before you call match window. Calling it while lag is 3 million is how you invent a 40-minute number.",
+        "Export the four CSV dumps from the dashboard (match window, lookup p95, lag, errors) into this report's appendix folder. Naming: {run-id}-{metric}.csv.",
+        "Drop the shadow cluster or snapshot it. Do not leave 11.4M of fake breaks in a clone that someone will restore onto a laptop."
+      ]
+    },
+    {
+      "type": "code",
+      "text": "# abort switch, same as run B1 when Jules thought WAL would tip over\nkubectl -n clh-shadow scale deploy/clh-loadgen --replicas=0\nkubectl -n clh-shadow annotate kafka/clh-match-inbound \\\n  clh.northstar.example/loadtest=aborted-$(date -u +%Y%m%dT%H%M%SZ)\n# lag drain check\nkafka-consumer-groups.sh --bootstrap-server kafka-shadow-01.chi.northstar.internal:9092 \\\n  --group match-engine-prod-shadow --describe | awk '$6+0 > 10000 {print}'\n",
+      "caption": "Abort and lag drain. We used the scale-to-zero on the harness at 11:07 on B1 when replica lag kissed 3.8s. We then let it drain and continued. We did not abort the day."
+    },
+    {
+      "type": "h1",
+      "text": "11. Open questions"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Question",
+        "Owner",
+        "Due",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "Does Helen accept 8.4 min p95 on expiry Fridays for Q1 if we miss the 8.0 target after the index?",
+          "Marcus Bell",
+          "October 24, 2024",
+          "Need a written ops exception, not a Slack thumbs-up."
+        ],
+        [
+          "cache.r6g.xlarge spend is $14.6k/year on shadow+prod. Does FY25 capacity already cover it?",
+          "Priya Nair",
+          "October 22, 2024",
+          "CLH-MEM-2024-018 listed r6g.large. This is a size bump."
+        ],
+        [
+          "Can Rina Das live with replica lag peeking at 3.8s during the open?",
+          "Diego Alvarez",
+          "November 1, 2024",
+          "Ties to the failover runbook 3s async argument with Marcus."
+        ],
+        [
+          "Do we rerun 11.4M on November 8 with the index only, or index plus cache?",
+          "Aman Kumar",
+          "October 21, 2024",
+          "I want index-only first so we can tell the two effects apart."
+        ],
+        [
+          "Is account 448192 a real account we should keep out of fixtures forever?",
+          "Chris Patel",
+          "October 23, 2024",
+          "It showed up in the snapshot. Might be a test acct that leaked."
+        ],
+        [
+          "Should Sneha's suite grow a 2.5s timeout / 503 case on break-svc?",
+          "Sneha Iyer",
+          "November 15, 2024",
+          "CLH-TCK-9044. Only if cache miss still 429s."
+        ]
+      ],
+      "caption": "Open questions. Owners are named so this does not become a group assignment."
+    },
+    {
+      "type": "h1",
+      "text": "12. Cost and calendar"
+    },
+    {
+      "type": "p",
+      "text": "Shadow cluster for three days: Diego's estimate $1,840 on EC2 and gp3, plus $210 on the k6 VLAN which is already ours. Redis size bump, if we keep it on shadow after the test, is the $14.6k/year number above for two caches. Engineering time: I spent 18.5 hours on the harness and the report, Diego 11 hours on the cluster, Jules 4.5 hours on k6 boxes, Kavya 2 hours on the flamegraph call. Priya, this is cheaper than a Go rewrite and cheaper than six Kafka brokers. It is not free."
+    },
+    {
+      "type": "p",
+      "text": "Calendar: index SQL on staging October 23 (Sneha), prod change window October 29 21:00-22:30 ET (Diego + me), cache parameter group November 5, shadow rerun November 8, readout to Marcus November 12. If the October 29 window slips, slip the cache, keep the index date, tell me."
+    },
+    {
+      "type": "h1",
+      "text": "13. Notes I would rather not bury"
+    },
+    {
+      "type": "p",
+      "text": "Helen sat in for the last 40 minutes of B1. She said the 11.1 minute number 'looks like 2022' which is the sentence that will travel. 2022 was 41-minute match windows on file drop. We are not there. We are at 11.1 on a day shape we have not had yet, on hardware we have not tuned, with a lookup we have not indexed. Please do not let that sentence become the summary of this test."
+    },
+    {
+      "type": "p",
+      "text": "Rahul asked whether we can get him a 15M number by Friday. No. The harness tops out around 13 million before produce p95 crosses 2.5 seconds on two c6i.2xlarge boxes, and I will not quote a matcher number from a producer-bound run. If Q1 really needs 15M we book another two loadgen boxes and another shadow day in December. We do not invent it."
+    },
+    {
+      "type": "p",
+      "text": "I am listing the tickets again so they have a home: CLH-TCK-8912 covering index, CLH-TCK-9020 Redis write-through, CLH-TCK-9044 503 on pool exhaustion, CLH-TCK-8841 leftover from the capacity memo for the two extra pods we will only buy if November 8 misses. Diego owns the shadow booking. I own the harness. Jules owns the k6 AMI. Kavya owns the query change inside break-svc because that service is hers on paper even though I wrote half the lookup."
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Sign-off",
+      "text": "Priya approved v1.2 the afternoon of October 17 with the hardware ask cut from 6 extra Kafka brokers (rejected) and 6 extra break-svc pods (rejected) down to 'index, cache, maybe 2 pods.' Marcus has the SLA exception question until October 24. This report is the record of the October 14 and October 16 runs. It is not a promise that November 8 will land under 8 minutes. It is a promise we will measure it."
+    }
+  ]
+}

@@ -1,0 +1,619 @@
+{
+  "slug": "26-clearhaven-idempotent-consumers-design",
+  "doc_id": "CLH-TDD-2023-014",
+  "title": "Idempotent consumers for settlement ingest",
+  "subtitle": "Kafka at-least-once plus recon.ingest_dedup. What we will call exactly-once-ish, and what we will not claim.",
+  "doc_type": "Technical design",
+  "kicker": "Clearhaven Recon / Ingest",
+  "org": "Northstar Engineering",
+  "classification": "INTERNAL",
+  "version": "1.2",
+  "status": "Approved",
+  "date": "July 6, 2023",
+  "author": "Aman Kumar",
+  "role": "Software Engineer II",
+  "team": "Clearhaven Recon Platform",
+  "audience": "Ingest and match-engine engineers, Diego Alvarez (SRE), Priya Nair (approver), Helen Cho (ops impact)",
+  "owners": "Aman Kumar (design), Kavya Menon (ingest-svc), Diego Alvarez (Kafka and Postgres ops)",
+  "related": "CLH-6012, CLH-TDD-2023-008, CLH-TDD-2022-021, CLH-RB-2023-012, CLH-TDD-2023-022",
+  "summary": "This design covers how ingest-svc will stop double-applying settlement trades when Kafka redelivers a message. We keep the broker at at-least-once, write a row to recon.ingest_dedup keyed by source plus content hash plus firm_seq, and publish match-engine work through recon.outbox in the same Postgres transaction as the trade insert. The document is for Kavya's ingest team to implement, for Diego to size the table and the WAL, and for Priya to sign the honesty bound: we will not tell Clearhaven we have true exactly-once semantics. Ticket CLH-6012.",
+  "form_description": "Technical design for idempotent Kafka consumers on the Clearhaven recon ingest path. Written after a week of duplicate exception tickets so the team has one schema, one commit order, and a list of failure modes before Kavya starts the CLH-6012 branch.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "June 22, 2023",
+      "Aman Kumar",
+      "Draft after June 19 duplicate week; hash-only key."
+    ],
+    [
+      "0.4",
+      "June 28, 2023",
+      "Aman Kumar",
+      "firm_seq added after 12 ms twin-trade case from Helen."
+    ],
+    [
+      "0.8",
+      "July 3, 2023",
+      "Kavya Menon",
+      "Outbox publisher contract and SQL reviewed."
+    ],
+    [
+      "1.0",
+      "July 5, 2023",
+      "Aman Kumar",
+      "Priya review. Rejected Kafka transactions section locked."
+    ],
+    [
+      "1.2",
+      "July 6, 2023",
+      "Aman Kumar",
+      "Approved. Open questions assigned."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "1. Decision for Priya"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Ship exactly-once-ish on ingest-svc: Kafka stays at-least-once, Postgres is the source of truth for whether a payload has been applied. Dedup table recon.ingest_dedup, unique on (source_system, content_sha256, firm_seq). Trade row plus outbox row plus dedup row in one transaction, then Kafka commit. Do not claim true EOS to Marcus or to Clearhaven compliance. Target: CLH-6012 in prod by August 8, 2023."
+    },
+    {
+      "type": "p",
+      "text": "Helen Cho's ops queue took 47 duplicate exception tickets the week of June 19. Same trade, same break_id generated twice, same cash movement proposed twice against the same Clearhaven account. Match-engine did what it was told. The duplicates came from ingest-svc applying the same Kafka record after a rebalance on clh-ingest-prod. Offset commit happened before the Postgres write finished on 11 of those 47. The other 36 were honest redeliveries after a 14.8 second stop-the-world GC on ingest-svc-2, which is a thing we already knew about from CLH-RB-2023-012 and still had not closed."
+    },
+    {
+      "type": "p",
+      "text": "Rahul asked in standup whether we could just tell the broker to give us exactly-once. I walked that with Diego. Clearhaven's cluster is Kafka 2.4.1 on kafka-clh-01 through kafka-clh-05.northstar.internal. Transactional producers work. The consumer isolation story across our outbox, Mule, and RailClear's producer is a mess. We would spend the quarter on broker upgrades and still have a window at the Mule hop. Priya, this is the cheaper honest design. Kavya estimated 6.5 engineering days for ingest-svc plus 1.5 for the outbox publisher that Chris already has a sketch of."
+    },
+    {
+      "type": "p",
+      "text": "What we tell Marcus Bell when he asks: we will not double-apply a settlement record that we have already persisted, including after a crash, a rebalance, or a replay from offset 0 on a live topic. What we do not tell him: that the whole pipeline from RailClear to cash is exactly-once. It is not. RailClear retries. Mule retries. We retry. This document is the ingest hop only."
+    },
+    {
+      "type": "table",
+      "caption": "Decision summary for a five-minute read.",
+      "headers": [
+        "Question",
+        "Answer",
+        "Owner"
+      ],
+      "rows": [
+        [
+          "Broker delivery",
+          "Stay at-least-once. enable.idempotence=true on our producers only.",
+          "Diego Alvarez"
+        ],
+        [
+          "Dedup store",
+          "Postgres recon.ingest_dedup on pg-recon-01, not Redis.",
+          "Kavya Menon"
+        ],
+        [
+          "Dedup key",
+          "(source_system, content_sha256, firm_seq). Hash alone is wrong.",
+          "Aman Kumar"
+        ],
+        [
+          "Downstream emit",
+          "recon.outbox, polled by outbox-pub. No dual-write to Kafka from ingest-svc.",
+          "Chris Patel"
+        ],
+        [
+          "True EOS claim",
+          "Forbidden in runbooks, TAM notes, and the August SLA draft.",
+          "Priya Nair"
+        ],
+        [
+          "Ship date",
+          "August 8, 2023 prod. Feature flag ingest.dedup.enabled.",
+          "Kavya Menon"
+        ]
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "2. Why we are here"
+    },
+    {
+      "type": "h2",
+      "text": "2.1 What broke the week of June 19"
+    },
+    {
+      "type": "p",
+      "text": "ingest-svc reads clh.settlement.inbound, twelve partitions, consumer group clh-ingest-prod. Average inbound is 18.4k records/hour during the US cash session, with a 7:00 ET burst that hit 41.2k on June 20 when RailClear replayed a stuck file. Each record is a JSON settlement trade. We insert into recon.trade and we used to produce a match-request directly onto clh.match.request from the same process."
+    },
+    {
+      "type": "p",
+      "text": "On June 19 at 14:22 ET, ingest-svc-2 on k8s node ip-10-12-4-88.ec2.internal hit a 14.8s GC. The coordinator bounced the member. ingest-svc-1 and ingest-svc-3 took partitions 4 through 7. Kafka redelivered records whose offsets had not been committed. ingest-svc-1 applied them. ingest-svc-2 later committed the old offsets after it recovered, which is legal, and then applied a subset a second time because the process had already written trades under the first attempt and then crashed before commit. We have the logs. session.timeout.ms is 45s. That part is fine. The commit-before-write order is not."
+    },
+    {
+      "type": "p",
+      "text": "Helen filed CLH-6012 at 15:07. She had already spent 40 minutes telling two juniors on her desk that the duplicate breaks were not a new kind of fail. Marcus got the same question from Clearhaven's exception desk at 15:41. I pulled consumer lag from Grafana on clh-ingest-prod and it looked healthy, which is how we missed it for another 22 minutes. Lag being low does not mean we did not apply twice. Lag being low means we committed. That is the opposite of comforting here."
+    },
+    {
+      "type": "p",
+      "text": "Chris counted 47 duplicate recon.trade rows with identical source_payload and different trade_id UUIDs, created_at between 14:22:11 and 14:37:44. Match-engine created 47 extra breaks. Ops auto-assigned 31 of them to the overnight queue. Cash did not move twice. The cash posting job keys on Clearhaven's firm_seq when it is present, and 44 of the 47 had it. The three that did not are the ones that scared Helen, and they happened to be cancels with net zero. Lucky. We do not get to stay lucky."
+    },
+    {
+      "type": "h2",
+      "text": "2.2 What CLH-TDD-2023-008 already decided"
+    },
+    {
+      "type": "p",
+      "text": "The April Kafka ingestion redesign moved us off the nightly file drop for RailClear and two other correspondents. That design said at-least-once and 'dedup later.' Later is now. I am not reopening the broker topology. Twelve partitions stay. Keys stay on account_id so a given Clearhaven account lands on one partition and match-engine can keep per-account ordering. This document only changes how a consumer is allowed to apply a record."
+    },
+    {
+      "type": "p",
+      "text": "Rina Das asked in the June 27 review whether we should wait for the DLQ design (now CLH-TDD-2023-022, still in draft) and do both together. No. Poison JSON and duplicate apply are different bugs. A poison record should not be retried forever. A good record should not be applied twice. Mixing them in one change set is how the June 19 PR for 'consumer timeout cleanup' got merged without anyone noticing the commit order. We will not do that again."
+    },
+    {
+      "type": "h1",
+      "text": "3. What we will not claim"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Honesty bound",
+      "text": "Do not write 'exactly-once' in a Clearhaven-facing sentence. The phrase in this doc is exactly-once-ish, and it applies only to ingest-svc applying a settlement payload into recon.trade. End-to-end EOS across RailClear, Mule, Kafka, ingest, match, and cash posting is false and we will not put it in the August SLA draft Rahul is circulating."
+    },
+    {
+      "type": "p",
+      "text": "Kafka's transactional API can give you read-committed isolation and atomic offset+output on a single cluster when every producer and consumer in the hop participates. We do not own RailClear's producer. We do not own Mule. Our match-engine still reads from a topic we publish, and until the outbox lands it also has a dual-write. Even after this design, a human replay of clh.settlement.inbound from offset 0 will re-apply nothing new only because ingest_dedup says so, not because Kafka promised it."
+    },
+    {
+      "type": "p",
+      "text": "Diego put numbers on the transactional path anyway, because Priya asked. Turning on transaction.id for ingest-svc and match-engine, bumping the cluster past 2.4.1, and teaching Mule to not retry in a way that forks payloads: 7 to 11 weeks, plus a change window Helen will not give us in July. Duplicate tickets are happening now. The Postgres unique constraint is a week of work we already know how to operate. That is the trade."
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "We will not claim EOS for the RailClear to Mule hop. They retry. We have seen the same file land twice on June 20 with different Kafka offsets and the same firm_seq.",
+        "We will not claim EOS for match-engine until it consumes the outbox contract in section 6. Today it can still double-create a break if it is called twice with two trade_ids for one payload. After ingest_dedup, that call should stop. After outbox, the event is the same event.",
+        "We will not claim EOS for cash posting. That job is Clearhaven's. Marcus confirmed it keys on firm_seq when present. We will start rejecting inbound records that lack firm_seq after August 22, with a two-week warn-only window.",
+        "We will not claim that a content hash is a business identity. Section 5 is the 12 ms case that killed hash-only."
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "4. Design"
+    },
+    {
+      "type": "h2",
+      "text": "4.1 Apply path"
+    },
+    {
+      "type": "p",
+      "text": "One Kafka record becomes at most one recon.trade row. The consumer loop for a partition is: deserialize, compute content_sha256 over the canonical bytes, read firm_seq from the JSON (required after the warn window), begin a Postgres transaction, insert ingest_dedup on conflict do nothing returning, if the insert missed we skip and commit Kafka, if the insert hit we insert recon.trade, insert recon.outbox, commit Postgres, then commit Kafka offset. That order is the whole design. Swap the last two steps and we are back in June."
+    },
+    {
+      "type": "p",
+      "text": "Canonical bytes: UTF-8 JSON object, keys sorted, no insignificant whitespace, decimal prices as the string RailClear sent (do not parse through float). Kavya already has the canonicalizer from the April redesign. Reuse it. If we canonicalize differently than we hash, we will accept duplicates that look different to us and identical to Helen. Chris will add a fixture in recon_qa that round-trips 1,024 production payloads from June 1 through June 30."
+    },
+    {
+      "type": "p",
+      "text": "source_system is the Kafka header x-clh-source if present, else the JSON field source, else 'unknown'. We have four values in prod today: railclear, mule-internal, ch-oms, and a leftover 'batch' from the file-drop path that still fires on weekends. 'unknown' gets a metric and a page if it exceeds 12 records in 10 minutes. Do not let a blank source collapse two correspondents onto one key."
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Read record. Reject if JSON parse fails. That is a DLQ candidate, not a retry. See CLH-TDD-2023-022 when it lands. Until then, log and skip with a committed offset so we do not freeze the partition. Yes, skip is lossy. Poison JSON from RailClear is a monthly event. Freezing a partition for it is worse. Track skipped offsets in recon.ingest_skip.",
+        "Canonicalize. Hash with SHA-256. Pull firm_seq. If firm_seq is missing, increment ingest_missing_firm_seq and, after August 22, DLQ. During warn-only, synthesize firm_seq as empty string and rely on hash. Document those rows; they are the residual risk.",
+        "BEGIN. INSERT INTO recon.ingest_dedup (source_system, content_sha256, firm_seq, kafka_topic, kafka_partition, kafka_offset, first_seen) VALUES (...) ON CONFLICT DO NOTHING RETURNING id.",
+        "If RETURNING is empty: the payload was applied. COMMIT (empty work). Commit Kafka offset. Emit metric ingest_dedup_hit. Stop.",
+        "If RETURNING has a row: INSERT recon.trade. INSERT recon.outbox with payload_type = 'trade_applied'. COMMIT Postgres. Then commit Kafka. Emit ingest_applied.",
+        "If Postgres commit fails: do not commit Kafka. The next delivery retries. ingest_dedup insert will conflict and we skip, or it will not if the transaction rolled back, and we apply once. That is the point of putting dedup in the same transaction as the trade."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "4.2 Schema"
+    },
+    {
+      "type": "p",
+      "text": "pg-recon-01.northstar.internal, database recon, schema recon. Table is new. Kavya owns the Flyway script. Diego owns the grants and the monitoring for bloat. We will partition by first_seen month starting day one because Chris's June dump already shows 11.6M inbound records/month once you count the weekend batch path. A unique constraint still works on a partitioned table if the partition key is included or if we use a global unique index. We will use a global unique index on (source_system, content_sha256, firm_seq). It will be large. Diego sized it at 1.8 to 2.3 GB per month of index plus 3.1 GB of heap, assuming 88 bytes of key and 220 bytes of row. We keep 92 days. Drop partitions older than that. Replay beyond 92 days is a different procedure and needs Priya's sign-off."
+    },
+    {
+      "type": "code",
+      "caption": "recon.ingest_dedup, Flyway V142. Approximate. Kavya has the final script in clh-ingest-svc/db.",
+      "text": "-- V142__ingest_dedup.sql\nCREATE TABLE recon.ingest_dedup (\n    id              bigserial,\n    source_system   text        NOT NULL,\n    content_sha256  bytea       NOT NULL,\n    firm_seq        text        NOT NULL,\n    kafka_topic     text        NOT NULL,\n    kafka_partition int         NOT NULL,\n    kafka_offset    bigint      NOT NULL,\n    first_seen      timestamptz NOT NULL DEFAULT now(),\n    PRIMARY KEY (id, first_seen)\n) PARTITION BY RANGE (first_seen);\n\nCREATE TABLE recon.ingest_dedup_2023_07\n    PARTITION OF recon.ingest_dedup\n    FOR VALUES FROM ('2023-07-01') TO ('2023-08-01');\n\nCREATE UNIQUE INDEX ingest_dedup_key_2023_07\n    ON recon.ingest_dedup_2023_07 (source_system, content_sha256, firm_seq);\n\n-- per-partition unique indexes. A cross-partition unique is not worth\n-- the lock. Replays that straddle months are rare; if they happen we\n-- accept a theoretical duplicate across a month boundary and page.\n\nGRANT INSERT, SELECT ON recon.ingest_dedup TO ingest_svc;\nGRANT SELECT ON recon.ingest_dedup TO recon_readonly;"
+    },
+    {
+      "type": "p",
+      "text": "Per-partition unique indexes mean a replay that crosses a month boundary could insert a second row. I would rather have that hole than a 2 GB unique index that we cannot drop a month from. The hole is closed in practice because we do not replay across month boundaries without truncating, and because 92-day retention means we are not keeping January around in September. Diego disagreed at first and wanted a single btree. He ran EXPLAIN on a 14M-row scratch copy. The partitioned plan won on vacuum. We are going partitioned."
+    },
+    {
+      "type": "p",
+      "text": "recon.outbox is not new. Chris created it in May for the CDC experiment that we paused. Columns we will use: id, payload_type, payload jsonb, created_at, published_at. ingest-svc inserts with published_at null. outbox-pub polls WHERE published_at IS NULL ORDER BY id LIMIT 200, produces to clh.match.request, then sets published_at. Poll every 250 ms. That is 4 Hz, which at 18.4k records/hour is fine. Burst of 41.2k/hour is 11.4 records/second. Limit 200 with 250 ms poll clears 800/second. Headroom is ugly in a good way."
+    },
+    {
+      "type": "h2",
+      "text": "4.3 Kafka consumer settings that actually matter"
+    },
+    {
+      "type": "p",
+      "text": "enable.auto.commit=false. We already set that in April and then a copy-paste in the June timeout PR flipped the YAML default on the staging overlay, which staging did not catch because staging's Postgres is empty and every insert looks new. Sneha is not on this ticket. I will add a unit test that boots the consumer config and asserts the flag. max.poll.records=80. Lower than the current 500. A 14.8s GC with 500 records in flight is how you get a long rebalance. isolation.level=read_uncommitted. We are not using transactional producers on this topic. Do not set read_committed and then wonder why you see nothing."
+    },
+    {
+      "type": "table",
+      "caption": "Consumer config for clh-ingest-prod. Staging must match. The June timeout PR is the cautionary tale.",
+      "headers": [
+        "Key",
+        "Value",
+        "Why"
+      ],
+      "rows": [
+        [
+          "enable.auto.commit",
+          "false",
+          "Offset moves only after Postgres commit."
+        ],
+        [
+          "max.poll.records",
+          "80",
+          "Bound the redo set after a crash. Was 500."
+        ],
+        [
+          "max.poll.interval.ms",
+          "300000",
+          "Leave this. Do not 'tune' it to hide GC."
+        ],
+        [
+          "session.timeout.ms",
+          "45000",
+          "Leave this. Diego's page threshold sits on it."
+        ],
+        [
+          "isolation.level",
+          "read_uncommitted",
+          "No transactions on this topic."
+        ],
+        [
+          "auto.offset.reset",
+          "earliest",
+          "New group only. Existing group has committed offsets."
+        ],
+        [
+          "partition.assignment.strategy",
+          "CooperativeSticky",
+          "Stop stop-the-world rebalances. Already set."
+        ]
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "5. Edge case: two legitimate trades, 12 ms apart"
+    },
+    {
+      "type": "p",
+      "text": "On June 23 Helen sent me two breaks that were not duplicates. Same account A-44108, same CUSIP 91282CFQ8, same qty 250000, same price 99.03125, timestamps 10:14:06.441 and 10:14:06.453 ET. Twelve milliseconds. Two firm_seq values, 8841201 and 8841202. Two real OMS prints. A hash of the business fields we currently canonicalize (account, CUSIP, qty, price, settle_date, side) is identical. Hash-only dedup would have dropped the second print. Match would have been short 250k face. That is a worse incident than June 19."
+    },
+    {
+      "type": "p",
+      "text": "I almost shipped hash-only. Version 0.1 of this doc, June 22, had (source_system, content_sha256) as the unique key. Kavya flagged it as a question, not a blocker. Helen's pair landed the next day and killed it. We add firm_seq to the key. firm_seq is assigned by Clearhaven's OMS and travels through RailClear as firmSeq in their JSON, through Mule as firm_seq, and through ch-oms as seq. Canonical field name in ingest is firm_seq. The adapter already normalizes. If a source cannot supply it, that is a source bug, not a reason to weaken the key."
+    },
+    {
+      "type": "p",
+      "text": "Could two real trades share a firm_seq? Marcus asked Clearhaven OMS. They said no within a source_system for a given calendar year. They recycle at year boundary on some older correspondent feeds. Our unique key includes source_system, not year. If a correspondent recycles firm_seq on January 2 onto a payload that hashes the same as last January, we would drop it. Probability is low and the payload hash includes settle_date, so the collision needs a repeat trade on the same settle_date. I am still not in love with this. Open question, owner Marcus, due July 20: get a written statement from OMS on recycle rules, not a Slack yes."
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Canonical hash fields",
+      "text": "content_sha256 is over the full canonical JSON as received after adapter normalize, not over a hand-picked field list. The June 23 pair differed in firm_seq and in a RailClear internal batchId we currently pass through. Hashing the full object would have distinguished them even without firm_seq. We still add firm_seq because adapters sometimes strip batchId, and because a business key you can explain to ops beats a hash you cannot."
+    },
+    {
+      "type": "p",
+      "text": "Rina asked why we do not key only on (source_system, firm_seq) and skip the hash. Because we have seen RailClear resend a firm_seq with a corrected price. Rare, 3 times in 2023 that Chris could find. If we keyed only on firm_seq we would keep the wrong price. The resend is a new payload with the same firm_seq. Hash differs. Unique key allows both rows. Match-engine has to treat the later trade_id as a correction. That is a match-engine problem, ticket CLH-6144, not this design. We will emit outbox payload_type = 'trade_applied' for both and include the prior trade_id if we can find one by firm_seq. Best effort. Do not block ingest on it."
+    },
+    {
+      "type": "h1",
+      "text": "6. Outbox"
+    },
+    {
+      "type": "p",
+      "text": "The June dual-write (Postgres trade plus Kafka produce in the same consumer thread) is the other half of why we doubled breaks. Kafka produce succeeded, Postgres rolled back, or the reverse. We will stop producing from ingest-svc. ingest-svc only writes Postgres. outbox-pub is a separate deployment, same namespace, two replicas, poll recon.outbox. Chris owns it. He has a 180-line prototype that has been sitting in a branch since May 11. We will finish that rather than invent a new publisher."
+    },
+    {
+      "type": "p",
+      "text": "outbox-pub must be idempotent too, in the Kafka-producer sense. enable.idempotence=true, acks=all, a key of outbox.id on clh.match.request so retries land in the same partition as the original. match-engine then needs to treat the same outbox.id as the same event. Today match-engine keys breaks on trade_id. After this change, trade_id is unique because ingest_dedup made it so, so match-engine can stay as it is for a cycle. The follow-up is match-engine storing last_outbox_id per account. Not in CLH-6012. Do not sneak it in."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if outbox-pub dies for 8 minutes: recon.trade is written, Kafka offset is committed, match-engine sees a hole. Breaks lag. Helen's queue looks quiet and then a burst. That is better than duplicates. Alert: recon_outbox_oldest_age_seconds > 30 pages Diego. Alert: recon_outbox_depth > 2,000 pages Kavya. We will add both before prod. I watched the May prototype sit at 0 depth for three days in staging and then nobody alerted when I froze it on purpose for an hour. Alerts first."
+    },
+    {
+      "type": "code",
+      "caption": "outbox poll, sketched. Real code is Java in clh-outbox-pub. Do not copy this into prod.",
+      "text": "-- pickup\nWITH batch AS (\n  SELECT id FROM recon.outbox\n  WHERE published_at IS NULL\n  ORDER BY id\n  LIMIT 200\n  FOR UPDATE SKIP LOCKED\n)\nSELECT o.* FROM recon.outbox o JOIN batch b ON b.id = o.id;\n\n-- after Kafka ack for each id\nUPDATE recon.outbox\n   SET published_at = now()\n WHERE id = ANY(:ids);"
+    },
+    {
+      "type": "h1",
+      "text": "7. Rejected alternatives"
+    },
+    {
+      "type": "h2",
+      "text": "7.1 Kafka transactions (true-ish EOS on one cluster)"
+    },
+    {
+      "type": "p",
+      "text": "Died in the June 27 review. Diego, Priya, Kavya, me. Cluster is 2.4.1. Transactional producer on ingest-svc would let us write clh.match.request and the consumer offsets atomically. It would not include Postgres. We would still need ingest_dedup or we would still double-insert trades on a crash between the DB write and the transaction commit. So we would build both. Cost: broker upgrade, max.number.transaction.timeout, debugging aborted transactions at 2 a.m., and Mule still retrying outside the transaction. Priya killed it in one sentence: do the database thing, do not take a Kafka upgrade into July."
+    },
+    {
+      "type": "h2",
+      "text": "7.2 Redis SETNX with a 36-hour TTL"
+    },
+    {
+      "type": "p",
+      "text": "Rina floated this because we already run redis-clh-01 for match keys. SETNX of the hash, apply, expire. Fast. The TTL is the design. A replay after 36 hours re-applies. Helen's weekend file drop is 44 to 62 hours late when RailClear misses Friday. We would apply Friday's file on Monday as new. Redis failover on June 2 dropped 8.4 seconds of writes; SETNX keys from that window would vanish. Postgres is the system of record for trades. Dedup belongs next to the trade row, in the same commit. Redis can cache a hit to skip a round trip later if Kavya wants it. Not in v1."
+    },
+    {
+      "type": "h2",
+      "text": "7.3 Dedup on (topic, partition, offset)"
+    },
+    {
+      "type": "p",
+      "text": "Works until someone replays the topic, or until a mirror maker copies records to a new topic name, or until we expand from 12 to 16 partitions and re-key. Offset identity is a delivery identity, not a business identity. June 20's RailClear file replay produced new offsets for old firm_seq values. Offset-keyed dedup would have applied them all again. That is the incident we are trying to not have."
+    },
+    {
+      "type": "table",
+      "caption": "Rejected paths, so the next design review does not reopen them without new facts.",
+      "headers": [
+        "Option",
+        "Why it looked good",
+        "Why it died"
+      ],
+      "rows": [
+        [
+          "Kafka transactions",
+          "Vendor-shaped EOS story for Marcus",
+          "Does not include Postgres; needs a broker upgrade in July"
+        ],
+        [
+          "Redis SETNX + TTL",
+          "We already have Redis; low latency",
+          "TTL vs weekend files; failover holes; not in the trade commit"
+        ],
+        [
+          "(topic, partition, offset)",
+          "Trivial to implement",
+          "Replays and re-keys look like new work"
+        ],
+        [
+          "Hash only, no firm_seq",
+          "One column, easy unique index",
+          "June 23 12 ms twin prints would drop a real trade"
+        ],
+        [
+          "Dedup in match-engine only",
+          "Ingest stays dumb",
+          "Helen still sees duplicate trades in recon.trade; cash risk"
+        ]
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "8. Failure modes"
+    },
+    {
+      "type": "p",
+      "text": "This is the section you run when it is 2 a.m. Each row is a thing that will happen, not a thing that might happen in theory. I have a log line or a ticket for most of them. The ones I do not are marked guessed, and those are the ones Diego should test in staging before August 8."
+    },
+    {
+      "type": "table",
+      "caption": "Failure modes for CLH-6012. Staging tests marked. Guessed rows need a drill.",
+      "headers": [
+        "Failure",
+        "What you see",
+        "What you do"
+      ],
+      "rows": [
+        [
+          "Postgres unique conflict on apply",
+          "ingest_dedup_hit climbing, lag flat",
+          "Normal. Do nothing. This is the happy retry."
+        ],
+        [
+          "Postgres down for 3-12 minutes",
+          "Consumer lag climbing, ingest_applied=0",
+          "Do not bounce pods in a loop. Kafka holds the records. Page Diego. After recovery, apply once."
+        ],
+        [
+          "Postgres commit ok, Kafka commit fails",
+          "Redelivery, then ingest_dedup_hit",
+          "Normal. The point of the order."
+        ],
+        [
+          "Kafka commit ok, outbox-pub down",
+          "recon.trade present, breaks not created, outbox depth climbing",
+          "Page Kavya on depth > 2000 or age > 30s. Do not replay the topic."
+        ],
+        [
+          "Canonicalizer change",
+          "Sudden ingest_dedup_hit drop, duplicates return",
+          "Revert the canonicalizer. Hash is a contract. Version it."
+        ],
+        [
+          "firm_seq missing after August 22",
+          "DLQ depth climbing (once DLQ exists), or ingest_skip",
+          "Call Marcus. Source bug. Do not empty the key."
+        ],
+        [
+          "Month-boundary replay",
+          "Possible duplicate across partitions of ingest_dedup",
+          "Do not replay across months. If you must, truncate the new month first."
+        ],
+        [
+          "Hash collision",
+          "Second distinct payload dropped",
+          "Guessed. SHA-256 on 12M rows/month. If it happens we will see a missing trade, not a crash. Restore from Kafka by offset."
+        ],
+        [
+          "ingest-svc split brain, two pods write",
+          "Unique index serializes. One wins.",
+          "Normal. Do not add an application lock."
+        ],
+        [
+          "Clock skew on first_seen",
+          "Wrong partition for the row",
+          "first_seen is DEFAULT now() on the DB host. Do not send it from the pod."
+        ],
+        [
+          "Flyway partial apply",
+          "Unique index missing on new month",
+          "Diego's check: alert if ingest_dedup has a partition without the unique index."
+        ],
+        [
+          "GC 14.8s again",
+          "Rebalance, redelivery, dedup hits",
+          "Still fix the GC. Dedup is the seatbelt, not the brakes."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "8.1 Staging drills Diego will run"
+    },
+    {
+      "type": "p",
+      "text": "Before prod: kill ingest-svc-2 mid-batch with max.poll.records=80 and confirm recon.trade count equals distinct firm_seq count for the fixture. Freeze outbox-pub for 90 seconds and confirm the age alert. Run the June 23 twin-print fixture and confirm two trade rows. Replay the same Kafka offsets twice from a throwaway consumer group and confirm zero new trades. Drop the July partition on a scratch database and confirm Flyway recreates the unique index. I will sit on the call. Kavya will watch ingest_dedup_hit."
+    },
+    {
+      "type": "code",
+      "caption": "Sanity counts after a staging replay. Run against pg-recon-staging.",
+      "text": "SELECT\n  count(*) AS trades,\n  count(DISTINCT (source_system, firm_seq)) AS firm_keys\nFROM recon.trade\nWHERE created_at >= :window_start;\n\n-- these two should match for sources that always send firm_seq\n\nSELECT count(*) AS dedup_rows,\n       count(*) FILTER (WHERE first_seen >= :window_start) AS dedup_in_window\nFROM recon.ingest_dedup;\n\nSELECT payload_type, count(*) FILTER (WHERE published_at IS NULL) AS pending\nFROM recon.outbox\nGROUP BY 1;"
+    },
+    {
+      "type": "h1",
+      "text": "9. Metrics, logs, runbook hooks"
+    },
+    {
+      "type": "p",
+      "text": "Grafana folder Clearhaven / Ingest. New panel row 'dedup' on the existing ingest dashboard, not a new dashboard Helen will not find. Metrics from ingest-svc: ingest_applied, ingest_dedup_hit, ingest_missing_firm_seq, ingest_skip_poison, ingest_canonicalizer_version (gauge, currently 3). Metrics from outbox-pub: recon_outbox_depth, recon_outbox_oldest_age_seconds, recon_outbox_publish_fail. Logs: one JSON line per record at info is too much at 18.4k/hour. Debug per record. Info on dedup hit only when the original first_seen is older than 5 minutes, because that is the interesting retry, not the 200 ms rebalance retry."
+    },
+    {
+      "type": "p",
+      "text": "Do not put the full payload in the log. We already lost that argument in 2022. Hash plus firm_seq plus kafka_offset is enough to join. If you need the payload, it is in Kafka for 92 hours (topic retention, separate from the 92-day SQL retention, yes the numbers are annoyingly close, Diego will change topic retention to 120 hours in the same change window so we can debug a long weekend)."
+    },
+    {
+      "type": "p",
+      "text": "CLH-RB-2023-012 (consumer lag runbook) gets a new section. I will write it as a follow-up, not in this file. One sentence for oncall this week: if lag is low and Helen still sees duplicates, look at ingest_dedup_hit versus ingest_applied, not at lag. If ingest_dedup_hit is zero and she sees duplicates, the unique index is missing or the canonicalizer changed. That is a sev-2."
+    },
+    {
+      "type": "h1",
+      "text": "10. Rollout"
+    },
+    {
+      "type": "p",
+      "text": "Feature flag ingest.dedup.enabled, default false, per cluster. Staging true on July 17. Prod true on August 8 if staging drills pass. Flag false means we still write ingest_dedup (so the table warms) but we do not skip on conflict. That lets us see what would have been a hit without changing apply behavior. Kavya will chart would_have_skipped for a week. If that number is not in shouting distance of the 47-from-June-19 plus ordinary rebalance retries, we stop and look."
+    },
+    {
+      "type": "steps",
+      "items": [
+        "July 10: Flyway V142 on staging. Diego watches bloat for 48 hours with a synthetic 2.4x traffic replay Chris will build from June 20.",
+        "July 12: ingest-svc with flag false to staging. Confirm ingest_dedup fills. Confirm no unique violations in logs (there will be none, we are not skipping).",
+        "July 17: flag true on staging. Twin-print fixture. Kill-pod drill. Replay drill.",
+        "July 24: Flyway V142 on prod during the Thursday change window, 21:00 ET. Table empty, flag false. Warm the table on live traffic.",
+        "July 25 through August 4: watch would_have_skipped. Helen reviews a daily sample of 25 would-skip payloads to confirm they are real retries, not twin prints.",
+        "August 8: flag true on prod. Kavya and I on call 07:00 to 11:00 ET. Diego on Kafka. Rollback is flag false, not a schema down-migration.",
+        "August 22: missing firm_seq becomes a skip/DLQ. Warn-only ends. Marcus has the correspondent notice by August 1."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Rollback does not drop the table. Dropping the table while flag false is a next-month decision. Down-migration of a unique index during a dual-write week is how you get a four-hour outage. We will live with 2 GB of unused-if-rolled-back index. Priya agreed."
+    },
+    {
+      "type": "h1",
+      "text": "11. Open questions"
+    },
+    {
+      "type": "table",
+      "caption": "Open questions. Dates are when the owner owes an answer, not when the work finishes.",
+      "headers": [
+        "Question",
+        "Owner",
+        "Due",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "OMS firm_seq recycle rules, written, not Slack",
+          "Marcus Bell",
+          "July 20, 2023",
+          "Year-boundary recycle would bite the unique key."
+        ],
+        [
+          "Topic retention 92h vs 120h",
+          "Diego Alvarez",
+          "July 14, 2023",
+          "Need a long weekend of Kafka if SQL skip looks wrong."
+        ],
+        [
+          "Does ch-oms ever omit firm_seq on cancels?",
+          "Helen Cho",
+          "July 18, 2023",
+          "Three June rows had no firm_seq. All cancels."
+        ],
+        [
+          "outbox-pub replica count 2 vs 3",
+          "Chris Patel",
+          "July 21, 2023",
+          "SKIP LOCKED should make 3 safe. Confirm."
+        ],
+        [
+          "Warn-only missing firm_seq: page or ticket?",
+          "Priya Nair",
+          "July 19, 2023",
+          "I want a ticket. Diego wants a page. We cannot have both at 41k/hour burst."
+        ],
+        [
+          "CLH-6144 correction handling in match-engine",
+          "Kavya Menon",
+          "August 15, 2023",
+          "Out of CLH-6012. Still needs a home."
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "If Marcus cannot get the recycle statement by July 20 we still ship hash-plus-firm_seq. We will add a year column to the unique key in a follow-up if the written rule says they recycle. Do not block August 8 on a correspondent's legal team."
+    },
+    {
+      "type": "h1",
+      "text": "12. Worked example"
+    },
+    {
+      "type": "p",
+      "text": "Record at partition 4, offset 88214091, source railclear, firm_seq 8841201, canonical hash 9f3c…a21b. ingest-svc-2 begins the transaction, inserts ingest_dedup, inserts trade trade_id 7c2a…, inserts outbox id 551209, commits Postgres, then GC pauses 14.8s. Coordinator removes the member. ingest-svc-1 gets partition 4, receives offset 88214091 again. It inserts ingest_dedup, unique conflict, skip, commit offset. outbox-pub, which never stopped, publishes outbox 551209 once. match-engine sees one trade. Helen sees one break if the trade is a break, zero if it matches. That is the story we are buying with this design."
+    },
+    {
+      "type": "p",
+      "text": "Same record, but Postgres commit fails after the inserts (disk full on pg-recon-01, which happened on March 11 for 6 minutes, different story). Transaction rolls back. ingest_dedup row is gone. Kafka offset is not committed. Redelivery applies once. Disk-full is still an incident. It is not a duplicate incident."
+    },
+    {
+      "type": "p",
+      "text": "Twin prints 8841201 and 8841202, 12 ms apart, identical business fields. Two hashes if batchId is present, one hash if the adapter stripped it. Two firm_seq values either way. Two ingest_dedup rows. Two trades. Two outbox rows. Match-engine matches them separately. If one of them was supposed to cancel the other, that is an OMS intent and it will have a cancel flag we already honor. Hash-only would have dropped 8841202. We do not do hash-only."
+    },
+    {
+      "type": "h1",
+      "text": "13. What success looks like"
+    },
+    {
+      "type": "p",
+      "text": "Week of August 14: Helen's duplicate-exception count is 0, not 47. ingest_dedup_hit is a noisy healthy number during rebalances, on the order of 200 to 900 a day based on how often we currently bounce pods, and we will find out. recon.trade count for a given hour matches distinct (source_system, firm_seq) for sources that always send firm_seq, within the known correction cases. Marcus does not have to explain duplicates to the exception desk. Priya does not have to explain EOS to Clearhaven's risk committee because we never said the word."
+    },
+    {
+      "type": "p",
+      "text": "If we see duplicates after August 8, this design failed. Do not add a second dedup layer in match-engine as a quiet patch. Open a sev-2, assume the canonicalizer or the unique index, and page me. I will be on the August 8 morning bridge. After that, Kavya is primary. The ticket stays CLH-6012 until the flag has been true for 14 days with zero duplicate trades Helen agrees are duplicates. Twin prints are not duplicates. We will sit together on August 9 and look at the would_have_skipped sample one more time so we share a definition."
+    },
+    {
+      "type": "p",
+      "text": "Related work we are not doing here: DLQ (CLH-TDD-2023-022), API versioning (CLH-TDD-2023-017, after the March break-status incident), and the match-engine correction ticket CLH-6144. Please do not pile them onto the August 8 flag flip. June 19 happened because a timeout cleanup PR also changed commit order. One behavior change at a time."
+    }
+  ]
+}

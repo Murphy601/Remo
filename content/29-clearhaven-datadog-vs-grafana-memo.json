@@ -1,0 +1,497 @@
+{
+  "slug": "29-clearhaven-datadog-vs-grafana-memo",
+  "doc_id": "CLH-MEM-2024-009",
+  "title": "Stay on Grafana for metrics. Do not buy Datadog as a platform.",
+  "subtitle": "Trial quote $14.6k/month at our cardinality. Tempo first for traces. Datadog APM only if OTel traces miss a 2 s bar in two sprints.",
+  "doc_type": "Recommendation memo",
+  "kicker": "Clearhaven Recon / Observability",
+  "org": "Northstar Engineering",
+  "classification": "INTERNAL",
+  "version": "1.2",
+  "status": "Approved",
+  "date": "April 9, 2024",
+  "author": "Aman Kumar",
+  "role": "Software Engineer II",
+  "team": "Clearhaven Recon Platform",
+  "audience": "Priya Nair (decision maker), Diego Alvarez, Rahul Deshmukh (budget), Helen Cho (trial user), finance partner on copy",
+  "owners": "Aman Kumar (memo), Priya Nair (decision), Diego Alvarez (numbers)",
+  "related": "CLH-MEM-2024-009, CLH-TDD-2024-006, CLH-7204, CLH-INC-2023-061, Datadog trial tenant ns-clh-trial",
+  "summary": "Priya asked for a written position before the Datadog trial expires on April 19. We already run Prometheus, Grafana, and on-prem Loki. Diego stood up Tempo in November. The trial quote to cover our current metric cardinality plus APM plus logs is $14.6k/month, and that number moved from $9.8k when we stopped filtering sku-shaped custom metrics. Recommendation: keep Grafana for metrics and Loki for logs. Finish the OpenTelemetry rollout in CLH-TDD-2024-006. Buy Datadog APM only if Tempo cannot fetch a trace by id in under 2.0 seconds p95 two sprints after phase 2. Do not buy Datadog Logs. Do not buy Datadog Metrics. We lose Helen's favorite trial notebooks; I am naming that so it is a conscious trade, not a surprise on April 22.",
+  "form_description": "Recommendation memo for Priya Nair on Datadog versus the existing Grafana stack after a six-week trial. Written with trial invoices, cardinality counts, and a backup trigger so we do not reopen the debate every quarter.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "March 21, 2024",
+      "Aman Kumar",
+      "Outline after trial week 4 readout."
+    ],
+    [
+      "0.7",
+      "April 2, 2024",
+      "Diego Alvarez",
+      "Quote $14.6k, cardinality table, Tempo p95 current."
+    ],
+    [
+      "1.0",
+      "April 8, 2024",
+      "Aman Kumar",
+      "Priya pre-read. Position unchanged. Notebooks loss added."
+    ],
+    [
+      "1.2",
+      "April 9, 2024",
+      "Aman Kumar",
+      "Approved for the April 11 staff meeting."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "1. Recommendation (read this if you read nothing else)"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Position",
+      "text": "Do not replace Prometheus+Grafana+Loki with Datadog. Do not dual-write metrics. Continue CLH-TDD-2024-006 (OTel to Tempo). If, at the end of two sprints after OTel phase 2 (calendar: May 31, 2024), Tempo p95 get-by-id is above 2.0 s or Helen cannot open a trace from a break_id without us, then buy Datadog APM as an OTLP backend only, cap custom metrics at zero, and revisit in 90 days. Trial ends April 19. Let it end."
+    },
+    {
+      "type": "p",
+      "text": "Priya, the trial was useful. Helen liked it. The notebooks in Datadog are prettier than anything we have given her in Grafana, and she said so on March 14 in a thread with 12 thumbs. That is a real loss. It is not a $14.6k/month loss. The quote is not 'APM for a few services.' It is platform pricing at the cardinality we actually emit when nobody is watching the metric names. We watched. sku leaked into a custom metric on March 6 and the quoted number jumped $4.8k. That leak is the product. Grafana does not send us an invoice when Chris adds a label. It sends Diego a page, which is cheaper and ruder and works."
+    },
+    {
+      "type": "p",
+      "text": "Rahul asked whether Clearhaven will pay. Marcus said not in FY24. This sits on the Northstar contract margin. $14.6k times 12 is $175.2k. Our Grafana stack, including the Tempo disk Diego wants, is about $2.4k/month in already-owned hardware plus 0.3 SRE FTE, which at Diego's loaded rate we already spend. I am not going to pretend SRE time is free. I am going to say we already bought it."
+    },
+    {
+      "type": "table",
+      "caption": "Money. Trial quote as of April 2 email from our Datadog account manager. Grafana costs from Diego's FY24 sheet.",
+      "headers": [
+        "Item",
+        "Monthly",
+        "What it covers",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "Datadog quote, April 2",
+          "$14.6k",
+          "Metrics + APM + logs at trial cardinality",
+          "Was $9.8k on Feb 27 before sku leak"
+        ],
+        [
+          "Datadog APM-only sketch they sent",
+          "$4.1k",
+          "APM host+span, no metrics, no logs",
+          "Still needs OTel or dd-trace"
+        ],
+        [
+          "Grafana stack, current",
+          "~$2.4k hardware",
+          "Prom+Grafana+Loki+alertmanager",
+          "Already running 14 months"
+        ],
+        [
+          "Tempo disk add, Diego FY24",
+          "~$380",
+          "180-240 GB, 14d, 5% sample",
+          "CLH-TDD-2024-006"
+        ],
+        [
+          "SRE time, current stack",
+          "0.3 FTE",
+          "Diego + oncall pages",
+          "Already in the plan"
+        ],
+        [
+          "SRE time, Datadog platform",
+          "0.2 FTE plus vendor",
+          "Less pager, more billing reviews",
+          "sku leak is a billing page"
+        ]
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "2. What we already have"
+    },
+    {
+      "type": "p",
+      "text": "Prometheus on thanos-clh-01 and thanos-clh-02, 15s scrape, 18-day raw, 13-month downsampled. Grafana 10.2 on grafana.clh.prod.northstar.internal, SSO, 41 dashboards in the Clearhaven folder, 12 of which Helen has starred. Loki on loki-clh-01, 14-day retention, JSON logs from ingest, match, break, query. Alertmanager to PagerDuty. Tempo 2.3 on tempo-01, proof of concept since November, not yet in Helen's path. Collector not in prod; staging only, per CLH-TDD-2024-006."
+    },
+    {
+      "type": "p",
+      "text": "This stack survived CLH-INC-2023-061 in the sense that it told us we were healthy while Mule was dying, which is a design hole, not a vendor hole. Datadog would have shown the same 200s. The missing piece was a consumer contract and a synthetic, which Diego is building and which does not require a new vendor. I checked the trial: we never pointed Datadog Synthetics at Mule. We pointed it at our /v1/breaks and got green. Same class of mistake."
+    },
+    {
+      "type": "p",
+      "text": "What Grafana is bad at, in sentences Helen would use: notebooks. Sharing a mixed logs-plus-metrics story with a screenshot that looks like a document. The Datadog notebook she built on March 12 for the wash case (break_id, surrounding logs, a latency plot) took her 20 minutes and she sent it to her two seniors without asking us. The Grafana equivalent is a dashboard plus a Loki query plus a Slack paste. We can make that less ugly. We have not. That is on us, not on Prometheus."
+    },
+    {
+      "type": "h1",
+      "text": "3. What the trial actually measured"
+    },
+    {
+      "type": "p",
+      "text": "Six weeks, February 6 to March 19, plus a hangover week they left open through April 19. Tenant ns-clh-trial. We dual-shipped a subset of metrics via the Datadog agent on two staging nodes and, for ten days, on one prod ingest node with Priya's written ok. APM via dd-trace-java on break-svc staging only. Logs via their Lambda-less tail on a Loki fan-out we should not have built and have since removed."
+    },
+    {
+      "type": "p",
+      "text": "APM on one service in staging felt good. Flamegraphs of break-svc's JSON serialize path showed the Jackson rename leftover from last March, which was embarrassing and useful. That same flamegraph is available from the OTel Java agent into Tempo once phase 2 lands. I reproduced it in staging Tempo on April 3 with Kavya. Slightly worse UI. Same hotspot. The trial did not reveal a class of data we cannot get from OTel."
+    },
+    {
+      "type": "p",
+      "text": "Metrics were the fight. Our Prometheus cardinality for clh_* is 1.84 million active series at the 7:00 ET peak, 1.12 million at 21:00. Diego has been yelling about this since November. The Datadog agent mapped those series into custom metrics. Their quote assumed 1.2 million, then 1.84, then a spike to 2.41 million on March 6 when a debug counter on match-engine included sku as a tag. We turned that counter off in 11 minutes. The quote did not come back down to $9.8k. Account manager said the $14.6k reflects 'observed peak plus APM plus log ingest at trial volume.' Trial log volume was a fraction of Loki, because we only tailed break-svc. If we sent all four services, they would requote."
+    },
+    {
+      "type": "table",
+      "caption": "Cardinality and quote movement. Sources: Diego's Prom series count, Datadog usage email April 2.",
+      "headers": [
+        "Date",
+        "Prom series (peak)",
+        "Datadog custom metrics billed",
+        "Quoted monthly"
+      ],
+      "rows": [
+        [
+          "Feb 27",
+          "1.12M (quiet test window)",
+          "0.94M",
+          "$9.8k"
+        ],
+        [
+          "Mar 5",
+          "1.84M",
+          "1.61M",
+          "$12.2k verbal"
+        ],
+        [
+          "Mar 6, sku tag, 11 min",
+          "2.41M",
+          "2.18M (partial hour)",
+          "usage alert in trial UI"
+        ],
+        [
+          "Mar 19, trial 'end'",
+          "1.84M",
+          "1.70M",
+          "$13.9k"
+        ],
+        [
+          "Apr 2, official quote",
+          "1.84M",
+          "1.70M + APM + logs",
+          "$14.6k"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "The sku incident is the same landmine as CLH-TDD-2024-006. In Grafana it is a page to Diego and a slow Prom. In Datadog it is a page to Diego and a slower Prom and a bill. I do not want finance to be the cardinality backstop. We already have a backstop. It is Diego, and it is the collector filter, and it is code review. Paying $14.6k does not remove the landmine. It prices it."
+    },
+    {
+      "type": "h1",
+      "text": "4. What we would lose by walking away from the trial"
+    },
+    {
+      "type": "p",
+      "text": "Helen liked the notebooks. She said the March 12 wash notebook was the first time she could send a story to a junior without sitting with them. Grafana Playlists plus a saved Loki query are a worse version of that. Rina can build a Grafana dashboard that takes a break_id variable. That is a week of work we have not scheduled. I am scheduling it here as a condition of this recommendation, not as a vague 'we should.' Ticket CLH-7310, Rina, due May 10. If we skip CLH-7310 and also skip Datadog, we have stolen a tool from Helen and replaced it with a speech."
+    },
+    {
+      "type": "p",
+      "text": "Marcus liked the TAM-facing 'we use Datadog' sentence. He said it on March 7. I told him we already tell clients we use Grafana and they do not leave. He agreed it is not a renewal issue. Do not let a TAM sentence drive $175k. Rahul, please do not put Datadog in the Q2 customer deck as a committed platform. OTel is the committed platform. Backends can move."
+    },
+    {
+      "type": "p",
+      "text": "Kavya liked live profiling in the trial APM. Java flight recorder plus async-profiler on a poke is what we have. It is worse. It is also free and we used it in November for CLH-INC-2023-204. If APM is the reason to buy, buy APM under the backup trigger, not the platform."
+    },
+    {
+      "type": "p",
+      "text": "Diego liked their AWS integration for a day, then noticed we would be paying to watch RDS metrics we already scrape. He does not like it anymore."
+    },
+    {
+      "type": "table",
+      "caption": "What we lose, with a replacement, so April 22 is not a surprise.",
+      "headers": [
+        "Trial thing",
+        "Who liked it",
+        "Replacement if we stay Grafana",
+        "Owner / date"
+      ],
+      "rows": [
+        [
+          "Notebooks",
+          "Helen Cho",
+          "Grafana dashboard with break_id variable, CLH-7310",
+          "Rina Das, May 10"
+        ],
+        [
+          "Pretty TAM screenshots",
+          "Marcus Bell",
+          "Grafana public snapshot, SSO-gated",
+          "Aman, as needed"
+        ],
+        [
+          "Java live profiling",
+          "Kavya Menon",
+          "async-profiler on poke; OTel profiles later",
+          "Kavya, existing"
+        ],
+        [
+          "One pane for logs+traces+metrics",
+          "Everyone, in theory",
+          "Grafana Explore, Tempo link from audit",
+          "CLH-TDD-2024-006 phase 3"
+        ],
+        [
+          "Vendor Synthetics",
+          "Diego, briefly",
+          "In-cluster canary, already in the March incident actions",
+          "Diego, April 18 train"
+        ]
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "5. Rejected alternatives"
+    },
+    {
+      "type": "h2",
+      "text": "5.1 Dual-write metrics to Datadog and Prom forever"
+    },
+    {
+      "type": "p",
+      "text": "Died in the April 2 working session. Two sources of truth for the same counter, two places to forget a label, two bills (one of them is Diego's time). The trial dual-write is how sku hit their meter 11 minutes after it hit Prom. Dual-write doubles the cost of a mistake. Priya asked 'until Tempo is proven.' I said no. A two-month dual-write has a way of becoming the architecture. We will not start it."
+    },
+    {
+      "type": "h2",
+      "text": "5.2 Datadog for logs only, keep Prom"
+    },
+    {
+      "type": "p",
+      "text": "Log ingest pricing at our Loki volume, even the trial fraction, was going to be the second line item they 'helpfully' added in a follow-up. We did not ask for a logs-only quote after that. Loki is fine. Query language is LogQL, which Chris already teaches to new engineers. Helen does not write LogQL; she greps in a dashboard we made her. That is a UI problem. Datadog Logs does not fix a UI problem we refuse to schedule. See CLH-7310."
+    },
+    {
+      "type": "h2",
+      "text": "5.3 Switch the whole platform on April 20"
+    },
+    {
+      "type": "p",
+      "text": "This is the account manager's timeline. It would freeze CLH-TDD-2024-006, put dd-trace-java on four services, and migrate 41 dashboards. Kavya estimated 4.5 weeks of freeze. We have the wash-rule train and the OTel phase 2 acceptance in that window. I will not trade a known design for a vendor cutover because a trial clock ended. Trials end. That is what they do."
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Rejected",
+      "text": "Full Datadog platform cutover, dual-write metrics, and logs-only purchase. All three died April 2. Remaining option: APM as an OTLP backend, later, if Tempo misses. No second Java agent."
+    },
+    {
+      "type": "h1",
+      "text": "6. The backup trigger, specified so we do not argue in May"
+    },
+    {
+      "type": "p",
+      "text": "CLH-TDD-2024-006 phase 2 acceptance is Tempo p95 get-by-id under 2.0 s at staging volume, and Helen (or Rina) opening a trace from a staging break. Two sprints after that phase 2 week (phase 2 is week of March 18, two sprints lands us at May 31 if we slip a week, which we will) we measure prod."
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Measure Tempo p95 get-by-id on prod for seven days after the UI flag is on. Diego owns the number. Source: Tempo metrics, not a stopwatch.",
+        "Count Helen-initiated Slack pings that are 'can you pull a trace' versus her using the link. Aman owns the count, honor system plus #clh-prod search.",
+        "If p95 <= 2.0 s and Helen used the link for at least 8 of the last 10 break investigations, the trigger is not fired. Memo stands. No Datadog PO.",
+        "If p95 > 2.0 s, or Tempo was down more than 45 minutes in that week, or Helen used the link fewer than 3 times because it 404d, fire the trigger.",
+        "Fired trigger means: Datadog APM as OTLP exporter from the existing collector, no dd-trace-java, no metrics, no logs, 90-day checkpoint, cap custom metrics at zero in the contract. Priya signs the PO. I write a one-page addendum to this memo."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "I am setting the trigger in writing because last year we said 'we will see' about Kafka versus file drop and then re-litigated it in three standups. See CLH-MEM-2023-004, which did take a position. This memo should work the same way. If you disagree with the 2.0 s number, disagree now. Diego thought 3.0 s was more honest for a first year. Helen thought 1.0 s because the trial felt instant. 2.0 s is the compromise. It is also the number already in the OTel design, so we are not running two bars."
+    },
+    {
+      "type": "h1",
+      "text": "7. Numbers Diego will defend in the staff meeting"
+    },
+    {
+      "type": "p",
+      "text": "Active series 1.84M peak is high. We should cut it whether we buy Datadog or not. Chris has a list: 14 histograms that should be 5, 3 debug counters that escaped to prod, match-engine's per-candidate metrics that should die in the same week we ban per-candidate spans. Target 1.20M by June 30. That target is independent of this memo and saves us if the trigger fires, because Datadog APM-only is still happier if we are not also begging them to ignore custom metrics."
+    },
+    {
+      "type": "p",
+      "text": "Tempo query: staging p95 get-by-id was 740 ms on April 3 with a 14-day window and a tiny volume. That number will get worse in prod. I do not know if it will get worse than 2.0 s. That is why there is a trigger rather than a speech about Tempo being fine. November's Tempo proof had a 6.8 s p95 on a cold query, which is why Diego is not claiming victory."
+    },
+    {
+      "type": "p",
+      "text": "Oncall pages, last 90 days, observability-related: 11 Loki disk, 4 Prom compaction, 1 Grafana SSO blip, 0 Tempo (it is not in the page path yet). Datadog trial generated 3 usage alerts, 1 agent CrashLoop on the prod ingest node we allowed, and 0 pages that found an incident before we did. The CrashLoop was a kernel version the agent did not like. 14 minutes. ingest-svc was fine. I still hated it."
+    },
+    {
+      "type": "table",
+      "caption": "Oncall and reliability, Dec 10 2023 to April 8 2024, plus trial side effects.",
+      "headers": [
+        "Signal",
+        "Count",
+        "Outcome"
+      ],
+      "rows": [
+        [
+          "Loki disk pages",
+          "11",
+          "Retention trim. Boring. Ours."
+        ],
+        [
+          "Prom compaction pages",
+          "4",
+          "Diego. Two during the March 6 sku spike."
+        ],
+        [
+          "Grafana SSO blip",
+          "1",
+          "12 min. Okta, not Grafana."
+        ],
+        [
+          "Datadog agent CrashLoop on prod node",
+          "1",
+          "14 min. Kernel. Reason enough to not leave their agent on ingest nodes."
+        ],
+        [
+          "Trial usage alerts",
+          "3",
+          "Email, not PagerDuty. sku was one."
+        ],
+        [
+          "Incidents first detected in Datadog",
+          "0",
+          "Trial was not in the page path. Fair."
+        ],
+        [
+          "Incidents first detected in Grafana/Loki",
+          "7 of 9 sev-2/3 in the window",
+          "The other two were Helen."
+        ]
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "8. What I want Priya to say in the meeting"
+    },
+    {
+      "type": "quote",
+      "text": "We are not buying Datadog as a platform. Grafana stays for metrics and logs. OTel traces go to Tempo. If Tempo misses the bar in the OTel design by May 31 we will buy APM only, as a backend, no second agent. Helen gets a break_id dashboard by May 10 so the notebooks are not the thing we forgot. Cardinality still has to come down to 1.20M by June 30 whether a vendor is in the room or not.",
+      "attrib": "Suggested close for Priya Nair, April 11 staff meeting"
+    },
+    {
+      "type": "p",
+      "text": "If she wants to soften it to 'we will keep evaluating,' I will argue. Evaluating without a trigger is how the trial gets extended into June and the OTel work pauses because people assume a vendor is coming. Kavya already asked me whether to put the Java agent or dd-trace on the phase 1 branch. I told her the agent. This memo is that answer in a form finance can file."
+    },
+    {
+      "type": "h1",
+      "text": "9. Engineer-facing: what to do this month"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Do not install dd-trace-java. Do not leave the trial agent on the prod ingest node. Diego removes it by April 12.",
+        "Do not add Datadog API keys to new services. The staging keys expire with the trial. Let them.",
+        "Do continue CLH-TDD-2024-006 phase 1 this week. OTEL_EXPORTER_OTLP_ENDPOINT stays the in-cluster collector.",
+        "Do file metric-cut PRs against the 1.20M target. Chris has the list in the spreadsheet 'prom-series-2024-04.' Per-candidate metrics are first.",
+        "Do not export sku, account_id, CUSIP, or firm_seq as metric labels. This was already a rule. March 6 is why I am repeating it.",
+        "Rina: CLH-7310 dashboard, break_id variable, logs panel, Tempo link placeholder even if prod Tempo is empty."
+      ]
+    },
+    {
+      "type": "code",
+      "caption": "Confirm the trial agent is gone from prod. Diego's checklist, April 12.",
+      "text": "kubectl -n ns-clh-prod get ds | grep -i datadog || echo 'no ds'\nkubectl -n ns-clh-prod get pods -o json \\\n  | jq -r '.items[].spec.containers[].image' | grep -i datadog || echo 'no images'\n# scrape configs should not mention datadoghq\ngrep -R datadoghq ./clh-obs/prometheus || echo 'no prom remote_write to dd'"
+    },
+    {
+      "type": "p",
+      "text": "If any of those print a hit after April 12, ping Diego, do not quietly start the agent 'for one more week of flamegraphs.' Flamegraphs wait for Tempo."
+    },
+    {
+      "type": "h1",
+      "text": "10. Open questions"
+    },
+    {
+      "type": "table",
+      "caption": "Open questions. None of these block letting the trial expire April 19.",
+      "headers": [
+        "Question",
+        "Owner",
+        "Due",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "Finance: any pre-commit language in the trial form we missed?",
+          "Rahul Deshmukh",
+          "April 12, 2024",
+          "I read it as no. Legal should glance."
+        ],
+        [
+          "Helen: is CLH-7310 a real substitute for notebooks, or do we owe her a second thing?",
+          "Helen Cho",
+          "May 10, 2024",
+          "Ask her after she uses the dashboard, not before."
+        ],
+        [
+          "Tempo disk PO for 240 GB",
+          "Priya Nair",
+          "April 18, 2024",
+          "Small. Still needs a yes so Diego orders."
+        ],
+        [
+          "1.20M series target: freeze new histograms?",
+          "Chris Patel",
+          "April 16, 2024",
+          "I vote freeze unless Priya grants."
+        ],
+        [
+          "If trigger fires, which Datadog org, ours or Clearhaven's?",
+          "Marcus Bell",
+          "May 15, 2024",
+          "Ours. Do not mix client tenants. Confirm anyway."
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "If legal finds a pre-commit, we still do not cut over on April 20. We negotiate an exit. I have not seen a clause, but I also did not sign the trial form. Rahul did."
+    },
+    {
+      "type": "h1",
+      "text": "11. Appendix: the sku leak, because it will be retold wrong"
+    },
+    {
+      "type": "p",
+      "text": "March 6, 10:14 ET. match-engine debug counter match_candidate_hash_ms labeled with sku, left on from a staging experiment, shipped in a PR titled 'match timing.' 11 minutes later Prom series peaked at 2.41M and Datadog trial UI showed a usage spike. Kavya reverted. Diego vacuumed Prom. The Datadog quote we got four weeks later still had the hangover in the 'observed peak' language. If we had been on a committed Datadog metrics contract that day, someone in finance would have asked me why March was $4.8k higher. I would have said a label. That is a bad conversation. Grafana made it a page instead of an invoice. Keep the page."
+    },
+    {
+      "type": "p",
+      "text": "The PR title was not cleanup. We learned that lesson in March 2023. It was still a timing PR with a label that did not belong. Review missed the label the same way review missed a JSON field. Contract tests for metrics do not exist. Chris's freeze on new histograms is the blunt instrument until we have one. I would rather be blunt than billed."
+    },
+    {
+      "type": "h1",
+      "text": "12. How this interacts with OTel"
+    },
+    {
+      "type": "p",
+      "text": "Read CLH-TDD-2024-006 if you have not. The collector is the seam. Apps speak OTLP. Today the gateway exports to Tempo. If the trigger fires, the gateway also exports to Datadog's OTLP intake. Apps do not change. That is the architecture argument for OTel that is not marketing. Two Java agents on one JVM is the architecture we are refusing. I reproduced a classloader mess with dd-trace plus OTel agent on a laptop on April 4. It booted once and then failed on the second start. I am not putting that in prod 'just in case.'"
+    },
+    {
+      "type": "p",
+      "text": "Sampling stays 5 percent baseline, 100 percent on break_id, whether the backend is Tempo or Datadog APM. We do not raise sampling to make a vendor UI look busy. Helen's question is a specific break, which we already force-sample."
+    },
+    {
+      "type": "h1",
+      "text": "13. Close"
+    },
+    {
+      "type": "p",
+      "text": "Let the trial die on April 19. Send the account manager a short note, Rahul can draft, I can add the technical line: we are standardizing on OpenTelemetry and our existing Grafana stack; we may return for APM as a backend if our trace store misses an internal bar. Do not promise a date. Do not apologize for using Prometheus. It is allowed."
+    },
+    {
+      "type": "p",
+      "text": "I like pretty notebooks. I like Helen liking her tools. CLH-7310 is how we honor that without a $14.6k meter that moves when a debug label ships. Priya, this is the position. If you override it and buy the platform, tell me before April 19 so Kavya does not keep the OTel agent branch warm for a week we will throw away."
+    }
+  ]
+}
