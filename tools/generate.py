@@ -58,10 +58,9 @@ def main():
         spec = json.loads(path.read_text(encoding="utf-8"))
         slug = spec.get("slug") or path.stem
         pages_now = page_baseline.get(slug)
-        # Stretch word count so LibreOffice lands at 100 pages.
-        min_words = 30000
+        min_words = 34500
         if pages_now:
-            min_words = int(30000 * (100.0 / pages_now) * 1.008)
+            min_words = int(34500 * (100.0 / pages_now) * 0.997)
         spec = expand_spec(spec, min_words=min_words)
         out = out_dir / f"{slug}.docx"
         build_document(spec, out)
