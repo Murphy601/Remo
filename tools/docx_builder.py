@@ -3,7 +3,12 @@
 from __future__ import annotations
 
 import datetime as dt
+import hashlib
+import io
+import re
+import zipfile
 from pathlib import Path
+from xml.sax.saxutils import escape
 
 from docx import Document
 from docx.enum.table import WD_TABLE_ALIGNMENT
@@ -296,6 +301,7 @@ def build_document(spec: dict, out_path: Path) -> Path:
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     doc.save(str(out_path))
+    stamp_docx_metadata(out_path, spec)
     return out_path
 
 
@@ -586,3 +592,110 @@ def _render_block(doc, block):
             _set_run_font(run, SANS, 9, color=MUTED)
     else:
         raise ValueError(f"Unknown block type: {kind}")
+
+
+_MONTHS = {
+    "January": 1, "February": 2, "March": 3, "April": 4, "May": 5, "June": 6,
+    "July": 7, "August": 8, "September": 9, "October": 10, "November": 11, "December": 12,
+}
+
+
+def _spec_datetime(s: str, hour: int, minute: int) -> dt.datetime:
+    m = re.match(r"([A-Za-z]+) (\d{1,2}), (\d{4})", s or "")
+    if not m:
+        d = dt.datetime(2023, 6, 1, hour, minute, 0)
+    else:
+        d = dt.datetime(int(m.group(3)), _MONTHS[m.group(1)], int(m.group(2)), hour, minute, 0)
+    return d
+
+
+def stamp_docx_metadata(path: Path, spec: dict, words: int | None = None, pages: int | None = None) -> None:
+    """Replace python-docx package stamps so File > Info looks like a Word file."""
+    path = Path(path)
+    author = spec.get("author") or "Aman Kumar"
+    title = spec.get("title") or ""
+    subject = spec.get("doc_type") or ""
+    company = spec.get("org") or "Northstar Engineering"
+    seed = int(hashlib.md5(spec.get("slug", path.stem).encode()).hexdigest()[:8], 16)
+    created = _spec_datetime(spec.get("date", ""), 8 + (seed % 8), (seed // 8) % 60)
+    modified = created
+    hist = spec.get("revision_history") or []
+    if hist:
+        modified = _spec_datetime(hist[-1][1], 14 + (seed % 5), (seed // 17) % 60)
+        if modified < created:
+            modified = created + dt.timedelta(days=2, hours=3)
+    if words is None:
+        words = 0
+    if pages is None:
+        pages = max(1, round(words / 310)) if words else 1
+    chars = words * 6
+    total_min = 25 + (seed % 180)
+
+    def iso(d: dt.datetime) -> str:
+        return d.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    core = (
+        "<?xml version='1.0' encoding='UTF-8' standalone='yes'?>\n"
+        '<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" '
+        'xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" '
+        'xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'
+        f"<dc:title>{escape(title)}</dc:title>"
+        f"<dc:subject>{escape(subject)}</dc:subject>"
+        f"<dc:creator>{escape(author)}</dc:creator>"
+        f"<cp:keywords>{escape(spec.get('doc_id') or '')}</cp:keywords>"
+        "<dc:description/>"
+        f"<cp:lastModifiedBy>{escape(author)}</cp:lastModifiedBy>"
+        "<cp:revision>4</cp:revision>"
+        f'<dcterms:created xsi:type="dcterms:W3CDTF">{iso(created)}</dcterms:created>'
+        f'<dcterms:modified xsi:type="dcterms:W3CDTF">{iso(modified)}</dcterms:modified>'
+        f"<cp:category>{escape(subject)}</cp:category>"
+        "</cp:coreProperties>"
+    )
+    app = (
+        "<?xml version='1.0' encoding='UTF-8' standalone='yes'?>\n"
+        '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" '
+        'xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">'
+        "<Template>Normal.dotm</Template>"
+        f"<TotalTime>{total_min}</TotalTime>"
+        f"<Pages>{pages}</Pages>"
+        f"<Words>{words}</Words>"
+        f"<Characters>{chars}</Characters>"
+        "<Application>Microsoft Office Word</Application>"
+        "<DocSecurity>0</DocSecurity>"
+        "<Lines>0</Lines>"
+        "<Paragraphs>0</Paragraphs>"
+        "<ScaleCrop>false</ScaleCrop>"
+        "<Company>" + escape(company) + "</Company>"
+        "<LinksUpToDate>false</LinksUpToDate>"
+        f"<CharactersWithSpaces>{chars + words}</CharactersWithSpaces>"
+        "<SharedDoc>false</SharedDoc>"
+        "<HyperlinkBase/>"
+        "<HyperlinksChanged>false</HyperlinksChanged>"
+        "<AppVersion>16.0000</AppVersion>"
+        "</Properties>"
+    )
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(path, "r") as zin, zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zout:
+        for item in zin.infolist():
+            if item.filename == "docProps/thumbnail.jpeg":
+                continue
+            data = zin.read(item.filename)
+            if item.filename == "docProps/core.xml":
+                data = core.encode("utf-8")
+            elif item.filename == "docProps/app.xml":
+                data = app.encode("utf-8")
+            elif item.filename == "_rels/.rels":
+                data = re.sub(
+                    r'<Relationship[^>]*metadata/thumbnail[^>]*/>',
+                    "",
+                    data.decode("utf-8"),
+                ).encode("utf-8")
+            elif item.filename == "[Content_Types].xml":
+                data = re.sub(
+                    r'<Default Extension="jpeg"[^>]*/>',
+                    "",
+                    data.decode("utf-8"),
+                ).encode("utf-8")
+            zout.writestr(item.filename, data)
+    path.write_bytes(buf.getvalue())

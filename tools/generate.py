@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
-from docx_builder import build_document  # noqa: E402
+from docx_builder import build_document, stamp_docx_metadata  # noqa: E402
 from expand import expand_spec  # noqa: E402
 
 
@@ -63,6 +63,7 @@ def main():
         wc = word_count(spec)
         # 12pt / 1.78 spacing historically ~310 words/page. 40-50 pages => ~12.4k-15.5k.
         est_pages = max(1, round(wc / 310))
+        stamp_docx_metadata(out, spec, words=wc, pages=est_pages)
         rec = {
             "file": str(out.relative_to(ROOT)),
             "source": str(path.relative_to(ROOT)),
