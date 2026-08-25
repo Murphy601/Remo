@@ -1,0 +1,532 @@
+{
+  "slug": "17-clearhaven-kafka-ingestion-redesign",
+  "doc_id": "CLH-TDD-2023-008",
+  "title": "Kafka ingestion redesign for Clearhaven settlement feeds",
+  "subtitle": "Replace 15-minute file drops and the Python poller with clh.settlement.inbound.v2 (72 partitions)",
+  "doc_type": "Technical design",
+  "kicker": "Clearhaven Markets / Ingest",
+  "org": "Northstar Engineering",
+  "classification": "INTERNAL",
+  "version": "1.2",
+  "status": "Approved",
+  "date": "April 11, 2023",
+  "author": "Aman Kumar",
+  "role": "Software Engineer II",
+  "team": "Clearhaven Platform, Northstar Engineering",
+  "audience": "Priya Nair, Kavya Menon, Diego Alvarez, Helen Cho, Chris Patel, Marcus Bell, Rahul Deshmukh",
+  "owners": "Aman Kumar (ingest-api + poller retirement), Diego Alvarez (brokers / 72 partitions), Kavya Menon (match-engine consumer group), Helen Cho (ops window)",
+  "related": "CLH-5519 (this work), CLH-TDD-2022-021 (platform design), CLH-MEM-2023-004 (file drop vs Kafka memo), CLH-TDD-2023-002 (CDC spike)",
+  "summary": "Ticket CLH-5519. We are replacing the 15-minute SFTP file drop plus Python poller with a Kafka-native ingest path on topic clh.settlement.inbound.v2, 72 partitions. Measured end-to-end processing on peak-shaped replays dropped from about 40 minutes (old warehouse window) and 11.4 minutes (recon v1 on 24 partitions) to 7.4-8.8 minutes on 8.2 million record days. This design covers consumer groups, backpressure, poison messages, schema registry, why 72 partitions instead of the 24 Helen Cho wanted, and the broker-roll failure where lag hit 2.1 million and how we drained it.",
+  "form_description": "Technical design for the Clearhaven Kafka ingest cutover. Written so ingest-api, match-engine, and SRE can ship CLH-5519 without re-arguing partition count on the change window.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.2",
+      "March 16, 2023",
+      "Aman Kumar",
+      "Spike notes from CLH-5519. 24 vs 72 partition math."
+    ],
+    [
+      "0.7",
+      "March 28, 2023",
+      "Aman Kumar",
+      "Consumer config, DLQ, schema registry. Kavya + Diego review."
+    ],
+    [
+      "1.0",
+      "April 6, 2023",
+      "Aman Kumar",
+      "Added broker-roll lag 2.1M postmortem slice. Priya approved direction."
+    ],
+    [
+      "1.2",
+      "April 11, 2023",
+      "Aman Kumar",
+      "Approved. Helen signed 72 partitions with a 24-partition shadow week."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "1. Why this exists"
+    },
+    {
+      "type": "p",
+      "text": "CLH-TDD-2022-021 shipped ingest-api as a seam in front of Kafka, but the producer is still the old world: RailClear drops a file every 15 minutes on sftp-clh-01.prod.us-east-1.northstar.internal, clh-file-poller.service on worker-clh-poller-02 wakes up, POSTs the file to ingest-api, ingest-api explodes it into clh.settlement.inbound.v1 (24 partitions). Firm-side is worse. books.trades_eod lands as a 1.1 GB dump around 18:40 ET and the poller chunks it. The recon platform matches in 11.4 minutes once records are in Kafka. We still wait on the 15-minute cadence and the dump. Helen Cho's cash desk does not care that match-engine is fast if the last file is still sitting on SFTP."
+    },
+    {
+      "type": "p",
+      "text": "CLH-5519 is the cutover of the producer side. RailClear (still fictional CSD, still street-side) will publish Avro to a Clearhaven-owned Kafka source connector we run in us-east-1, or, if their team slips, we run a file-to-Kafka pump that tails the SFTP directory and produces per-row instead of per-file. Firm-side moves off the dump to the CDC path Chris Patel sketched in CLH-TDD-2023-002, with a dump fallback for 30 days. Topic name: clh.settlement.inbound.v2. 72 partitions. Schema registry stays on clh-schemareg-01.prod.us-east-1.northstar.internal:8081. Nothing leaves us-east-1. 7-year retain of payloads still goes through recon-archive-worker, not through Kafka retention. Kafka retention stays 3 days. Do not try to satisfy retain with topic retention. We had that argument in 2022. It died."
+    },
+    {
+      "type": "p",
+      "text": "If you are Priya or Rahul, read section 2, section 5 (24 vs 72), and section 11. If you are on-call or writing the consumer, read sections 6 through 10. Commands are there. Ticket remains CLH-5519 until the poller unit is disabled in prod and the v1 topic is empty for 48 hours."
+    },
+    {
+      "type": "h1",
+      "text": "2. Decision (skim this)"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Cut over street-side and firm-side ingest to clh.settlement.inbound.v2 with 72 partitions. Retire clh-file-poller.service after a 10-business-day dual-publish. Keep schema registry + Avro. match-engine consumer group becomes cg-match-engine-prod-v2. Target e2e last-record-in-to-match-pass 7.4-8.8 min on an 8.2M peak day (measured). Helen's 24-partition request is rejected for v2; we dual-run 24 on v1 until she signs the lag charts."
+    },
+    {
+      "type": "p",
+      "text": "Measured numbers, not a slide. Staging replay of the August 26, 2022 peak shape (8.21M street + 6.40M firm) plus the March 17, 2023 near-peak (7.66M street):"
+    },
+    {
+      "type": "table",
+      "caption": "e2e last inbound record to match-pass complete",
+      "headers": [
+        "Shape",
+        "v1 24-part (min)",
+        "v2 72-part (min)",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "2022-08-26 peak 8.21M street",
+          "11.4",
+          "8.8",
+          "JSON parse still 1.71ms p95"
+        ],
+        [
+          "2023-03-17 7.66M street",
+          "9.6",
+          "7.4",
+          "CDC firm-side, no dump burst"
+        ],
+        [
+          "2023-03-24 5.02M street",
+          "6.1",
+          "4.2",
+          "quiet Friday, not a sizing day"
+        ],
+        [
+          "2023-04-04 soak + broker roll",
+          "n/a",
+          "drain 2.1M lag in 19.4 min",
+          "see section 9"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Rahul wanted a single SLA number. We will publish 8.8 minutes as the peak-day SLO and 7.4 as the near-peak expectation. Do not average them into 8. The cash desk lives on the worst day. Priya approved the SLO language April 6. Marcus will carry 8.8 to the cash desk, not 7.4, so we do not get a surprise on the next rebalance Friday."
+    },
+    {
+      "type": "p",
+      "text": "Cost: 72 partitions on a 6-broker cluster we already run is not extra broker money. It is extra file handles and extra consumer threads. match-engine HPA ceiling goes from 24 to 36 pods, concurrency 2 per pod (72). Diego priced the extra node-group capacity at about $1,260/month. Cheaper than keeping the poller VM and the 40 minute complaint."
+    },
+    {
+      "type": "h1",
+      "text": "3. Current ingest path (what we are deleting)"
+    },
+    {
+      "type": "p",
+      "text": "worker-clh-poller-02, systemd clh-file-poller.service, Python 3.9, repo ns/clh-file-poller, cron-ish loop every 20 seconds. It lists SFTP, downloads, hashes, POSTs /v1/batches. On a 38.4 MB RailClear file that POST takes 6.8-11.2 seconds depending on ingest-api GC. The poller is single-threaded. If two files land, the second waits. That is the 15-minute drop plus wait-on-POST stacked. Firm dump split into 20 MB chunks takes 14.6 minutes just to POST on March 17 because ingest-api's 50 MB cap and a slow JSON parse of the dump format. CDC makes that number look silly, which is the point."
+    },
+    {
+      "type": "p",
+      "text": "v1 topic clh.settlement.inbound.v1, 24 partitions, key=match_key, retention 3 days. Consumer group cg-match-engine-prod. This path stays alive during dual-publish. We do not flip a DNS record and pray. Dual-publish means ingest-api writes v1 and v2 for 10 business days, match-engine v2 runs in shadow (writes to recon_match_shadow), Helen compares break counts. Cut street-side first, firm-side second, poller last."
+    },
+    {
+      "type": "table",
+      "caption": "Components retired by CLH-5519",
+      "headers": [
+        "Component",
+        "Host / unit",
+        "What replaces it",
+        "When"
+      ],
+      "rows": [
+        [
+          "clh-file-poller.service",
+          "worker-clh-poller-02",
+          "RailClear connector + dump fallback producer",
+          "T+10 business days after v2 green"
+        ],
+        [
+          "SFTP as the system of record",
+          "sftp-clh-01",
+          "Kafka (SFTP remains a fallback lander 30 days)",
+          "T+30"
+        ],
+        [
+          "inbound.v1 as live",
+          "clh-kafka-prod",
+          "inbound.v2",
+          "after shadow accept"
+        ],
+        [
+          "cg-match-engine-prod",
+          "match-engine",
+          "cg-match-engine-prod-v2",
+          "same cut"
+        ],
+        [
+          "20 MB dump chunks",
+          "poller",
+          "CDC (CLH-TDD-2023-002) + dump fallback",
+          "firm cut, +7 days"
+        ]
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "4. Constraints that did not change"
+    },
+    {
+      "type": "p",
+      "text": "us-east-1 only. The connector runs in namespace clh-recon-prod on eks-clh-prod-use1. No Confluent Cloud, no MSK in another region, no vendor that stores payloads. Diego already had that fight with a salesperson in January. Schema registry is ours. 7-year retain is still parquet to s3://clh-recon-archive-prod/ then Glacier, still us-east-1. Kafka is a pipe with a 3-day memory. Audit of who changed a break still lives in recon_break.break_audit, not in Kafka headers. I am restating this because someone will propose 'just compact the topic for 7 years.' Compacted 8.2M keys/day for 7 years is a different product. We are not that product."
+    },
+    {
+      "type": "p",
+      "text": "SOX-ish control language, same as 2022: we are not claiming a SOX opinion. Dual-publish logs (which batch_id went to which topic) are evidence Leah Kim will want for the April sample. ingest-api already writes recon_ingest.batch. We add column produced_topics text[] so a row can show {v1}, {v2}, or {v1,v2}. Do not log payloads into that table. Hash stays."
+    },
+    {
+      "type": "h1",
+      "text": "5. Why 72 partitions (Helen wanted 24)"
+    },
+    {
+      "type": "p",
+      "text": "Helen Cho asked to keep 24. Her words in the March 22 ops huddle: '24 matches how we think about the day, do not make my lag graph a forest.' Fair. Burrow with 72 partition rows is ugly. We will ship a dashboard that shows aggregate lag and top-5 stuck partitions, not 72 lines. The partition count is a throughput and rebalance choice, not an ops metaphor."
+    },
+    {
+      "type": "p",
+      "text": "Math. Peak burst we measured on March 17 when CDC firm-side overlapped a RailClear catch-up: 6,140 rec/s for 9.4 minutes. match-engine p95 on v1 was 1.71ms after Kavya's January parse work (down from 2.14ms). Per-partition ceiling at 1.71ms is about 585 rec/s if the partition is busy. 24 * 585 = 14,040 rec/s theoretical, which looks like headroom until you remember partitions are hashed by match_key, not round-robin by load. Account 4418-CLEAR (a market-maker Clearhaven clears) is 4.6% of street rows on peak days. That keyspace lands in a handful of partitions. We watched partition 17 on v1 sit at 1,980 rec/s while partition 4 idled at 40 rec/s. Hot keys, not average keys, size the partition count."
+    },
+    {
+      "type": "p",
+      "text": "72 partitions cuts the 4418-CLEAR concentration. Same day replay: hottest partition 740 rec/s, p95 handle 1.71ms, headroom left. Consumer parallelism: 36 pods * 2 concurrency = 72. Rebalance time on a rolling deploy went from 14.2s (24 parts, 8 pods) to 22.8s (72 parts, 36 pods) in the first soak. That is worse. We fixed it by raising session.timeout.ms to 13s and cooperative-sticky assignor (see config). Rebalance is now 8.6s. 72 is acceptable if the assignor is not range. If someone 'simplifies' the consumer back to range assignor, 72 will hurt. Put that in the runbook."
+    },
+    {
+      "type": "p",
+      "text": "Rejected alternative: 48 partitions as a compromise. Nina Okonkwo (platform) suggested it on March 23 so Helen's graph is 'only twice as bad.' 48 does not divide our node-group of 12 worker nodes as cleanly when we want 2 consumers per pod and a 36-pod ceiling (72). 48 with 24 pods * 2 is fine until HPA wants 30 pods and we have idle members. 72 matches the HPA ceiling we already discussed with Diego for peak. Compromise partition counts are how you get a second migration in October. We do the migration once."
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Do not resplit in place",
+      "text": "You cannot change partition count on inbound.v2 without a new topic. If 72 is wrong we create inbound.v3. We do not kafka-topics --alter --partitions on a keyed match topic. Keys would not rehash. Helen's 24 stays on v1 until v1 is dead. That is the compromise she actually gets: 24 lives until shadow is signed."
+    },
+    {
+      "type": "table",
+      "caption": "Partition options we actually ran",
+      "headers": [
+        "Count",
+        "Hottest part rec/s (Aug 26 replay)",
+        "Rebalance s (after sticky)",
+        "HPA mapping",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "24 (v1)",
+          "1980",
+          "6.1",
+          "8 pods x 3 conc",
+          "hot key bound, keep for shadow only"
+        ],
+        [
+          "48",
+          "1120",
+          "7.4",
+          "24 pods x 2",
+          "rejected, second migration risk"
+        ],
+        [
+          "72 (v2)",
+          "740",
+          "8.6",
+          "36 pods x 2",
+          "chosen"
+        ],
+        [
+          "96",
+          "610",
+          "11.9",
+          "48 pods x 2",
+          "rejected, node-group $ and rebalance"
+        ]
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "6. Topic, schema registry, producer"
+    },
+    {
+      "type": "h2",
+      "text": "6.1 Topic"
+    },
+    {
+      "type": "code",
+      "caption": "Create clh.settlement.inbound.v2 (once, from kafka-tools)",
+      "text": "export BROKERS=clh-kafka-01.prod.us-east-1.northstar.internal:9092\n\nkafka-topics.sh --bootstrap-server $BROKERS --create \\\n  --topic clh.settlement.inbound.v2 --partitions 72 --replication-factor 3 \\\n  --config retention.ms=259200000 \\\n  --config compression.type=lz4 \\\n  --config min.insync.replicas=2 \\\n  --config unclean.leader.election.enable=false\n\nkafka-topics.sh --bootstrap-server $BROKERS --create \\\n  --topic clh.settlement.inbound.v2.dlq --partitions 12 --replication-factor 3 \\\n  --config retention.ms=1209600000\n\n# verify\nkafka-topics.sh --bootstrap-server $BROKERS --describe --topic clh.settlement.inbound.v2"
+    },
+    {
+      "type": "p",
+      "text": "DLQ retention 14 days. Poison investigation is not a same-day activity when Helen is also working breaks. 12 DLQ partitions is enough; DLQ volume should be tiny. If DLQ partitions are 12 and inbound is 72, we do not preserve partition mapping onto DLQ. We key DLQ by original partition plus offset in the payload so we can find the source. Do not try to keep 72-to-72 mapping for a topic that should be almost empty. That is how you pay for 72 idle DLQ partitions."
+    },
+    {
+      "type": "h2",
+      "text": "6.2 Schema"
+    },
+    {
+      "type": "p",
+      "text": "Subject clh.settlement.inbound.v2-value, Avro, compatibility BACKWARD. Registry URL http://clh-schemareg-01.prod.us-east-1.northstar.internal:8081. Producers set auto.register.schemas=false in prod. CI registers. If a RailClear field shows up that we do not know, ingest-api (or the connector) fails the record to DLQ with reason UNKNOWN_FIELD, we do not autowire a schema bump at 19:04. Chris owns the Avro file in ns/clh-schemas. Current version 4 (added orig_ref for cancels, already in v1 JSON). v2 Avro is a port of that JSON, not a new business model."
+    },
+    {
+      "type": "code",
+      "caption": "SettlementInbound.avsc (trimmed; full file in ns/clh-schemas)",
+      "text": "{\"type\":\"record\",\"name\":\"SettlementInbound\",\"namespace\":\"clh.settlement\",\n \"fields\":[\n  {\"name\":\"record_id\",\"type\":\"string\"},\n  {\"name\":\"source_system\",\"type\":{\"type\":\"enum\",\"name\":\"Source\",\"symbols\":[\"RAILCLEAR\",\"FIRM_BOOKS\",\"MANUAL\"]}},\n  {\"name\":\"settle_date\",\"type\":\"int\",\"logicalType\":\"date\"},\n  {\"name\":\"account\",\"type\":\"string\"},\n  {\"name\":\"cusip\",\"type\":\"string\"},\n  {\"name\":\"qty\",\"type\":\"string\"},\n  {\"name\":\"amount_cents\",\"type\":\"long\"},\n  {\"name\":\"txn_type\",\"type\":{\"type\":\"enum\",\"name\":\"TxnType\",\"symbols\":[\"NEW\",\"CXL\",\"CORR\"]}},\n  {\"name\":\"orig_ref\",\"type\":[\"null\",\"string\"],\"default\":null},\n  {\"name\":\"content_sha256\",\"type\":\"string\"},\n  {\"name\":\"batch_id\",\"type\":\"string\"},\n  {\"name\":\"emitted_at\",\"type\":\"long\",\"logicalType\":\"timestamp-millis\"}\n ]}"
+    },
+    {
+      "type": "p",
+      "text": "qty is string in Avro because RailClear sends 4 decimal places as text and we already burned a day in 2022 to a float. Parse to numeric in match-engine with the same path as v1. content_sha256 is the row hash for idempotency at consume time, not the file hash. File hash still lives on recon_ingest.batch for fallback files. Row hash is sha256 of source_system|record_id|settle_date|payload_canonical. Connector must send it. If it is missing, ingest path rejects to DLQ. Do not compute a hash in the consumer that the producer did not compute. Two implementations will drift."
+    },
+    {
+      "type": "h2",
+      "text": "6.3 Producer settings (ingest-api dual-publish and connector)"
+    },
+    {
+      "type": "code",
+      "caption": "Producer config shipped in ingest-api v2 dual-publish",
+      "text": "acks=all\nenable.idempotence=true\nmax.in.flight.requests.per.connection=5\nlinger.ms=8\nbatch.size=65536\ncompression.type=lz4\nkey.serializer=org.apache.kafka.common.serialization.StringSerializer\nvalue.serializer=io.confluent.kafka.serializers.KafkaAvroSerializer\nschema.registry.url=http://clh-schemareg-01.prod.us-east-1.northstar.internal:8081\nauto.register.schemas=false\nuse.latest.version=true"
+    },
+    {
+      "type": "p",
+      "text": "max.in.flight=5 with idempotence is valid on the client we run (3.2). Do not drop idempotence to 'go faster.' The whole point of CLH-5519 after last year's filename mess is we do not double-produce a row because a POST retried. Connector tasks: 6, matching the 6 brokers, not 72. Connector parallelism is task count, not partition count. 6 tasks on the RailClear source was 4,220 rec/s in soak, enough."
+    },
+    {
+      "type": "h1",
+      "text": "7. Consumer groups, backpressure, poison"
+    },
+    {
+      "type": "p",
+      "text": "Live group: cg-match-engine-prod-v2. Shadow group during dual-run: cg-match-engine-shadow-v2. They must not share a group.id. If they do, shadow steals partitions and prod stalls. I will put a startup assertion in match-engine: if SPRING_PROFILES_ACTIVE contains shadow, group.id must contain shadow. Fail the pod otherwise."
+    },
+    {
+      "type": "code",
+      "caption": "match-engine consumer config for inbound.v2",
+      "text": "spring.kafka.consumer:\n  group-id: cg-match-engine-prod-v2\n  key-deserializer: org.apache.kafka.common.serialization.StringDeserializer\n  value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer\n  enable-auto-commit: false\n  auto-offset-reset: latest   # prod cut; shadow uses earliest on empty group once\n  max-poll-records: 180\n  max-poll-interval-ms: 180000\n  session.timeout.ms: 13000\n  heartbeat.interval.ms: 4000\n  fetch.min.bytes: 102400\n  fetch.max.wait.ms: 400\n  partition.assignment.strategy: org.apache.kafka.clients.consumer.CooperativeStickyAssignor\n  isolation.level: read_committed\n  properties:\n    schema.registry.url: http://clh-schemareg-01.prod.us-east-1.northstar.internal:8081\n    specific.avro.reader: true\nspring.kafka.listener:\n  ack-mode: MANUAL_IMMEDIATE\n  concurrency: 2\n  type: batch"
+    },
+    {
+      "type": "p",
+      "text": "max-poll-records 180, not 250. 72 partitions with 250 records and a 1.71ms handle is fine until a poison JSON-in-Avro wrapper (we saw one in soak: a connector bug emitted a 1.8 MB residual file as a single field). 180 keeps a bad poll under max-poll-interval. batch listener is new vs v1. Kavya wanted it for the JDBC batch upsert into open_key. Measured: 180-record batch upsert p95 41.2ms vs 180 * 1.1ms single inserts. Take the batch."
+    },
+    {
+      "type": "h3",
+      "text": "Backpressure"
+    },
+    {
+      "type": "p",
+      "text": "We do not pause partitions from application code on day one. Backpressure is HPA on match-engine (CPU 62% target, lag metric from Burrow exporter as a custom metric, scale when aggregate lag > 80k for 3 minutes). If lag is 80k and CPU is 30%, that is not a scale problem, that is a stuck partition or a DB wait. HPA on lag-alone caused a 40-pod storm on staging March 29 when Postgres commit spiked and lag was the symptom. Diego and I agreed: HPA needs CPU or memory OR (lag AND CPU > 45%). The Helm values have that. Do not 'simplify' the HPA to lag-only after the first page."
+    },
+    {
+      "type": "p",
+      "text": "If recon-match-01 commit latency p95 > 80ms, match-engine should slow down. We will set a Micrometer gauge match.db.commit.p95 and a circuit that reduces poll size to 40 until it recovers. That is backpressure toward Kafka (lag grows, which is honest) instead of melting Postgres. Kafka can hold 3 days. Postgres cannot hold a connection storm."
+    },
+    {
+      "type": "h3",
+      "text": "Poison messages"
+    },
+    {
+      "type": "p",
+      "text": "Three failures of the same record (tracked by record_id in a Caffeine cache, max 50k entries, TTL 15 min) then produce to clh.settlement.inbound.v2.dlq and commit. Failures that count: Avro deserialize, missing content_sha256, qty parse, and unhandled exceptions. Failures that do not count toward poison: SQLTransientConnectionException, Kafka produce timeout on the unmatched topic. Those should retry the poll, not DLQ a valid trade. We mixed those in v1 once. A Postgres failover DLQ'd 6,402 valid rows. Chris had to replay. The classification lives in MatchListener.isPoison(Throwable). Read it before you add a catch."
+    },
+    {
+      "type": "p",
+      "text": "Replay from DLQ is a manual produce to inbound.v2 with a header x-clh-replay=true. match-engine treats replay as idempotent on content_sha256. Do not bump record_id on replay. Helen will ask you to. If you bump it, you double-open breaks."
+    },
+    {
+      "type": "h1",
+      "text": "8. Dual-publish and cut sequence"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Day 0: create v2 topics, register Avro v4 under the v2 subject, deploy match-engine shadow with group cg-match-engine-shadow-v2, auto-offset-reset earliest, write to recon_match_shadow only.",
+        "Day 0-1: ingest-api dual-publish flag DUAL_PUBLISH_V2=true. Every accepted batch produces v1 and v2. recon_ingest.batch.produced_topics shows both.",
+        "Days 1-10: Helen compares shadow break counts to prod v1 each evening. Accept if count delta <= 3.5% (same allocation gap as 2022 design) and no unmatched wait regression > 90s p95.",
+        "Firm-side: flip CDC producer to v2 on day 4 if street-side shadow is inside delta. Keep dump fallback producing v2 for 30 days with the same content_sha256 so duplicates no-op.",
+        "Cut: switch match-engine prod group to cg-match-engine-prod-v2, point unmatched produce at the existing unmatched topic (still v1 name; that topic is downstream, not this design). Disable v1 produce. Watch lag 2 hours.",
+        "T+10: stop poller systemd unit. Leave the VM 7 days. Delete the unit on ticket CLH-5519 comment, not on Slack.",
+        "T+14: if v1 consumer lag is 0 for 48h, set inbound.v1 retention to 1 hour then delete topic in a change window Diego owns."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Rollback: turn DUAL_PUBLISH off (v1 only) if v2 lag exceeds 400k for 10 minutes during the first two peak days and CPU is not the reason. That page policy already exists in draft for the lag runbook. Shadow database can be dropped after Leah's sample; it is not the journal."
+    },
+    {
+      "type": "h1",
+      "text": "9. Failure: broker roll, lag 2.1M, how we drained"
+    },
+    {
+      "type": "p",
+      "text": "April 4, 2023, staging soak. Diego rolled clh-kafka-02 for a log4j config. Controlled, one broker. ISR stayed at 3 except a 38 second window on 12 partitions whose leaders were on 02. Producers with acks=all blocked. Connector tasks retried. match-engine stayed up. When 02 came back, the connector flushed. inbound.v2 received a burst: 2.14 million records in 4.1 minutes. Aggregate lag on cg-match-engine-shadow-v2 hit 2.11 million. Burrow went red. HPA added pods. We peaked at 34 pods. Drain time 19.4 minutes to lag < 1k. Match pass for that soak finished 26.1 minutes after the roll started. That is worse than 8.8. It is also a broker roll during a peak-shaped replay, which we should not do in prod at 19:00."
+    },
+    {
+      "type": "p",
+      "text": "What worked: cooperative-sticky did not stop the world. max-poll-interval 180s held. Postgres commit p95 went to 62.4ms, circuit cut poll size to 40, lag drain slowed but connections did not die. What did not work: the first HPA rule (lag-only) tried to go to 40 pods, cluster IP exhausted on the staging node group at 38. Diego had to cap maxReplicas at 36 before we replayed. Prod values.yaml must cap at 36 before go-live. I will check it myself."
+    },
+    {
+      "type": "p",
+      "text": "How we drain a 2.1M lag in prod if a roll or a network blip repeats: do not rewind. Do not skip. Let HPA rise to 36. Watch commit p95. If p95 > 80ms, the circuit already shrinks polls; do not also restart pods (rebalance adds lag). If a single partition is not moving while aggregate is falling, that is poison, go to the lag runbook, do not scale. After drain, do not roll another broker the same evening. Diego will put a change freeze 16:00-21:00 ET on clh-kafka-prod on settlement days. The April 4 soak is the reason, not a vibe."
+    },
+    {
+      "type": "table",
+      "caption": "April 4 staging broker-roll drain",
+      "headers": [
+        "t (min from roll start)",
+        "Lag",
+        "Pods",
+        "commit p95 ms",
+        "Hottest part rec/s"
+      ],
+      "rows": [
+        [
+          "0",
+          "12.4k",
+          "18",
+          "9.2",
+          "410"
+        ],
+        [
+          "1 (leader move)",
+          "188k",
+          "18",
+          "14.6",
+          "0 (produce blocked)"
+        ],
+        [
+          "5 (flush)",
+          "2.11M",
+          "22",
+          "48.1",
+          "890"
+        ],
+        [
+          "9",
+          "1.42M",
+          "34",
+          "62.4",
+          "740"
+        ],
+        [
+          "14",
+          "410k",
+          "34",
+          "33.0",
+          "710"
+        ],
+        [
+          "19.4",
+          "0.9k",
+          "34",
+          "11.8",
+          "80"
+        ],
+        [
+          "26.1",
+          "0",
+          "20 (scale-in)",
+          "8.4",
+          "20"
+        ]
+      ]
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Prod rule from this failure",
+      "text": "No Kafka broker rolls 16:00-21:00 ET on US settlement days. If a security patch forces it, Helen and Marcus get a 2 hour heads-up and cash desk treats the window as degraded. We will not pretend e2e stays 8.8 through a roll."
+    },
+    {
+      "type": "h1",
+      "text": "10. Engineer execute: verify, cut, watch"
+    },
+    {
+      "type": "code",
+      "caption": "Consumer group and lag commands (on-call paste)",
+      "text": "export BROKERS=clh-kafka-01.prod.us-east-1.northstar.internal:9092\n\nkafka-consumer-groups.sh --bootstrap-server $BROKERS --group cg-match-engine-prod-v2 --describe\n\n# aggregate lag (awk skips header)\nkafka-consumer-groups.sh --bootstrap-server $BROKERS --group cg-match-engine-prod-v2 --describe \\\n  | awk 'NR>1 {lag+=$6; if($6+0>max) max=$6} END {print \"sum=\" lag, \"max_part=\" max}'\n\n# stuck partition: CURRENT-OFFSET not moving for 2 min, LAG high\nwatch -n 15 'kafka-consumer-groups.sh --bootstrap-server $BROKERS --group cg-match-engine-prod-v2 --describe | sort -k6 -n | tail'\n\n# DLQ depth\nkafka-run-class.sh kafka.tools.GetOffsetShell --broker-list $BROKERS \\\n  --topic clh.settlement.inbound.v2.dlq --time -1"
+    },
+    {
+      "type": "code",
+      "caption": "Helm: match-engine v2 values you must not 'simplify'",
+      "text": "helm upgrade --install match-engine charts/clh-match-engine -n clh-recon-prod \\\n  -f charts/clh-match-engine/values.prod.yaml \\\n  --set kafka.topics.inbound=clh.settlement.inbound.v2 \\\n  --set kafka.consumerGroup=cg-match-engine-prod-v2 \\\n  --set replicaCount=18 \\\n  --set autoscaling.maxReplicas=36 \\\n  --set autoscaling.cpuThreshold=62 \\\n  --set autoscaling.lagThreshold=80000 \\\n  --set autoscaling.lagRequiresCpuAbove=45 \\\n  --wait --timeout 10m\n\nkubectl -n clh-recon-prod rollout status deploy/match-engine"
+    },
+    {
+      "type": "p",
+      "text": "Shadow deploy uses values.shadow.yaml which points at recon_match_shadow and group cg-match-engine-shadow-v2. If you helm with the wrong file, shadow writes prod breaks. The chart has a required value shadow.unsafe=false and a check that database name contains _shadow when shadow.unsafe is false. Do not set shadow.unsafe=true because you are in a hurry."
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Describe inbound.v2: 72 partitions, RF 3, ISR 3, min.insync 2.",
+        "Registry: curl the subject, confirm version 4, compatibility BACKWARD, auto.register disabled in the running pod env.",
+        "Produce 12-row fixture with a unique content_sha256 through ingest-api with DUAL_PUBLISH_V2. Confirm two topics received 12 keys each (kcat -C -e -q | wc).",
+        "Watch shadow match-engine consume. Confirm recon_match_shadow.open_key, not recon_match.open_key.",
+        "Kill one match-engine pod. Confirm cooperative rebalance < 10s and no duplicate break opens on the fixture.",
+        "On cut day, flip produce to v2-only after Helen's email. Watch lag 120 minutes. Do not disable the poller the same afternoon."
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "11. Open questions"
+    },
+    {
+      "type": "table",
+      "caption": "Open questions with owners",
+      "headers": [
+        "ID",
+        "Question",
+        "Owner",
+        "Due"
+      ],
+      "rows": [
+        [
+          "Q1",
+          "RailClear connector date: May 1 or we ship file-to-Kafka pump first?",
+          "Marcus Bell + Helen Cho",
+          "2023-04-18"
+        ],
+        [
+          "Q2",
+          "CDC firm-side dual-run 30 days or 10? Chris wants 30 for month-end.",
+          "Chris Patel + Rahul Deshmukh",
+          "2023-04-20"
+        ],
+        [
+          "Q3",
+          "Burrow UI: aggregate + top-5, who builds the dashboard before cut?",
+          "Diego Alvarez",
+          "2023-04-25"
+        ],
+        [
+          "Q4",
+          "Should inbound.v1 deletion require Leah's sign-off because dual-publish is evidence?",
+          "Leah Kim",
+          "2023-05-02"
+        ],
+        [
+          "Q5",
+          "File-to-Kafka pump owner if RailClear slips past May 15?",
+          "Aman Kumar (interim) / Priya staffing",
+          "2023-04-18"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Q1 gates whether CLH-5519 is a connector cut or a pump cut. The topic, partition count, consumer group, and poison path do not change. The producer does. I will write the pump as a 400-line Go binary in ns/clh-sftp-pump if Marcus does not have a RailClear date by April 18. I will not keep the Python poller. The poller POSTs whole files. The pump must produce per-row. Different program."
+    },
+    {
+      "type": "p",
+      "text": "Q4 is real. Dual-publish rows in recon_ingest.batch are the evidence trail. Deleting the v1 topic does not delete the batch table. Leah can sign topic deletion as long as batch.produced_topics remains. I want that in writing before Diego runs the delete command."
+    }
+  ]
+}
