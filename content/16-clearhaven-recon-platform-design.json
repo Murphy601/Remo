@@ -1,0 +1,775 @@
+{
+  "slug": "16-clearhaven-recon-platform-design",
+  "doc_id": "CLH-TDD-2022-021",
+  "title": "Clearhaven transaction reconciliation platform: end-to-end systems design",
+  "subtitle": "Street-side vs firm-side ingest, match, exception handling, and break journal under audit constraints",
+  "doc_type": "Systems design",
+  "kicker": "Clearhaven Markets / Recon",
+  "org": "Northstar Engineering",
+  "classification": "INTERNAL",
+  "version": "1.2",
+  "status": "Approved",
+  "date": "September 15, 2022",
+  "author": "Aman Kumar",
+  "role": "Software Engineer II",
+  "team": "Clearhaven Platform, Northstar Engineering",
+  "audience": "Priya Nair (EM), Rahul Deshmukh (PM), Kavya Menon, Chris Patel, Diego Alvarez (SRE), Helen Cho (Clearhaven ops), Marcus Bell (TAM), Leah Kim (Clearhaven control owner)",
+  "owners": "Aman Kumar (design), Priya Nair (engineering approval), Kavya Menon (match-engine), Diego Alvarez (Kafka/Postgres), Helen Cho (ops acceptance)",
+  "related": "CLH-REQ-2022-033 (audit trail reqs), CLH-4412 (batch window SLA), CLH-4488 (warehouse proc spike), CLH-TDD-2023-008 (Kafka ingest, later)",
+  "summary": "This is the systems design for Clearhaven Markets' transaction reconciliation platform. We ingest street-side and firm-side trades, match them, open exceptions, and keep a break journal with a full who/why audit trail. Peak day volume we sized against is 8.2 million records. The current 15-minute file drop plus warehouse job already burns 40 minutes of the evening window, which Helen Cho called painful in the August 29 working session. This document is for the platform team, Clearhaven ops, and Marcus Bell so he can brief the cash desk without translating a whiteboard.",
+  "form_description": "Internal systems design for the Clearhaven recon platform. Written so engineering can build ingest-api, match-engine, break-svc, and recon-query, and so Clearhaven ops can sign off on audit and residency constraints.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "August 18, 2022",
+      "Aman Kumar",
+      "Outline after Helen Cho batch-window complaint; warehouse proc option parked."
+    ],
+    [
+      "0.4",
+      "August 31, 2022",
+      "Aman Kumar",
+      "Service boundaries, Kafka topics, break journal schema. Kavya review."
+    ],
+    [
+      "1.0",
+      "September 9, 2022",
+      "Aman Kumar",
+      "Priya Nair design review. Rejected warehouse stored-proc path in writing."
+    ],
+    [
+      "1.2",
+      "September 15, 2022",
+      "Aman Kumar",
+      "Approved. Added 7-year retain path, us-east-1 constraint table, open questions."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "1. Purpose and who this is for"
+    },
+    {
+      "type": "p",
+      "text": "Clearhaven Markets is a US mid-market broker-dealer with a clearing affiliate. Northstar Engineering owns the recon stack they run against street-side settlement files and their own firm books. I am writing this as the engineer who will own ingest-api and the first cut of match-engine. Kavya Menon takes match-engine after the October staffing swap. Chris Patel owns the reporting extracts that recon-query will feed. Diego Alvarez owns the Kafka cluster and the Postgres instances in us-east-1. Helen Cho is the Clearhaven ops counterpart who lives in the 7pm ET window. Marcus Bell is the TAM who will get paged when cash desk thinks we are short."
+    },
+    {
+      "type": "p",
+      "text": "If you are Priya or Rahul, read section 2 (decision), section 4 (constraints), section 5 (what we rejected), and section 13 (open questions). If you are going to write code or operate this, read sections 6 through 12. Commands and DDL live there. I am not writing a strategy memo. This is the shape of four services, two data stores, and an audit table that has to survive a control-owner walkthrough."
+    },
+    {
+      "type": "p",
+      "text": "Scope is transaction recon for cash equities and the DTC-like street feed Clearhaven calls RailClear. Out of scope for this design: options exercise, corp actions, and the FY23 client-reporting warehouse. Those stay on the existing overnight extract until Chris has a cutover plan. Rahul asked whether we should fold client-reporting into recon-query now. No. recon-query will expose matched and unmatched rows. Reporting can read that later. Mixing the two in v1 is how we get a 14-month project."
+    },
+    {
+      "type": "h1",
+      "text": "2. Decision (skim this)"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Build four services (ingest-api, match-engine, break-svc, recon-query) on Postgres 14 and Kafka 3.2 in us-east-1 only. Match in the application, not in a warehouse stored procedure. Keep a break journal with immutable audit rows for every state change. Target end-to-end ingest-to-break under 12 minutes on an 8.2M peak day, down from the current 40 minute batch. Retain operational data 7 years in S3 Glacier Deep Archive in us-east-1, with hot Postgres covering 90 days."
+    },
+    {
+      "type": "p",
+      "text": "Priya Nair approved this direction in the September 9 review. Rahul Deshmukh signed the scope cut (no client-reporting in v1). Helen Cho accepted the 12 minute target as a working SLA, with the note that cash desk still wants a 7pm ET 'window closed' signal even if matching is still draining. We will emit that signal from match-engine when the last partition for the settlement date has been consumed, not when every break is researched. Those are different clocks and we should stop pretending they are the same."
+    },
+    {
+      "type": "p",
+      "text": "Cost envelope Diego priced on September 6: three r6g.2xlarge Postgres primaries (ingest, match/break, query replica split), a six-broker Kafka cluster on r5.xlarge, and about $4,180/month in S3 + Glacier for the 7-year retain once we are a year in. Year-one compute is about $11,640/month at the sizes above, not counting the existing EKS node group. That is cheaper than the warehouse path Chris costed at $18,200/month for a dedicated Redshift-class cluster plus the overnight slot we already pay for."
+    },
+    {
+      "type": "table",
+      "caption": "Decision summary for leadership review",
+      "headers": [
+        "Question",
+        "Choice",
+        "Owner",
+        "Date"
+      ],
+      "rows": [
+        [
+          "Where does matching run?",
+          "match-engine service, not warehouse SQL",
+          "Kavya Menon",
+          "2022-09-09"
+        ],
+        [
+          "How do we ingest?",
+          "ingest-api writes Kafka; files still land, then produce",
+          "Aman Kumar",
+          "2022-09-09"
+        ],
+        [
+          "Break mutations",
+          "break-svc only; no direct SQL from ops tools",
+          "Aman Kumar",
+          "2022-09-09"
+        ],
+        [
+          "Read path",
+          "recon-query against replica, 5s staleness budget",
+          "Chris Patel",
+          "2022-09-12"
+        ],
+        [
+          "Region",
+          "us-east-1 only, no replica outside the region",
+          "Diego Alvarez",
+          "2022-08-29"
+        ],
+        [
+          "Retain",
+          "90d hot Postgres, 7y object store in us-east-1",
+          "Leah Kim",
+          "2022-09-08"
+        ]
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "3. Current system and why it hurts"
+    },
+    {
+      "type": "p",
+      "text": "Today street-side files drop every 15 minutes onto sftp-clh-01.prod.us-east-1.northstar.internal. A Python poller on worker-clh-poller-02 (systemd unit clh-file-poller.service) copies them to s3://clh-settlement-inbound-prod/incoming/ and kicks a warehouse job named clh_recon_nightly_v3. That job is a 2,400-line SQL script with three staging tables and a final MERGE into warehouse.recon_breaks. Firm-side comes from a nightly dump of the books database, table books.trades_eod, about 2.1 hours after the cash session close on a normal day and later on month-end."
+    },
+    {
+      "type": "p",
+      "text": "Helen timed the August 11 peak: 7.94 million street rows plus 6.11 million firm rows. The poller queued the last file at 19:06 ET. The warehouse job finished at 19:46 ET. Forty minutes. Cash desk starts calling her at 19:20. The job also holds an exclusive lock on warehouse.recon_breaks for the last 11 minutes, which is why the ops UI spins. Sneha Iyer (QA) reproduced the lock on staging with a 1.2 million row fixture. We did not need a bigger fixture. The lock is the design."
+    },
+    {
+      "type": "p",
+      "text": "Matching logic lives in that SQL script. It joins on (account, cusip, settle_date, qty, amount) with a 0.01 USD tolerance on amount. When the join misses, it inserts a break with break_code derived from a CASE of 40-odd branches. Nobody can tell who changed a break after insert. Ops updates the row in place. The warehouse has last_updated_by as a free-text field that the UI fills with whatever Windows login the Citrix jump has. Leah Kim looked at three weeks of that column in August and found 14 rows where last_updated_by was 'admin' and the reason was blank. That fails the control language her auditors use, even though we are not claiming a SOX opinion in this document. We need who, when, from-state, to-state, and a reason code that is not optional."
+    },
+    {
+      "type": "p",
+      "text": "Idempotency is filename. If RailClear (street-side CSD feed) drops the same content under a new name, we double-count. Helen has a spreadsheet of 6 incidents in 2021-2022 where that happened. The worst was March 3, 2022: 9,102 extra street rows, $1.18M apparent long, 47 minutes of cash desk time. We will not keep filename as the idempotency key. Content hash goes in v1. I am stating that here so it does not fall out of the ingest design later."
+    },
+    {
+      "type": "table",
+      "caption": "Measured pain on recent peak and near-peak days (Helen Cho ops log)",
+      "headers": [
+        "Date",
+        "Street rows",
+        "Firm rows",
+        "Poller last file (ET)",
+        "Warehouse done (ET)",
+        "Elapsed min",
+        "Ops UI usable?"
+      ],
+      "rows": [
+        [
+          "2022-06-17",
+          "6.41M",
+          "5.02M",
+          "19:04",
+          "19:31",
+          "27",
+          "partial, lock 8 min"
+        ],
+        [
+          "2022-07-29",
+          "7.12M",
+          "5.66M",
+          "19:08",
+          "19:44",
+          "36",
+          "no, lock 12 min"
+        ],
+        [
+          "2022-08-11",
+          "7.94M",
+          "6.11M",
+          "19:06",
+          "19:46",
+          "40",
+          "no, lock 11 min"
+        ],
+        [
+          "2022-08-26",
+          "8.21M",
+          "6.40M",
+          "19:11",
+          "19:52",
+          "41",
+          "no, lock 14 min"
+        ],
+        [
+          "2022-09-02",
+          "5.88M",
+          "4.71M",
+          "19:03",
+          "19:22",
+          "19",
+          "yes after 4 min"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "August 26 is the 8.2 million peak we are sizing against. Street-side 8.21M. That day was a rebalance Friday plus a RailClear catch-up file. The warehouse job did not crash. It just occupied the window. Any design that still serializes matching behind a single MERGE is going to lose that Friday."
+    },
+    {
+      "type": "h1",
+      "text": "4. Constraints (non-negotiable)"
+    },
+    {
+      "type": "h2",
+      "text": "4.1 Residency"
+    },
+    {
+      "type": "p",
+      "text": "Clearhaven contract exhibit C.4: settlement and recon data does not leave us-east-1. No cross-region replica, no DR in us-west-2, no vendor SaaS that stores payloads outside the region. Diego asked about an S3 replica in us-east-2. Leah Kim said no on September 8. us-east-2 is a different region. We will take AZ failure inside us-east-1 with three AZs (use1-az2, use1-az4, use1-az6). If the region is gone, the RPO is the Kafka topic retention (3 days) plus the 90-day Postgres backups that already sit in us-east-1. That is the trade. Write it down so nobody 'just adds a replica' during a weekend incident."
+    },
+    {
+      "type": "h2",
+      "text": "4.2 Retain"
+    },
+    {
+      "type": "p",
+      "text": "Seven years. Leah's control language: 'books and records supporting settlement recon shall be retained 84 months from trade date.' Hot Postgres holds 90 days of txn_street, txn_firm, match_result, break, and break_audit. Nightly, a job named recon-archive-worker dumps closed settlement dates older than 90 days to s3://clh-recon-archive-prod/year=YYYY/month=MM/day=DD/ as parquet, then Glacier Deep Archive after 30 days in standard S3. Restore test is quarterly. Diego scheduled the first restore drill for December 7, 2022. Chris owns the parquet schema so reporting can read archives without standing up Postgres."
+    },
+    {
+      "type": "h2",
+      "text": "4.3 Audit and control language"
+    },
+    {
+      "type": "p",
+      "text": "We are not issuing a SOX attestation. We are implementing control-style evidence Clearhaven's auditors already ask for: maker/checker on break resolution above $50,000 notional, immutable history of who changed a break and why, and deploy change tickets tied to production writes. break_audit is append-only. Application role recon_break_app can INSERT and SELECT. It cannot UPDATE or DELETE. The table is owned by recon_ddl, which only CI can assume. If someone needs to correct a bad audit row, that is a ticketed DDL event, not an UPDATE. Leah will write the control narrative. We give her the table and the access pattern."
+    },
+    {
+      "type": "p",
+      "text": "Every break mutation through break-svc requires: actor (Okta subject, not a Windows login), reason_code from a closed list, optional free-text comment (max 500 chars, logged), previous status, new status. The API rejects an empty reason_code with 422. Ops UI cannot save without it. Helen asked for a 'quick close' button that skips reason. Rejected in the September 9 review. The whole point of the journal is that quick close is how 'admin' showed up last year."
+    },
+    {
+      "type": "h2",
+      "text": "4.4 Volume and window"
+    },
+    {
+      "type": "p",
+      "text": "Peak 8.2 million street records in a calendar day, concentrated after 16:00 ET, with a tail of late files through 19:11 on the August 26 shape. Firm-side is smaller (6.4M that day) but arrives in one burst around 18:40 ET from books.trades_eod. Batch window used to be 40 minutes and was already painful. Target for v1: last street file of the 15-minute cadence to first complete match pass in 12 minutes at peak. Stretch if Kafka ingest lands later (see CLH-TDD-2023-008, not this doc). We still accept 15-minute file drops in v1. ingest-api is the seam so we can change the producer without rewriting match-engine."
+    },
+    {
+      "type": "table",
+      "caption": "Constraint register",
+      "headers": [
+        "ID",
+        "Constraint",
+        "Source",
+        "Enforcement"
+      ],
+      "rows": [
+        [
+          "C-REG-1",
+          "No data leaves us-east-1",
+          "Contract exhibit C.4",
+          "SCP on clh-recon-prod account; no peering west"
+        ],
+        [
+          "C-RET-7",
+          "84 month retain from trade date",
+          "Leah Kim, control owner",
+          "archive-worker + Glacier; quarterly restore"
+        ],
+        [
+          "C-AUD-1",
+          "Who/why on every break change",
+          "CLH-REQ-2022-033",
+          "break_audit append-only; API 422 on blank reason"
+        ],
+        [
+          "C-AUD-2",
+          "Maker/checker above $50k notional",
+          "Leah Kim, Sept 8",
+          "break-svc dual-ack; checker != maker"
+        ],
+        [
+          "C-VOL-82",
+          "Size for 8.2M street rows/day",
+          "Helen Cho ops log Aug 26",
+          "Kafka partitions + match-engine HPA"
+        ],
+        [
+          "C-WIN-12",
+          "12 min ingest-to-match at peak",
+          "Rahul SLA draft Sept 2",
+          "metric match_pass_complete_seconds"
+        ]
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "5. Rejected alternative: warehouse stored-proc monster"
+    },
+    {
+      "type": "p",
+      "text": "Chris Patel spiked a single stored procedure, warehouse.match_all_v1, in August (ticket CLH-4488). The pitch was honest: keep the data where reporting already lives, one job, ops already knows the warehouse password. The proc took a street staging table and a firm staging table, built a hash of the match key, wrote matches and breaks, and updated warehouse.recon_breaks in place. On a 1.2M row staging copy it ran in 6.4 minutes. Chris thought we could linear-scale that to 8.2M. We cannot. The 1.2M fixture fit in memory on the warehouse leader. The 8.2M shape spills. Diego reran it on a restored snapshot with a 4x scaled fixture on September 1: 54 minutes, and it bloated temp by 186 GB. The leader CPU sat at 96% for the whole window. Concurrent reporting queries queued."
+    },
+    {
+      "type": "p",
+      "text": "Worse than runtime: audit. A stored proc that UPDATEs breaks in place does not give us an immutable journal unless we bolt on a trigger that writes warehouse.recon_break_audit. Triggers on a table that also serves the ops UI are how we get mystery row versions. The proc also had to run as warehouse_etl, which is a shared role four other jobs use. Leah looked at that role's grant list and stopped the conversation. Shared ETL roles cannot be the actor on a break change. We would have to impersonate an ops user inside PL/pgSQL, which is a security story I will not sign."
+    },
+    {
+      "type": "p",
+      "text": "Helen liked the idea of 'one place to look.' I get that. The warehouse is where she runs ad hoc today. recon-query is the answer to that, not stuffing matching into SQL. She can keep a read replica and a saved query. She cannot keep mutating breaks with UPDATE FROM a worksheet. Priya killed the proc path in the September 9 review. Chris agreed after the 54 minute number. We are writing it here so the next quarterly planning cycle does not reopen it as a 'simpler v1.'"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Do not revive",
+      "text": "warehouse.match_all_v1 and any successor stored proc that matches and mutates breaks in the reporting warehouse is out of scope and out of policy. Matching stays in match-engine. Break writes stay in break-svc. If reporting needs a warehouse copy, it reads from recon-query or from the parquet archive, it does not own the journal."
+    },
+    {
+      "type": "p",
+      "text": "Second rejected path, shorter: run matching as a Spark job on the overnight cluster (clh-spark-prod, currently 12 executors). Nina Okonkwo (platform, extra pair on this design) costed it. Cold start on that cluster is 4.6 minutes on a good day. We do not have 4.6 minutes after 19:00. Spark is fine for the 7-year backfill Chris will need in 2023. It is the wrong runtime for the evening window."
+    },
+    {
+      "type": "h1",
+      "text": "6. Service map"
+    },
+    {
+      "type": "p",
+      "text": "Four services. All Java 17 on EKS namespace clh-recon-prod, cluster eks-clh-prod-use1. Each service has its own Postgres database on the instances listed below, except recon-query which is read-only against the match/break instance replica. Kafka cluster clh-kafka-prod, bootstrap clh-kafka-01.prod.us-east-1.northstar.internal:9092 (and 02, 03). Schema registry on clh-schemareg-01.prod.us-east-1.northstar.internal:8081."
+    },
+    {
+      "type": "h2",
+      "text": "6.1 ingest-api"
+    },
+    {
+      "type": "p",
+      "text": "Receives street-side and firm-side payloads. v1 still has the poller, but the poller becomes a thin producer: it POSTs to ingest-api /v1/batches with the file bytes plus source metadata (source_system, settle_date, filename, content_sha256). ingest-api validates the Avro schema against the registry, writes a batch row to recon_ingest.batch, and produces one Kafka record per trade onto clh.settlement.inbound.v1 (we will bump this to v2 when the 2023 ingest redesign lands; do not confuse the two). HTTP timeout 60s. Max batch 50 MB. RailClear files on August 26 were 38.4 MB compressed; we have headroom. Firm-side dump is split by the poller into 20 MB chunks because the full dump is 1.1 GB uncompressed."
+    },
+    {
+      "type": "p",
+      "text": "Idempotency key for a batch is content_sha256 plus source_system. Filename is stored, never used as a uniqueness key. If the same hash arrives twice, ingest-api returns 200 with the original batch_id and produces nothing. If the hash collides across source systems (we have not seen this; SHA-256 of a RailClear file matching a firm dump would be a very strange day), the source_system discriminator still splits them."
+    },
+    {
+      "type": "h2",
+      "text": "6.2 match-engine"
+    },
+    {
+      "type": "p",
+      "text": "Consumer group cg-match-engine-prod. Reads clh.settlement.inbound.v1, writes match_result, and emits unmatched rows to clh.settlement.unmatched.v1 for break-svc. Matching is keyed by match_key = sha256(account | cusip | settle_date | qty | amount_cents). amount_cents is the amount rounded to integer cents so we do not float-compare. Tolerance of 1 cent is applied by matching on amount_cents and also on amount_cents +/- 1 as a second pass, tagged match_class = EXACT or NEAR. Helen wants to see NEAR separately because cash desk treats a 1 cent residual different from a missing street trade. I agree. Put it on the row."
+    },
+    {
+      "type": "p",
+      "text": "State for an open match key lives in Postgres table recon_match.open_key, not in Kafka compaction (compaction lag on a peak day would hide firm-side arrivals). open_key is hashed to 64 partitions matching the Kafka partition count we start with (24 in v1; Helen wanted 24 because that is how many file drops they think in. We can raise this later without this design changing). A match-engine replica owns a subset of open_key partitions via a lease table recon_match.partition_lease. If a replica dies, lease expiry is 30s, another replica takes it. Diego wanted 10s. 10s caused thrash in the soak on staging when GC paused a replica for 12s. 30s it is."
+    },
+    {
+      "type": "h2",
+      "text": "6.3 break-svc"
+    },
+    {
+      "type": "p",
+      "text": "Consumes clh.settlement.unmatched.v1, upserts recon_break.break, and is the only writer of recon_break.break_audit. HTTP API for ops: GET/PATCH /v1/breaks/{id}. PATCH is the mutation path. Dual-ack for notional_abs >= 50000: the PATCH sets status=PENDING_CHECK, a second actor with role break.checker must PATCH status=CLOSED or REOPEN. The service compares actor sub claims. Same person cannot check their own close. Okta groups: clh-break-maker, clh-break-checker. Helen and Jordan Hale (cash desk, extra name on this doc) are makers. Leah's designated checkers are two people on her list; names live in Okta not in this design."
+    },
+    {
+      "type": "h2",
+      "text": "6.4 recon-query"
+    },
+    {
+      "type": "p",
+      "text": "Read API for ops UI and for Chris's extracts. GET /v1/breaks, GET /v1/matches, GET /v1/batches, GET /v1/audit/{break_id}. Hits the Postgres replica recon-match-replica-01.prod.us-east-1.northstar.internal. Replica lag SLO is 5 seconds. If lag exceeds 15 seconds we fail the readiness probe and the UI shows stale, we do not serve 10-minute-old breaks as live. Chris will batch-extract via GET /v1/extracts?settle_date= with a cursor, 10k rows/page. No full table dump over HTTP. He asked. I said no. Use the parquet archive for history, this API for T+0 through T+90."
+    },
+    {
+      "type": "table",
+      "caption": "Services, runtime, and data stores",
+      "headers": [
+        "Service",
+        "Repos",
+        "Runtime",
+        "Writes",
+        "Reads",
+        "Kafka"
+      ],
+      "rows": [
+        [
+          "ingest-api",
+          "ns/clh-ingest-api",
+          "EKS, 4x 500m/1Gi HPA to 12",
+          "recon_ingest",
+          "schema registry",
+          "produce inbound.v1"
+        ],
+        [
+          "match-engine",
+          "ns/clh-match-engine",
+          "EKS, 8x 1cpu/2Gi HPA to 24",
+          "recon_match",
+          "recon_match",
+          "consume inbound, produce unmatched"
+        ],
+        [
+          "break-svc",
+          "ns/clh-break-svc",
+          "EKS, 4x 500m/1Gi HPA to 10",
+          "recon_break + break_audit",
+          "recon_break",
+          "consume unmatched"
+        ],
+        [
+          "recon-query",
+          "ns/clh-recon-query",
+          "EKS, 4x 500m/1Gi HPA to 16",
+          "none",
+          "replica recon_match/recon_break",
+          "none"
+        ]
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "7. Data model (engineer execute)"
+    },
+    {
+      "type": "p",
+      "text": "Three Postgres instances. recon-ingest-01 (r6g.2xlarge, 500 GB gp3, 12000 IOPS), recon-match-01 (r6g.2xlarge, 2 TB gp3, 16000 IOPS, this is the hot one), recon-query uses a streaming replica of recon-match-01. All in us-east-1, multi-AZ, encryption at rest with CMK alias clh-recon-prod. Databases are separate so a runaway ingest copy cannot lock match tables. I watched that happen on staging on August 22 when I loaded a fixture into the wrong database. Separate instances is slightly more money. Worth it."
+    },
+    {
+      "type": "h3",
+      "text": "recon_ingest"
+    },
+    {
+      "type": "code",
+      "caption": "recon_ingest.batch and recon_ingest.rejected",
+      "text": "CREATE TABLE recon_ingest.batch (\n  batch_id           uuid PRIMARY KEY,\n  source_system      text NOT NULL,  -- RAILCLEAR | FIRM_BOOKS | MANUAL\n  settle_date        date NOT NULL,\n  filename           text NOT NULL,\n  content_sha256     text NOT NULL,\n  row_count          integer NOT NULL,\n  received_at        timestamptz NOT NULL DEFAULT now(),\n  produced_at        timestamptz,\n  actor              text NOT NULL,  -- service account or poller identity\n  UNIQUE (source_system, content_sha256)\n);\n\nCREATE TABLE recon_ingest.rejected (\n  rejected_id        uuid PRIMARY KEY,\n  batch_id           uuid REFERENCES recon_ingest.batch,\n  payload            jsonb NOT NULL,\n  reason             text NOT NULL,\n  created_at         timestamptz NOT NULL DEFAULT now()\n);"
+    },
+    {
+      "type": "p",
+      "text": "rejected is for schema failures and rows that fail field validation (missing cusip, amount not parseable). Those do not go to Kafka. Helen gets a count on the ops dashboard. We had 2,184 rejected rows on August 26, almost all a RailClear trailer she already knew about. Do not send trailers to match-engine. ingest-api strips them."
+    },
+    {
+      "type": "h3",
+      "text": "recon_match"
+    },
+    {
+      "type": "code",
+      "caption": "open_key, match_result, partition_lease",
+      "text": "CREATE TABLE recon_match.open_key (\n  match_key          text PRIMARY KEY,\n  account            text NOT NULL,\n  cusip              text NOT NULL,\n  settle_date        date NOT NULL,\n  qty                numeric(18,4) NOT NULL,\n  amount_cents       bigint NOT NULL,\n  street_batch_id    uuid,\n  firm_batch_id      uuid,\n  street_payload     jsonb,\n  firm_payload       jsonb,\n  state              text NOT NULL, -- OPEN_STREET | OPEN_FIRM | MATCHED | AGED\n  updated_at         timestamptz NOT NULL DEFAULT now()\n);\n\nCREATE TABLE recon_match.match_result (\n  match_id           uuid PRIMARY KEY,\n  match_key          text NOT NULL,\n  match_class        text NOT NULL, -- EXACT | NEAR\n  settle_date        date NOT NULL,\n  matched_at         timestamptz NOT NULL,\n  street_batch_id    uuid NOT NULL,\n  firm_batch_id      uuid NOT NULL\n) PARTITION BY RANGE (settle_date);\n\nCREATE TABLE recon_match.partition_lease (\n  kafka_partition    integer PRIMARY KEY,\n  owner_pod          text NOT NULL,\n  lease_until        timestamptz NOT NULL\n);"
+    },
+    {
+      "type": "p",
+      "text": "match_result is partitioned by settle_date, one partition per week in v1. Chris asked for daily. Weekly is less DDL churn for Kavya. We can split later. open_key is not partitioned. It should stay small: only unmatched keys. On August 26 shape, unmatched after the window was 12,440 keys. That is a nothing-burger for Postgres. If open_key ever exceeds 2 million rows we have a matching bug, not a scaling problem. Alert on that."
+    },
+    {
+      "type": "h3",
+      "text": "recon_break"
+    },
+    {
+      "type": "code",
+      "caption": "break and break_audit (append-only audit)",
+      "text": "CREATE TABLE recon_break.break (\n  break_id           uuid PRIMARY KEY,\n  match_key          text NOT NULL,\n  settle_date        date NOT NULL,\n  side               text NOT NULL, -- STREET | FIRM | BOTH\n  status             text NOT NULL, -- OPEN | PENDING_CHECK | CLOSED | REOPEN | AGED\n  break_code         text NOT NULL,\n  notional_abs       numeric(18,2) NOT NULL,\n  maker              text,\n  checker            text,\n  opened_at          timestamptz NOT NULL DEFAULT now(),\n  updated_at         timestamptz NOT NULL DEFAULT now()\n);\n\nCREATE TABLE recon_break.break_audit (\n  audit_id           bigserial PRIMARY KEY,\n  break_id           uuid NOT NULL,\n  at                 timestamptz NOT NULL DEFAULT now(),\n  actor              text NOT NULL,\n  from_status        text,\n  to_status          text NOT NULL,\n  reason_code        text NOT NULL,\n  comment            text,\n  request_id         uuid NOT NULL\n);\n-- GRANT INSERT, SELECT ON break_audit TO recon_break_app;\n-- REVOKE UPDATE, DELETE ON break_audit FROM recon_break_app;"
+    },
+    {
+      "type": "p",
+      "text": "break_code is the classification match-engine assigned (MISSING_STREET, MISSING_FIRM, QTY_DIFF, AMOUNT_DIFF, ACCOUNT_DIFF, LATE_FILE, MANUAL). reason_code on the audit row is why a human changed it (RESEARCHED_MATCH, CANCELLED_TRADE, FEED_DUPLICATE, CASH_ADJUST, OTHER). Do not collapse those two fields. Marcus relayed a cash-desk complaint from 2021 that the warehouse CASE mixed 'what is wrong' and 'what we did about it.' Separate columns. The UI shows both."
+    },
+    {
+      "type": "p",
+      "text": "Indexes we actually need on day one: break (settle_date, status), break (match_key), break_audit (break_id, at), match_result (settle_date, match_class), batch (settle_date, source_system). Do not index jsonb payloads. If someone wants to query inside street_payload, that is a recon-query feature request, not a GIN index on 8 million rows."
+    },
+    {
+      "type": "h1",
+      "text": "8. Kafka topics and the 15-minute seam"
+    },
+    {
+      "type": "p",
+      "text": "v1 topics, all replication factor 3, retention 3 days (enough to replay a weekend), compression lz4."
+    },
+    {
+      "type": "table",
+      "caption": "Kafka topics for recon v1",
+      "headers": [
+        "Topic",
+        "Partitions (v1)",
+        "Key",
+        "Producers",
+        "Consumers",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "clh.settlement.inbound.v1",
+          "24",
+          "match_key",
+          "ingest-api",
+          "cg-match-engine-prod",
+          "Helen asked for 24; revisit in 2023"
+        ],
+        [
+          "clh.settlement.unmatched.v1",
+          "24",
+          "match_key",
+          "match-engine",
+          "cg-break-svc-prod",
+          "only rows that leave OPEN after timeout"
+        ],
+        [
+          "clh.settlement.ingest.dlq.v1",
+          "6",
+          "batch_id",
+          "ingest-api",
+          "manual",
+          "poison produce failures"
+        ],
+        [
+          "clh.settlement.match.dlq.v1",
+          "6",
+          "match_key",
+          "match-engine",
+          "manual",
+          "poison payloads"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "24 partitions is a v1 compromise. Helen thinks in 15-minute files, 24 is 'a day of files.' That is not how Kafka partitions work, but fighting that in September 2022 delays the build. Throughput math: 8.2M records in a 3.2 hour heavy tail is about 711 records/sec average and maybe 4,200/sec at the 19:00 burst. 24 partitions at 400 rec/sec/partition is 9,600/sec headroom. We are fine on throughput. We are not fine on consumer parallelism if match-engine work per record exceeds 2ms. Soak on staging with a 2.1ms p95 put us at 11.4 minutes for the August 26 replay, which beats 40 minutes and misses the 12 minute target by a rounding error I will not celebrate. Kavya will profile the JSON parse. If we cannot get under 1.6ms p95, we raise partitions in the 2023 ingest redesign rather than now. Changing partition count is a migration. Doing it twice is silly."
+    },
+    {
+      "type": "p",
+      "text": "Poison messages: if match-engine throws on a payload three times, it produces the record to match.dlq and commits the inbound offset. We do not stall a partition for one bad RailClear row. Diego will page on dlq depth > 50. Helen will see rejected vs dlq as different widgets. rejected is ingest validation. dlq is 'we thought it was valid and then the consumer died.' Different owners."
+    },
+    {
+      "type": "h1",
+      "text": "9. Match algorithm and edge cases"
+    },
+    {
+      "type": "p",
+      "text": "Pass 1: exact match_key. If both street_payload and firm_payload are present, write match_result EXACT, delete open_key, done. Pass 2: if only one side is present, wait. The wait is 8 minutes from first-seen, not from file time. Late RailClear files are normal. 8 minutes covers one missed 15-minute slot plus processing. After 8 minutes the key is emitted to unmatched and break-svc opens a break. If the other side arrives later, match-engine consumes it, finds no open_key, writes a LATE_MATCH event to break-svc (topic unmatched with a late_match flag). break-svc can auto-close with reason_code LATE_ARRIVAL if the notional matches and status is still OPEN. If a human already closed it, we do not auto-reopen. We open a new note on the audit trail. That is the ugly case. Helen said she would rather see a note than a resurrected break at 21:10."
+    },
+    {
+      "type": "p",
+      "text": "Pass 3: NEAR match. If exact misses and amount_cents differs by 1, and account/cusip/settle_date/qty match, write NEAR and still open a break with break_code AMOUNT_DIFF and notional_abs = 0.01. Cash desk wants those visible even though they are rounding. Auto-close NEAR after 24 hours if nobody touches them, actor = break-svc-autoclose, reason_code NEAR_EXPIRE. Leah signed that. Maker/checker does not apply under $50k, and 1 cent is under $50k."
+    },
+    {
+      "type": "p",
+      "text": "Partial fills: one firm trade, two street executions, same account/cusip/settle_date, qty splits, amounts split. match_key as defined will not join them. v1 treats this as two MISSING_FIRM / one MISSING_STREET until a human links them. There is no allocation graph in v1. Rahul wanted it. Priya cut it. If we try to solve allocations in the first match-engine we will still be here in March. break-svc will grow a link_breaks endpoint in a later ticket (CLH-4601, not funded). Until then Helen's team links them with comments."
+    },
+    {
+      "type": "p",
+      "text": "Cancels: RailClear sends a cancel as a row with txn_type=CXL and orig_ref. ingest-api keeps txn_type on the payload. match-engine, if it sees CXL and an open_key for the original match_key, removes the street side instead of matching. If already MATCHED, we emit unmatched with break_code CANCEL_AFTER_MATCH. That one always needs a human. Do not auto-close cancels. March 3, 2022 taught Helen that."
+    },
+    {
+      "type": "p",
+      "text": "Duplicates: content hash at batch level stops file replays. Intra-file duplicate rows (same match_key twice in one RailClear file) increment a dup_count on open_key and open a break with break_code DUP_STREET. We do not silently drop the second row. Dropping it hides a real feed bug. We did that in the warehouse CASE. Stop."
+    },
+    {
+      "type": "h1",
+      "text": "10. Failure modes"
+    },
+    {
+      "type": "p",
+      "text": "Write these on the runbook later. Putting them in the design so we do not 'discover' them in production."
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "ingest-api 5xx during a file drop: poller retries 5 times with 8s backoff, then pages Diego and Helen. File stays on SFTP. Do not ack the SFTP delete until ingest-api returns 200 with batch_id.",
+        "Kafka produce timeout: ingest-api does not mark batch produced_at. Retry is safe because produce is idempotent on (source_system, content_sha256) at the batch table, and Kafka producer enable.idempotence=true with acks=all.",
+        "match-engine replica death: lease expires 30s, another replica loads open_key for that kafka_partition from Postgres (source of truth), resumes consume. Brief double-process is possible; match_result insert is ON CONFLICT DO NOTHING on match_id which is a UUID from match_key+settle_date+class.",
+        "break-svc cannot write audit: fail the PATCH, do not change break.status. The journal and the row stay in lockstep. A status change without an audit row is a control failure.",
+        "Replica lag > 15s: recon-query readiness fails, UI banner, ops uses the primary failover path only with Diego on the call. Do not point recon-query at primary as a convenience. Writes from break-svc would then contend with 16 query pods.",
+        "AZ loss: Kafka and Postgres are multi-AZ. EKS node groups in three AZs. We have not tested a full AZ pull. Diego's drill is November 16, 2022. Until that drill passes, do not tell cash desk we are AZ-redundant as a proven fact.",
+        "Poison RailClear row: three failures, DLQ, partition moves on. Alert dlq depth. Do not rewind the whole topic.",
+        "open_key > 2M rows: page Kavya. Matching is wrong or the 8 minute wait is not firing. Do not raise the wait to 'fix' the table size."
+      ]
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Control failure mode",
+      "text": "If break-svc ever writes status without an audit row, treat it as a Sev-2 even if cash is right. Leah's auditors will ask for a join of break to break_audit with zero orphans for the sample month. A 'we will backfill audit' story is worse than a slower PATCH."
+    },
+    {
+      "type": "h1",
+      "text": "11. Capacity numbers that are not round"
+    },
+    {
+      "type": "p",
+      "text": "August 26 replay on staging (cluster eks-clh-staging-use1, half the prod instance sizes): 8.21M street + 6.40M firm = 14.61M Kafka records. ingest-api produce rate peaked at 3,840 rec/s. match-engine p95 handle was 2.14ms. End-to-end last-file-to-match-pass was 11.4 minutes with 8 match-engine pods. break-svc opened 12,440 breaks in 74 seconds after the unmatched topic started flowing. Postgres commit p95 on recon-match-01 staging (r6g.xlarge) was 18.6ms during the burst, 4.1ms after. CPU on match pods hit 71%. We have room, not a mountain of room."
+    },
+    {
+      "type": "p",
+      "text": "Disk: recon-match-01 prod at 2 TB. match_result for 90 hot days at ~6.2M matches/day average (peak is 8.2M street, matches are lower) is roughly 90 * 6.2M * 220 bytes ~ 123 GB plus indexes ~ 2.1x = 258 GB. open_key is small. break + audit for 90 days at 12k-40k breaks/day, say 28k average, ~ 4.1 GB. The rest of the 2 TB is headroom for bloat, WAL, and the week we forget to drop an old partition. Alert disk at 62% so we notice before 80%."
+    },
+    {
+      "type": "p",
+      "text": "Network: RailClear SFTP plus produce to Kafka on the 19:00 burst is about 1.1 Gbit/s for four minutes on staging. The prod NAT gateway currently shows 0.42 Gbit/s peak. Diego will raise the EKS subnet throughput check before go-live. If we NAT the brokers we will have a bad night. Brokers are on private subnets with VPC endpoints for S3. Keep it that way."
+    },
+    {
+      "type": "table",
+      "caption": "Staging replay vs target (August 26 shape)",
+      "headers": [
+        "Metric",
+        "Observed staging",
+        "v1 target",
+        "Gap"
+      ],
+      "rows": [
+        [
+          "Last file to match pass",
+          "11.4 min",
+          "12 min",
+          "inside, thin"
+        ],
+        [
+          "Produce peak rec/s",
+          "3840",
+          "4200 burst budget",
+          "ok"
+        ],
+        [
+          "match-engine p95",
+          "2.14 ms",
+          "1.60 ms stretch",
+          "profile JSON"
+        ],
+        [
+          "Breaks opened",
+          "12440",
+          "n/a (data)",
+          "ops load ok"
+        ],
+        [
+          "Postgres commit p95 burst",
+          "18.6 ms",
+          "< 25 ms",
+          "ok"
+        ],
+        [
+          "Match pod CPU",
+          "71%",
+          "< 85%",
+          "ok"
+        ]
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "12. Engineer execute: local soak, deploy, smoke"
+    },
+    {
+      "type": "p",
+      "text": "This section is for the person who has to stand this up, including me next week."
+    },
+    {
+      "type": "h3",
+      "text": "12.1 Topic create"
+    },
+    {
+      "type": "code",
+      "caption": "Create v1 topics on clh-kafka-prod (run from kafka-tools pod)",
+      "text": "kubectl -n clh-kafka-prod exec -it kafka-tools-0 -- bash\nexport BROKERS=clh-kafka-01.prod.us-east-1.northstar.internal:9092\n\nkafka-topics.sh --bootstrap-server $BROKERS --create \\\n  --topic clh.settlement.inbound.v1 --partitions 24 --replication-factor 3 \\\n  --config retention.ms=259200000 --config compression.type=lz4\n\nkafka-topics.sh --bootstrap-server $BROKERS --create \\\n  --topic clh.settlement.unmatched.v1 --partitions 24 --replication-factor 3 \\\n  --config retention.ms=259200000 --config compression.type=lz4\n\nkafka-topics.sh --bootstrap-server $BROKERS --create \\\n  --topic clh.settlement.ingest.dlq.v1 --partitions 6 --replication-factor 3\n\nkafka-topics.sh --bootstrap-server $BROKERS --create \\\n  --topic clh.settlement.match.dlq.v1 --partitions 6 --replication-factor 3"
+    },
+    {
+      "type": "h3",
+      "text": "12.2 Helm and smoke"
+    },
+    {
+      "type": "code",
+      "caption": "Deploy namespace clh-recon-prod and smoke ingest",
+      "text": "helm upgrade --install ingest-api charts/clh-ingest-api -n clh-recon-prod \\\n  -f charts/clh-ingest-api/values.prod.yaml --wait --timeout 8m\nhelm upgrade --install match-engine charts/clh-match-engine -n clh-recon-prod \\\n  -f charts/clh-match-engine/values.prod.yaml --wait --timeout 8m\nhelm upgrade --install break-svc charts/clh-break-svc -n clh-recon-prod \\\n  -f charts/clh-break-svc/values.prod.yaml --wait --timeout 8m\nhelm upgrade --install recon-query charts/clh-recon-query -n clh-recon-prod \\\n  -f charts/clh-recon-query/values.prod.yaml --wait --timeout 8m\n\n# smoke: post a 12-row fixture, hash must be unique per run\ncurl -sS -X POST https://ingest-api.clh.prod.northstar.internal/v1/batches \\\n  -H 'Authorization: Bearer $TOKEN' \\\n  -H 'Content-Type: application/json' \\\n  -d @fixtures/railclear_tiny_20220915.json\n\nkubectl -n clh-recon-prod logs deploy/match-engine --tail=80\npsql $RECON_BREAK_URL -c \"select status, count(*) from recon_break.break group by 1;\""
+    },
+    {
+      "type": "h3",
+      "text": "12.3 Consumer config we will ship"
+    },
+    {
+      "type": "code",
+      "caption": "match-engine consumer (application.yml excerpt)",
+      "text": "spring.kafka.consumer:\n  group-id: cg-match-engine-prod\n  enable-auto-commit: false\n  max-poll-records: 250\n  max-poll-interval-ms: 180000\n  fetch-min-size: 102400\n  fetch-max-wait-ms: 500\n  isolation-level: read_committed\nspring.kafka.listener:\n  ack-mode: MANUAL_IMMEDIATE\n  concurrency: 8\n# producer for unmatched + dlq\nspring.kafka.producer:\n  acks: all\n  enable-idempotence: true\n  linger-ms: 8\n  batch-size: 65536"
+    },
+    {
+      "type": "p",
+      "text": "max-poll-records 250 is the value that kept p95 under 2.2ms without blowing max-poll-interval on a GC pause. 500 caused a rebalance storm on staging at 19:04 during the replay. Do not 'tune it up' on the first prod night without Diego. concurrency 8 times 3 pods is 24, which matches partition count. If you scale pods to 6, drop concurrency to 4 or you will have idle consumers and confusing lag charts."
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Confirm SCP and region: aws s3api get-bucket-location --bucket clh-recon-archive-prod must return us-east-1. If it returns anything else, stop.",
+        "Apply DDL from migrations/001_ingest.sql through 006_audit_grants.sql via the CI role recon_ddl. Do not apply by hand as rds_superuser.",
+        "Create topics (commands above). Verify ISR = 3 on each.",
+        "Deploy four charts. Watch match-engine consume lag on Burrow http://burrow.clh.prod.northstar.internal/v3/kafka/clh-kafka-prod/consumer/cg-match-engine-prod/lag",
+        "Run fixtures/railclear_tiny then fixtures/firm_tiny. Expect 8 EXACT matches, 2 OPEN breaks, 2 audit rows on the opens (actor=match-engine).",
+        "PATCH one break as a maker, then as a checker, with notional_abs forced above 50000 in the fixture named fixtures/dual_ack.json. Confirm two audit rows, different actors.",
+        "Page test: delete a match-engine pod during the 8.21M staging replay. Lag should recover without a full rewind. If it rewinds, the lease code is wrong. Stop the go-live."
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "13. Rollout"
+    },
+    {
+      "type": "p",
+      "text": "Shadow week of October 10, 2022: ingest-api and match-engine consume prod files, write to staging databases, do not open prod breaks. Helen compares break counts to the warehouse job. We accept a 3.5% count mismatch while we still have the allocation gap (see section 9). Above 6% we stop and look. Dual-run through October 28. Warehouse remains source of truth until Rahul sends the cutover mail. Cutover target November 7, 2022, a Monday, not a month-end, not a Friday rebalance. Marcus will warn cash desk the Friday before."
+    },
+    {
+      "type": "p",
+      "text": "Rollback: leave the poller able to feed the warehouse job. ingest-api is additive. If match-engine is wrong we stop producing to unmatched, warehouse stays. We do not have a story for 'replay the journal into the warehouse.' Do not invent one on the night. If we have written prod breaks and have to roll back, those breaks stay in recon_break for audit and Helen works the warehouse again. Ugly. Prefer aborting shadow rather than a half cutover."
+    },
+    {
+      "type": "h1",
+      "text": "14. Open questions"
+    },
+    {
+      "type": "table",
+      "caption": "Open questions with owners",
+      "headers": [
+        "ID",
+        "Question",
+        "Owner",
+        "Due"
+      ],
+      "rows": [
+        [
+          "Q1",
+          "Is 8 min unmatched wait right for month-end, or do we need 15 min on the last business day?",
+          "Helen Cho + Kavya Menon",
+          "2022-10-05"
+        ],
+        [
+          "Q2",
+          "Okta group membership for break.checker: two names or a rotation?",
+          "Leah Kim",
+          "2022-09-30"
+        ],
+        [
+          "Q3",
+          "Can books.trades_eod land 20 min earlier if we read CDC instead of the dump? (may become CLH-TDD-2023-002)",
+          "Chris Patel",
+          "2022-10-21"
+        ],
+        [
+          "Q4",
+          "Quarterly Glacier restore: who signs the restored sample vs live breaks?",
+          "Leah Kim + Diego Alvarez",
+          "2022-12-07"
+        ],
+        [
+          "Q5",
+          "NEAR auto-close at 24h: does cash desk want a digest email or only the UI?",
+          "Marcus Bell + Jordan Hale",
+          "2022-10-12"
+        ],
+        [
+          "Q6",
+          "Allocation linking (CLH-4601) funding in FY23Q1 or later?",
+          "Rahul Deshmukh",
+          "2022-11-15"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Q3 is the one that changes capacity. If firm-side arrives at 18:20 instead of 18:40, the 19:00 burst is less stupid. Chris should not block v1 on it. He should answer it so we know whether 2023 ingest work includes a CDC path. Q1 is the one that changes false-open rate. If Helen would rather wait 15 minutes on month-end than open 4,000 breaks that close themselves, we make the wait a config keyed by calendar. I will not hardcode 8."
+    },
+    {
+      "type": "p",
+      "text": "I am the owner of this document through go-live. After November 7, Kavya owns match-engine pages, I own ingest-api and break-svc, Diego owns the brokers and Postgres, Chris owns extracts, Helen owns the window, Marcus owns the cash-desk conversation. Priya owns staffing if the 2.14ms p95 does not come down and we need another engineer on the JSON path."
+    }
+  ]
+}

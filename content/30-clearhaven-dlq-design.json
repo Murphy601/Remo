@@ -1,0 +1,621 @@
+{
+  "slug": "30-clearhaven-dlq-design",
+  "doc_id": "CLH-TDD-2023-022",
+  "title": "Dead letter topic for settlement inbound",
+  "subtitle": "clh.settlement.inbound.dlq. Headers for partition, exception, first_seen. Replay tool. Alert depth > 200. Do not infinite-retry RailClear's extra comma.",
+  "doc_type": "Technical design",
+  "kicker": "Clearhaven Recon / Match-engine",
+  "org": "Northstar Engineering",
+  "classification": "INTERNAL",
+  "version": "1.2",
+  "status": "Approved",
+  "date": "October 12, 2023",
+  "author": "Aman Kumar",
+  "role": "Software Engineer II",
+  "team": "Clearhaven Recon Platform",
+  "audience": "Match-engine team (owners), ingest-svc engineers, Diego Alvarez (Kafka), Helen Cho (ops when replay happens), Priya Nair",
+  "owners": "Match-engine team (Kavya Menon primary), Aman Kumar (design), Diego Alvarez (topic and alerts)",
+  "related": "CLH-TDD-2023-022, CLH-TDD-2023-014, CLH-TDD-2023-008, CLH-6012, CLH-6680, CLH-RB-2023-012",
+  "summary": "Settlement ingest still has a hole from CLH-TDD-2023-014: poison JSON is skipped with a committed offset and a row in recon.ingest_skip. That is lossy. This design adds topic clh.settlement.inbound.dlq, producer-side from ingest-svc, with headers original_topic, original_partition, original_offset, exception_class, first_seen. Match-engine team owns the topic, the replay tool, and the page when depth exceeds 200. We will not infinite-retry. RailClear sends a trailing extra comma on the last record of a file about once a month; that record belongs in the DLQ once, then a human or a one-shot replay after they resend. Ticket CLH-6680.",
+  "form_description": "Technical design for the settlement inbound dead letter topic and replay path. Written so match-engine owns operations, ingest-svc has a producer contract, and oncall has a depth alert instead of a skip table nobody reads.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.2",
+      "September 14, 2023",
+      "Aman Kumar",
+      "Draft after Rina counted ingest_skip. Hash-only retry loop rejected."
+    ],
+    [
+      "0.5",
+      "September 28, 2023",
+      "Kavya Menon",
+      "Ownership moved to match-engine. Headers locked."
+    ],
+    [
+      "0.9",
+      "October 6, 2023",
+      "Diego Alvarez",
+      "Topic config, depth alert, retention 14 days."
+    ],
+    [
+      "1.0",
+      "October 11, 2023",
+      "Aman Kumar",
+      "Priya review. RailClear comma called out as the monthly poison."
+    ],
+    [
+      "1.2",
+      "October 12, 2023",
+      "Aman Kumar",
+      "Approved. Replay tool CLI in clh-dlq-replay."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "1. Decision"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Create clh.settlement.inbound.dlq (12 partitions, 14-day retention, RF 3). ingest-svc produces a poison or exhausted-retry record once, with headers listed in section 4, then commits the original offset. Match-engine team owns the topic, the Grafana row, the PagerDuty page at depth > 200, and the replay CLI. Default retry in ingest-svc is 3 attempts for retriable exceptions, then DLQ. Parse errors and RailClear's extra-comma poison go to DLQ on attempt 1. No infinite retry. No automatic replay into inbound."
+    },
+    {
+      "type": "p",
+      "text": "CLH-TDD-2023-014 told ingest-svc to skip poison JSON so a bad record would not freeze a partition. That was the right emergency. It was the wrong steady state. recon.ingest_skip has 31 rows from July 17 through October 9. Rina Das counted them on September 12. 19 are the RailClear extra comma on the last record of a file. 6 are truncated JSON from a Mule timeout. 4 are records over 1.2 MB that our deserializer cap rejected. 2 are 'unknown' and still bother me. Helen did not see any of the 19 comma cases as missing trades because RailClear resends the file the next morning, which produces a new Kafka record that parses. The skip table did not tell her the first copy died. The DLQ will, if she looks, and the page will if we pile up."
+    },
+    {
+      "type": "p",
+      "text": "Ownership is match-engine, not ingest. Priya asked why. Because a DLQ record is a thing that failed to become a trade, and the people who think about missing trades are Kavya's match-engine rotation, the same people who already own clh.match.request and the break queue. ingest-svc will produce. They will not run the replay. They will not 'just bump retries' on a Friday. I want one team that can say no to a replay that would duplicate a resend RailClear already delivered."
+    },
+    {
+      "type": "table",
+      "caption": "Decision summary.",
+      "headers": [
+        "Item",
+        "Choice",
+        "Owner"
+      ],
+      "rows": [
+        [
+          "Topic",
+          "clh.settlement.inbound.dlq, 12 partitions, RF 3, 14d",
+          "Diego Alvarez"
+        ],
+        [
+          "Producer",
+          "ingest-svc, after 3 retriable failures or 1 parse failure",
+          "Kavya Menon (code), ingest rotation (runtime)"
+        ],
+        [
+          "Operations / replay / alert",
+          "Match-engine team",
+          "Kavya Menon"
+        ],
+        [
+          "Depth page",
+          "> 200 messages, 5 min",
+          "Diego (alert), match-engine (respond)"
+        ],
+        [
+          "Auto-replay",
+          "None",
+          "Explicit. Humans only."
+        ],
+        [
+          "RailClear extra comma",
+          "DLQ once, do not retry-parse in a loop",
+          "Marcus notifies RailClear; we do not wait"
+        ]
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "2. Why skip is not enough"
+    },
+    {
+      "type": "p",
+      "text": "ingest_skip is a SQL table with offset, reason, first_seen. Nobody has a dashboard on it. I did not until Rina pinged. The July Flyway that created it was a paragraph in the idempotency design, not a product. When RailClear resends, we get a healthy record with a new offset and a new ingest_dedup key (firm_seq matches, hash may match if they only fixed the comma on a wrapper; usually they resend a clean file with the same firm_seq and a new batchId, so hash differs, so we apply). The skipped offset is an orphan. If they do not resend, we have silently dropped a trade. Chris found one September 4 case where a Mule truncation was not resent and Helen caught a missing qty two days later from a Clearhaven blotter, not from us. ingest_skip had the row. Nobody looked."
+    },
+    {
+      "type": "p",
+      "text": "A DLQ is visible in the same Kafka UI Diego already uses for lag. Depth is a Prom metric. Replay is a deliberate produce back to clh.settlement.inbound with a new header x-clh-replayed-from-dlq=true so ingest_dedup and logs can tell. Visibility is the feature. The topic is a queue of shame with a page, which is what skip should have been."
+    },
+    {
+      "type": "p",
+      "text": "Rahul asked if this delays the batch replay PRD (CLH-PRD-2024-002, not started). No. Batch replay is a product for Helen to re-run a date. DLQ replay is an engineer with a CLI and a break-glass. Different verbs. Do not combine the UIs."
+    },
+    {
+      "type": "h1",
+      "text": "3. What goes to the DLQ (and what does not)"
+    },
+    {
+      "type": "h2",
+      "text": "3.1 Attempt 1, no retry"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "JSON parse failure, including RailClear's extra comma at the end of the last record. exception_class=com.fasterxml.jackson.core.JsonParseException or the Go equivalent if we ever rewrite. Today Java.",
+        "Payload larger than 1,048,576 bytes after Kafka max we already set. exception_class=clh.ingest.PayloadTooLarge.",
+        "Missing required envelope fields after adapter normalize (not missing firm_seq during the warn window; that has its own path from CLH-TDD-2023-014). exception_class=clh.ingest.EnvelopeInvalid.",
+        "Canonicalizer throwing. Should be rare. If it throws, that is a bug, but we still should not freeze the partition. exception_class=clh.ingest.CanonicalizeException."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "3.2 Retry 3 times, then DLQ"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Postgres serialization failure, 40001. Wait 40 ms, 120 ms, 400 ms.",
+        "Postgres connection failure. Same backoff. If pg-recon-01 is actually down, we will DLQ a burst and then page on depth. That is ugly. The alternative is blocking the consumer for 12 minutes, which is what we do today and which is how lag pages fire. After this design, connection failure for more than 3 attempts is a DLQ plus the existing Postgres page. Match-engine oncall and Diego both get woken. We will tune this if a 6-minute failover dumps 800 records into the DLQ. Open question, Diego.",
+        "Temporary 401 from a side call we should not be making in ingest. There is one: the source-system catalog HTTP check Kavya wants to delete. Until she deletes it, 3 retries then DLQ. Do not add new side calls."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "3.3 Never DLQ"
+    },
+    {
+      "type": "p",
+      "text": "Successful apply. Dedup hit (already applied). Kafka rebalance. GC pause. Those are not poison. If we DLQ a rebalance we will replay duplicates; ingest_dedup would save us, but the DLQ would lie about volume and page Helen's patience. Also never DLQ because match-engine is slow. ingest does not call match-engine. outbox-pub has its own failure path, not this topic."
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Do not infinite-retry",
+      "text": "A parse error retried forever is a frozen partition. That is the June 2022 file-drop hang, which some of you remember. Three attempts for retriable, one attempt for parse. The RailClear comma will not become valid JSON on the fourth try. I will reject PRs that set retries to -1 or to 999 'until we figure it out.'"
+    },
+    {
+      "type": "h1",
+      "text": "4. Topic and headers"
+    },
+    {
+      "type": "p",
+      "text": "Diego creates the topic in the Thursday window October 19. Name clh.settlement.inbound.dlq. 12 partitions so we can key by original partition and keep a weak ordering if someone replays a burst. Replication factor 3, min.insync 2, retention 14 days, max.message.bytes 2,097,152 so a 1 MB poison still fits with headers. Compact off. This is not a changelog."
+    },
+    {
+      "type": "p",
+      "text": "Key: the original key (account_id). If original key is null, use original_partition-original_offset as a string. We want a key so replay has a partition story. Value: the original bytes, not a wrapper JSON. Wrapping would make replay need a unwrap step and would break a hex dump. Headers carry the metadata. If headers are lost, replay of the value still produces a parse error again, which is sad but safe."
+    },
+    {
+      "type": "table",
+      "caption": "Required headers on every DLQ produce. ingest-svc fails the produce (and does not commit the original offset) if a required header is missing. Better to retry than to write a mute record.",
+      "headers": [
+        "Header",
+        "Example",
+        "Required"
+      ],
+      "rows": [
+        [
+          "x-clh-original-topic",
+          "clh.settlement.inbound",
+          "yes"
+        ],
+        [
+          "x-clh-original-partition",
+          "4",
+          "yes"
+        ],
+        [
+          "x-clh-original-offset",
+          "88214107",
+          "yes"
+        ],
+        [
+          "x-clh-exception-class",
+          "com.fasterxml.jackson.core.JsonParseException",
+          "yes"
+        ],
+        [
+          "x-clh-exception-message",
+          "Unexpected character (',' (code 44)): was expecting double-quote to start field name",
+          "yes, truncated to 256 chars"
+        ],
+        [
+          "x-clh-first-seen",
+          "2023-10-02T11:18:44.512Z",
+          "yes, ISO-8601 UTC from ingest pod clock, good enough"
+        ],
+        [
+          "x-clh-source-system",
+          "railclear",
+          "yes, same rules as ingest_dedup"
+        ],
+        [
+          "x-clh-attempt-count",
+          "1",
+          "yes"
+        ],
+        [
+          "x-clh-ingest-version",
+          "4.18.3",
+          "yes"
+        ],
+        [
+          "x-clh-firm-seq",
+          "8841550",
+          "no, often unparseable if JSON is poison"
+        ],
+        [
+          "x-clh-content-sha256",
+          "hex",
+          "no, only if we parsed enough to canonicalize"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "first_seen is the first time ingest-svc decided this record was poison, not the Kafka timestamp of the original (which might be hours earlier if we lagged). Both are useful. Kafka timestamp stays on the original record; we copy it into a header only if we add x-clh-original-timestamp later. Not v1. Helen asked for first_seen because she wants to know when we noticed, not when RailClear produced."
+    },
+    {
+      "type": "code",
+      "caption": "Topic create. Diego runs this, not a random engineer from a laptop against prod.",
+      "text": "kafka-topics.sh --bootstrap-server kafka-clh-01.northstar.internal:9092 \\\n  --create --topic clh.settlement.inbound.dlq \\\n  --partitions 12 --replication-factor 3 \\\n  --config min.insync.replicas=2 \\\n  --config retention.ms=1209600000 \\\n  --config max.message.bytes=2097152\n\n# alert: kafka_consumergroup_lag is the wrong metric (no consumer on DLQ in steady state)\n# use kafka_topic_partition_current_offset delta via a recorded probe, or\n# Burrow depth on a dedicated probe consumer that does not commit. Diego's choice:\n# kafka-exporter topic offset vs a 14d baseline, plus a 5-min scrape of\n# clh_dlq_produce_total from ingest-svc minus clh_dlq_replay_total from the CLI."
+    },
+    {
+      "type": "h1",
+      "text": "5. Producer path in ingest-svc"
+    },
+    {
+      "type": "p",
+      "text": "Same consumer loop as CLH-TDD-2023-014. On poison or exhausted retry: produce to the DLQ with acks=all, enable.idempotence=true, a timeout of 8.0 s. If the produce fails, do not commit the original offset. We will retry the original record, fail the same way, produce again. That can loop if the DLQ topic is down. Bound it: after 5 failed DLQ produces, stop the consumer and page. Frozen partition plus a page is better than skip-without-trace, which is where we started, and better than committing a drop because the DLQ was sad. Diego, the DLQ topic being down is a Kafka incident. You will already be awake."
+    },
+    {
+      "type": "p",
+      "text": "Do not write ingest_skip and DLQ. Dual-write is how they drift. After this ships, Flyway V168 stops inserts into ingest_skip, leaves the table for history, and a Grafana annotation says 'skip table frozen.' Rina will export the 31 rows into the first runbook example set."
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Deserialize. On JsonParseException: build headers, produce DLQ, wait ack, commit original offset, metric clh_dlq_produce_total{reason=\"parse\"}. Stop.",
+        "On PayloadTooLarge or EnvelopeInvalid: same, reason=envelope or too_large.",
+        "On Postgres 40001 or connection error: increment attempt in memory for this record (not in Kafka; if we rebalance we start attempts at 0, which may extra-retry, which is fine). After 3: produce DLQ reason=postgres, commit, stop. Before 3: throw, do not commit, backoff.",
+        "On DLQ produce failure: do not commit. Count consecutive DLQ failures. At 5: System.exit is too rude; stop the listener and page clh_dlq_produce_fail. Kavya will use Spring's listener pause."
+      ]
+    },
+    {
+      "type": "code",
+      "caption": "Header build, sketched. Real code in ingest-svc DlqPublisher.java.",
+      "text": "Headers h = new RecordHeaders();\nh.add(\"x-clh-original-topic\", topic.getBytes(UTF_8));\nh.add(\"x-clh-original-partition\", Integer.toString(part).getBytes(UTF_8));\nh.add(\"x-clh-original-offset\", Long.toString(off).getBytes(UTF_8));\nh.add(\"x-clh-exception-class\", ex.getClass().getName().getBytes(UTF_8));\nh.add(\"x-clh-exception-message\", trim(ex.getMessage(), 256).getBytes(UTF_8));\nh.add(\"x-clh-first-seen\", Instant.now().toString().getBytes(UTF_8));\nh.add(\"x-clh-source-system\", source.getBytes(UTF_8));\nh.add(\"x-clh-attempt-count\", Integer.toString(attempts).getBytes(UTF_8));\nh.add(\"x-clh-ingest-version\", buildVersion.getBytes(UTF_8));\nproducer.send(new ProducerRecord<>(DLQ, null, key, originalBytes, h)).get(8, SECONDS);"
+    },
+    {
+      "type": "h1",
+      "text": "6. RailClear extra comma"
+    },
+    {
+      "type": "p",
+      "text": "About once a month, RailClear's file generator writes a valid JSON object, then a comma, then EOF, on the last record. Their parser on their side is a streaming array parser that allows a trailing comma. Ours is Jackson on a single object per Kafka record, after Mule splits the file. The extra comma is Unexpected character code 44. First seen in our logs February 14, 2023, then roughly every 26 to 40 days. Marcus has a ticket on their side, RC-4419, last pinged September 8, status 'backlog.' We do not wait for RC-4419."
+    },
+    {
+      "type": "p",
+      "text": "Rejected alternative: strip a trailing comma in ingest-svc if the parse fails. Died in the September 28 review. A trailing comma is not the only poison they will invent. A stripper that fires only on JsonParseException will also strip a comma that was a truncated field and produce a plausible wrong object. We would apply a wrong trade. Helen would rather have a missing row she can see in a DLQ than a wrong qty that posted. I agree. Parse fails, DLQ, they resend a clean file, ingest_dedup handles the business key, we apply once."
+    },
+    {
+      "type": "p",
+      "text": "When they resend, we may still have the poison sitting in the DLQ. Depth 1 is not a page. Do not replay the poison after the clean file has applied; you will parse-fail again and write a second DLQ record unless the replay tool is idempotent on original_offset. The replay tool will be. Section 7."
+    },
+    {
+      "type": "quote",
+      "text": "If you 'fix' their JSON in our consumer I will not help you explain the trade that was not the trade.",
+      "attrib": "Helen Cho, September 28 review, written down with permission"
+    },
+    {
+      "type": "h1",
+      "text": "7. Replay tool"
+    },
+    {
+      "type": "p",
+      "text": "CLI clh-dlq-replay, Java, same repo as ingest-svc, match-engine team runs it. It is not a cron. It is not a button in Helen's UI. Preconditions: you can name the original_offset or a first_seen window, you have read the exception_class, you believe the producer side (RailClear or Mule) has fixed the bytes or you are replaying into a staging topic. Prod inbound replay requires a second person. Kavya or me. Diego can be the second for Kafka reasons. Helen is not the second; she can request."
+    },
+    {
+      "type": "steps",
+      "items": [
+        "kcat or the CLI list: print headers plus a 200-byte body prefix for records in the window. Confirm they are the ones you think.",
+        "For parse errors: default action is do not replay until a new file exists. The CLI will refuse JsonParseException unless you pass --i-know-this-is-still-poison (staging only) or --payload-file to substitute bytes.",
+        "For postgres errors: replay is reasonable after pg-recon-01 is healthy. CLI produces to clh.settlement.inbound with x-clh-replayed-from-dlq=true and x-clh-original-offset preserved in a second header so logs join. ingest-svc applies or dedup-hits.",
+        "After successful produce to inbound, the CLI writes a marker header onto a new record in the DLQ? No. That is cute and is a loop. Instead the CLI writes recon.dlq_replay (offset, replayed_at, actor, dest_topic). Grafana subtracts. Depth alert uses produce minus replay minus a 14-day expire.",
+        "Idempotent replay: unique on original_offset in recon.dlq_replay. Second CLI run of the same offset no-ops unless --force, which still needs the second person flag."
+      ]
+    },
+    {
+      "type": "code",
+      "caption": "Replay CLI, happy path after a Postgres blip. VPN, prod flags require --confirm-prod.",
+      "text": "# list last 6 hours of DLQ\nclh-dlq-replay list \\\n  --bootstrap kafka-clh-01.northstar.internal:9092 \\\n  --topic clh.settlement.inbound.dlq \\\n  --since 6h\n\n# replay postgres-class only, original offsets 88214000-88214999\nclh-dlq-replay replay \\\n  --bootstrap kafka-clh-01.northstar.internal:9092 \\\n  --src clh.settlement.inbound.dlq \\\n  --dest clh.settlement.inbound \\\n  --exception-class org.postgresql.util.PSQLException \\\n  --from-offset 88214000 --to-offset 88214999 \\\n  --confirm-prod \\\n  --second-person kavya.menon\n\n# parse errors: refuse unless substitute bytes\nclh-dlq-replay replay --exception-class JsonParseException\n# -> exit 2, 'parse errors require --payload-file or staging'"
+    },
+    {
+      "type": "p",
+      "text": "The CLI produces with the original key and the original value bytes (or substitute). It does not commit anything on the DLQ; there is no consumer group for the DLQ in steady state. Retention 14 days is the eraser. If you need a record after 14 days it is gone. Diego would go longer. 14 days is enough for the monthly comma plus a slow RailClear ticket plus a long weekend. 30 days would make depth more confusing because old poison would sit. We drop them. ingest_dedup and recon.trade are the system of record, not the DLQ."
+    },
+    {
+      "type": "h1",
+      "text": "8. Alerting"
+    },
+    {
+      "type": "p",
+      "text": "Page match-engine oncall if DLQ depth > 200 for 5 minutes. Depth is clh_dlq_produce_total minus clh_dlq_replay_total minus records expired by retention, which we cannot see perfectly. Practical implementation: a probe consumer in ns-clh-obs, group clh-dlq-probe, auto.offset.reset earliest, it does not commit, it only exposes kafka_consumergroup_lag on that group. Wait. If it never commits, lag equals topic end minus 0, which grows forever and will be 200 after 200 poison records in 14 days, which is plausible, and then stay above 200 forever even if we replayed, because replay does not delete. That probe idea is wrong."
+    },
+    {
+      "type": "p",
+      "text": "Correct depth: end offset minus a committed probe that we only use for metrics, still wrong if we do not delete. We will not delete (compaction off, no tombstones from the CLI in v1). So 'depth' is not queue depth in the Kafka sense. It is unreplayed poison in the last 14 days. Metric: Prom recording rule on ingest-svc produces minus CLI replay counters, with expire via a 14-day increase(). Alert: increase(clh_dlq_produce_total[14d]) - increase(clh_dlq_replay_total[14d]) > 200. Name it clh_dlq_unreplayed. Page at > 200. Ticket (not page) at > 50. Grafana row on the ingest dashboard, not a new folder."
+    },
+    {
+      "type": "p",
+      "text": "200 is not scientific. 19 comma cases a month plus a Postgres blip of 80 plus headroom. A 6-minute failover that dumps 800 will page, which is what we want. A single comma will not. If match-engine starts ignoring the ticket at 50, we will know from the ticket aging, not from a louder page."
+    },
+    {
+      "type": "table",
+      "caption": "Alerts. Routing to match-engine PD, not ingest, not Diego unless Kafka itself is down.",
+      "headers": [
+        "Alert",
+        "Threshold",
+        "Route",
+        "What you do"
+      ],
+      "rows": [
+        [
+          "clh_dlq_unreplayed",
+          "> 50 for 15 min",
+          "Ticket CLH-dlq",
+          "Look at list. Probably commas. Wait for resend unless blotter missing."
+        ],
+        [
+          "clh_dlq_unreplayed",
+          "> 200 for 5 min",
+          "Page match-engine",
+          "Likely Postgres or a new poison class. Do not replay parse errors in a loop."
+        ],
+        [
+          "clh_dlq_produce_fail",
+          "> 0 for 2 min",
+          "Page ingest + Diego",
+          "DLQ topic or Kafka ack failing. Listener should have paused."
+        ],
+        [
+          "clh_dlq_parse_ratio",
+          "parse produces / inbound > 2% for 10 min",
+          "Page match-engine",
+          "RailClear or Mule having a worse day than a monthly comma."
+        ]
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "9. Failure modes"
+    },
+    {
+      "type": "table",
+      "caption": "Failure modes for CLH-6680.",
+      "headers": [
+        "Failure",
+        "What happens",
+        "What you do"
+      ],
+      "rows": [
+        [
+          "DLQ topic down",
+          "ingest pauses after 5 produce fails, lag climbs",
+          "Diego. Do not skip. Do not set retries infinite."
+        ],
+        [
+          "Replay without --confirm-prod",
+          "CLI no-ops",
+          "Working as intended."
+        ],
+        [
+          "Replay of parse error without substitute",
+          "CLI exit 2",
+          "Working as intended. Wait for RailClear resend."
+        ],
+        [
+          "Replay of already-applied firm_seq",
+          "ingest_dedup hit, no new trade",
+          "Working. Check logs for x-clh-replayed-from-dlq."
+        ],
+        [
+          "Replay of not-yet-fixed parse error with --payload-file wrong bytes",
+          "Wrong trade",
+          "Second person is supposed to prevent this. If it happens, sev-2, do not hide it."
+        ],
+        [
+          "Postgres failover dumps 800 to DLQ",
+          "Page at 200",
+          "Replay PSQLException class after primary is up. Section 7."
+        ],
+        [
+          "Header missing, old ingest-svc version",
+          "Produce refused, original not committed, lag",
+          "Roll ingest. Do not dual-run 4.17 and 4.19 on the same group."
+        ],
+        [
+          "14-day expire of unreplayed poison",
+          "Record gone, unreplayed metric drops",
+          "If still needed, it is in Kafka inbound only if retention there still has it (120h after Diego's July change). After that, call Marcus for a file resend."
+        ],
+        [
+          "Someone sets consumer retry to 999",
+          "Frozen partition on comma",
+          "Reject the PR. This table is why."
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Wrong-trade from a bad --payload-file is the serious one. The CLI logs actor, second_person, sha256 of substitute bytes, original_offset, to recon.dlq_replay. That row is the audit. We do not have a better lock. CODEOWNERS on the CLI will not save a 2 a.m. run. Two-person and a refuse-parse default are the lock."
+    },
+    {
+      "type": "h1",
+      "text": "10. Rejected alternatives"
+    },
+    {
+      "type": "h2",
+      "text": "10.1 Infinite retry with a 30 s backoff"
+    },
+    {
+      "type": "p",
+      "text": "Died first. Looks patient. Freezes a partition on the monthly comma. We have the 2022 hang. No."
+    },
+    {
+      "type": "h2",
+      "text": "10.2 Strip trailing commas"
+    },
+    {
+      "type": "p",
+      "text": "Died September 28. Helen's quote in section 6. Wrong-trade risk."
+    },
+    {
+      "type": "h2",
+      "text": "10.3 DLQ as a Postgres table only"
+    },
+    {
+      "type": "p",
+      "text": "ingest_skip is that design. Nobody looked. Kafka is where ingest engineers already look. A table can back the replay audit (recon.dlq_replay) without being the queue."
+    },
+    {
+      "type": "h2",
+      "text": "10.4 ingest-svc owns the replay"
+    },
+    {
+      "type": "p",
+      "text": "Died when Priya asked who says no. ingest's incentive is empty lag. match-engine's incentive is correct trades. Ownership follows the incentive. ingest still produces; they do not run --confirm-prod."
+    },
+    {
+      "type": "table",
+      "caption": "Rejected, so we do not reopen without new facts.",
+      "headers": [
+        "Option",
+        "Why it looked good",
+        "Why it died"
+      ],
+      "rows": [
+        [
+          "Infinite retry",
+          "No data loss, simple",
+          "Frozen partition on poison"
+        ],
+        [
+          "Strip trailing comma",
+          "19 cases/month vanish",
+          "Wrong-trade on truncated fields"
+        ],
+        [
+          "SQL skip table as the product",
+          "Already exists",
+          "Invisible; September 4 miss"
+        ],
+        [
+          "ingest owns replay",
+          "Same team that produces",
+          "Will replay to clear lag"
+        ],
+        [
+          "Auto-replay parse errors at 06:00",
+          "RailClear resends overnight",
+          "Resend already applies via new offset; auto-replay double-churns DLQ"
+        ]
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "11. Rollout"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "October 19: Diego creates the topic in prod and staging. Alert rules in staging only, threshold 20 so we can trip it.",
+        "October 23: ingest-svc 4.19.0 to staging with DlqPublisher. Fixture: the February 14 comma payload from Rina's export. Confirm one DLQ record, original offset committed, inbound lag not stuck.",
+        "October 24: freeze ingest_skip inserts in staging. Confirm Grafana annotation.",
+        "October 26: CLI against staging. Replay PSQLException fixture (we will inject). Refuse parse replay without flags. Kavya + Aman as two-person even in staging, for practice.",
+        "November 2: ingest-svc 4.19.0 prod, Thursday window. Topic already exists. Feature flag ingest.dlq.enabled default true (unlike dedup, there is no useful dark mode; skip versus DLQ is the behavior change). I will be on the bridge 07:00-09:00.",
+        "November 3: alert thresholds to 50 ticket / 200 page in prod after we confirm the probe math is not using the never-commit lag bug.",
+        "November 16: freeze ingest_skip in prod if no missed produces. Drop skip from runbooks."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Rollback: flag ingest.dlq.enabled false returns us to skip-table inserts. Topic can stay. CLI can stay. We will not delete a topic in a panic. Priya agreed."
+    },
+    {
+      "type": "h1",
+      "text": "12. Open questions"
+    },
+    {
+      "type": "table",
+      "caption": "Open questions.",
+      "headers": [
+        "Question",
+        "Owner",
+        "Due",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "Postgres failover: 3 retries then DLQ, or block 2 minutes first?",
+          "Diego Alvarez",
+          "October 20, 2023",
+          "I lean DLQ+page. He leans block. Need a number."
+        ],
+        [
+          "RC-4419 extra comma, any real date?",
+          "Marcus Bell",
+          "October 27, 2023",
+          "We ship regardless. A date would change the parse_ratio alert."
+        ],
+        [
+          "Second DLQ for clh.match.request?",
+          "Kavya Menon",
+          "November 10, 2023",
+          "Out of this ticket. Do not overload this topic."
+        ],
+        [
+          "Should Helen see DLQ depth in her ops UI?",
+          "Helen Cho + Rahul",
+          "November 8, 2023",
+          "I vote no for v1. It is an engineer queue. She can ask."
+        ],
+        [
+          "Retention 14d vs 21d after the first holiday",
+          "Diego Alvarez",
+          "January 8, 2024",
+          "Revisit after Thanksgiving, not before ship."
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "If Diego wins the block-2-minutes argument, we still do not infinite-retry parse errors. The backoff is for Postgres only. Write that in the flag comments so a future engineer does not 'simplify' it."
+    },
+    {
+      "type": "h1",
+      "text": "13. Worked examples"
+    },
+    {
+      "type": "p",
+      "text": "Monthly comma. RailClear file 2023-10-02, last record has a trailing comma. Mule splits, produce to partition 4 offset 88214107. ingest-svc Jackson throws. Headers as in section 4, attempt_count 1, produce DLQ, commit 88214107. unreplayed += 1, still under 50. Next morning RailClear resends a clean file, new offsets, same firm_seq, new batchId, hash differs, ingest applies, Helen never knows unless she looks at Grafana. Marcus still owes RC-4419. We do not replay the poison."
+    },
+    {
+      "type": "p",
+      "text": "Postgres blip. pg-recon-01 disk stall 3.4 minutes, October hypothetical. 640 records fail 3 times each, land in DLQ, unreplayed 640, page at 200 around record 200, match-engine oncall wakes, Diego already on the disk page. After primary is healthy, clh-dlq-replay replay --exception-class PSQLException --confirm-prod --second-person aman.kumar. ingest_dedup hits for any that actually committed before the stall (the 014 design). The rest apply once. Parse-class records that happened to arrive in the same window stay in the DLQ; the exception-class filter leaves them."
+    },
+    {
+      "type": "p",
+      "text": "September 4 miss, if we had this. Mule truncation, not resent. One DLQ record. Ticket at 50 would not fire. Helen's blotter catch two days later: we search DLQ by first_seen, find the truncation, ask Mule to resend, replay with --payload-file if they send bytes out of band, or wait for a Kafka reproduce. Better than a skip row in a table with 31 lines and no dashboard. Not perfect. Perfect is Mule not truncating. Out of scope."
+    },
+    {
+      "type": "h1",
+      "text": "14. Success and ownership reminder"
+    },
+    {
+      "type": "p",
+      "text": "Success on November 20: ingest_skip inserts at 0, DLQ has a handful of comma records, no page unless we earned it, replay CLI used at least once in staging and, if we are unlucky, once in prod for Postgres. Match-engine oncall can run list without me. ingest oncall has not set retries to 999."
+    },
+    {
+      "type": "p",
+      "text": "Ownership, last time: match-engine team. Kavya's rotation. The runbook section lives in their folder, not in ingest's. I will write the first draft of the runbook as a follow-up to CLH-RB-2023-012, then they edit it. If a page fires and ingest answers because muscle memory, they transfer. This only works if Priya backs the transfer at 2 a.m. She said she would."
+    }
+  ]
+}

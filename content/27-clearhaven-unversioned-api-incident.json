@@ -1,0 +1,610 @@
+{
+  "slug": "27-clearhaven-unversioned-api-incident",
+  "doc_id": "CLH-INC-2023-061",
+  "title": "break-svc renamed status to break_status without a version",
+  "subtitle": "March 22 release. Clearhaven Mule mappings died at 06:12 ET. Zero trades matched until 08:47. Delayed exception queue, not wrong cash.",
+  "doc_type": "Incident report",
+  "kicker": "Incident / Clearhaven Recon",
+  "org": "Northstar Engineering",
+  "classification": "INTERNAL",
+  "version": "1.2",
+  "status": "Approved",
+  "date": "March 28, 2023",
+  "author": "Aman Kumar",
+  "role": "Software Engineer II",
+  "team": "Clearhaven Recon Platform",
+  "audience": "Priya Nair, Helen Cho, Marcus Bell, ingest and break-svc engineers, Rahul Deshmukh (customer comms)",
+  "owners": "Aman Kumar (writeup), Kavya Menon (break-svc), Diego Alvarez (deploy timeline)",
+  "related": "CLH-INC-2023-061, CLH-5520, CLH-TDD-2023-017, CLH-MTG-2023-041, break-svc PR #1844",
+  "summary": "On March 22, 2023 we shipped break-svc 4.11.0, which renamed the JSON field status to break_status on GET /v1/breaks and on the Mule-facing payload. There was no API version bump. Clearhaven's Mule mappings look up status. They started failing at 06:12 ET when the first post-deploy poll ran. Match-engine kept writing breaks. Mule stopped reading them. Helen's exception queue sat at zero new items while 1,847 breaks accumulated unseen. We restored the old field name at 08:41 and Mule caught up at 08:47. Cash posting keys off a different endpoint and did not run wrong numbers. This report is the timeline, why review missed a breaking change inside a PR titled cleanup, the hotfix, and the versioning program that CLH-TDD-2023-017 will specify.",
+  "form_description": "Incident report for the March 22 unversioned field rename on break-svc. Written so Priya has a record for Clearhaven, so Kavya has the review checklist that failed, and so the versioning design has a concrete failure to point at.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "March 22, 2023",
+      "Aman Kumar",
+      "Bridge notes, timeline from Grafana and kube events."
+    ],
+    [
+      "0.5",
+      "March 24, 2023",
+      "Aman Kumar",
+      "Helen impact numbers. Cash posting confirmed clean."
+    ],
+    [
+      "0.9",
+      "March 27, 2023",
+      "Kavya Menon",
+      "PR #1844 review reconstruction. Action items."
+    ],
+    [
+      "1.0",
+      "March 28, 2023",
+      "Aman Kumar",
+      "Priya review. Versioning follow-up pointed at CLH-TDD-2023-017."
+    ],
+    [
+      "1.2",
+      "March 28, 2023",
+      "Aman Kumar",
+      "Approved for TAM packet. Marcus has the customer paragraph."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "1. What happened, for people who will not read the rest"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Headline",
+      "text": "We shipped a breaking JSON rename on an unversioned /v1 contract. Clearhaven's Mule integration stopped consuming breaks for 2 hours 35 minutes. Exception handling delayed. Cash was not wrong. The rename lived in PR #1844, titled 'cleanup: align break payload with proto.' Two reviewers approved it. Neither diffed the field against the Mule mapping sheet. Hotfix 4.11.1 restored status as a sibling field and kept break_status. The lasting fix is API versioning, tracked as CLH-TDD-2023-017 even though that document is not written yet."
+    },
+    {
+      "type": "p",
+      "text": "Helen Cho was at her desk at 06:19 ET. The overnight queue usually has 40 to 90 new breaks waiting. She had 4, all from before midnight, all already worked. She pinged me at 06:21: 'did you turn matching off.' Matching was not off. Matching was writing to recon.break at a normal 11.4/minute. The thing that was off was Mule's poll of GET /v1/breaks?since=, which Clearhaven uses to feed the exception UI Helen lives in. Mule was getting 200s with bodies it could not map. Their error log, which Marcus pulled at 07:04, is full of 'Cannot coerce Null to String for field status' starting 06:12:17 ET."
+    },
+    {
+      "type": "p",
+      "text": "Rahul asked on the 08:55 customer call whether we posted cash against the wrong breaks. We did not. Cash posting reads GET /v1/settlements/{id}/cash-preview, which we did not touch in 4.11.0. Breaks that would have been worked between 06:12 and 08:47 sat. Some of those would have been true breaks that need a human before T+1 cutoff. March 22 was a Wednesday. T+1 cutoff for that session is 15:45 ET. We had the afternoon. Helen's team worked a 2.8x queue from 08:47 to 14:10 and made cutoff. That is luck plus a team that skipped lunch. It is not a design."
+    },
+    {
+      "type": "p",
+      "text": "Priya: we owe Clearhaven a written versioning policy before the next break-svc release that touches JSON. I will write CLH-TDD-2023-017. Kavya will not ship another field rename on /v1. Diego will add a contract test in CI that fails the build if the public OpenAPI for /v1 loses a property. That test would have caught this. We do not have it today. We will have it before April 18, which is the next scheduled break-svc train."
+    },
+    {
+      "type": "h1",
+      "text": "2. Impact"
+    },
+    {
+      "type": "table",
+      "caption": "Impact as of March 28. Helen signed the ops numbers. Marcus signed the customer paragraph.",
+      "headers": [
+        "Dimension",
+        "Number",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "Customer-visible gap",
+          "06:12:17 to 08:47:03 ET",
+          "2 h 34 min 46 s of no new exceptions in Helen's UI"
+        ],
+        [
+          "Breaks written but unseen",
+          "1,847",
+          "recon.break created_at in the window, status=open"
+        ],
+        [
+          "Mule poll errors",
+          "4,412",
+          "HTTP 200 with mapping exception, 15s poll"
+        ],
+        [
+          "True breaks in the unseen set",
+          "611",
+          "Rest matched when Mule replayed. Humans needed on 611."
+        ],
+        [
+          "T+1 cutoff miss",
+          "0",
+          "Helen cleared the 611 by 14:10. Cutoff 15:45."
+        ],
+        [
+          "Wrong cash posted",
+          "0",
+          "Cash-preview endpoint unchanged. Lucky."
+        ],
+        [
+          "Sev",
+          "SEV-2",
+          "Priya. Not SEV-1 because cash was clean and cutoff held."
+        ],
+        [
+          "Clearhaven TAM time",
+          "3.6 hours",
+          "Marcus on the bridge, then the 08:55 and 12:30 calls"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Helen was furious, and she was right. Her words on the 09:10 internal retro, written down because we should not soften them: 'I almost called the floor and told them matching was broken. The UI was empty. Empty means healthy on a quiet day. This was not a quiet day. You shipped at 6 a.m. and did not watch the thing I actually use.' We shipped at 05:48 ET, which is the Thursday train we picked so we would miss the US cash open. Mule's first poll after pod ready was 06:12, which is after cash open. The 'ship before open' idea only works if the consumer you care about runs before open. Mule does not. Mule starts with Clearhaven's ops shift. We optimized for the wrong clock."
+    },
+    {
+      "type": "p",
+      "text": "Customer impact we will put in Marcus's note: exception handling was delayed, cash was not wrong, cutoff was met, no restatement. We will not say 'no customer impact.' Helen is the customer for this surface. Delayed exception queue is impact. Rahul drafted a sentence that said 'no material impact.' I asked him to take 'material' out. He did."
+    },
+    {
+      "type": "h1",
+      "text": "3. Timeline"
+    },
+    {
+      "type": "p",
+      "text": "Times are ET, March 22, 2023 unless noted. Sources: kube events on ns-clh-prod, Grafana break-svc deploy annotation, Mule support bundle Marcus received at 07:11, Slack #clh-prod, my laptop clock which I synced after the fact against Grafana so the Slack times match."
+    },
+    {
+      "type": "table",
+      "caption": "Incident timeline. Slack quotes trimmed. Full export in the incident folder on Drive, CLH-INC-2023-061.",
+      "headers": [
+        "Time ET",
+        "Event",
+        "Source"
+      ],
+      "rows": [
+        [
+          "Mar 21, 16:42",
+          "PR #1844 merged to main. Title: cleanup: align break payload with proto. Approvers: Rina Das, Chris Patel.",
+          "GitHub"
+        ],
+        [
+          "Mar 21, 17:05",
+          "4.11.0 tag. Build 1844.7 green. Contract tests: none for field presence.",
+          "CI"
+        ],
+        [
+          "Mar 22, 05:36",
+          "Diego starts the Thursday train. change ticket CHG-9921.",
+          "change calendar"
+        ],
+        [
+          "05:48",
+          "break-svc 4.11.0 ready on 3/3 pods. Grafana annotation.",
+          "kube"
+        ],
+        [
+          "05:49",
+          "ingest-svc, match-engine unchanged. /v1/breaks now emits break_status, not status.",
+          "changelog we did not write"
+        ],
+        [
+          "06:12:17",
+          "First Mule mapping error. Cannot coerce Null to String for field status.",
+          "Mule log"
+        ],
+        [
+          "06:12 to 06:19",
+          "Helen's UI shows no new breaks. She gives it a few minutes because 06:00 is sometimes quiet.",
+          "Helen"
+        ],
+        [
+          "06:21",
+          "Helen pings Aman: did you turn matching off.",
+          "Slack"
+        ],
+        [
+          "06:24",
+          "Aman checks match-engine lag. 2.1s. recon.break inserts 11.4/min. Looks healthy.",
+          "Grafana"
+        ],
+        [
+          "06:31",
+          "Aman checks break-svc 5xx. Zero. 200s at 4.0 rps, which is Mule's poll.",
+          "Grafana"
+        ],
+        [
+          "06:38",
+          "Aman asks Helen to screenshot the UI. Empty since-queue. First real alarm in my head.",
+          "Slack"
+        ],
+        [
+          "06:47",
+          "Kavya pulled in. We diff 4.10.3 vs 4.11.0. Field rename is the second hunk.",
+          "git"
+        ],
+        [
+          "06:51",
+          "Aman pages Priya. SEV-2 declared 06:53.",
+          "Pager"
+        ],
+        [
+          "07:04",
+          "Marcus on with Clearhaven Mule ops. They send the error line.",
+          "Zoom"
+        ],
+        [
+          "07:11",
+          "Mule support bundle in hand. Confirms status missing, 200 OK.",
+          "email"
+        ],
+        [
+          "07:18",
+          "Decision: hotfix restore status as sibling, keep break_status. Do not revert whole 4.11.0 (it also has a null-scan fix we want).",
+          "bridge"
+        ],
+        [
+          "07:40",
+          "PR #1849 hotfix. Kavya authors. Aman and Diego review. 4.11.1 tag.",
+          "GitHub"
+        ],
+        [
+          "08:22",
+          "CHG-9924 emergency. Diego rolls 4.11.1.",
+          "change"
+        ],
+        [
+          "08:41",
+          "3/3 pods on 4.11.1. status present again.",
+          "kube"
+        ],
+        [
+          "08:47:03",
+          "Mule poll succeeds. UI starts filling. Helen confirms.",
+          "Helen"
+        ],
+        [
+          "08:47 to 14:10",
+          "Mule backfill of 1,847 breaks. Helen's team works 611 true breaks.",
+          "ops"
+        ],
+        [
+          "08:55",
+          "Customer call. Rahul, Marcus, Priya. Cash question asked and answered.",
+          "Zoom"
+        ],
+        [
+          "12:30",
+          "Second customer call. Queue still elevated, cutoff still plausible.",
+          "Zoom"
+        ],
+        [
+          "14:10",
+          "Helen: remaining true breaks are the ordinary afternoon set. Cutoff ok.",
+          "Slack"
+        ],
+        [
+          "15:45",
+          "T+1 cutoff. No miss.",
+          "ops"
+        ],
+        [
+          "Mar 23, 10:00",
+          "Internal retro. This document started from those notes.",
+          "calendar"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "The 26 minutes from Helen's ping to 'the field is gone' are on me. I trusted 5xx and lag. Both were green because we had not failed. We had succeeded at returning a body the contract tests did not describe and the client could not read. Diego said on the bridge that we need a Mule synthetic, not another Grafana panel of our own 200s. He is right. Action item in section 8."
+    },
+    {
+      "type": "h1",
+      "text": "4. Technical detail"
+    },
+    {
+      "type": "h2",
+      "text": "4.1 What 4.11.0 changed"
+    },
+    {
+      "type": "p",
+      "text": "break-svc speaks JSON over HTTP to Mule and to our own query UI. Internally Kavya has been moving the break record onto a protobuf that match-engine already uses on the gRPC path. The proto field is break_status. The JSON field was status. PR #1844 taught the JSON serializer to emit proto names. The PR also deleted the Jackson @JsonProperty(\"status\") annotation that had been papering over the difference. The description said cleanup. The description was accurate in the sense that the author believed JSON should match proto. It was not accurate in the sense that Mule is a client of JSON, not of proto."
+    },
+    {
+      "type": "p",
+      "text": "GET /v1/breaks?since= returned objects like {\"break_id\":\"...\",\"status\":\"OPEN\",\"account\":\"A-44108\",...} on 4.10.3. On 4.11.0 the same object had break_status and no status. HTTP 200. OpenAPI in repo still said status, because the OpenAPI file is generated from annotations we also removed, and the generate step is not in CI. The committed openapi.yaml was stale by 11 days. I did not know that until Thursday afternoon. Rina thought CI generated it. Chris thought the author updated it. Nobody ran a grep."
+    },
+    {
+      "type": "code",
+      "caption": "The actual hunk. break-svc PR #1844, BreakResponse.java.",
+      "text": " - @JsonProperty(\"status\")\n - private String status;\n + private String breakStatus;\n\n   // lombok + Jackson proto naming\n   // emitted JSON key: break_status"
+    },
+    {
+      "type": "p",
+      "text": "Mule mapping, from the sheet Marcus keeps in Confluence and that is not in our repo: field status, required, string, values OPEN/MATCHED/CLOSED/WASH. When the field is absent, DataWeave throws. They do not ignore unknown fields in a way that would save us; they fail closed on required fields, which is the correct client behavior. We broke a required field and returned 200. That combination is the incident."
+    },
+    {
+      "type": "h2",
+      "text": "4.2 Why cash was clean"
+    },
+    {
+      "type": "p",
+      "text": "Clearhaven cash posting does not read /v1/breaks. It reads /v1/settlements/{id}/cash-preview and a file drop that Chris's job still produces at 16:30. Neither path uses the status field on the break object. Match-engine itself never stopped matching. recon.break rows were correct. The unseen 1,847 included 611 that needed a human (wrong qty, missing firm_seq, wash that did not wash) and 1,236 that Mule would have auto-closed as matched. Auto-close is a Mule rule, not ours. Those 1,236 sat in OPEN until 08:47 and then closed in a burst. Helen's UI looked like a firehose. The underlying match was already done. This is why I keep saying lucky. A different client that posted cash from the break payload would have posted nothing, or worse, posted from a stale cache. We do not have that client. We might next year."
+    },
+    {
+      "type": "h2",
+      "text": "4.3 Why the queue was empty rather than wrong"
+    },
+    {
+      "type": "p",
+      "text": "Mule's poll is since= last_success_timestamp. On mapping failure they do not advance the timestamp. They also do not write a poison row. They log and wait 15 seconds. So Helen saw last night's leftovers and nothing new. The alternative failure, advancing the cursor on 200 OK regardless of map success, would have dropped 1,847 breaks on the floor with a full-looking UI. We should thank whoever wrote fail-closed on the mapping, then we should still not rely on it. Our contract should not require their caution."
+    },
+    {
+      "type": "h1",
+      "text": "5. Why review missed it"
+    },
+    {
+      "type": "p",
+      "text": "PR #1844, 86 files, +1,412 / -960. Most of the diff is proto alignment in match-engine stubs, a null-scan fix in BreakQueryService that we actually wanted, and generated Java from proto. The JSON field rename is 8 lines in BreakResponse.java and 2 lines in a unit test that was updated to expect break_status. The unit test is the tell. We tested the new name. We did not test the old name. We did not have a consumer contract test. Two reviewers, Rina Das and Chris Patel, both competent, both reviewing at 16:10 on a Tuesday because we asked for a same-day merge to catch the Thursday train."
+    },
+    {
+      "type": "p",
+      "text": "Rina's review comment, full text: 'cleanup looks good, thanks for collapsing the names.' She meant proto versus Java field names. She was not thinking about Mule. Chris's review was a +1 with no comments. Chris owns data jobs. He is on the reviewer list because break-svc dumps into his warehouse path. He would not know the Mule mapping sheet exists. I put him on the list in January to spread review load. That was a staffing move, not a competence check for API contracts. I will take him off break-svc public JSON reviews. That is on me, not him."
+    },
+    {
+      "type": "p",
+      "text": "The PR title said cleanup. Our review culture treats cleanup as safe. I have used that title. Kavya has used that title. The word is doing work it has not earned. After this, a PR that touches a JSON field on /v1 is a breaking-change PR even if the author thinks it is a rename to the 'real' name. Titles will say breaking or they will not merge. Priya agreed. We will put that in the versioning design, not only in this retro."
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Review failure, named",
+      "text": "No reviewer opened the Mule mapping sheet. No reviewer ran git diff against openapi.yaml. openapi.yaml was already stale, so even that would have been a weak net. The unit test encoded the break. CI was green because it tested what we wrote, not what the client reads. Cleanup as a title lowered scrutiny on an 86-file PR during a same-day review window."
+    },
+    {
+      "type": "p",
+      "text": "Rejected explanation, because it showed up on Slack: 'Mule should be more tolerant.' No. Optional-field tolerance is a versioning conversation. Required-field absence is a broken contract. We will not write an incident action item that says 'ask Helen's integration team to ignore missing fields.' I shut that down on the bridge. It stayed shut in the retro."
+    },
+    {
+      "type": "h1",
+      "text": "6. Hotfix"
+    },
+    {
+      "type": "p",
+      "text": "4.11.1 emits both fields. status is a computed getter returning the same enum as break_status. We will keep both until /v2 exists and Mule has moved. We will not pick a removal date in this incident. Removal without a version is how we got here. Kavya wanted to revert 4.11.0 entirely. Diego pointed at the null-scan fix, which stops a 500 on breaks with a null comment field, a 500 we had paged on twice in March. Revert would bring the 500 back. Sibling fields are ugly and they are the right hotfix."
+    },
+    {
+      "type": "code",
+      "caption": "Hotfix shape. break-svc 4.11.1, BreakResponse.java.",
+      "text": "@JsonProperty(\"break_status\")\nprivate String breakStatus;\n\n@JsonProperty(\"status\")\npublic String getStatus() {\n    return breakStatus;\n}"
+    },
+    {
+      "type": "p",
+      "text": "We did not ask Mule to change first. We could have. Their mapping is a DataWeave one-liner. Round-trip on an emergency change with Clearhaven change control is 4 to 8 hours on a good day, and Marcus said 07:18 that they would not make 09:00. Our hotfix was ours. 83 minutes from decision to pods ready is acceptable for an emergency train. The 26 minutes of diagnosis plus the 22 minutes of 'is lag fine' are the part I would like back."
+    },
+    {
+      "type": "p",
+      "text": "Rollback plan if 4.11.1 had been wrong: go to 4.10.3, lose the null-scan fix, live with the 500 until a cherry-pick. We wrote that down in CHG-9924 and did not need it. Staging got 4.11.1 at 08:05. We ran one curl against staging's /v1/breaks and saw both keys. That was the entire staging test. It was enough for a sibling-field restore. It is not enough in general. Action item: a fixture of the Mule mapping, even if it is a JSON Schema that says status is required. Diego will own the CI hook."
+    },
+    {
+      "type": "h1",
+      "text": "7. What we will change (the versioning program)"
+    },
+    {
+      "type": "p",
+      "text": "This incident is the reason CLH-TDD-2023-017 exists as a slot. I have not written that design yet. The date on it will be later than this report. That is fine. The commitments we can make on March 28 follow. The design will spell the mechanics (URL /v2, header, sunset). This report spells why we are not allowed to skip it."
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "No field rename, type change, or required-field add on /v1 without a new version. Additive optional fields are still allowed on /v1. Priya is the exception granter, not the author.",
+        "OpenAPI generate in CI. The committed openapi.yaml must match the running code or the build fails. Kavya, April 4.",
+        "Consumer contract test: a JSON Schema copied from the Mule mapping sheet, checked into break-svc/contracts/mule-breaks-v1.json. CI posts a fixture and asserts status exists and is a known enum. Diego, April 11. I will type the schema from Marcus's sheet so we do not wait on a perfect process.",
+        "PR title and label. Breaking changes labeled breaking. Cleanup PRs that touch public JSON are rejected in review until retitled. Rina will add a CODEOWNERS line so Kavya or I must approve /v1 changes.",
+        "Synthetic canary: once a minute, from inside the cluster, GET /v1/breaks?since= with the same JSON Schema. Page on fail. Do not wait for Helen. Diego, April 18.",
+        "CLH-TDD-2023-017: versioning strategy, including how we sunset status once Mule reads break_status, and how query-svc and the internal UI version. Aman, target August (Rahul wants it sooner; the design quality wins over a May draft we rewrite).",
+        "Reviewer list: Chris off public JSON for break-svc. Rina stays. Add me. Add Kavya. Two of that set, not one plus a data engineer on a Tuesday at 16:10."
+      ]
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Rejected alternative",
+      "text": "Freeze break-svc JSON forever and put new fields only on gRPC. Died in the retro. The internal UI is JSON. Mule is JSON. gRPC is match-engine to break-svc on a different path. Freezing JSON just moves the next rename into a 'new' endpoint we will also forget to version. Versioning is cheaper than a second protocol for the same client."
+    },
+    {
+      "type": "p",
+      "text": "Rahul asked whether we should bill a 'stabilization sprint' and stop feature work on breaks. Priya said no. The April 18 train already has the wash-rule change Helen wants. We will put the contract tests in front of that train, not instead of it. If the tests are not green, the wash-rule waits. Helen heard that and agreed. She would rather have a late wash-rule than another empty morning."
+    },
+    {
+      "type": "h1",
+      "text": "8. Action items"
+    },
+    {
+      "type": "table",
+      "caption": "Actions from the March 23 retro. Status as of March 28.",
+      "headers": [
+        "Action",
+        "Owner",
+        "Due",
+        "Status"
+      ],
+      "rows": [
+        [
+          "Sibling fields status + break_status in 4.11.1",
+          "Kavya Menon",
+          "March 22",
+          "Done. In prod."
+        ],
+        [
+          "Customer note, no 'material' hedge",
+          "Rahul Deshmukh / Marcus Bell",
+          "March 22",
+          "Done. Sent 16:20."
+        ],
+        [
+          "JSON Schema contract for Mule v1",
+          "Aman Kumar (schema), Diego Alvarez (CI)",
+          "April 11, 2023",
+          "Schema draft started. CI not yet."
+        ],
+        [
+          "OpenAPI generate in CI",
+          "Kavya Menon",
+          "April 4, 2023",
+          "Ticket CLH-5521."
+        ],
+        [
+          "Synthetic canary on /v1/breaks",
+          "Diego Alvarez",
+          "April 18, 2023",
+          "Not started. Blocked on schema."
+        ],
+        [
+          "CODEOWNERS for break-svc public JSON",
+          "Rina Das",
+          "April 4, 2023",
+          "PR open."
+        ],
+        [
+          "Remove Chris from break-svc JSON review",
+          "Aman Kumar",
+          "March 28, 2023",
+          "Done this morning."
+        ],
+        [
+          "CLH-TDD-2023-017 versioning design",
+          "Aman Kumar",
+          "August 3, 2023 (slot)",
+          "Not started. This incident is the motivation."
+        ],
+        [
+          "Mule mapping sheet copied into repo",
+          "Marcus Bell",
+          "April 4, 2023",
+          "Waiting on Confluence export."
+        ],
+        [
+          "Postmortem with Clearhaven engineering, 30 min",
+          "Priya Nair",
+          "April 5, 2023",
+          "Scheduled."
+        ]
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "9. Contributing factors"
+    },
+    {
+      "type": "p",
+      "text": "Five, in the order I would tell a new engineer so they do not think this was a Jackson quirk."
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Unversioned public JSON treated as an implementation detail of a proto. The proto is not the contract. The JSON that left the cluster in 4.10.3 is the contract.",
+        "PR titled cleanup, 86 files, same-day review, reviewer set that did not include someone who has the Mule sheet open once a week.",
+        "No consumer contract test. Our unit test documented the break.",
+        "OpenAPI stale and not gated. We had a file that said status. Nobody asked the running pod.",
+        "Deploy clock optimized for cash open, not for the consumer that actually pages Helen. 05:48 ET is quiet for us and loud for her 06:12 poll."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Not a contributing factor: Mule's fail-closed mapping. Not a contributing factor: Helen waiting 7 minutes before pinging. Not a contributing factor: the null-scan fix that rode along. We will not ban mix-in fixes; we will ban mix-in contract changes. If 4.11.0 had only been the null-scan, Thursday would have been boring."
+    },
+    {
+      "type": "p",
+      "text": "A factor I almost left off because it is cultural: we talk about Mule as 'the client's problem' in standup when their poll is slow. I have said that. Slow poll is their problem. Broken body is ours. The slang mixed the two. I will stop saying it."
+    },
+    {
+      "type": "h1",
+      "text": "10. Detection gap"
+    },
+    {
+      "type": "p",
+      "text": "Our dashboards answered the question 'is break-svc up.' The incident needed the question 'is the client succeeding.' Those are different. 200s at 4.0 rps looked like health. They were the error rate. Diego's canary is the fix. Until April 18, Helen is the detector. That is an embarrassing sentence and it is accurate. I added a personal alarm: a Grafana query on recon.break created versus a log metric on Mule that we do not have, so that is not real. What I actually did: a 06:15 ET calendar ping the day after a break-svc deploy, for the next four trains, that says 'ask Helen if the queue looks alive.' Calendar pings do not scale. They cover April."
+    },
+    {
+      "type": "p",
+      "text": "Match-engine lag, ingest lag, 5xx, pod ready, all green. I will put a screenshot of that green dashboard in the incident folder so the next person who is tempted to declare health from it has to look at March 22 first."
+    },
+    {
+      "type": "h1",
+      "text": "11. Open questions"
+    },
+    {
+      "type": "table",
+      "caption": "Open questions left after the retro. Not blockers for the hotfix, blockers for the versioning design.",
+      "headers": [
+        "Question",
+        "Owner",
+        "Due",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "Does any other client parse status besides Mule and the internal UI?",
+          "Marcus Bell",
+          "April 5, 2023",
+          "If a downstream vendor batch-reads /v1/breaks we do not know, sibling fields save them too."
+        ],
+        [
+          "Internal UI: already reads break_status in a feature flag?",
+          "Rina Das",
+          "April 4, 2023",
+          "She thought a frontend branch existed. Confirm."
+        ],
+        [
+          "Sunset plan for status once /v2 exists",
+          "Aman Kumar",
+          "with CLH-TDD-2023-017",
+          "Do not sunset in a cleanup PR."
+        ],
+        [
+          "Should Thursday trains move to 11:00 ET so Helen is in the chair?",
+          "Priya Nair",
+          "April 12, 2023",
+          "Diego hates 11:00 because it sits on cash. Fight it out."
+        ],
+        [
+          "Do we owe a credit on the April invoice?",
+          "Rahul Deshmukh",
+          "April 3, 2023",
+          "I do not decide this. 2.5h delay, cutoff met. Rahul + Priya."
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "If Marcus finds a third client, 4.11.1 already covers them on status. Tell them anyway. Silent saves are how we learn about clients from the next incident instead of from a list."
+    },
+    {
+      "type": "h1",
+      "text": "12. Customer paragraph (Marcus may paste this)"
+    },
+    {
+      "type": "quote",
+      "text": "On March 22 between 06:12 and 08:47 ET, the exception queue in your ops UI did not receive new breaks. Matching continued. 1,847 breaks were created on our side and not displayed. 611 required a human; your team worked them after the queue resumed and met the 15:45 ET cutoff. Cash posting was not affected. The cause was a field rename on our breaks API that we shipped without a version. We restored the previous field at 08:41 and added a compatibility field so both names are present. We are adding contract tests against your mapping and we will version this API before we remove or rename a field again. Contact Marcus Bell with questions.",
+      "attrib": "Draft for TAM note, approved by Priya Nair March 28, 2023"
+    },
+    {
+      "type": "p",
+      "text": "Do not add 'we apologize for any inconvenience.' Marcus can be a human in email. The packet should stay factual. Helen already knows we are sorry. She was on the 09:10 call when I said it."
+    },
+    {
+      "type": "h1",
+      "text": "13. Appendix: what I checked that was a waste, and what I should have checked first"
+    },
+    {
+      "type": "p",
+      "text": "Waste, in order: match-engine consumer lag, break-svc 5xx, ingest-svc pod restarts, Kafka under-replicated partitions, whether Helen's browser had a stuck tab (I asked her to hard-refresh at 06:33, which cost 2 minutes and some goodwill). First checks that would have found it: curl the prod /v1/breaks body and grep status; ask Marcus for the latest Mule error; diff 4.10.3 and 4.11.0 for JsonProperty. I did the diff at 06:47. I should have done it at 06:24 when Helen said the queue was empty and my graphs were green. Empty queue plus green graphs is the signature of a contract break, not of a quiet morning."
+    },
+    {
+      "type": "p",
+      "text": "curl example we now keep in the break-svc README. Run it after every prod train, from a laptop on the VPN, not from inside the pod (inside the pod you will lie to yourself about DNS)."
+    },
+    {
+      "type": "code",
+      "caption": "Post-deploy smoke. VPN. Expect status and break_status both present after 4.11.1.",
+      "text": "curl -sS -H \"Authorization: Bearer $CLH_TOKEN\" \\\n  \"https://breaks.clh.prod.northstar.internal/v1/breaks?since=$(date -u +%Y-%m-%dT%H:%M:%SZ --date='5 minutes ago')\" \\\n  | jq '.[0] | {status, break_status, break_id}'"
+    },
+    {
+      "type": "p",
+      "text": "If jq prints status: null, you are in this incident again. Page, do not investigate lag. That sentence is the only runbook change I am making this week. The rest waits for CLH-TDD-2023-017."
+    }
+  ]
+}

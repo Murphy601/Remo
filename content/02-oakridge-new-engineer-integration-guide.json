@@ -1,0 +1,434 @@
+{
+  "slug": "02-oakridge-new-engineer-integration-guide",
+  "doc_id": "OAK-DOC-2020-003",
+  "title": "Oakridge inventory-api integration guide for new engineers",
+  "subtitle": "VPN profile, ForgeNet replica views, Dayton snapshot, and the plant CHAR(2) footgun, so you can ship in week one without asking Priya",
+  "doc_type": "Integration documentation",
+  "kicker": "Oakridge Industrial  \u00b7  inventory-api  \u00b7  OAK-4412",
+  "org": "Northstar Engineering",
+  "classification": "INTERNAL",
+  "version": "1.2",
+  "status": "Approved",
+  "date": "February 21, 2020",
+  "author": "Aman Kumar",
+  "role": "Junior Software Engineer",
+  "team": "Northstar Engineering, Oakridge plant systems",
+  "audience": "New Northstar engineers on Oakridge; Kavya Menon (reviewer); Elena Vasquez (LDAP/VPN); Walt Hendricks (replica)",
+  "owners": "Aman Kumar (this guide), Kavya Menon (service), Walt Hendricks (replica and extract), Elena Vasquez (LDAP and VPN), Diego Alvarez (RHEL/F5)",
+  "related": "OAK-4412; OAK-REQ-2019-014; OAK-TDD-2020-002; OAK-SOP-2020-011; OAK-MTG-2019-044; OAK-4412-17; OAK-IT-5521",
+  "summary": "New hires kept pinging Priya Nair for the FortiClient profile name, the inventory-api host, and why plant 03 joins die. This guide is the real path: Oakridge-Plant-SSL, replica views on INV_MAST INV_BIN INV_ALLOC PLANT_CAL, inv-api-01.oak.internal:8084, a sanitized Dayton snapshot of about 1.8GB, the nightly SFTP drop at files.oak.internal/inv/in, and the CHAR(2) versus integer 3 footgun. Written so a new engineer can ship a small API change in week one without asking Priya.",
+  "form_description": "Internal integration guide for Northstar engineers joining the Oakridge inventory-api work, covering VPN, schema, local snapshot, extract path, and ownership.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "February 12, 2020",
+      "Aman Kumar",
+      "Priya asked for this after the third VPN Slack that week."
+    ],
+    [
+      "0.8",
+      "February 18, 2020",
+      "Aman Kumar",
+      "Walt reviewed replica hostnames. Elena corrected FortiClient 6.4 split-tunnel note."
+    ],
+    [
+      "1.0",
+      "February 21, 2020",
+      "Aman Kumar",
+      "Approved. Added OAK-4412-17 as the week-one ticket."
+    ],
+    [
+      "1.2",
+      "February 21, 2020",
+      "Aman Kumar",
+      "Who-owns-what table expanded. Snapshot sha256 step after the Feb 7 truncate."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Oakridge inventory-api: path for a new engineer"
+    },
+    {
+      "type": "p",
+      "text": "This is the document I wanted in week one and did not have. New hires (and I was one of them last year) keep pinging Priya Nair for the VPN profile name, for which host the inventory API lives on, and for why a join on plant 03 returns zero rows. Priya is the EM. She should not be the wiki. After you follow this, you should be able to pull the sanitized Dayton snapshot, run inventory-api locally, change a mapper, and open a PR that Kavya Menon can review without you asking Priya where sqlplus lives."
+    },
+    {
+      "type": "p",
+      "text": "Oakridge Industrial is four discrete plants. Dayton OH is 01, Fort Wayne IN is 02, Greenville SC is 03, Longview TX is 04. The ERP is ForgeNet 7.4 on an IBM i. We do not develop against the IBM i. We develop against an Oracle 12.2 replica (forgenet-ro-01.oak.internal) that Walt Hendricks loads from a nightly extract, and against a sanitized Dayton snapshot you can keep on a laptop. The production API box is inv-api-01.oak.internal, RHEL 7, port 8084. Ticket family is OAK-4412. Requirements are OAK-REQ-2019-014. Design is OAK-TDD-2020-002."
+    },
+    {
+      "type": "p",
+      "text": "If you are a VP who landed here by accident: the service is a read-only inventory position API for plant ops. This document is onboarding. The decision that matters for you is still the one in the requirements doc. Skip to Who owns what if you just need a name."
+    },
+    {
+      "type": "h2",
+      "text": "Who owns what"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Thing",
+        "Owner",
+        "Backup",
+        "How to reach"
+      ],
+      "rows": [
+        [
+          "Scope, plant politics, whether v1 grows a field",
+          "Priya Nair",
+          "Tom Rourke for ops asks",
+          "Priya on Slack 09:00-17:30 ET. Do not Slack her at 21:00 about a VPN cert."
+        ],
+        [
+          "inventory-api code, mappers, Redis",
+          "Kavya Menon",
+          "Aman Kumar",
+          "#oakridge-inv. Kavya is backend. I am the other committer today."
+        ],
+        [
+          "Replica, grants, extract_inv.sh, INV_READ",
+          "Walt Hendricks",
+          "Elena Vasquez for OS-level access on batch-01",
+          "Walt answers email. He does not live in Slack. If replica lag is over 180s, page #oakridge-inv-oncall, do not email."
+        ],
+        [
+          "LDAP groups INV-API-01 through 04 and ALL",
+          "Elena Vasquez (plant IT)",
+          "Tom Rourke can request a person be added, Elena executes",
+          "Ticket in Oakridge IT, category LDAP. Not a Northstar ticket."
+        ],
+        [
+          "F5 pool, RHEL box inv-api-01, FortiClient profile push",
+          "Diego Alvarez",
+          "Elena for the plant VLAN tablets",
+          "Diego is SRE. He will not reset your VPN. That is below."
+        ],
+        [
+          "Acceptance pack, snapshot fixtures",
+          "Sneha Iyer",
+          "Kavya",
+          "Sneha owns the JAR grep for POST mappings. Take her seriously."
+        ],
+        [
+          "Dayton floor truth, mis-pick counts, aisle 7 display",
+          "Tom Rourke",
+          "his lead on first shift, Dana Whitlock",
+          "Tom will call you. Answer."
+        ],
+        [
+          "Fort Wayne freeze calendar",
+          "Elena Vasquez plus Fort Wayne materials (Ken Ibarra)",
+          "Walt for the flag in PLANT_CAL",
+          "Freeze weeks are on the plant calendar. Do not load-test Fort Wayne during one."
+        ],
+        [
+          "This document",
+          "Aman Kumar",
+          "Kavya Menon",
+          "If a hostname here is wrong, fix the doc in the same PR as the code. Do not leave it in Slack."
+        ]
+      ],
+      "caption": "Names as of February 21, 2020. If someone has left, the backup is the person you page, not Priya by default."
+    },
+    {
+      "type": "callout",
+      "label": "Decision",
+      "text": "New engineers develop against the sanitized Dayton snapshot and the replica views, never against oak-i5-01 (the IBM i) and never against ForgeNet production accounts. Walt will revoke your laptop's SSH if he sees sqlplus from a developer VPN session on forgenet-p.oak.internal. That is not a joke. He did it to a contractor in November.",
+      "kind": "decision"
+    },
+    {
+      "type": "h2",
+      "text": "Network path. VPN first, or nothing resolves"
+    },
+    {
+      "type": "p",
+      "text": "From a Northstar laptop you need FortiClient. The profile name is Oakridge-Plant-SSL. Not Oakridge-Corp, not Oakridge-SSL, not the older Oakridge-Plant-SSL-2018 profile that still sits in some images and points at a dead concentrator. If you are on Oakridge-Corp you will reach email and the wiki and you will not reach inv-api-01.oak.internal or files.oak.internal. I lost 2.5 hours on this in July. The 2018 profile still auths. It just puts you on the wrong VRF."
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Install FortiClient 6.2.3 (not 6.4, the 6.4 build Elena tested dropped split tunnel and sent laptop DNS to the plant, which breaks GitHub). Ask Diego for the installer if your image does not have it.",
+        "Import the profile XML from the Northstar share: /shared/oakridge/vpn/Oakridge-Plant-SSL.forticlientconfig. Profile name after import must read Oakridge-Plant-SSL. If it reads Oakridge-Plant-SSL-1 you imported twice. Delete the duplicate.",
+        "Username is your Oakridge LDAP uid, usually first initial + last name, not your Northstar email. Mine is akumar. Kavya is kmenon. Priya is pnair. If you use the email form the auth looks like it works and then DNS for *.oak.internal returns nothing.",
+        "Connect. ping inv-api-01.oak.internal. You want 10.24.8.41. ping files.oak.internal. You want 10.24.8.19. ping forgenet-ro-01.oak.internal. You want 10.24.9.7. If you get 10.18.x.x you are on Oakridge-Corp. Disconnect, switch profile.",
+        "SSH is key-based to inv-api-01 and batch-01 as your LDAP uid, once Elena has put your pubkey in. Until then you can still hit HTTP on 8084 and SFTP on files.oak.internal with the svc-inv-api password Walt hands you in 1Password, vault Oakridge-INV."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Plant-floor tablets do not use VPN. They sit on VLAN 40 (Dayton), 41 (Fort Wayne), 42 (Greenville), 43 (Longview) and route to 10.24.8.41:8084 directly. If you are debugging a tablet, you need to be on site or on the plant jump (jump-plant-01.oak.internal) which is a different FortiClient profile, Oakridge-Plant-Jump, that Elena will not give you in week one. Do not ask Priya for it. Ask Elena after you have shipped something."
+    },
+    {
+      "type": "callout",
+      "label": "Warn",
+      "text": "Do not disable the FortiClient 'block connections to untrusted servers' checkbox to make a weekend cert glitch go away. The plant concentrator rotates certs. If Oakridge-Plant-SSL fails on a Monday, it is usually the 2018 profile or a laptop clock 8 minutes off, not a reason to turn verification off. Check date -u first.",
+      "kind": "warn"
+    },
+    {
+      "type": "h2",
+      "text": "Where the bits live"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Host",
+        "Role",
+        "What you do there"
+      ],
+      "rows": [
+        [
+          "oak-i5-01.oak.internal",
+          "IBM i, ForgeNet 7.4 production",
+          "Nothing. No login. If you think you need one, you are wrong. Talk to Walt."
+        ],
+        [
+          "forgenet-ro-01.oak.internal",
+          "Oracle 12.2 replica, 12.1.0.2 actually on the banner, Walt has not renamed it",
+          "SELECT on VW_INV_BIN_V1, VW_INV_ALLOC_V1, VW_PLANT_CAL_V1, VW_INV_MAST_V1 as INV_API_RO. sqlplus from inv-api-01, not from your laptop, unless Walt has granted you INV_READ_DEV."
+        ],
+        [
+          "inv-api-01.oak.internal:8084",
+          "RHEL 7.7, Java 8, Spring Boot inventory-api",
+          "Production (and staging is the same box on 8085, which is a bad idea Diego knows about). systemd unit inventory-api.service. Logs in /var/log/inventory-api/."
+        ],
+        [
+          "batch-01.oak.internal",
+          "RHEL 7.7, nightly extract",
+          "extract_inv.sh at 01:10 ET. You do not run this in week one. You read the SOP (OAK-SOP-2020-011) if you are on call."
+        ],
+        [
+          "files.oak.internal",
+          "SFTP drop",
+          "sftp://files.oak.internal/inv/in for nightly CSVs. /inv/dev for sanitized snapshots. Your local snapshot comes from here."
+        ],
+        [
+          "rpt-01.oak.internal",
+          "Crystal",
+          "The old report. You do not deploy here. You may look at INV_OH_BIN_DTL.rpt if you need to explain a qty mismatch to Tom."
+        ],
+        [
+          "id.oak.internal:389",
+          "LDAP",
+          "Bind as svc-inv-api. Groups INV-API-01..04 and INV-API-ALL. Do not use ldaps in v1; Elena has not put the cert on inv-api-01 yet. Ticket OAK-IT-5521, not ours."
+        ],
+        [
+          "redis-inv-01.oak.internal:6379",
+          "Redis 5.0, 20s cache for inventory pages",
+          "No AUTH on the plant network. That is Diego's call, not a free-for-all. Do not expose 6379 through the F5."
+        ]
+      ],
+      "caption": "Hostnames as of February 21, 2020. If DNS disagrees, trust DNS and fix this table."
+    },
+    {
+      "type": "h2",
+      "text": "ForgeNet schema map (the four objects you actually touch)"
+    },
+    {
+      "type": "p",
+      "text": "The IBM i files have older names. Walt's replica views are what the API selects from. I am documenting both so you can read a Crystal formula and not get lost. Do not join IBM i names in Oracle. They are not there."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Replica view / table",
+        "IBM i file (do not query)",
+        "Grain",
+        "Columns we use"
+      ],
+      "rows": [
+        [
+          "VW_INV_MAST_V1 (from INV_MAST)",
+          "IIM / ITEMMAST, depending on who you ask in Longview",
+          "One row per ITEM_NO",
+          "ITEM_NO, UOM, SERIAL_FLAG, ITEM_STAT, DESC_SHORT. SERIAL_FLAG='Y' means omit in v1 and 409 on the sku path."
+        ],
+        [
+          "VW_INV_BIN_V1 (from INV_BIN)",
+          "IBIN",
+          "Plant + item + bin",
+          "PLANT CHAR(2), ITEM_NO, BIN_CODE, QTY_OH_NET (OH minus hold), LAST_CNT_TS, FRZ_FLAG. 4.12M rows at Dayton on the Nov snapshot, 4.19M now."
+        ],
+        [
+          "VW_INV_ALLOC_V1 (from INV_ALLOC)",
+          "IALLOC",
+          "Plant + item + bin, pre-summed",
+          "QTY_OPEN_SUM for ALLOC_STAT in OPEN and PICK. The base table has one row per allocation id. The view already sums. Do not sum again or you will double."
+        ],
+        [
+          "VW_PLANT_CAL_V1 (from PLANT_CAL)",
+          "IPCALE",
+          "Plant + calendar date",
+          "OPEN_INV, FREEZE_INV. Fort Wayne physical weeks set FREEZE_INV='Y'. Sundays at Greenville set OPEN_INV='N'."
+        ]
+      ],
+      "caption": "Walt's views as granted to INV_API_RO on January 24, 2020. Base tables INV_MAST, INV_BIN, INV_ALLOC, PLANT_CAL also exist on the replica. Prefer the views."
+    },
+    {
+      "type": "p",
+      "text": "The plant-code footgun. I am putting this in its own paragraph so you will see it when you grep the doc later. PLANT is CHAR(2). Values are '01','02','03','04'. If you bind a Java Integer 3, Oracle will coerce and you will match no rows, or worse, you will match a bad implicit conversion depending on NLS. If you TRIM(PLANT) in a join to a CSV that stored 3, Greenville disappears. That happened to the labor extract in March 2019 for 11 days. Tableau showed Fort Wayne and Dayton and Longview and a hole. The hole was plant 03 stored as integer 3 on the left and CHAR '03' on the right. Write tests that pass plant as the string \"03\" and that fail if anyone uses Integer.parseInt. Kavya's mapper uses a PlantCode value type. Use it. Do not invent a new enum that uses int."
+    },
+    {
+      "type": "code",
+      "text": "-- This returns rows:\nSELECT COUNT(*) FROM VW_INV_BIN_V1 WHERE PLANT = '03';\n\n-- This returns 0. It looks like a valid query. It is the footgun.\nSELECT COUNT(*) FROM VW_INV_BIN_V1 WHERE PLANT = 3;\n\n-- This also returns 0 if your session did something clever with padding:\nSELECT COUNT(*) FROM VW_INV_BIN_V1 WHERE TRIM(PLANT) = '3';\n\n-- Java. Right:\nPreparedStatement ps = conn.prepareStatement(\n    \"SELECT ... FROM VW_INV_BIN_V1 WHERE PLANT = ?\");\nps.setString(1, plantCode.getValue()); // \"01\"\n\n-- Java. Wrong. Do not. I reviewed a PR that did this on January 29.\nps.setInt(1, Integer.parseInt(plantCode.getValue()));\n",
+      "caption": "Plant CHAR(2) vs integer. Paste this into your notes. Sneha's pack includes the integer bind as an expected-empty case that should never ship as a 'fix'."
+    },
+    {
+      "type": "h2",
+      "text": "Get a local run working (Dayton snapshot, ~1.8GB)"
+    },
+    {
+      "type": "p",
+      "text": "You do not get a full four-plant replica on a laptop. You get a sanitized Dayton snapshot. Walt builds it from the Friday extract, strips employee names out of a couple of unused columns, replaces vendor bin labels that had a person's last name (Longview habit, leaked into a Dayton vendor-consign bin), and dumps Oracle datapump. File is about 1.84GB compressed, 6.7GB on disk. It fits on a 16GB laptop if you shut Chrome."
+    },
+    {
+      "type": "h3",
+      "text": "Fetch the snapshot"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "VPN on Oakridge-Plant-SSL. sftp akumar@files.oak.internal (your uid). cd inv/dev. get dayton_inv_sanitized_20200214.dmp.gz and the matching dayton_inv_sanitized_20200214.sha256. Newer Fridays will have newer dates. Use the newest unless Sneha tells you a fixture pack is pinned to 20200214.",
+        "sha256sum -c the checksum file. If it does not match, do not import. The February 7 file was truncated at 1.12GB after an SFTP drop. Walt rebuilt it. Truncated imports will give you a silent missing INV_ALLOC and your allocated qty will be zero for every SKU. You will then 'fix' a mapper that is not broken.",
+        "You need Oracle XE 18c or a local 12.2 docker image. The team image is on the share: /shared/oakridge/docker/orcl-12-invdev.tar. Load it. Do not use Postgres and a translation layer. The CHAR(2) footgun will not reproduce.",
+        "Create user INV_DEV identified by a password you do not reuse. Grant it whatever Walt's script grant_inv_dev.sql grants. The script is in the inventory-api repo under db/grant_inv_dev.sql. Run it as sys in the container.",
+        "impdp INV_DEV/yourpwd directory=INV_DUMP dumpfile=dayton_inv_sanitized_20200214.dmp schemas=INV_DEV remap if needed. This takes 11-14 minutes on my ThinkPad. If it finishes in 90 seconds the file was truncated.",
+        "Sanity: SELECT COUNT(*) FROM VW_INV_BIN_V1 WHERE PLANT='01'; You want about 4.12 million, plus or minus Friday growth. SELECT COUNT(*) FROM VW_INV_BIN_V1 WHERE PLANT='03'; You want 0. This snapshot is Dayton only. Greenville rows are not in it. If you see Greenville, you imported the wrong dump (there was a four-plant unsanitized dump on files.oak.internal/inv/in once; do not use it)."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "The snapshot has SERIAL_FLAG='N' for every Dayton row. Longview serial behavior will not reproduce locally unless you flip a handful of SKUs by hand. Sneha's fixtures do that in test/resources/sql/longview_serial_stub.sql against an H2 that she hates but that runs in CI. For serial 409 behavior, run that stub. Do not ask Walt for a Longview dump in week one. It has 8.2M serial rows and it is not sanitized for laptop use."
+    },
+    {
+      "type": "h3",
+      "text": "Run inventory-api on the laptop"
+    },
+    {
+      "type": "code",
+      "text": "# repo\ngit clone ssh://git.northstar.internal/oakridge/inventory-api.git\ncd inventory-api\ngit checkout main   # as of Feb 21, Java 8, Spring Boot 1.5.22, yes that old, matches erp-ship-api\n\n# config. Copy, then edit URLs. Do not commit application-local.yml.\ncp src/main/resources/application-local.yml.example src/main/resources/application-local.yml\n\n# application-local.yml needs:\n#   spring.datasource.url=jdbc:oracle:thin:@localhost:1521/XEPDB1\n#   spring.datasource.username=INV_DEV\n#   ldap.url=ldap://id.oak.internal:389   # needs VPN\n#   ldap.base=DC=oak,DC=internal\n#   redis.host=localhost\n#   redis.port=6379\n#   oak.inventory.cache-ttl-seconds=20\n#   oak.inventory.page-default=200\n#   oak.inventory.page-max=500\n\n# Redis local\ndocker run -d --name inv-redis -p 6379:6379 redis:5.0.9\n\n# Build and run. Skip tests the first time only if Oracle is up and Redis is up.\nmvn -q -DskipTests package\njava -jar target/inventory-api-0.8.2.jar --spring.profiles.active=local\n\n# Without VPN, LDAP bind will fail and every request 503s. For offline mapper work:\n#   oak.ldap.enabled=false\n#   oak.ldap.dev-user=akumar\n#   oak.ldap.dev-plants=01,02,03,04\n# Priya will not let that flag into anything that is not profile=local. CI greps for it.\n\ncurl -sS -H \"X-Dev-User: akumar\" \\\n  \"http://localhost:8084/v1/plants/01/inventory/sku/188-0441\" | head\n",
+      "caption": "Local run. Port 8084 matches production on purpose so copy-paste curl from runbooks works. If 8084 is busy, you have a leftover java process, not a reason to change the port in yml."
+    },
+    {
+      "type": "p",
+      "text": "First useful change in week one: there is always a SKU whose UOM is lowercase in INV_MAST because a Fort Wayne clerk typed 'ea' in 2014 and nobody has fixed the master. The API contract says uppercase. The mapper already has toUpperCase. If you want a real ticket, grab OAK-4412-17 (exceptions endpoint omits bins with LAST_CNT_TS null from the stale-count list; Tom wants them included as NEVER_COUNTED). That is a query predicate, a test fixture, and a one-line exceptions DTO. You can ship it without asking Priya. Ask Kavya for a review. Put the plant CHAR(2) test in the same PR if it is missing on the branch you cut."
+    },
+    {
+      "type": "h2",
+      "text": "How the nightly extract lands"
+    },
+    {
+      "type": "p",
+      "text": "You will not own extract_inv.sh in week one, but you will debug 'the API looks like yesterday' and you need to know the path. Window is 01:10-02:15 ET on batch-01.oak.internal. Script: /opt/oak/inv/extract_inv.sh, sqlplus INV_READ, spool CSV, trailer row with count, sftp to files.oak.internal:/inv/in. Loader on inv-api-01 is /opt/oak/inv/load_inv.py, which is Walt's, not ours, and it sqlldr's into the replica. Full commands are in OAK-SOP-2020-011. The only facts you need on a weekday morning:"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "File name pattern INV_YYYYMMDD_HHMMSS.csv plus INV_YYYYMMDD_HHMMSS.trl. The trailer is a single line COUNT=<n>. If the loader does not see the trailer, it refuses the file. That is the truncated-file guard after October 27.",
+        "A missing file at 02:15 pages #oakridge-inv-oncall. If you are shadowing on-call, that page is yours to acknowledge even if you then call Walt.",
+        "Fort Wayne freeze: extract still runs, plant 02 section of the CSV is a snapshot flagged FROZEN=Y in the trailer. The API must surface PLANT_FROZEN. Do not 'fix' freeze by re-running extract during the day.",
+        "Replica lag after load is usually 2.1-4.8s. After a Dayton cycle count it is 12-40s. If you query at 01:45 you can see a torn read. Do not performance-test at 01:45."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Rejected shortcut, so you do not propose it in week one: someone will suggest the API should read the CSV from files.oak.internal and skip Oracle. Kavya tried a spike on January 6. The CSV has no ALLOC rows in the same grain as the view (alloc is a second file, INVALLOC_*.csv, late some nights by 19 minutes). You would re-implement Walt's loader in Java, without his truncated-file guard, and you would still need PLANT_CAL. We did not do it. The replica is the source for the API. The CSV is the source for the replica. Keep the layers."
+    },
+    {
+      "type": "h2",
+      "text": "LDAP, groups, and the 403 you will hit on day two"
+    },
+    {
+      "type": "p",
+      "text": "Your Northstar laptop auth is not Oakridge LDAP. After Elena creates your Oakridge uid, she still has to put you in a group. New engineers go in INV-API-ALL for the first 30 days so you can hit all four plants in staging (8085). After 30 days Priya wants you in the plants you actually work on. Tom does not want a dozen Northstar accounts in INV-API-ALL forever. Put a reminder on the calendar. I am in INV-API-ALL because I still get Longview 409 tickets."
+    },
+    {
+      "type": "p",
+      "text": "Local profile with oak.ldap.enabled=false bypasses this. Production does not. If you test against :8084 with a curl and no Authorization header you get 401. We do not use JWT. We use HTTP Basic against LDAP, same as erp-ship-api. That is ugly and it is what the tablets already know how to do. Do not add Spring OAuth in week one. Diego will not put a token gateway on the plant VLAN this quarter."
+    },
+    {
+      "type": "code",
+      "text": "# From a VPN session, production read of a Dayton SKU. Use your uid.\ncurl -sS -u akumar https://inv-api-01.oak.internal:8084/v1/plants/01/inventory/sku/188-0441\n\n# This 403s if you are only in INV-API-01 (Dayton) and you forgot:\ncurl -sS -u akumar https://inv-api-01.oak.internal:8084/v1/plants/02/inventory/sku/188-0441\n# body: {\"error\":\"PLANT_FORBIDDEN\",\"plantId\":\"02\"}\n\n# Health. Does not need LDAP. Used by the F5.\ncurl -sS http://inv-api-01.oak.internal:8084/health\n# {\"status\":\"UP\",\"replicaLagMs\":2410,\"redis\":\"UP\"}\n",
+      "caption": "curl shapes that work today. HTTPS on 8084 is the F5. HTTP on 8084 from the box itself is Tomcat. Tablets hit the F5."
+    },
+    {
+      "type": "h2",
+      "text": "Footguns besides plant 03"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Qty is a decimal string on the wire. Java BigDecimal in the mapper. If you return a double, SKU 551-0007 (0.125 lb powder) becomes 0.12500000000000003 and Tom's tablet shows a different ETag every request. Sneha fails the PR.",
+        "ETags are strong and include the replica SCN. A 20s Redis cache can serve a stale ETag. That is accepted. If you skip Redis in local yml, your laptop will scan. Keep Redis on.",
+        "INV_ALLOC view is pre-summed. Joining it and summing QTY_OPEN_SUM again doubles allocated. The January 17 staging incident was this. Tom saw allocated 160 on a bin with 80 pieces. Kavya's postmortem is in the ticket. Test with a SKU that has two OPEN alloc rows.",
+        "application-local.yml.example has cache-ttl-seconds=20. Setting it to 0 locally is fine. Setting it to 0 in application-prod.yml will take the replica to 100% CPU the first morning the aisle 7 display is on 15s refresh. Do not.",
+        "The sanitized snapshot lags production. Do not demo to Tom from your laptop and promise the qty matches INV310. Demo from inv-api-01 against the replica, or say the word snapshot out loud.",
+        "Longview bins are mixed-case. Dayton bins are uppercase. Do not uppercase BIN_CODE. Do uppercase ITEM_NO. Yes, that is inconsistent. It matches INV310."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "What good looks like in week one"
+    },
+    {
+      "type": "p",
+      "text": "You have VPN Oakridge-Plant-SSL. You have the Dayton snapshot imported and a count of ~4.12M on plant 01. inventory-api starts on 8084 with profile local. You have a PR that is not a README typo: either OAK-4412-17 (NEVER_COUNTED) or a missing CHAR(2) test or the UOM trim on a SKU Sneha flagged. Kavya has commented. You have not asked Priya where the host is. You have not SSHed to oak-i5-01. You have read OAK-REQ-2019-014 section on hold qty so you do not 'fix' Crystal parity."
+    },
+    {
+      "type": "quote",
+      "text": "If someone can ship a small API change in week one without asking me which box is inv-api-01, this document did its job. If they still Slack me the FortiClient profile name, the document is in the wrong folder.",
+      "attrib": "Priya Nair, February 12, 2020, when she asked me to write this"
+    },
+    {
+      "type": "h2",
+      "text": "Open questions for the onboarding path"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Question",
+        "Owner",
+        "Due",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "Can we put a second staging box on inv-api-02 instead of :8085 on the prod host?",
+          "Diego Alvarez",
+          "March 31, 2020",
+          "Diego agrees it is bad. There is no spare RHEL license this quarter. Document the 8085 footgun until then."
+        ],
+        [
+          "Should week-one engineers get Oakridge-Plant-Jump, or is that still Elena's 30-day gate?",
+          "Elena Vasquez",
+          "March 6, 2020",
+          "I think 30 days is right. Kavya wants jump access earlier for tablet header bugs."
+        ],
+        [
+          "Snapshot refresh: weekly Friday, or pin to Sneha's fixture date for a month at a time?",
+          "Sneha Iyer",
+          "March 13, 2020",
+          "Weekly is more honest. Pinning means CI and laptops match. We should pick one."
+        ],
+        [
+          "INV_READ_DEV on the replica for laptops, or snapshot-only forever?",
+          "Walt Hendricks",
+          "March 20, 2020",
+          "Walt currently says snapshot-only. A read-only laptop account on forgenet-ro-01 would skip the 1.8GB download. He does not want 12 developer sessions on apply."
+        ],
+        [
+          "FortiClient 6.4: retry when Elena has a split-tunnel build, or stay on 6.2.3 until FY21?",
+          "Diego Alvarez",
+          "When Elena says so",
+          "Do not upgrade on your own and then file a DNS ticket."
+        ]
+      ],
+      "caption": "Open questions as of February 21, 2020."
+    },
+    {
+      "type": "p",
+      "text": "Related reading, in this order: OAK-REQ-2019-014 (what we are allowed to build), OAK-TDD-2020-002 (how the three GET paths work, cursors, ETags, Redis), OAK-SOP-2020-011 (what to do at 02:15 when the file is missing), OAK-MTG-2019-044 (why WIP is out and why Thanksgiving was a no). If those disagree with this guide, ping me and Kavya in the same thread. Do not ping Priya first."
+    }
+  ]
+}

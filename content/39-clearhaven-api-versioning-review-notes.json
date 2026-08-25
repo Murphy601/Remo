@@ -1,0 +1,522 @@
+{
+  "slug": "39-clearhaven-api-versioning-review-notes",
+  "doc_id": "CLH-MTG-2023-041",
+  "title": "Architecture review notes: recon API versioning",
+  "subtitle": "URI versioning held. Header versioning rejected. /v1 sunset still open (90 vs 180 days).",
+  "doc_type": "Meeting notes",
+  "kicker": "Clearhaven Markets / Reconciliation platform",
+  "org": "Northstar Engineering",
+  "classification": "INTERNAL",
+  "version": "1.2",
+  "status": "Approved",
+  "date": "July 25, 2023",
+  "author": "Aman Kumar",
+  "role": "Software Engineer II",
+  "team": "Clearhaven recon (ops-api, match-engine)",
+  "audience": "Priya Nair, Kavya Menon, Marcus Bell, Brett Okonkwo, Helen Cho, Sneha Iyer",
+  "owners": "Aman Kumar (notes and follow-through), Kavya Menon (ops-api), Brett Okonkwo (Clearhaven architecture review)",
+  "related": "CLH-TDD-2023-017 (draft), CLH-INC-2023-061, CLH-TDD-2022-021, CLH-TCK-6401, CLH-TCK-6418, CLH-TCK-6430",
+  "summary": "Architecture review on July 25, 2023 of the recon API versioning design. In the room: Marcus Bell, Priya Nair, Kavya Menon, Aman Kumar, and Brett Okonkwo from Clearhaven architecture. Brett wanted Accept-Version / header versioning. We held URI versioning (/v1, /v2) as the public contract. Decision is recorded below. Open fight: sunset of /v1. Brett wants 90 days after /v2 GA. We want 180 because Helen still has two vendor terminals on /v1 and one of them is a change-control nightmare. Next steps and owners are at the end. This is not a transcript.",
+  "form_description": "Meeting notes from the July 25 architecture review of Clearhaven ops-api versioning. Written so the URI vs header decision and the /v1 sunset argument are on paper before the August design freezes.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "July 25, 2023",
+      "Aman Kumar",
+      "Same-day notes from the 90-minute review."
+    ],
+    [
+      "1.0",
+      "July 26, 2023",
+      "Aman Kumar",
+      "Checked quotes with Kavya. Added the gateway table Brett asked for."
+    ],
+    [
+      "1.2",
+      "July 26, 2023",
+      "Priya Nair",
+      "Approved to share with Brett. Sunset still marked open, not decided."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "1. Meeting"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Field",
+        "Value"
+      ],
+      "rows": [
+        [
+          "When",
+          "July 25, 2023, 13:00-14:32 ET"
+        ],
+        [
+          "Where",
+          "Clearhaven 14th floor, room 14-C, plus Zoom for Kavya"
+        ],
+        [
+          "Type",
+          "Architecture review of CLH-TDD-2023-017 draft v0.6"
+        ],
+        [
+          "Facilitator",
+          "Priya Nair"
+        ],
+        [
+          "Notes",
+          "Aman Kumar"
+        ],
+        [
+          "Present",
+          "Marcus Bell (TAM), Priya Nair (EM), Kavya Menon (backend, Zoom), Aman Kumar, Brett Okonkwo (Clearhaven architecture)"
+        ],
+        [
+          "Absent / sent notes",
+          "Helen Cho (ops, written constraints in Slack 10:14), Sneha Iyer (QA, sent the /v1 client list), Diego Alvarez (SRE, no objection on gateway)"
+        ],
+        [
+          "Related incident",
+          "CLH-INC-2023-061, March 28, unversioned /match/status break"
+        ]
+      ],
+      "caption": "Attendance and setup. Helen could not sit the full hour. Her Slack is treated as in-room for the sunset constraint."
+    },
+    {
+      "type": "p",
+      "text": "We were here because the March incident shipped a field rename on an unversioned path and two vendor terminals died for 47 minutes. The draft TDD (Kavya + me) says URI versions, additive /v2, freeze /v1, sunset later. Brett reviewed the draft last Thursday and came in wanting headers. Priya asked for a recorded decision, not a hallway agreement. That is why these notes are long."
+    },
+    {
+      "type": "h1",
+      "text": "2. Decision (skim this)"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Recorded decision",
+      "text": "Public recon HTTP API versions in the URI: /v1/..., /v2/.... Gateways, runbooks, and vendor packets will show the URI. We will not version the public contract with Accept-Version, X-API-Version, or Accept: application/vnd.clh.v2+json as the primary switch. Internal service-to-service calls may keep an X-Clh-Internal-Version header for canaries. That header is not documented for Helen's vendors. /v1 stays until a sunset date we did not close today. Brett dissented on the mechanism, agreed to live with URI if the sunset is short. Sunset length is still open."
+    },
+    {
+      "type": "p",
+      "text": "Vote around the table, not a formal CAB: Priya, Kavya, Aman, Marcus for URI. Brett against, prefers headers. Marcus is not an architect and said so. He still voted because he is the one who will email the vendors. Helen's Slack: 'put it in the URL, my people can see a URL.' That sat on the screen for the second half and did more work than my slides."
+    },
+    {
+      "type": "quote",
+      "text": "If the version is in a header, the first ticket I get is still 'which URL do I hit.' Put it in the URL.",
+      "attrib": "Helen Cho, Slack 10:14 ET, read aloud by Priya"
+    },
+    {
+      "type": "h1",
+      "text": "3. What Brett asked for, and why we said no"
+    },
+    {
+      "type": "p",
+      "text": "Brett's model, as he walked it: one URL surface /match/status, /breaks/{id}, /ops/ack. Version selected by Accept-Version: 2 or a vendor media type. Gateway routes to ops-api-v2. Old clients omit the header and get v1. He has this on two other Clearhaven apps (client master, and the older cash-wire API). He said URI versioning 'forks the surface' and doubles the WAF rules. He also said a 180-day dual run is how you never sunset."
+    },
+    {
+      "type": "p",
+      "text": "Kavya's counter, which I am writing down because it is the actual argument: the March incident was a silent field change on a single URL. A header-versioned single URL would have failed the same way if the client omitted the header and we defaulted to latest, which is what the cash-wire API does today. Brett confirmed cash-wire defaults omitted headers to latest. That is the behavior Helen's vendors will hit. We will not default omitted to latest. Brett then said 'default omitted to v1.' At that point we have two versions on one URL with a default, which is the thing our runbooks cannot see, and which Sneha cannot pin in a browser test without a plugin. URI makes the pin visible. The WAF rule cost is two extra paths. Diego already said in Slack he would rather duplicate three WAF lines than debug a header at 02:00."
+    },
+    {
+      "type": "h2",
+      "text": "3.1 Rejected: header versioning as the public contract"
+    },
+    {
+      "type": "p",
+      "text": "Rejected in the room, with Brett's dissent noted. Reasons we will copy into the August TDD: vendor terminals are browser-ish and show a URL, not a header; defaulting omitted headers is a footgun we already have on cash-wire; CLH-INC-2023-061 was a single-URL rename; Sneha's suite and Helen's runbooks grep paths; the public packet Marcus sends is a list of URLs. Internal canary header is allowed so Kavya can ship ops-api-v2 behind the gateway without a DNS change on day one."
+    },
+    {
+      "type": "p",
+      "text": "Brett asked whether we would at least accept a vendor media type as an optional alias. Priya said no for v2 GA. Optional aliases become the real contract for whoever finds them first. One contract. URI."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Option",
+        "How a vendor selects v2",
+        "Default if they forget",
+        "Who liked it",
+        "End state"
+      ],
+      "rows": [
+        [
+          "URI (held)",
+          "GET /v2/match/status",
+          "They keep hitting /v1 until they change the URL",
+          "Priya, Kavya, Aman, Marcus, Helen (Slack)",
+          "Accepted"
+        ],
+        [
+          "Accept-Version header",
+          "header = 2, URL unversioned",
+          "cash-wire style latest, or a hidden v1 default",
+          "Brett",
+          "Rejected as public contract"
+        ],
+        [
+          "Vendor media type",
+          "Accept: application/vnd.clh.v2+json",
+          "easy to omit, hard to grep",
+          "Brett, as fallback",
+          "Rejected as public alias"
+        ],
+        [
+          "Query param ?v=2",
+          "Helen can see it",
+          "caching and CDNs eat query params; we have a CDN in front of ops-api",
+          "nobody in the room, I listed it",
+          "Rejected in 30 seconds"
+        ]
+      ],
+      "caption": "Options actually said out loud. Query param died fast because of the CloudFront cache key. Diego's note."
+    },
+    {
+      "type": "h1",
+      "text": "4. What we are actually versioning"
+    },
+    {
+      "type": "p",
+      "text": "Scope of the TDD, restated so Brett and we were talking about the same API. Public: ops-api, the thing Helen's terminals and two vendors call. Paths today (unversioned, this is the problem): /match/status, /match/slice/{id}, /breaks/{id}, /breaks/{id}/ack, /ops/health. Not in scope: Kafka, the ingest DSN, the lister, internal gRPC if we ever grow one. Brett asked if /ops/health is versioned. Decision: /ops/health stays unversioned on purpose so a load balancer can probe without knowing a version. /readyz too if we add it."
+    },
+    {
+      "type": "p",
+      "text": "v2 changes we intend to ship, from draft v0.6, which Brett had read: break status enum split (open vs pending_review vs closed, instead of open/closed/other), match window in milliseconds not minutes, cursor pagination on /breaks instead of offset, and the field rename that caused March (qty_open, not qty). v1 keeps qty and minutes. We will not make v1 speak milliseconds under the old field. That mix is how you get two units in one column and a new incident."
+    },
+    {
+      "type": "h2",
+      "text": "4.1 Gateway shape"
+    },
+    {
+      "type": "p",
+      "text": "Brett wanted a picture. Kavya drew one on the whiteboard. I copied it into a table because I cannot photograph the board into this JSON. External DNS api.recon.clh.internal (vendor-facing, VPN) to CloudFront to nlb-ops-api to two k8s Ingress paths: /v1 and /v2. /v1 Ingress to deploy/ops-api-v1. /v2 to deploy/ops-api-v2. Same cluster, different Deployments, so a v2 crash does not take v1. That is a cost: two deploys, two pdbs. Priya accepted it. Shared Postgres. Shared Kafka. No shared in-memory cache, because that is how v2 would poison v1."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Layer",
+        "v1",
+        "v2",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "DNS / CDN",
+          "api.recon.clh.internal/v1/*",
+          "api.recon.clh.internal/v2/*",
+          "Same cert. Cache key includes path. No header in cache key."
+        ],
+        [
+          "Ingress",
+          "ops-api-v1",
+          "ops-api-v2",
+          "Two objects. WAF duplicates the three extra rules."
+        ],
+        [
+          "Deployment",
+          "ops-api:1.x freeze after GA of v2",
+          "ops-api:2.x",
+          "Freeze means bugfixes only, no enum work."
+        ],
+        [
+          "Auth",
+          "same OIDC, same scopes",
+          "same",
+          "Brett asked for v2-only scopes. We said not for GA. Revisit if a vendor should not see v1."
+        ],
+        [
+          "DB",
+          "recon, same tables",
+          "same tables",
+          "v2 reads qty_open, v1 reads qty via a view or a column alias. Kavya prefers a column alias. Open, small."
+        ],
+        [
+          "Logs",
+          "path=/v1/...",
+          "path=/v2/...",
+          "This is why URI wins at 02:00."
+        ]
+      ],
+      "caption": "Gateway and deploy shape we agreed to write into the August TDD."
+    },
+    {
+      "type": "p",
+      "text": "I asked about a single Deployment with path routing inside the app. Kavya said she would rather two binaries than a flag that says 'if path contains v2.' We had that flag style on Riverview and it leaked. Two Deployments. More YAML. Less clever."
+    },
+    {
+      "type": "h1",
+      "text": "5. Sunset of /v1: 90 days vs 180. Not decided."
+    },
+    {
+      "type": "p",
+      "text": "This was the second half of the meeting and the part that will come back. Brett: 90 days after /v2 GA, then 403 with a body that names the v2 URL. He has a firm-wide note that APIs should not dual-run more than a quarter. He cited client-master, which did 90 days in 2022 and 'the vendors lived.' Marcus: the two recon vendors are not the client-master vendors. One of them is a change-control shop that books windows 8 weeks out. 90 days from a GA date they did not pick is how they miss and then call him. Helen (Slack, then a 4-minute phone-in at 14:08): she needs 180 if GA is in the fall, because her Q4 freeze starts November 15 and she will not change a terminal in it. If GA slips to January, she can talk. We do not have a GA date. Draft TDD says 'target October 2023' which is already tight."
+    },
+    {
+      "type": "p",
+      "text": "Our position, which Priya stated: 180 days from GA, with a 30-day header Warning and a 14-day 410 preview on a shadow hostname, then 403. We will publish the GA date in Marcus's vendor packet, not in a Slack. We will not start the 180 clock on the review date. Brett said 180 is how /v1 becomes permanent. Priya said then we put a calendar reminder in her box at day 120 and we actually cut. The March incident is why we are versioning. It is not why we have to be cruel to a vendor with an 8-week CAB."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Proposal",
+        "Clock start",
+        "Length",
+        "End behavior",
+        "Who"
+      ],
+      "rows": [
+        [
+          "Brett",
+          "/v2 GA date",
+          "90 days",
+          "403 + v2 URL in body",
+          "Brett, firm-wide note"
+        ],
+        [
+          "Northstar / Helen",
+          "/v2 GA date",
+          "180 days",
+          "Warning at 150, 410 preview 14 days, then 403",
+          "Priya, Kavya, Aman, Helen"
+        ],
+        [
+          "Marcus compromise (verbal)",
+          "vendor packet ack date, per vendor",
+          "120 days",
+          "same 403",
+          "Marcus, not accepted, he offered it at 14:18"
+        ],
+        [
+          "Infinite /v1",
+          "never",
+          "forever",
+          "we pay two deploys forever",
+          "nobody said this, Brett accused us of it"
+        ]
+      ],
+      "caption": "Sunset options. Meeting ended without a pick. Priya will not let the August TDD ship with a blank, so we need a decision by August 1."
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Open, owner Priya",
+      "text": "Sunset length is open. Target to close: August 1, 2023, in the TDD review. Until then the draft will say 180 days and will footnote Brett's 90. Do not tell vendors either number yet. Marcus was explicit: no number in email until Priya and Brett stop fighting."
+    },
+    {
+      "type": "p",
+      "text": "I asked what 'GA' means for the clock. Agreement: GA is the Monday we tell Helen she can point a terminal at /v2 in prod, not the day we merge the Ingress. Shadow /v2 does not start the clock. Brett wanted shadow to start a 90-day clock so we could not 'hide' in shadow. Priya said no. Shadow is for Sneha. Clocks start when a vendor is allowed on prod /v2."
+    },
+    {
+      "type": "h1",
+      "text": "6. Other decisions that did get made"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Error envelope in v2: {code, message, retryable, trace_id}. v1 keeps the ad-hoc {error, detail} so we do not break the terminals while we sunset. Sneha will snapshot v1 error bodies this week (CLH-TCK-6418).",
+        "Pagination: v2 cursor opaque, signed, 15-minute TTL. No leaking offset into the vendor. v1 offset stays. Brett wanted a firm-wide cursor library. We will not wait for it. Kavya will copy the 40-line signer from ingest.",
+        "Rate limit: same 220 rps per client we already have. v1 and v2 share the bucket so a vendor on both during migration cannot double-fire. Diego will wire the gateway key to client_id, not to path.",
+        "Auth scopes: unchanged at GA. Revisit v2-only scopes if a third vendor shows up who should never see /v1.",
+        "Docs: Marcus's packet lists URLs, example curl, and a one-page changelog. No OpenAPI for v1 (we do not have one). v2 gets OpenAPI, Kavya owns, due with GA.",
+        "Health: /ops/health unversioned. /v1/ops/health will exist as a redirect or a duplicate 200 so old probes do not fail. Brett wanted only unversioned. We will keep the duplicate for 180 days because two probes in Helen's Nagios still hit /v1/ops/health from a copy-paste last year."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "6.1 The March incident, as it sat in the room"
+    },
+    {
+      "type": "p",
+      "text": "CLH-INC-2023-061, March 28: we renamed qty to qty_open on the unversioned path, shipped with the matcher change, vendor A parsed JSON strictly, 47 minutes of ack failures, Helen's desk in the war room. Root cause in that writeup was 'no version, no freeze.' Brett said a header would have saved us if vendors had sent it. Kavya said vendors were not sending any version header because we had never asked. Inventing a header after the incident and hoping vendors set it is the same migration problem as a URI, except the URI is greppable. We are doing the URI. We still owe a freeze of /v1 behavior from today, not from GA. That freeze starts now. No more field renames on the unversioned paths. They will become /v1 as a mechanical prefix, same JSON."
+    },
+    {
+      "type": "p",
+      "text": "Priya asked me to put that freeze in a ticket before end of day. CLH-TCK-6401, opened at 15:10. Kavya is assignee. I will Ingress-prefix /v1 onto the current app without changing JSON. /v2 is a different binary later."
+    },
+    {
+      "type": "h1",
+      "text": "7. Open questions"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Question",
+        "Owner",
+        "Due",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "90 vs 180 vs Marcus's 120 for /v1 sunset",
+          "Priya Nair, with Brett",
+          "August 1, 2023",
+          "Blocks the TDD freeze. Do not email vendors."
+        ],
+        [
+          "Column alias vs view for qty vs qty_open",
+          "Kavya Menon",
+          "August 4, 2023",
+          "She prefers alias. Chris should look (types)."
+        ],
+        [
+          "Does vendor B's CAB really need 8 weeks, or is that folklore?",
+          "Marcus Bell",
+          "July 28, 2023",
+          "If it is 3 weeks, 90 days is easier to swallow."
+        ],
+        [
+          "CloudFront cache key already includes path? Confirm.",
+          "Diego Alvarez",
+          "July 27, 2023",
+          "We assumed yes. If no, query-param option is still dead, but we must add path."
+        ],
+        [
+          "Nagios probes: how many still hit unversioned /ops/health vs /v1?",
+          "Helen Cho",
+          "August 2, 2023",
+          "Affects how long we keep the duplicate."
+        ],
+        [
+          "OpenAPI for v2: in-repo or a separate docs host?",
+          "Kavya Menon",
+          "August 11, 2023",
+          "Brett wants it on the firm portal. That portal has a 3-week publish queue."
+        ],
+        [
+          "Should /readyz exist at GA?",
+          "Aman Kumar",
+          "August 8, 2023",
+          "I think yes, unversioned, next to /ops/health. Will write it into the TDD unless someone yells."
+        ]
+      ],
+      "caption": "Open questions with owners. The sunset row is the only one that can reopen the mechanism fight. Keep them separate."
+    },
+    {
+      "type": "h1",
+      "text": "8. Next steps"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Aman: publish these notes to Brett and the room by July 26 EOD. Done if you are reading v1.2.",
+        "Kavya: mechanical /v1 prefix on current JSON, CLH-TCK-6401, staging by July 31, prod window August 3 with Diego. No behavior change.",
+        "Aman: fold the URI decision, the rejected header section, and the gateway table into CLH-TDD-2023-017. Target draft v0.9 August 1, freeze August 3.",
+        "Priya: close 90 vs 180 with Brett by August 1. If no close, TDD ships with 180 and a dissent footnote, and she will say that to Marcus.",
+        "Sneha: snapshot v1 error bodies and happy-path JSON, CLH-TCK-6418, before the August 3 window so we can prove the prefix did not change bytes.",
+        "Marcus: no vendor email until Priya's sunset number exists. Draft the packet in a doc, do not send it.",
+        "Diego: confirm CloudFront cache key, duplicate WAF rules as a PR, do not apply until /v1 prefix is in prod.",
+        "Helen: list the Nagios URLs and the two vendor contacts she actually calls when /match/status dies. We had one stale contact in March.",
+        "Brett: send Priya the firm-wide 90-day note as a PDF so we are arguing the same artifact. He said he would, 14:29."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "August 3 TDD freeze is the same day as the /v1 prefix window. That is tight. If the prefix slips, the TDD can still freeze on mechanism. If the TDD slips, the prefix still ships. Do not couple them in the change ticket. I will open two changes."
+    },
+    {
+      "type": "h1",
+      "text": "9. Things said that should not get lost"
+    },
+    {
+      "type": "p",
+      "text": "Brett, on cost: two Deployments is 'a luxury for a mid-market recon API.' Priya: two Deployments is cheaper than a second March. We did not pull CPU numbers in the room. I will put a 2-pod vs 4-pod dollar number in the TDD appendix. Rough: ops-api pods are 2 vCPU / 2 Gi, 3 replicas today. Doubling during 180 days is about $3.1k. Not zero. Not a reason to share a process."
+    },
+    {
+      "type": "p",
+      "text": "Marcus, on vendors: vendor A (the strict JSON one from March) can move in 3 weeks if we give them a packet. Vendor B is the 8-week CAB. There is no vendor C on recon HTTP today. If someone adds a third, they start on /v2 only. We will write that in the packet."
+    },
+    {
+      "type": "p",
+      "text": "Kavya, on headers for internal canaries: she wants X-Clh-Internal-Version on service-to-service during the week we bake /v2, then she wants it gone. I will put a 30-day expiry on that header in the TDD so it does not become a second public contract. Brett smiled at that, which I am choosing to take as agreement."
+    },
+    {
+      "type": "p",
+      "text": "I asked whether we should version Kafka topics the same way. Room said no, different problem, different doc. Do not sneak topic names into this TDD. Chris is not even in this review."
+    },
+    {
+      "type": "quote",
+      "text": "Ninety days is a policy. One hundred eighty days is a desk that still has a vendor on a frozen terminal. We can pick the desk and still have a policy next year.",
+      "attrib": "Priya Nair, 14:22"
+    },
+    {
+      "type": "h1",
+      "text": "10. Engineer follow-through (so this is not only a decision log)"
+    },
+    {
+      "type": "p",
+      "text": "The prefix change is mechanical and still easy to get wrong. Current Ingress maps /match to ops-api. New Ingress maps /v1/match to the same service, and we keep /match as a 308 to /v1/match for 14 days so any leftover Nagios check fails loudly in access logs instead of silently working. Brett did not like the 308. He wanted a hard 404 on unversioned day one. We kept 14 days of 308 because March taught us there are URLs we do not know about. After 14 days, unversioned 404 with a body that names /v1. That 14-day 308 is not the sunset. It is a cleanup of the thing we already broke."
+    },
+    {
+      "type": "code",
+      "text": "# staging check Sneha will run after the prefix window\ncurl -sS -o /tmp/v1.json -w '%{http_code}' \\\n  https://api.recon.staging.clh.internal/v1/match/status?slice=0\ncurl -sS -o /tmp/old.json -w '%{http_code}' \\\n  https://api.recon.staging.clh.internal/match/status?slice=0\n# expect 200 on /v1, 308 on unversioned, JSON bytes of v1 equal to last night's snapshot\ndiff -u /tmp/snapshot-2023-07-24.json /tmp/v1.json\n",
+      "caption": "Byte-compare for the prefix window. If diff is non-empty, abort the prod change. Do not 'fix forward' a JSON change in the same window as the prefix."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "When",
+        "What",
+        "Owner",
+        "Done when"
+      ],
+      "rows": [
+        [
+          "Jul 26",
+          "Notes out, TCK-6401 in flight",
+          "Aman, Kavya",
+          "Brett has the PDF"
+        ],
+        [
+          "Jul 27",
+          "CloudFront cache key confirmed",
+          "Diego",
+          "Slack in #clh-api"
+        ],
+        [
+          "Jul 28",
+          "Vendor B CAB folklore checked",
+          "Marcus",
+          "Number of weeks in writing"
+        ],
+        [
+          "Jul 31",
+          "Prefix on staging, snapshot diff green",
+          "Kavya, Sneha",
+          "Sneha thumbs-up"
+        ],
+        [
+          "Aug 1",
+          "Sunset number closed",
+          "Priya, Brett",
+          "TDD v0.9 has one number"
+        ],
+        [
+          "Aug 3",
+          "Prefix prod + TDD freeze",
+          "Kavya, Aman, Diego",
+          "Two change tickets, both green"
+        ],
+        [
+          "Aug 11",
+          "OpenAPI host question closed",
+          "Kavya",
+          "In-repo or portal"
+        ]
+      ],
+      "caption": "Follow-through calendar. If August 1 misses, TDD still freezes August 3 with 180 and a dissent line."
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Do not",
+      "text": "Do not tell vendor A to 'try a header' as a compatibility shim. Do not add Accept-Version in v1 as a quiet extra. Do not default anything to latest. Do not start the sunset clock on July 25. Do not ship a qty_open change on the unversioned path this week, even if match-engine wants it. Freeze means freeze."
+    },
+    {
+      "type": "p",
+      "text": "These notes are the review record. The design that ships is CLH-TDD-2023-017. If that TDD disagrees with this document on URI vs header, this document wins until Priya says otherwise in writing. If it disagrees on 90 vs 180, neither document wins yet. That is the open question. I will not pretend we closed it because the meeting ran out of time."
+    }
+  ]
+}

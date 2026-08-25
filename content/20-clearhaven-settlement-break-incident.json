@@ -1,0 +1,524 @@
+{
+  "slug": "20-clearhaven-settlement-break-incident",
+  "doc_id": "CLH-INC-2023-204",
+  "title": "Incident report: November 14 settlement break after duplicate RailClear file",
+  "subtitle": "18,441 unmatched trades, $2.4M apparent short, idempotency keyed on filename not content hash",
+  "doc_type": "Incident report",
+  "kicker": "Clearhaven Markets / Incident",
+  "org": "Northstar Engineering",
+  "classification": "INTERNAL",
+  "version": "1.2",
+  "status": "Approved",
+  "date": "November 16, 2023",
+  "author": "Aman Kumar",
+  "role": "Software Engineer II",
+  "team": "Clearhaven Platform, Northstar Engineering",
+  "audience": "Priya Nair, Rahul Deshmukh, Helen Cho, Marcus Bell, Diego Alvarez, Kavya Menon, Chris Patel, Leah Kim, Jordan Hale (cash desk)",
+  "owners": "Aman Kumar (writeup + idempotency fix), Kavya Menon (match-engine replay), Helen Cho (ops window), Marcus Bell (cash desk comms)",
+  "related": "CLH-TDD-2022-021 (content hash required in design, not on dump fallback), CLH-TDD-2023-008, CLH-5519, CLH-TDD-2023-014 (idempotent consumers), CLH-INC-2023-061",
+  "summary": "On November 14, 2023 the 7pm ET settlement window closed with 18,441 unmatched trades. Cash desk saw an apparent $2.4 million short. Real short was $0. A RailClear street-side file arrived twice: same bytes, new filename with an incremented suffix. Our dump-fallback producer still keyed idempotency on filename, so ingest-api accepted a second batch and match-engine treated the rows as a second street-side. Alerting looked green because a file arrived on time. This report is the timeline, contributing factors, and the content-hash fix we are shipping.",
+  "form_description": "Incident report for the November 14, 2023 Clearhaven settlement break. Written for engineering, ops, TAM, and control owner so the filename idempotency gap is closed in code and in the window checklist.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "November 14, 2023",
+      "Aman Kumar",
+      "Working notes during incident, 21:40 ET."
+    ],
+    [
+      "0.8",
+      "November 15, 2023",
+      "Aman Kumar",
+      "Timeline from logs, Helen + Jordan numbers, lag charts."
+    ],
+    [
+      "1.0",
+      "November 16, 2023",
+      "Aman Kumar",
+      "Priya review. Fix plan: content hash on fallback producer."
+    ],
+    [
+      "1.2",
+      "November 16, 2023",
+      "Aman Kumar",
+      "Approved. Leah added control language. Open questions assigned."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "1. Summary for people who will not read the rest"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "What happened and what we will change",
+      "text": "RailClear duplicated a street-side file and incremented the filename. Dump-fallback producer (ns/clh-sftp-pump) used filename as the idempotency key. ingest-api UNIQUE (source_system, content_sha256) was bypassed because the pump sent a fresh hash of filename+mtime instead of file bytes. 18,441 extra street rows. 18,441 unmatched after the 7pm ET window. Apparent cash short $2.41M. Actual $0. We close the window by matching the duplicate batch as FEED_DUPLICATE, and we ship content-hash idempotency on the pump and a guardrail in ingest-api that rejects a hash that is not SHA-256 of the payload. File-on-time alerts stay, and we add duplicate-hash and unmatched-count alerts that would have fired."
+    },
+    {
+      "type": "p",
+      "text": "Sev-2 for Clearhaven ops (window wrong, cash desk scrambled). Sev-3 for Northstar availability (no outage). Leah Kim treats the bad breaks as a control event: we opened 18,441 breaks that were not real, then closed them with reason_code FEED_DUPLICATE. That is the correct journal. We do not delete them."
+    },
+    {
+      "type": "p",
+      "text": "Priya, Rahul, Marcus: this section, section 2 impact, section 6 what we change. Helen, Kavya, on-call: sections 3-5 and 7. I own the pump fix. Kavya owns the replay that marked the duplicate street side. Diego owns the alert gaps."
+    },
+    {
+      "type": "h1",
+      "text": "2. Impact"
+    },
+    {
+      "type": "table",
+      "caption": "Impact numbers, November 14, 2023",
+      "headers": [
+        "Item",
+        "Value",
+        "Source"
+      ],
+      "rows": [
+        [
+          "Unmatched after 19:00 ET window signal",
+          "18441",
+          "recon_break.break settle_date=2023-11-14 status OPEN at 19:07"
+        ],
+        [
+          "Apparent short (cash desk blotter)",
+          "$2,411,608.42",
+          "Jordan Hale, screenshot 19:11 ET"
+        ],
+        [
+          "Actual short after research",
+          "$0.00",
+          "Helen Cho, 20:36 ET"
+        ],
+        [
+          "Duplicate file bytes",
+          "identical, 41.2 MB gzip",
+          "sftp-clh-01 listing + sha256sum"
+        ],
+        [
+          "Filenames",
+          "RC_EOD_20231114_1903.dat.gz then RC_EOD_20231114_1903_2.dat.gz",
+          "SFTP mtime 19:03:12 and 19:03:18"
+        ],
+        [
+          "Extra street rows ingested",
+          "18441",
+          "recon_ingest.batch row_count on second batch_id"
+        ],
+        [
+          "Window signal time",
+          "19:00:08 ET (green)",
+          "match-engine last-partition consumed, wrong"
+        ],
+        [
+          "Cash desk time spent",
+          "84 minutes",
+          "Helen ops log"
+        ],
+        [
+          "Breaks auto-closable after hash proof",
+          "18441",
+          "all FEED_DUPLICATE"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "No customer trade was missing. No money moved. The blotter summed street-side notional that we double-counted against a single firm-side. Jordan Hale (cash desk) did the right thing: he treated a $2.4M short as real until recon said otherwise. That cost 84 minutes of his and Helen's evening. Marcus was on the phone with them from 19:18. We owe them a window that does not go green when the second file is a copy."
+    },
+    {
+      "type": "p",
+      "text": "Reporting: Chris Patel's 19:30 extract included the duplicate unmatched. He reran at 21:12 after we tagged the batch. Tableau showed 18,441 extra for about 102 minutes. Chris will footnote the 14th in his monthly pack. Leah wants the break_audit rows preserved for the November sample. They will look noisy. That is honest."
+    },
+    {
+      "type": "h1",
+      "text": "3. Timeline (ET, November 14, 2023)"
+    },
+    {
+      "type": "p",
+      "text": "All times Eastern. Sources: SFTP logs on sftp-clh-01, pump logs on deploy/sftp-pump, ingest-api, match-engine, #clh-ops, PagerDuty (no page fired for this)."
+    },
+    {
+      "type": "table",
+      "caption": "Incident timeline",
+      "headers": [
+        "Time",
+        "What",
+        "Evidence"
+      ],
+      "rows": [
+        [
+          "16:02-18:51",
+          "Normal RailClear 15-min files, CDC firm-side",
+          "inbound.v2 lag < 12k"
+        ],
+        [
+          "18:54:03",
+          "RailClear catch-up file RC_EOD_20231114_1854.dat.gz (legit, 12.1k rows)",
+          "batch_id 7c91…"
+        ],
+        [
+          "19:03:12",
+          "First EOD file RC_EOD_20231114_1903.dat.gz, 18,441 rows, sha256 9f3c…ab12",
+          "SFTP, pump, ingest batch 221a…"
+        ],
+        [
+          "19:03:18",
+          "Second EOD file RC_EOD_20231114_1903_2.dat.gz, same 18,441 rows, same sha256 of bytes, different name",
+          "SFTP listing"
+        ],
+        [
+          "19:03:19",
+          "Pump treated _2 as new, computed 'hash' = sha256(filename|mtime) per a 2023-05 shortcut",
+          "sftp-pump code IdempotencyKey.fileKey()"
+        ],
+        [
+          "19:03:21",
+          "ingest-api accepted batch 8ee0… because content_sha256 column was the filename hash, not bytes",
+          "recon_ingest.batch"
+        ],
+        [
+          "19:03:22-19:06:40",
+          "match-engine consumed second street side, open_key already MATCHED, emitted unmatched LATE / extra street",
+          "unmatched topic 18,441"
+        ],
+        [
+          "19:00:08",
+          "Window signal already emitted (last expected partition for 19:00 cadence). Second file was 'late' vs signal, still inside Helen's 7pm meaning",
+          "metric window_closed_timestamp"
+        ],
+        [
+          "19:07:12",
+          "Helen: 18,441 OPEN breaks, notional_abs sum $2.41M",
+          "ops UI"
+        ],
+        [
+          "19:11",
+          "Jordan: blotter short $2,411,608.42. Marcus on bridge.",
+          "#clh-ops"
+        ],
+        [
+          "19:14",
+          "On-call (Rina Solis, extra, primary) checked lag: 1.2k, green. File-arrived alert green.",
+          "PD none, Grafana green"
+        ],
+        [
+          "19:18-19:41",
+          "Helen vs warehouse leftover extract: warehouse also doubled (it still keys filename). Not a recon-only bug.",
+          "Helen"
+        ],
+        [
+          "19:44",
+          "Aman on call (secondary). Compared sha256sum of both SFTP files: identical.",
+          "jump host"
+        ],
+        [
+          "19:52",
+          "Confirmed pump fileKey() in the May 12 commit on sftp-pump.",
+          "git blame"
+        ],
+        [
+          "20:06",
+          "Kavya froze auto-close. Stopped dual-ack noise.",
+          "break-svc flag"
+        ],
+        [
+          "20:21",
+          "SQL: two batch_ids, same row_count, different stored content_sha256, identical payload sample",
+          "psql"
+        ],
+        [
+          "20:36",
+          "Helen: actual short $0. Duplicate feed. Cash desk stands down.",
+          "Helen"
+        ],
+        [
+          "20:48-21:22",
+          "Script tagged 18,441 breaks FEED_DUPLICATE, closed with actor=aman.kumar + checker=helen.cho (notional each row < $50k except 14 rows; those 14 dual-acked with Leah's checker)",
+          "break_audit"
+        ],
+        [
+          "21:40",
+          "Incident notes in this doc started. Pump feature-flagged to hash bytes on staging.",
+          "ns/clh-sftp-pump"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "The window signal at 19:00:08 is the part that made alerting look green. match-engine emits window_closed when it has consumed the last partition for the settlement date's expected cadence, not when SFTP is quiet. The 19:03 files were a RailClear 'EOD' drop that is usually the 19:00 slot a few minutes late. Helen treats 19:03 as on time. Our signal already fired at 19:00:08 from the 18:54 file plus CDC completing. Then 18,441 extra rows arrived and opened breaks without a new window event. File-arrived monitor: both files landed, both processed, success=true. Nobody pages on unmatched_count. That gap is in section 6."
+    },
+    {
+      "type": "h1",
+      "text": "4. Technical path (what the code did)"
+    },
+    {
+      "type": "p",
+      "text": "CLH-TDD-2022-021 said idempotency key for a batch is content_sha256 plus source_system, and filename is stored never used as uniqueness. ingest-api still has UNIQUE (source_system, content_sha256). The pump is supposed to send SHA-256 of file bytes. In May, after RailClear slipped the connector date (open question Q1 on CLH-TDD-2023-008), we shipped ns/clh-sftp-pump as the per-row producer. On May 12, in a review comment about SFTP files that were still uploading when we hashed them, someone (me, I accepted the PR) hashed filename+mtime to 'avoid hashing a partial gzip.' The partial-gzip problem was real on May 9 (we produced a truncated Avro row). The fix should have been: wait for stable size (we already sleep 2.5s and re-stat). Instead fileKey() became the batch hash. Per-row content_sha256 in Avro was still a hash of the row. Matching at row level is idempotent on row hash. The duplicate file had the same rows, same row hashes. match-engine idempotency on content_sha256 should have no-op'd the second street side."
+    },
+    {
+      "type": "p",
+      "text": "Why it did not: match-engine idempotency is on (source_system, content_sha256) for consume-once into open_key. Second consume of the same row hash on an already MATCHED key takes the LATE_MATCH / extra-street path. That path is for a genuine late other side, not for a second copy of a side that already matched. We emit unmatched and break-svc opens MISSING_FIRM (street exists twice, firm once, the extra street looks like firm missing relative to that copy). Classification was wrong and consistent. 18,441 MISSING_FIRM. Firm was there. Street was there twice."
+    },
+    {
+      "type": "p",
+      "text": "ingest-api never saw the same content_sha256 twice because the pump lied about the hash. The UNIQUE constraint did its job on a fake key. That is the kind of bug that looks like the design held. The design held on the database. The producer violated the contract the design assumed."
+    },
+    {
+      "type": "code",
+      "caption": "The May 12 shortcut (do not keep)",
+      "text": "// ns/clh-sftp-pump, IdempotencyKey.java, shipped 2023-05-12, reverted in the fix\nstatic String fileKey(Path p, FileTime mtime) {\n  // WRONG: used as recon_ingest.batch.content_sha256\n  return sha256(p.getFileName().toString() + \"|\" + mtime.toMillis());\n}\n\n// contract from CLH-TDD-2022-021\nstatic String fileKey(Path p) throws IOException {\n  return sha256(Files.readAllBytes(p)); // wait for stable size first\n}"
+    },
+    {
+      "type": "p",
+      "text": "Warehouse leftover job Helen compared at 19:18 also keyed on filename. It doubled too. That is why her cross-check did not save us. Two systems, same shortcut, same CSD behavior. RailClear has done increment-and-resend before. Helen's 2021-2022 spreadsheet had 6 cases. March 3, 2022 was $1.18M apparent long. We wrote 'filename is not the key' in the 2022 design and then put filename back in a pump in May. I am stating that as a contributing factor, not a metaphor."
+    },
+    {
+      "type": "h1",
+      "text": "5. Contributing factors"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "RailClear sent identical bytes under a new name with _2 suffix, 6 seconds after the first EOD file. Vendor behavior, not a Northstar outage.",
+        "sftp-pump fileKey() used filename+mtime (May 12, 2023, PR clh-sftp-pump#84, reviewer Aman Kumar). Direct cause of ingest accepting the second batch.",
+        "match-engine extra-street path opens MISSING_FIRM instead of DUP_STREET when the key is already MATCHED. We had DUP_STREET for intra-file dups, not for second-batch dups after match. Gap in CLH-TDD-2022-021 section 9.",
+        "Window signal is cadence-based, not SFTP-quiet-based. Fired 19:00:08, before the 19:03 EOD pair.",
+        "Alerts: file arrived on time (both files success), consumer lag 1.2k (fine), no alert on unmatched_count delta vs 20-day median, no alert on two batches with equal row_count within 60s from RAILCLEAR.",
+        "Connector still not live. Pump was the 'temporary' path from April. Temporary lasted until November. Rahul tracked RailClear dates; they slipped three times. Temporary code got a shortcut.",
+        "On-call Rina Solis did what the lag runbook says: lag green, do not restart. The runbook does not tell you to sha256sum two SFTP files. That is an ops instinct Helen has and the runbook lacks.",
+        "Warehouse still filename-keyed, so the independent check was not independent."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Rejected during the incident: rewind inbound.v2 to before 19:03 and replay. That would have re-processed legitimate 18:54 rows and CDC, and we did not have a clean offset. Priya said no at 20:02. Correct. We forward-fixed the breaks. Also rejected: DELETE FROM recon_break.break where opened_at between 19:03 and 19:07. Leah would have lost the journal. We closed them. The rows stay."
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Control",
+      "text": "Do not delete break or break_audit rows for this incident. Closed + FEED_DUPLICATE is the record. Maker/checker on the 14 rows above $50k notional used Helen as maker and Leah's checker (Priya Nair standing in after hours? No: checker was Nina Okonkwo, who is in clh-break-checker). Aman was not checker on those 14."
+    },
+    {
+      "type": "h1",
+      "text": "6. What we will actually change"
+    },
+    {
+      "type": "h2",
+      "text": "6.1 Content-hash idempotency (the fix)"
+    },
+    {
+      "type": "p",
+      "text": "Pump: wait for stable size (stat twice, 2.5s, sizes equal), then SHA-256 the bytes, send that as batch content_sha256. If ingest-api returns 200 with an existing batch_id, produce nothing. Filename is metadata only. Ticket CLH-6411, target prod November 21, 2023 (Tuesday train), staging November 17."
+    },
+    {
+      "type": "p",
+      "text": "ingest-api: compute SHA-256 of the received payload (the gzip we got) and compare to the claimed content_sha256. Mismatch: 422, do not produce. This would have rejected the May 12 lie. We did not verify the hash because the poller era trusted itself. The pump is a different binary. Verify."
+    },
+    {
+      "type": "code",
+      "caption": "ingest-api guard (sketch, CLH-6411)",
+      "text": "// BatchService.accept\nString claimed = req.contentSha256();\nString actual = sha256(req.bytes());\nif (!constantTimeEquals(claimed, actual)) {\n  throw new Api422(\"content_sha256 does not match payload bytes\");\n}\n// existing UNIQUE (source_system, content_sha256) then 200 replay\nOptional<Batch> existing = repo.findBySourceAndHash(req.sourceSystem(), actual);\nif (existing.isPresent()) {\n  return existing.get(); // no Kafka produce\n}"
+    },
+    {
+      "type": "h2",
+      "text": "6.2 match-engine: second street copy after MATCHED is DUP_STREET"
+    },
+    {
+      "type": "p",
+      "text": "If open_key is gone because MATCHED, and a new street row arrives with the same match_key and same row content_sha256 as the original street_payload hash, emit DUP_STREET, do not MISSING_FIRM. If the hash differs, keep LATE path. Kavya, CLH-6412, same train if tests pass, else the train after. This would have opened 18,441 DUP_STREET with notional still visible but a code Helen filters. She asked for that filter in 2022. We only had intra-file DUP_STREET."
+    },
+    {
+      "type": "h2",
+      "text": "6.3 Alerting (why it looked green)"
+    },
+    {
+      "type": "p",
+      "text": "File-on-time stayed green because both files arrived. We add:"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "unmatched_opened_delta: if OPEN break count for settle_date exceeds 20-day median by 4x and notional_abs sum > $500k within 15 minutes of window_closed, page clh-recon-lag and #clh-ops. November 14 was 18,441 vs median ~2,180. Would have fired at 19:07.",
+        "railclear_twin_batch: two RAILCLEAR batches within 120s with equal row_count, page even if hashes differ. Cheap. Would have fired at 19:03:21.",
+        "hash_mismatch_422: count of ingest-api 422 on hash, page at 1 during 16:00-21:00. After the guard exists.",
+        "Keep file-on-time. It is still useful for a missing drop. It is not sufficient."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Diego owns the Grafana alerts. Target November 20 so they exist before the Tuesday train, even if the pump fix slips a day. A noisy unmatched_delta on a genuine ugly day is better than a quiet $2.4M ghost. Helen can silence for a known RailClear catch-up if she is in the huddle. Default is page."
+    },
+    {
+      "type": "h2",
+      "text": "6.4 Window signal"
+    },
+    {
+      "type": "p",
+      "text": "Do not move window_closed to 'SFTP quiet for 10 minutes.' That makes the window late every day. Add a second signal: window_stable, emitted when unmatched_opened in the last 8 minutes is under 50 and SFTP has had no new RAILCLEAR file for 5 minutes, or 19:25 ET, whichever first. Helen's UI shows both. Cash desk 7pm meaning maps to window_stable, not window_closed. Rahul will rewrite the SLA sentence. This is CLH-6413, not on the Tuesday train. Do not rush a second clock into prod on the same night as the hash fix."
+    },
+    {
+      "type": "table",
+      "caption": "Fix tickets",
+      "headers": [
+        "Ticket",
+        "Change",
+        "Owner",
+        "When"
+      ],
+      "rows": [
+        [
+          "CLH-6411",
+          "Pump byte hash + ingest-api verifies hash",
+          "Aman Kumar",
+          "staging 11/17, prod 11/21"
+        ],
+        [
+          "CLH-6412",
+          "DUP_STREET after MATCHED same row hash",
+          "Kavya Menon",
+          "11/21 or 11/28"
+        ],
+        [
+          "CLH-6413",
+          "window_stable signal",
+          "Aman + Rahul",
+          "design 11/27, ship December"
+        ],
+        [
+          "CLH-6414",
+          "Grafana unmatched_delta + twin_batch",
+          "Diego Alvarez",
+          "11/20"
+        ],
+        [
+          "CLH-6415",
+          "Lag runbook: sha256sum two newest SFTP files if unmatched spike",
+          "Aman Kumar",
+          "11/17, patch CLH-RB-2023-012"
+        ],
+        [
+          "CLH-6416",
+          "Warehouse filename key: Chris deprecates leftover job or hashes too",
+          "Chris Patel",
+          "11/30"
+        ]
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "7. Engineer execute: tonight's closeout and the fix soak"
+    },
+    {
+      "type": "p",
+      "text": "If you are closing a similar night before 6411 is in prod:"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "On sftp-clh-01, ls -l the last three RAILCLEAR files. sha256sum them. If two hashes match, you have this incident again.",
+        "SELECT batch_id, filename, content_sha256, row_count, received_at FROM recon_ingest.batch WHERE source_system='RAILCLEAR' AND settle_date=CURRENT_DATE ORDER BY received_at DESC LIMIT 10;",
+        "If two row_counts match and filenames differ, do not rewind Kafka. Identify the later batch_id.",
+        "Kavya's script tools/tag_duplicate_batch.py --batch-id <later> --reason FEED_DUPLICATE. It PATCHes via break-svc, it does not UPDATE SQL. Dual-ack rows above $50k will pause for a checker.",
+        "Tell Helen the later batch_id and that blotter short is the duplicate notional, not cash.",
+        "After 6411: curl a second POST of the same bytes with a new filename through ingest-api staging. Expect 200 original batch_id and zero new Kafka records (kcat count)."
+      ]
+    },
+    {
+      "type": "code",
+      "caption": "Prove two SFTP files are the same bytes (jump host)",
+      "text": "ssh sftp-clh-01.prod.us-east-1.northstar.internal\ncd /data/railclear/incoming\nls -l RC_EOD_* | tail -5\nsha256sum RC_EOD_20231114_1903.dat.gz RC_EOD_20231114_1903_2.dat.gz\n# identical hashes: duplicate feed, stop looking at Kafka lag"
+    },
+    {
+      "type": "code",
+      "caption": "Staging soak for CLH-6411 (must go green before prod)",
+      "text": "# 1) post file A\ncurl -sS -X POST https://ingest-api.clh.staging.northstar.internal/v1/batches \\\n  -H \"Authorization: Bearer $TOKEN\" -F filename=RC_dup_A.dat.gz -F source_system=RAILCLEAR \\\n  -F content_sha256=$(sha256sum A.dat.gz | awk '{print $1}') -F file=@A.dat.gz\n# 2) post same bytes, new name, same real hash\ncurl -sS -X POST https://ingest-api.clh.staging.northstar.internal/v1/batches \\\n  -H \"Authorization: Bearer $TOKEN\" -F filename=RC_dup_B.dat.gz -F source_system=RAILCLEAR \\\n  -F content_sha256=$(sha256sum A.dat.gz | awk '{print $1}') -F file=@A.dat.gz\n# expect same batch_id\n# 3) lie about hash\ncurl -sS -o /tmp/r -w '%{http_code}' -X POST ... -F content_sha256=deadbeef ...\n# expect 422"
+    },
+    {
+      "type": "p",
+      "text": "Do not run tag_duplicate_batch.py against a batch that is not a byte-duplicate. If sha256 of files differs, that is a real second file. You will close real breaks. Helen confirms before the script. The script requires --i-checked-sha256."
+    },
+    {
+      "type": "h1",
+      "text": "8. Comms we already sent"
+    },
+    {
+      "type": "p",
+      "text": "Marcus's mail to cash desk November 14 20:52 ET: apparent short was duplicate street-side, $0 actual, recon will show closed breaks with reason FEED_DUPLICATE, no action on settlement. Helen's #clh-ops summary 21:05. Priya's note to Leah 21:18 that the journal keeps the opens and closes. We are not sending a customer-facing note. There was no customer impact. If someone asks why Tableau spiked, Chris has the footnote."
+    },
+    {
+      "type": "p",
+      "text": "What we will not say: 'alerting failed.' Alerting did what it was asked (file on time, lag low). We asked the wrong thing. The writeup should stay that precise when Marcus briefs up."
+    },
+    {
+      "type": "h1",
+      "text": "9. Failure modes of the fix"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Hashing a partial gzip if stable-size wait is too short: we sleep 2.5s, restat. If RailClear keeps appending after 2.5s, we could hash a prefix once and then a longer file under a new name (real new bytes). UNIQUE allows the second. That is correct. If they append without renaming, mtime changes, we re-read, hash changes, we would ingest a new batch of a longer file. Pump must only process files after a suffix .ok or after mtime idle 8s. We will idle 8s in 6411, not 2.5s. May 12 used 2.5s. That was part of the partial-gzip story. Go to 8s. Helen said EOD files are fully landed when they appear; 8s is cheap.",
+        "422 on hash mismatch if a client still sends filename hash: dump fallback curl runbooks. Update the runbooks the same day as 6411. Otherwise ops will think ingest is down.",
+        "DUP_STREET hiding a real late correction with the same hash: if RailClear sends a correction with identical row hash, we would DUP it. Corrections must change orig_ref or payload. If they do not, that is a vendor bug we should not silently match.",
+        "unmatched_delta paging on a genuine 8.2M messy day: Helen silence, not a threshold of 1e9."
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "10. Open questions"
+    },
+    {
+      "type": "table",
+      "caption": "Open questions with owners",
+      "headers": [
+        "ID",
+        "Question",
+        "Owner",
+        "Due"
+      ],
+      "rows": [
+        [
+          "Q1",
+          "RailClear connector: a real date in Q1 FY24 or we accept the pump as the path and treat it as prod-critical?",
+          "Marcus Bell + Rahul Deshmukh",
+          "2023-12-01"
+        ],
+        [
+          "Q2",
+          "Should window_stable block Jordan's blotter auto-refresh until it fires?",
+          "Jordan Hale + Helen Cho",
+          "2023-11-22"
+        ],
+        [
+          "Q3",
+          "Leah: sample of 18,441 FEED_DUPLICATE closes acceptable as-is for November?",
+          "Leah Kim",
+          "2023-11-20"
+        ],
+        [
+          "Q4",
+          "Warehouse leftover job: kill by 11/30 or hash-align? Killing is better.",
+          "Chris Patel",
+          "2023-11-22"
+        ],
+        [
+          "Q5",
+          "Add sha256sum step to CLH-RB-2023-012 only, or also to on-call SOP CLH-SOP-2023-028?",
+          "Aman + Priya",
+          "2023-11-21"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Q1 is why May happened. If the pump is still 'temporary' in March 2024 we should staff it like ingest-api. I will not accept another filename shortcut in a review. Q3: Leah said verbally on November 16 that keeping the rows is what she wants; I still want Q3 in writing. Q2 might reduce 84 minutes to 10 the next time something else looks like a short. It is a cash-desk product choice, not an ingest toggle."
+    },
+    {
+      "type": "p",
+      "text": "I am sorry this got to Jordan as a $2.4M hole. The design said content hash in September 2022. The pump said filename in May 2023. The incident is that gap, plus a vendor double drop, plus alerts that watched the wrong green lights. Fix the hash, verify it at the API, page on unmatched explosions, keep the journal. That is the work."
+    }
+  ]
+}

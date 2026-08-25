@@ -1,0 +1,866 @@
+{
+  "slug": "11-riverview-patient-api-oncall-runbook",
+  "doc_id": "RVH-RB-2021-016",
+  "title": "patient-api on-call runbook",
+  "subtitle": "Triage, feed isolation, ChartLine outages, and break-glass for namespace riverview-chart",
+  "doc_type": "Runbook",
+  "kicker": "Riverview Health Network / patient-api",
+  "org": "Northstar Engineering",
+  "classification": "INTERNAL",
+  "version": "1.2",
+  "status": "Approved",
+  "date": "September 30, 2021",
+  "author": "Aman Kumar",
+  "role": "Software Engineer",
+  "team": "Riverview chart platform (Northstar)",
+  "audience": "Primary on-call for patient-api, backup engineers, and anyone covering a weekend or holiday shift on riverview-chart",
+  "owners": "Aman Kumar (runbook), Kavya Menon (feed flags and Redis), Luis Ortega (LDAP path)",
+  "related": "RVH-PRD-2021-006, RVH-SOP-2021-009, RVH-INC-2021-118, RVH-TDD-2021-004, PD:patient-api-prod, Jira RVH-2411 / RVH-2388 / RVH-2294",
+  "summary": "This is the page-one runbook for patient-api in Kubernetes namespace riverview-chart. If you are holding the pager, start here: confirm the symptom, decide whether a single facility feed should be taken offline, and do not page Dr. Anita Shah. Night and weekend ChartLine failures go to Slack #rvh-interface-oncall. The procedures below are the ones we actually run from jump-rvh-01.northstar.internal against cluster rvh-prod-eks-01. They cover 5xx bursts, stale RapidChart payloads, hospital LDAP auth failures, and a dead ChartLine interface, plus the break-glass path when Redis or the ConfigMap write is blocked.",
+  "form_description": "On-call runbook for Riverview patient-api. Written so a Northstar engineer who did not ship the last release can isolate a facility feed, talk to ChartLine on-call, and avoid dumping PHI into Slack at 3am.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.9",
+      "August 12, 2021",
+      "Aman Kumar",
+      "First draft after RVH-INC-2021-118 leftover pages"
+    ],
+    [
+      "1.0",
+      "September 3, 2021",
+      "Kavya Menon",
+      "Added feed-flag ConfigMap and redis-cli on chart-cache-01"
+    ],
+    [
+      "1.1",
+      "September 21, 2021",
+      "Luis Ortega",
+      "LDAP bind timeout and cached-ticket fallback"
+    ],
+    [
+      "1.2",
+      "September 30, 2021",
+      "Aman Kumar",
+      "Anita is not on-call; #rvh-interface-oncall is the 3am path"
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Purpose"
+    },
+    {
+      "type": "p",
+      "text": "You are on-call for patient-api. The service lives in namespace riverview-chart on cluster rvh-prod-eks-01 (us-east-1). Deployment name is patient-api. Helm release is also patient-api. If RapidChart, CensusBoard, or the med-surg whiteboard is throwing 5xx, showing yesterday's allergies, or bouncing nurses into an LDAP login loop, this is the document. Read the callout on paging before you send anything to Riverview clinical leadership."
+    },
+    {
+      "type": "callout",
+      "label": "Decision",
+      "text": "Dr. Anita Shah is the CMIO liaison. She is not on the engineering pager, not in PagerDuty service patient-api-prod, and not a 3am contact. If ChartLine or a facility interface is down, post in Slack #rvh-interface-oncall (Riverview interface desk, primary Nate Okonkwo, backup Elena Voss). If the question is clinical meaning of a field, wait until 07:00 Eastern and email Anita. Do not SMS her from the jump box.",
+      "kind": "decision"
+    },
+    {
+      "type": "p",
+      "text": "This runbook assumes you already have Teleport access to jump-rvh-01.northstar.internal and the kube context rvh-prod. If you do not, stop. Do not copy kubeconfigs into Slack. Priya Nair (EM) can grant a 4-hour break-glass kube role; that is a different procedure, listed near the end. Diego Alvarez is joining as SRE in November 2021. Until his first rotation on November 8, there is no dedicated SRE on this pager. After 20 minutes of unresolved Sev-1, page Kavya Menon, then Priya."
+    },
+    {
+      "type": "h2",
+      "text": "What this service actually does"
+    },
+    {
+      "type": "p",
+      "text": "patient-api assembles a chart payload for RapidChart (Java, Riverview-owned) and a thinner census payload for CensusBoard. It does not own the source of truth. ChartLine holds the legal chart. SiteNotes holds encounter text. hospital LDAP (ldap-west.rvh.internal:636 and ldap-east.rvh.internal:636) holds who is allowed to call us. We cache assembled charts in Redis on chart-cache-01.rvh.internal:6379 with replica chart-cache-02.rvh.internal:6379. Postgres chart-pg-01.rvh.internal database patient_api stores merge keys and feed-disable audit rows, not the chart body."
+    },
+    {
+      "type": "p",
+      "text": "Weekday 07:00-09:30 Eastern we run 8 pods. Other hours we run 6. Each pod is 500m CPU request, 1.5 CPU limit, 768Mi request, 1536Mi limit. HPA target is 62% CPU. If you see 14 pods, something else already scaled you, usually a ChartLine retry storm, and you should not scale further until you look at upstream errors. The assemble p95 SLO we committed in RVH-PRD-2021-006 is 1.8s. Error budget is 99.5% non-5xx on /v1/chart/assemble over 28 days. As of September 28 we were at 99.61%, which is 3.1 hours of remaining budget in the window. A sloppy restart of all pods will spend that."
+    },
+    {
+      "type": "h2",
+      "text": "Who is on the hook"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Role",
+        "Person",
+        "When to involve",
+        "Do not"
+      ],
+      "rows": [
+        [
+          "Primary on-call",
+          "Rotation: Aman / Kavya / Luis (PD: riverview-eng-primary)",
+          "First 20 min of any page",
+          "Hand the laptop to a contractor on the jump box"
+        ],
+        [
+          "Backend backup",
+          "Kavya Menon",
+          "Redis, feed flags, assemble timeouts > 2.4s p95",
+          "Ask her to rewrite ChartLine"
+        ],
+        [
+          "LDAP path",
+          "Luis Ortega",
+          "401/403 bursts, bind timeouts > 180ms",
+          "Reset Riverview AD passwords"
+        ],
+        [
+          "QA verify after change",
+          "Sneha Iyer (weekday 08:00-17:30 Eastern)",
+          "After a feed disable or Helm rollback",
+          "Page her at 03:00 for a red dashboard"
+        ],
+        [
+          "CMIO liaison",
+          "Dr. Anita Shah",
+          "Next business morning for clinical field questions",
+          "Page, SMS, or Slack-DM at night"
+        ],
+        [
+          "Interface desk",
+          "#rvh-interface-oncall (Nate Okonkwo / Elena Voss)",
+          "ChartLine down, facility feed poison, VPN to a hospital site",
+          "Bypass them and call ChartLine vendor TAM directly unless Nate says to"
+        ],
+        [
+          "Privacy if PHI leaked",
+          "Helen Park (RVH-SOP-2021-009)",
+          "Any MRN/DOB in logs or Slack",
+          "Paste the log line into the incident channel to 'show the problem'"
+        ],
+        [
+          "SRE (from Nov 8, 2021)",
+          "Diego Alvarez",
+          "Cluster, node, or Teleport failures once he is on rotation",
+          "Assume he is covering this week; he is not"
+        ]
+      ],
+      "caption": "On-call contacts for patient-api as of September 30, 2021"
+    },
+    {
+      "type": "h2",
+      "text": "Preconditions before you type kubectl"
+    },
+    {
+      "type": "p",
+      "text": "If you skip this section you will either talk to the wrong cluster or paste a chart body into Slack. Both have happened. RVH-2294 was a staging context left in kubeconfig; the engineer scaled staging to 0 and thought they had stopped prod 5xx. Staging is rvh-stage-eks-01, namespace still riverview-chart. Always print context."
+    },
+    {
+      "type": "steps",
+      "items": [
+        "From your laptop: tsh login --proxy=teleport.northstar.internal --auth=okta. Then tsh ssh aman.kumar@jump-rvh-01.northstar.internal (substitute your user). Do not SSH as ubuntu.",
+        "On the jump box: export KUBECONFIG=/home/shared/kube/rvh-prod.kubeconfig && kubectl config current-context. Expected: arn:aws:eks:us-east-1:554129001:cluster/rvh-prod-eks-01.",
+        "Confirm namespace: kubectl -n riverview-chart get deploy patient-api. You want READY at least 6/6 on nights, 8/8 weekday mornings. If the deploy is missing you are in the wrong cluster or the Helm release was deleted, which is a Sev-1 of a different shape.",
+        "Open Grafana folder Riverview / patient-api (grafana.northstar.internal, dashboard uid rvh-papi-17). Do not use the old uid rvh-chart-03; it still graphs the 2020 census-only service.",
+        "If you need logs, use the commands in this runbook. Do not kubectl logs | grep MRN. PHI handling is RVH-SOP-2021-009. On-call may not paste chart bodies, MRNs, DOBs, or full Authorization headers into Slack."
+      ]
+    },
+    {
+      "type": "callout",
+      "label": "Warn",
+      "text": "kubectl -n riverview-chart logs is allowed. Pasting those logs into #riverview-eng is not allowed if the line contains mrn, dob, patientName, or a cookie. Redact on the jump box with python3 /opt/rvh/redact_dump.py --stdin or do not paste. Helen Park will not accept 'it was an incident' as a reason.",
+      "kind": "warn"
+    },
+    {
+      "type": "h1",
+      "text": "When to declare, when to isolate, when to wait"
+    },
+    {
+      "type": "p",
+      "text": "Priya asked for one page a manager can read without scrolling the kubectl appendix. Here it is. patient-api has 11 facility feeds. Taking the whole API down because RVH-CLINIC-12's ChartLine connector is poison will black out RapidChart at RVH-MAIN, which is 2,140 beds and the place that pages us. Isolate the facility. Do not scale the deploy to 0. Do not delete the Helm release. Do not bounce all pods 'to clear it' unless Redis is split-brain and Kavya agrees."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Condition",
+        "Severity",
+        "First action",
+        "Caller / channel"
+      ],
+      "rows": [
+        [
+          "Assemble 5xx > 4.8% for 6 min, all facilities",
+          "Sev-1",
+          "Check ChartLine /healthz and LDAP. Do not roll Helm yet.",
+          "PD primary + #riverview-eng"
+        ],
+        [
+          "Assemble 5xx > 12% on one facility, others < 1.1%",
+          "Sev-2",
+          "Disable that facility feed via ConfigMap. Leave API up.",
+          "#riverview-eng, then #rvh-interface-oncall"
+        ],
+        [
+          "RapidChart charts older than 11.4 min median",
+          "Sev-2",
+          "Redis TTL and ChartLine lag. See stale-chart section.",
+          "PD primary"
+        ],
+        [
+          "LDAP bind fail rate > 8.6% for 4 min",
+          "Sev-1",
+          "Failover bind to ldap-east if west is sick. Do not disable auth.",
+          "Luis Ortega (page) + Jordan Hale (Riverview IAM, via #rvh-interface-oncall)"
+        ],
+        [
+          "ChartLine /healthz 5xx or TCP timeout > 3.2s p50",
+          "Sev-1",
+          "Open circuit CHARTLINE_CIRCUIT=open, serve cache + banners.",
+          "#rvh-interface-oncall immediately"
+        ],
+        [
+          "Single pod CrashLoop, others healthy",
+          "Sev-3",
+          "Delete that pod once. If it loops again, leave it and look at the log on the jump box.",
+          "Next business day unless error budget is already red"
+        ],
+        [
+          "You cannot reach the jump box",
+          "Sev-1",
+          "Priya for Teleport break-glass. Do not use personal AWS keys.",
+          "Priya Nair"
+        ]
+      ],
+      "caption": "Severity cheat sheet. Percentages are from Grafana uid rvh-papi-17, panel 12 and panel 19."
+    },
+    {
+      "type": "p",
+      "text": "Rejected alternative, recorded so nobody revives it during an incident: we used to have a Jenkins job Stop patient-api (all facilities) that scaled the deploy to 0. Rahul liked it because the status page went quiet. Denise Howell (nursing informatics) did not like it because RapidChart showed a generic 'service unavailable' on every floor. We killed the job on September 9 (RVH-2388). If you find a bookmark to jenkins.northstar.internal/job/rvh-stop-papi, it 404s on purpose. Facility feed flags replaced it."
+    },
+    {
+      "type": "h1",
+      "text": "Symptom map"
+    },
+    {
+      "type": "p",
+      "text": "Pages come from Alertmanager with names that do not match the Grafana panels. Map them before you start changing ConfigMaps. The four pages we actually get at night are below. If you get something else, treat it as 5xx until proven otherwise, and write the new mapping in the incident ticket. Do not invent a fifth 'restart everything' path."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Alert name",
+        "What the nurse sees",
+        "Likely layer",
+        "First command"
+      ],
+      "rows": [
+        [
+          "PAPIHigh5xx",
+          "RapidChart red banner, 'chart failed to load'",
+          "API, ChartLine, or PG",
+          "kubectl -n riverview-chart get pods -l app=patient-api"
+        ],
+        [
+          "PAPIStaleChart",
+          "Allergies or meds from an earlier encounter, ED tracker still showing a discharged name",
+          "Redis TTL or ChartLine lag",
+          "redis-cli -h chart-cache-01.rvh.internal INFO stats"
+        ],
+        [
+          "PAPIAuthFail",
+          "Nurse bounced to login, or 401 on assemble",
+          "LDAP west/east or our token cache",
+          "curl -sk https://patient-api.rvh.internal/healthz/deps"
+        ],
+        [
+          "PAPIChartLineDown",
+          "Banners on every chart, or 5xx if circuit still closed",
+          "chartline-iface-prod.rvh.internal:8443",
+          "curl -sk --max-time 5 https://chartline-iface-prod.rvh.internal:8443/healthz"
+        ],
+        [
+          "PAPIFeedDisabled",
+          "Informational. A human already isolated a facility.",
+          "ConfigMap patient-api-feed-flags",
+          "kubectl -n riverview-chart get cm patient-api-feed-flags -o yaml"
+        ]
+      ],
+      "caption": "PagerDuty alert names as wired on September 21, 2021"
+    },
+    {
+      "type": "p",
+      "text": "Stale charts and ED discharge lag are related but not the same bug. CensusBoard still shows discharged patients for about 11 min when ChartLine's ADT discharge message sits behind the allergy feed (we measured 11.4 min median on April 13, still 10.8-12.6 min in September on RVH-MAIN ED). That is a known P0 in RVH-MTG-2021-022 / ticket RVH-2201. If the page is PAPIStaleChart and the only complaint is ED names, do not flush Redis globally. You will stampede ChartLine. Check the discharge key TTL first."
+    },
+    {
+      "type": "h1",
+      "text": "Triage sequence"
+    },
+    {
+      "type": "p",
+      "text": "Do this in order. Skipping to Helm rollback is how we spent 41 minutes on August 19 reproducing a ChartLine outage with our own pods. Sneha Iyer timed it. The rollback did nothing because the dependency was dead."
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Acknowledge the PD page within 5 min. If you cannot, the backup gets it at 8 min. Silence is worse than a wrong first hypothesis.",
+        "Confirm context and deploy ready count (preconditions). Screenshot nothing that contains a patient list.",
+        "curl healthz and healthz/deps from the jump box, not from your laptop. Laptop VPN path goes through a different NAT and lies about ChartLine latency.",
+        "Classify: all facilities vs one facility vs auth vs cache. Use the Grafana facility breakdown (panel 22). If only RVH-BH or RVH-CLINIC-07 is red, you are in feed-isolation land.",
+        "If ChartLine healthz fails, skip straight to the ChartLine section and post in #rvh-interface-oncall. Do not wait for a 'complete picture'. Nate would rather a short 'TCP timeout 3.7s from jump-rvh-01' than a 20-minute essay.",
+        "If LDAP is the only red dep, skip to auth. Do not disable facility feeds for an IAM problem.",
+        "If Redis looks sick (connected_clients collapsing, evicted_keys climbing through 12.4k in a few minutes), skip to stale charts. Do not bounce the API first; you will just cold-start against a dying cache.",
+        "Only after deps are green and one revision looks bad do you Helm rollback. Rollback is not step 1."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "healthz from the jump box"
+    },
+    {
+      "type": "code",
+      "text": "# You are on jump-rvh-01. Cluster DNS works here.\ncurl -sk --max-time 3 https://patient-api.rvh.internal/healthz\n# expected: {\"status\":\"ok\",\"build\":\"1.16.3\",\"ts\":\"...\"}  HTTP 200\n\ncurl -sk --max-time 8 https://patient-api.rvh.internal/healthz/deps\n# expected keys: chartline, ldap_west, ldap_east, redis_01, redis_02, sitenotes, postgres\n# each: {\"ok\":true,\"p50_ms\":...}  chartline p50 is usually 46-90ms at night, 110-180ms at 07:30\n\n# in-cluster check if the ingress is the thing that is dead\nkubectl -n riverview-chart exec deploy/patient-api -- \\\n  wget -qO- --timeout=3 http://127.0.0.1:8080/healthz\n\nkubectl -n riverview-chart get pods -l app=patient-api -o wide\nkubectl -n riverview-chart get hpa patient-api\nkubectl -n riverview-chart describe deploy patient-api | tail -n 40\n",
+      "caption": "Baseline health checks. Run these before changing any ConfigMap."
+    },
+    {
+      "type": "p",
+      "text": "If /healthz is 200 and /healthz/deps.chartline.ok is false, the API process is up and the interface is the incident. If /healthz itself is 5xx or hangs past 3s, look at pods. CrashLoopBackOff with Restarts at 14, 17, 22 on every pod is usually a bad secret or a Redis AUTH change, not ChartLine. If only one pod is looping, delete it once:"
+    },
+    {
+      "type": "code",
+      "text": "kubectl -n riverview-chart delete pod <pod-name> --wait=false\n# wait 45s\nkubectl -n riverview-chart get pods -l app=patient-api\n# if the new pod loops again, do not keep deleting. kubectl -n riverview-chart logs <pod> -c patient-api --tail=80\n# then read RVH-SOP-2021-009 before you copy anything off the box\n",
+      "caption": "Single-pod recycle. Stop after one try."
+    },
+    {
+      "type": "h1",
+      "text": "5xx on assemble"
+    },
+    {
+      "type": "p",
+      "text": "Assemble is GET /v1/chart/assemble?facility=RVH-MAIN&mrn=... RapidChart also hits POST /v1/chart/assemble with a body; same handler. 5xx here is what nurses mean by 'the chart is down'. 4xx is usually auth or a malformed facility code. Do not treat a pile of 400s from a misconfigured CensusBoard build as an API outage. Sneha keeps a synthetic check in Jenkins rvh-papi-smoke that calls assemble with a test MRN in the non-prod vault path. Prod smoke uses a synthetic patient SYNTH-000441 whose chart is fake and is the only MRN you may put in Slack."
+    },
+    {
+      "type": "h3",
+      "text": "Read the 5xx shape"
+    },
+    {
+      "type": "code",
+      "text": "kubectl -n riverview-chart get deploy patient-api -o jsonpath='{.status.readyReplicas}{\" / \"}{.status.replicas}{\"\\n\"}'\n\n# last 10 min of HTTP status from the API's own json logs (no PHI fields if LOG_REDACT=1, which it should be)\nkubectl -n riverview-chart logs deploy/patient-api --since=10m | \\\n  python3 /opt/rvh/redact_dump.py --stdin --fail-on-unmatched | \\\n  grep -E '\"status\":5|\"status\": 5' | tail -n 40\n\n# if redact_dump.py exits 2 (unmatched patterns), stop. Do not grep raw logs into your scrollback and then paste.\n# call Helen Park's procedure in RVH-SOP-2021-009.\n\n# recent ReplicaSet / Helm\nkubectl -n riverview-chart rollout history deploy/patient-api\nhelm -n riverview-chart history patient-api\n",
+      "caption": "5xx inspection. Redact before grep if you are going to copy output off the box."
+    },
+    {
+      "type": "p",
+      "text": "Common 5xx causes we have actually seen since March, with the fix that worked. If yours is not in the table, write it down after, do not skip isolation."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Pattern",
+        "How it showed up",
+        "What worked",
+        "What failed"
+      ],
+      "rows": [
+        [
+          "ChartLine 504, our handler 502",
+          "deps.chartline.ok false, p50_ms 3200+",
+          "CHARTLINE_CIRCUIT=open, cache + banners",
+          "Helm rollback to 1.15.9, wasted 19 min"
+        ],
+        [
+          "PG connection pool exhausted (max 48)",
+          "pods ready but assemble 500, logs 'too many clients'",
+          "kubectl -n riverview-chart rollout restart deploy/patient-api AFTER killing idle backends on chart-pg-01",
+          "Raising max to 96 without PG change, made it worse"
+        ],
+        [
+          "Null allergy bundle after ChartLine schema drift",
+          "200 then 500 on 18.4% of RVH-WEST only",
+          "Disable RVH-WEST feed, leave other 10 up",
+          "Global feature flag ALLERGY_V2=false, broke MAIN"
+        ],
+        [
+          "OOMKill 1536Mi during Friday SiteNotes retries",
+          "Restart count climbing, lastState OOMKilled",
+          "HPA already at 8; raised limit to 2048Mi in 1.16.2",
+          "Deleting pods in a loop, they OOM'd again"
+        ],
+        [
+          "Bad ConfigMap YAML after a manual edit",
+          "All pods 0/1, CrashLoop 'yaml: unmarshal'",
+          "kubectl -n riverview-chart apply -f the last known good from /home/shared/rvh/feed-flags-last.yaml",
+          "Editing live with vi and missing a quote"
+        ]
+      ],
+      "caption": "5xx causes from RVH-2187, RVH-2294, RVH-2411, and the August 19 ChartLine timeout"
+    },
+    {
+      "type": "h3",
+      "text": "Helm rollback (only if the current revision is guilty)"
+    },
+    {
+      "type": "p",
+      "text": "Rollback is for 'we shipped 1.16.3 at 21:10 and 5xx started at 21:14 and deps are green.' It is not for ChartLine. Check history. Our last three prod revisions as of September 30: 1.16.3 (Sep 28, Aman), 1.16.2 (Sep 14, Kavya, memory limit), 1.15.9 (Aug 26, Luis, LDAP timeout). If you roll back past 1.16.2 you lose the OOM fix. Say that out loud in #riverview-eng before you do it."
+    },
+    {
+      "type": "code",
+      "text": "helm -n riverview-chart history patient-api\n# pick REVISION that was last known good AND still has the OOM limit if this is a memory incident\n\nhelm -n riverview-chart rollback patient-api <REVISION> --wait --timeout 5m\n# if --wait times out: kubectl -n riverview-chart get pods -l app=patient-api\n# do not run rollback twice. If it hung, describe rs and look at ImagePullBackOff.\n\n# verify\ncurl -sk --max-time 3 https://patient-api.rvh.internal/healthz\nkubectl -n riverview-chart rollout status deploy/patient-api --timeout=3m\n",
+      "caption": "Helm rollback. Requires helm 3.6 on the jump box (already installed)."
+    },
+    {
+      "type": "p",
+      "text": "If rollback fails because of a failed ConfigMap checksum, you edited feed flags by hand and Helm wants to overwrite them. Copy the live ConfigMap off to /tmp first, rollback, then re-apply feed flags if a facility still needs to stay disabled. Kavya keeps /home/shared/rvh/feed-flags-last.yaml updated after every isolation. If that file is older than 7 days, believe the cluster, not the file."
+    },
+    {
+      "type": "h1",
+      "text": "Stale charts and Redis"
+    },
+    {
+      "type": "p",
+      "text": "PAPIStaleChart fires when the assembled payload's source_ts is older than 8.5 min at p50 (we tightened from 15 min after the April feedback session). Nurses care about allergies before meds. A chart that is 9 min old on allergies is a clinical problem even if HTTP 200. Redis key shape is chart:v1:{facility}:{mrn_hash} with TTL 120s for a successful assemble and 25s for a partial (banner) assemble. Discharge keys for CensusBoard are census:discharged:{facility}:{enc_id} with TTL 90s. If those discharge keys hang around, you get the 11 min ghost patient. RVH-2201 is still open; do not 'fix' it at 3am by setting TTL to 5s. You will melt ChartLine at shift change."
+    },
+    {
+      "type": "h3",
+      "text": "redis-cli on chart-cache-01"
+    },
+    {
+      "type": "p",
+      "text": "Redis AUTH token is in k8s secret chart-cache-auth, key redis-password. Do not put the password in your shell history if you can avoid it. The jump box has a wrapper."
+    },
+    {
+      "type": "code",
+      "text": "# wrapper reads the secret and opens redis-cli. You still type commands.\n/opt/rvh/bin/papi-redis chart-cache-01\n\n# inside redis-cli:\nINFO stats\nINFO memory\nINFO replication\n# expected: role:master on chart-cache-01, replica on 02. used_memory_human around 3.4G-5.1G at night, 6.8G-8.2G weekday 08:00.\n# evicted_keys should be near 0. If you see 12.4k evicted in 10 min, the cache is thrashing and stale pages will lie.\n\n# look at TTL on a SYNTHETIC key only\nTTL chart:v1:RVH-MAIN:synth-000441\nGET chart:v1:RVH-MAIN:synth-000441\n# if GET returns a JSON body, do not copy it off the box. TTL number is fine to paste.\n\n# connected clients: API pods + CensusBoard + one jump-box session. 40-70 is normal. 400+ means a leaked lettuce pool from RapidChart (happened May 6, RVH-2189).\n\n# replica\n/opt/rvh/bin/papi-redis chart-cache-02\nINFO replication\n# role:slave, master_link_status:up. If down, do not promote 02 yourself. Page Kavya. Wrong failover is how we served 14 min of mixed allergy documents on June 3.\n",
+      "caption": "Redis inspection via the jump-box wrapper. Synthetic MRN only."
+    },
+    {
+      "type": "p",
+      "text": "If chart-cache-01 is unreachable from the jump box (Could not connect to Redis at chart-cache-01.rvh.internal:6379) try chart-cache-02. If both fail, the API will still run but every assemble becomes a cache miss and ChartLine will take the p95 from 1.8s to something like 4.6-7.1s. That is a Sev-1 even if /healthz is 200. Open the ChartLine circuit before the retry storm (see next section) and call #rvh-interface-oncall to warn them we are about to be noisy if we do not."
+    },
+    {
+      "type": "h3",
+      "text": "When you may flush, and when you may not"
+    },
+    {
+      "type": "callout",
+      "label": "Warn",
+      "text": "FLUSHALL is banned on chart-cache-01 and chart-cache-02. There is no 'just this facility' flush command that is safe at 3am. To drop one bad chart, DEL the synthetic key in a drill, or DEL chart:v1:{facility}:{hash} only if Kavya or Aman gives you the hash from the audit table (mrn_hash, not MRN). If you FLUSHALL you will stampede ChartLine at 11 facilities. We tried a 'flush by prefix' SCAN+DEL during RVH-INC-2021-118 leftovers. It held the Redis CPU at 96.4% for 7.4 min and CensusBoard lagged worse.",
+      "kind": "warn"
+    },
+    {
+      "type": "p",
+      "text": "If a single facility is serving stale allergies, isolate the feed (next major section) rather than hunting keys. Isolation marks new assembles as partial and stops writing fresh bad data into Redis. Old keys expire in 120s. Wait two minutes. Watch Grafana panel 19 (chart_age_seconds). If it does not come down, the feed is not the cache."
+    },
+    {
+      "type": "h1",
+      "text": "Auth failures against hospital LDAP"
+    },
+    {
+      "type": "p",
+      "text": "Nurses authenticate to RapidChart via Riverview SSO. RapidChart then calls us with a bearer token we introspect against hospital LDAP group cn=rapidchart-users,ou=groups,dc=rvh,dc=internal. We bind as uid=papi-svc,ou=svc,dc=rvh,dc=internal to ldap-west.rvh.internal:636 first, ldap-east.rvh.internal:636 after 180ms timeout (Luis's 1.15.9 change). A 401 storm is often west dying and east not taking over because someone set LDAP_FALLBACK=deny in the feed-flags ConfigMap during a drill and left it. Check that before you accuse IAM."
+    },
+    {
+      "type": "code",
+      "text": "curl -sk --max-time 8 https://patient-api.rvh.internal/healthz/deps | python3 -m json.tool | sed -n '/ldap/,+12p'\n\n# from a pod, test bind latency without printing the bind DN password\nkubectl -n riverview-chart exec deploy/patient-api -- \\\n  /app/bin/ldap_probe --host ldap-west.rvh.internal --port 636 --timeout 0.18\nkubectl -n riverview-chart exec deploy/patient-api -- \\\n  /app/bin/ldap_probe --host ldap-east.rvh.internal --port 636 --timeout 0.18\n# expected: ok p50_ms ~22-55 west, ~28-70 east. If west > 180 and east ok, traffic should already fail over.\n# if both fail: Jordan Hale via #rvh-interface-oncall. This is an IAM outage. We cannot fix AD at 3am.\n\n# ConfigMap flag\nkubectl -n riverview-chart get cm patient-api-feed-flags -o jsonpath='{.data.LDAP_FALLBACK}{\"\\n\"}'\n# expected at night: cached\n# cached = accept tokens we introspected in the last 8 min if LDAP is down\n# deny = 401 everyone, which is how you take RapidChart down during an IAM blip\n",
+      "caption": "LDAP probes. ldap_probe prints timing and ok/fail only, no DNs of nurses."
+    },
+    {
+      "type": "p",
+      "text": "If LDAP_FALLBACK is deny and both directories are sick, set it back to cached, then wait 30s for the reload (the app watches the ConfigMap). Do not rollout restart unless the watch is broken (you would see 'configmap watch stopped' in logs). If fallback is already cached and nurses still cannot get in, the failure is in RapidChart's SSO, not us. Say that in #rvh-interface-oncall and in #riverview-eng. We spent 33 min on July 7 debugging our bind while Okta was expired for the RapidChart SP. Jordan Hale caught it."
+    },
+    {
+      "type": "p",
+      "text": "Rejected alternative: Luis and I talked about disabling auth entirely behind a break-glass flag AUTH_OFF=1 so nurses could chart during an IAM outage. Anita shut it down in the July 12 privacy review. Unauthenticated assemble would return PHI to anyone on the hospital network, including printers and the guest VLAN that still routes to 10.18.0.0/16. There is no AUTH_OFF flag. If you find one in an old values.yaml, it is dead code and 1.16.0 removed the handler. Do not re-add it in a hotfix."
+    },
+    {
+      "type": "h3",
+      "text": "What 'cached' actually serves"
+    },
+    {
+      "type": "p",
+      "text": "Cached fallback serves the last successful introspection for that bearer token, max age 8 min. It does not mint new sessions. A nurse who logged in 2 min ago keeps working. A nurse who tries to log in fresh during the IAM hole still fails at RapidChart SSO, which is correct. If you promised someone 'the API will let everyone in,' you promised wrong. Write the actual behavior in the incident channel so Denise does not hear a rumor on a unit."
+    },
+    {
+      "type": "h1",
+      "text": "ChartLine interface down"
+    },
+    {
+      "type": "p",
+      "text": "ChartLine is the vendor interface process at chartline-iface-prod.rvh.internal:8443, run by Riverview interface engineering, not by Northstar. We talk to it with mTLS. Client cert is in secret chartline-client-tls. If the interface is down, our correct behavior is to open the circuit, serve Redis plus partial banners, and tell RapidChart the allergy/med/problem blocks may be stale. Closing our eyes and retrying 40 times per pod is how we DDoS the interface on the way back up. Default retries in 1.16.3 are 2, backoff 80ms, circuit open after 12 consecutive failures in 30s."
+    },
+    {
+      "type": "code",
+      "text": "curl -sk --max-time 5 https://chartline-iface-prod.rvh.internal:8443/healthz\n# 200 {\"status\":\"up\",\"vendor\":\"chartline\",\"q\":...} is good\n# hang, 000, or 5xx: interface problem. Post in #rvh-interface-oncall with the exact curl output and the time from `date -u`.\n\n# from a pod (uses mTLS automatically)\nkubectl -n riverview-chart exec deploy/patient-api -- \\\n  /app/bin/chartline_probe --timeout 5\n# prints: ok|fail, http_code, p50_ms. No chart bodies.\n\n# open the circuit\nkubectl -n riverview-chart get cm patient-api-feed-flags -o yaml > /tmp/feed-flags-$(date -u +%Y%m%dT%H%M%SZ).yaml\n# edit CHARTLINE_CIRCUIT=open  (was closed)\nkubectl -n riverview-chart apply -f /tmp/feed-flags-....yaml\n# wait 20-40s\ncurl -sk https://patient-api.rvh.internal/healthz/deps\n# chartline.circuit should read open. Assemble should be 200 with payload.partial=true.\n\n# when Nate says ChartLine is healthy, set CHARTLINE_CIRCUIT=closed the same way.\n# do not flap it. Wait until healthz is 200 for 3 consecutive minutes.\n",
+      "caption": "ChartLine probe and circuit. Always snapshot the ConfigMap before apply."
+    },
+    {
+      "type": "p",
+      "text": "SiteNotes is a separate host (sitenotes.rvh.internal). It is flaky on Fridays after 16:00 Eastern (their index job). A SiteNotes fail should not open the ChartLine circuit. Assemble already partial-fills notes and shows a banner. If you open the ChartLine circuit because SiteNotes is 500, you will serve stale allergies, which is the one thing Denise told us not to do. Check deps.sitenotes vs deps.chartline separately."
+    },
+    {
+      "type": "quote",
+      "text": "If the interface is down I need a banner on allergies, not a pretty empty page that looks like 'no known allergies'. Empty and down are different.",
+      "attrib": "Denise Howell, April 13, 2021 feedback session (RVH-MTG-2021-022)"
+    },
+    {
+      "type": "h1",
+      "text": "Disable a facility feed without taking the API down"
+    },
+    {
+      "type": "p",
+      "text": "This is the procedure people skip, and then they scale the deploy to 0. Stop. Eleven facilities share one deploy. RVH-CLINIC-12 having a poison allergy XML must not take down RVH-MAIN. The feed flag list is comma-separated facility codes in ConfigMap patient-api-feed-flags, key FEED_DISABLED_FACILITIES. When a code is on the list, assemble for that facility returns 200 with payload.partial=true, blocks from Redis if younger than 120s, otherwise empty blocks plus banners, and we stop calling ChartLine for that facility. Other facilities are unchanged. CensusBoard hides new ADT for the disabled facility after 45s (it polls our /v1/census/status)."
+    },
+    {
+      "type": "h3",
+      "text": "Which code to put on the list"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Facility",
+        "Code",
+        "Notes",
+        "Typical night traffic share"
+      ],
+      "rows": [
+        [
+          "Flagship campus",
+          "RVH-MAIN",
+          "Do not disable unless Anita's office asked and Priya agrees. 2,140 beds.",
+          "41.6%"
+        ],
+        [
+          "West campus",
+          "RVH-WEST",
+          "Med-surg heavy. Patrice Coleman's units.",
+          "12.8%"
+        ],
+        [
+          "East campus",
+          "RVH-EAST",
+          " ",
+          "9.4%"
+        ],
+        [
+          "North campus",
+          "RVH-NORTH",
+          " ",
+          "6.1%"
+        ],
+        [
+          "South campus",
+          "RVH-SOUTH",
+          " ",
+          "5.7%"
+        ],
+        [
+          "Children's",
+          "RVH-PEDS",
+          "Different allergy dictionary. Poison feeds show up here first.",
+          "7.2%"
+        ],
+        [
+          "Rehab",
+          "RVH-REHAB",
+          " ",
+          "3.3%"
+        ],
+        [
+          "Behavioral health",
+          "RVH-BH",
+          "Stricter break-glass. See below.",
+          "2.9%"
+        ],
+        [
+          "Ambulatory surgery",
+          "RVH-ASC",
+          "Weekday only, should be near 0 at 03:00.",
+          "4.8%"
+        ],
+        [
+          "Clinic 07",
+          "RVH-CLINIC-07",
+          "ChartLine connector replaced Aug 11, still noisy.",
+          "3.4%"
+        ],
+        [
+          "Clinic 12",
+          "RVH-CLINIC-12",
+          "Oldest connector. First isolate candidate.",
+          "2.8%"
+        ]
+      ],
+      "caption": "Facility codes as ChartLine sends them. Wrong code = you isolated nobody and thought you did."
+    },
+    {
+      "type": "h3",
+      "text": "Commands"
+    },
+    {
+      "type": "code",
+      "text": "# 1. snapshot\nkubectl -n riverview-chart get cm patient-api-feed-flags -o yaml \\\n  > /tmp/feed-flags-$(date -u +%Y%m%dT%H%M%SZ).yaml\n\n# 2. copy for edit\ncp /tmp/feed-flags-*.yaml /tmp/feed-flags-edit.yaml\n# set FEED_DISABLED_FACILITIES. If empty, use the facility code only.\n# if already RVH-CLINIC-07, add comma no spaces: RVH-CLINIC-07,RVH-CLINIC-12\n# valid keys in this ConfigMap: FEED_DISABLED_FACILITIES, CHARTLINE_CIRCUIT, LDAP_FALLBACK\n# do not add new keys. The watcher ignores them and you will think they worked.\n\n# 3. apply\nkubectl -n riverview-chart apply -f /tmp/feed-flags-edit.yaml\n# expected: configmap/patient-api-feed-flags configured\n\n# 4. confirm the watcher reloaded (look for one line per pod, ~15-40s)\nkubectl -n riverview-chart logs deploy/patient-api --since=2m | grep feed_flags_reload | tail\n# expected: {\"msg\":\"feed_flags_reload\",\"disabled\":[\"RVH-CLINIC-12\"],\"circuit\":\"closed\",\"ldap\":\"cached\"}\n\n# 5. copy the new file to the shared last-known path (you are on the jump box)\ncp /tmp/feed-flags-edit.yaml /home/shared/rvh/feed-flags-last.yaml\n\n# 6. tell humans\n# Slack #riverview-eng: \"disabled feed RVH-CLINIC-12, API still up, ticket RVH-....\"\n# Slack #rvh-interface-oncall: same, plus \"please check ChartLine connector for CLINIC-12\"\n# do not include sample payloads\n",
+      "caption": "Facility feed isolation. Snapshot, edit, apply, confirm reload, notify."
+    },
+    {
+      "type": "p",
+      "text": "Failure handling for this procedure is not optional. If apply says error: conflict, someone else edited the ConfigMap. Get the live YAML again, do not force. If feed_flags_reload never appears, the watcher is dead (we have seen that after a 1.15.x pod that did not pick up 1.16's watcher). Then, and only then, kubectl -n riverview-chart rollout restart deploy/patient-api. That restart is 6-8 pods rolling, about 2.4-3.1 min of mixed old/new. It is better than a stuck flag, worse than a clean reload. If you restart and the flag still does not show in logs, you applied to the wrong namespace."
+    },
+    {
+      "type": "p",
+      "text": "To re-enable: remove the code from the list (empty string if none left), apply, confirm reload with disabled:[]. Leave the snapshot files in /tmp; they rotate with the jump box. Ticket the isolation window. Sneha will want start/stop times for her Friday QA notes."
+    },
+    {
+      "type": "h3",
+      "text": "RVH-BH extra rule"
+    },
+    {
+      "type": "p",
+      "text": "Behavioral health charts have a tighter audience. Disabling RVH-BH is allowed. Enabling it again after an isolation requires a second person in #riverview-eng (Kavya, Luis, Priya, or Aman). If you are alone at 03:00 and BH needs to come back, leave it disabled and say so. A wrong re-enable that serves the wrong identity merge is worse than a bannered BH unit until 07:00. Identity merge background is RVH-TDD-2021-004. Do not debug merges during a feed incident."
+    },
+    {
+      "type": "h1",
+      "text": "Break-glass"
+    },
+    {
+      "type": "p",
+      "text": "Break-glass here means 'I cannot perform the above because access or Redis or the API watcher is itself broken,' not 'I am impatient.' There are three glass panes. Use the smallest one that unblocks the procedure you already chose."
+    },
+    {
+      "type": "h3",
+      "text": "Pane A: ConfigMap apply is forbidden"
+    },
+    {
+      "type": "p",
+      "text": "Your kube role rvh-oncall-edit can patch ConfigMaps in riverview-chart. If you get Error from server (Forbidden), your role dropped or you are on the wrong context. Do not use a personal AWS access key. Page Priya Nair for a 4-hour binding to clusterrole rvh-breakglass-config. She will want the PD incident URL. While you wait, you cannot isolate a feed. You can still post in #rvh-interface-oncall and you can still open the ChartLine circuit if someone else applies it. Luis has the same role if Priya does not answer in 10 min. After November 8, Diego Alvarez will own this binding."
+    },
+    {
+      "type": "h3",
+      "text": "Pane B: Redis is down and assemble is melting ChartLine"
+    },
+    {
+      "type": "code",
+      "text": "# last resort: stop the API from calling ChartLine even if ConfigMap watch is dead\n# this is an env override on the deploy, which Helm will undo on next sync\nkubectl -n riverview-chart set env deploy/patient-api CHARTLINE_CIRCUIT=open\n# wait for rollout (this DOES bounce pods, unlike ConfigMap)\nkubectl -n riverview-chart rollout status deploy/patient-api --timeout=4m\n\n# undo after ConfigMap is writable again\nkubectl -n riverview-chart set env deploy/patient-api CHARTLINE_CIRCUIT-\nhelm -n riverview-chart rollback patient-api <current-revision>  # only if helm drift is messy; prefer set env unset\n",
+      "caption": "Break-glass circuit via deploy env. Bounces pods. Helm drift follows."
+    },
+    {
+      "type": "p",
+      "text": "set env creates drift. File a ticket before you go to sleep, assigned to Kavya, title 'remove CHARTLINE_CIRCUIT env from deploy, back on ConfigMap'. If you leave the env, the next Helm upgrade will look like it 'does not honor feed flags'. That bug report already exists twice (RVH-2310, RVH-2402)."
+    },
+    {
+      "type": "h3",
+      "text": "Pane C: jump box is unreachable"
+    },
+    {
+      "type": "p",
+      "text": "Teleport down: page Priya, not Anita, not Nate. There is a backup jump jump-rvh-02.northstar.internal with the same kubeconfig path. tsh ssh aman.kumar@jump-rvh-02.northstar.internal. If both jumps are dead, you are in a Northstar access incident and you should not try to kubectl from a coffee-shop laptop against the public EKS endpoint. We closed that endpoint in May. There is no public kube. Wait for Teleport."
+    },
+    {
+      "type": "h2",
+      "text": "Who to call at 03:00 (short list)"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Situation",
+        "Channel or person",
+        "Backup after 10 min",
+        "Never"
+      ],
+      "rows": [
+        [
+          "ChartLine / facility connector / hospital VPN",
+          "#rvh-interface-oncall",
+          "Nate Okonkwo's PD (Riverview), then Elena Voss",
+          "Dr. Anita Shah"
+        ],
+        [
+          "patient-api code, Redis, feed flags",
+          "PD riverview-eng-primary (you)",
+          "Kavya Menon",
+          "Sneha Iyer"
+        ],
+        [
+          "LDAP / AD bind",
+          "Luis Ortega + #rvh-interface-oncall (Jordan Hale)",
+          "Priya Nair",
+          "Resetting nurse passwords yourself"
+        ],
+        [
+          "Teleport / jump / EKS API",
+          "Priya Nair",
+          "Luis Ortega",
+          "Personal AWS keys, public kube"
+        ],
+        [
+          "PHI in a log line you already pasted",
+          "Helen Park (email + PD rvh-privacy), then Priya",
+          "RVH-SOP-2021-009",
+          "More paste to 'correct' the first paste"
+        ],
+        [
+          "Clinical 'is this banner wording ok'",
+          "Wait until 07:00, Denise Howell or Anita",
+          "Rahul Deshmukh weekday",
+          "Inventing new banner text at 03:00"
+        ]
+      ],
+      "caption": "3am contact matrix. Print this. Do not improvise a new chain."
+    },
+    {
+      "type": "p",
+      "text": "Anita reads email at 06:45 Eastern most weekdays. If you needed a clinical call during the night, write her a six-line summary at 07:00: what the nurses saw, what you isolated, what is still bannered, ticket id. She will translate to CMO if needed. She asked for this pattern after someone CC'd her on a 02:14 Slack thread that included a screenshot of RapidChart with a name visible. That screenshot is why the PHI SOP exists."
+    },
+    {
+      "type": "h1",
+      "text": "After the fire: what you must leave behind"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "PD incident: timeline with UTC, commands that changed state (ConfigMap apply, helm rollback, set env), not a novel.",
+        "Jira: component patient-api, label oncall. Assign feed-flag leftovers to Kavya, LDAP leftovers to Luis, ChartLine leftovers to Nate's queue (project RVHINT).",
+        "If you isolated a facility, calendar a re-enable review for 09:30 Eastern the next business day. Do not leave CLINIC-12 disabled for a week because the thread died.",
+        "If you used break-glass env, ticket the drift the same night.",
+        "Sneha gets a ping on weekday mornings only, with the synthetic patient check you ran (SYNTH-000441) and pass/fail. She will rerun the fuller suite.",
+        "If error budget dropped under 99.52%, tell Priya before standup. We owe Riverview a note at 99.50%."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Synthetic check you can run at 03:10"
+    },
+    {
+      "type": "code",
+      "text": "# uses a vaulted service token for the synth patient. prints status and partial flags only.\n/opt/rvh/bin/papi-synth-assemble --facility RVH-MAIN --id SYNTH-000441\n# expected when healthy: http=200 partial=false blocks=demo,allergy,med,enc,prob p95_hint_ms=...\n# expected when circuit open: http=200 partial=true banners=chartline_unavailable\n# expected when facility disabled: http=200 partial=true banners=feed_disabled\n# if http=500, you are not done\n",
+      "caption": "Synthetic assemble. Output is safe to paste in Slack."
+    },
+    {
+      "type": "h1",
+      "text": "Failure modes the commands do not fix"
+    },
+    {
+      "type": "p",
+      "text": "Some failures look like patient-api and are not. Spend 5 min on these before you Helm rollback a healthy revision."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "What you see",
+        "Actual source",
+        "What on-call can do",
+        "What on-call cannot do"
+      ],
+      "rows": [
+        [
+          "RapidChart 5xx, our /healthz 200, no assemble traffic",
+          "RapidChart app servers (Java) on rvh-rc-prod-a/b",
+          "Tell #rvh-interface-oncall, attach our healthz output",
+          "Restart their Tomcat"
+        ],
+        [
+          "One nursing unit broken, others fine, our facility metrics green",
+          "Unit workstation proxy PAC file",
+          "Ask the charge nurse which proxy; do not debug PAC at 3am beyond 'try another PC'",
+          "Hospital desktop GPO"
+        ],
+        [
+          "ED tracker names linger ~11 min, assemble fresh",
+          "RVH-2201 discharge lag, ChartLine ADT order",
+          "Confirm not a new cache bug (TTL on census keys)",
+          "Rewrite ADT ordering tonight"
+        ],
+        [
+          "Allergy block empty, meds present, ChartLine 200",
+          "ChartLine allergy dictionary delay, known on PEDS",
+          "Banner is already coded; check they are on 1.16.3",
+          "Backfill allergies from SiteNotes (no mapping)"
+        ],
+        [
+          "Grafana blank",
+          "grafana.northstar.internal SSO",
+          "Use kubectl and curl; Grafana is not required to isolate a feed",
+          "Fix Okta"
+        ],
+        [
+          "kubectl timeout",
+          "EKS API or jump DNS",
+          "jump-rvh-02, then Priya",
+          "AWS console from a personal account"
+        ]
+      ],
+      "caption": "Lookalikes. Rollback will not help any row in this table."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions"
+    },
+    {
+      "type": "p",
+      "text": "These are still open as of September 30. They are not yours to decide at 03:00. If an incident forces a temporary answer, write the temporary answer in the ticket and assign the owner."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Question",
+        "Owner",
+        "Default if you must act tonight",
+        "Status"
+      ],
+      "rows": [
+        [
+          "Should FEED_DISABLED_FACILITIES auto-reenable after 4 hours?",
+          "Kavya Menon",
+          "No auto-reenable. Leave disabled.",
+          "Open, spike RVH-2411"
+        ],
+        [
+          "Can CensusBoard read discharge from ADT topic instead of our census keys?",
+          "Rahul Deshmukh + Chris Patel",
+          "Do not point CensusBoard at Kafka tonight.",
+          "Open, blocked on ChartLine schema"
+        ],
+        [
+          "When does Diego take first SRE pager?",
+          "Priya Nair",
+          "Not this week. Page Kavya then Priya.",
+          "Start Nov 8, 2021"
+        ],
+        [
+          "Do we allow a second Redis replica in us-east-1b?",
+          "Kavya Menon + Diego (after Nov)",
+          "Stay on 01/02 as documented.",
+          "Budget ask, not an incident action"
+        ],
+        [
+          "Banner copy for feed_disabled vs chartline_unavailable",
+          "Denise Howell (clinical), Aman (string table)",
+          "Use existing strings in 1.16.3. Do not invent copy.",
+          "Open from April session"
+        ]
+      ],
+      "caption": "Open questions. Night default is the conservative column."
+    },
+    {
+      "type": "h2",
+      "text": "Related dashboards, hosts, and tickets"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Grafana uid rvh-papi-17, folder Riverview / patient-api. Panels 12 (5xx ratio), 19 (chart_age_seconds), 22 (per-facility 5xx), 28 (ldap bind ms), 31 (redis evicted_keys).",
+        "Alertmanager: http://am.northstar.internal, route team=riverview.",
+        "Hosts: jump-rvh-01/02.northstar.internal, chart-cache-01/02.rvh.internal, chart-pg-01.rvh.internal, ldap-west/east.rvh.internal, chartline-iface-prod.rvh.internal, sitenotes.rvh.internal.",
+        "Cluster: rvh-prod-eks-01, ns riverview-chart, deploy patient-api, cm patient-api-feed-flags, secret chart-cache-auth, secret chartline-client-tls.",
+        "Tickets: RVH-2411 auto-reenable spike, RVH-2388 killed global stop job, RVH-2294 wrong kube context, RVH-2201 ED discharge lag, RVH-2189 Redis client leak, RVH-INC-2021-118 inflated census.",
+        "Sibling docs: RVH-PRD-2021-006 assemble requirements, RVH-SOP-2021-009 PHI logging, RVH-MTG-2021-022 clinical feedback, RVH-TDD-2020-011 REST vs FHIR (why we have this API shape at all)."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "If this runbook disagrees with a Slack memory, the runbook wins until someone files a PR against the JSON source. Last reviewer: Aman Kumar, September 30, 2021. Kavya signed the Redis section. Luis signed the LDAP section. Priya approved the 'do not page Anita' rule after the screenshot incident. Diego has a read-through scheduled for October 18 before he joins the rotation."
+    },
+    {
+      "type": "h2",
+      "text": "Appendix: rejected global kill switch"
+    },
+    {
+      "type": "p",
+      "text": "Documented a second time because it keeps coming back in incident Slack. A global kill switch (scale replicas to 0, or an env API_DEAD=1 that 503s every route) was proposed by a contractor in June after Clinic-12's connector looped. It died for three reasons. First, RapidChart has no useful offline mode; nurses get a full-screen error and call the help desk, which then calls us, which is not quieter. Second, CensusBoard and RapidChart share the API, so you would blank the ED tracker at MAIN to save Clinic-12. Third, we already had 6.4 min of that behavior during a mistaken scale event on June 22 (see RVH-INC-2021-118 adjacent notes) and Denise's charge nurses still mention it. Facility isolation is the replacement. If a future engineer adds API_DEAD, revert it in the same incident window."
+    },
+    {
+      "type": "p",
+      "text": "The other rejected idea was paging Anita as 'clinical incident commander' whenever RapidChart was down. She is a physician and a liaison, not an interface tech. Nate's channel exists. Use it. If Nate is silent for 15 min on a Sev-1 ChartLine outage, Elena Voss is next, then Riverview hospital operator (ask for 'interface on-call', they know the phrase). That operator number is in the #rvh-interface-oncall channel topic. It is not in this document on purpose so we do not fork a stale copy."
+    }
+  ]
+}

@@ -1,0 +1,493 @@
+{
+  "slug": "34-clearhaven-capacity-fy25-memo",
+  "doc_id": "CLH-MEM-2024-018",
+  "title": "FY25 capacity for Clearhaven recon: four brokers, not twelve",
+  "subtitle": "1.7% month-over-month volume, 8.2M to 11.4M month-end files, and what happens if we do nothing",
+  "doc_type": "Capacity planning memo",
+  "kicker": "Memo / capacity / FY25",
+  "org": "Northstar Engineering",
+  "classification": "INTERNAL",
+  "version": "1.2",
+  "status": "Approved",
+  "date": "September 5, 2024",
+  "author": "Aman Kumar",
+  "role": "Software Engineer II",
+  "team": "Clearhaven recon platform",
+  "audience": "Priya Nair, platform leads, Finance partner on the Clearhaven account, Diego Alvarez",
+  "owners": "Aman Kumar (analysis), Diego Alvarez (Kafka/k8s), Rina Das (Postgres storage), Priya Nair (EM)",
+  "related": "CLH-MEM-2023-027, CLH-TDD-2023-008, CLH-RB-2023-012, CLH-TDD-2024-014, CLH-MTG-2024-015, CLH-4811",
+  "summary": "Clearhaven inbound volume is growing 1.7% month over month. Month-end file count is 8.2M now and models to 11.4M in September 2025. Kafka disk, Postgres storage, and match-engine CPU are the three places that break first. The ask from a well-meaning draft last week was 12 more Kafka brokers. That is the wrong ask. Buy 4 brokers, turn on better compaction, and buy Postgres storage. If we do nothing, the 7:20 ET SLA miss rate goes from 6% of month-end days to about 22%. This memo is the position I want Priya to take into the FY25 planning meeting on September 12.",
+  "form_description": "Capacity planning memo for Clearhaven recon FY25. Written to kill the 12-broker ask and replace it with 4 brokers, compaction, and Postgres disk, with a do-nothing SLA forecast.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "1.0",
+      "August 28, 2024",
+      "Aman Kumar",
+      "Draft after Rahul's 12-broker slide leaked into the FY25 packet."
+    ],
+    [
+      "1.1",
+      "September 3, 2024",
+      "Diego Alvarez",
+      "Kafka disk numbers, compaction estimates, broker instance class."
+    ],
+    [
+      "1.2",
+      "September 5, 2024",
+      "Aman Kumar",
+      "Approved position: 4 brokers + compaction + PG storage. Do-nothing SLA."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "FY25 capacity memo"
+    },
+    {
+      "type": "p",
+      "text": "I am writing this because a 12-broker line item showed up in Rahul Deshmukh's FY25 packet on August 27. He took it from a Slack thread where Diego Alvarez said, roughly, we will need more brokers by next September. That is true and incomplete. 'More' became 12 on a slide because 12 matches the current cluster size and looks like a doubling. Doubling Kafka does not fix Postgres disk, and it does not fix the 11-minute 14k rps burst on the open-break path. It also costs about $86.4k/year more than the mix I want. Priya asked me for a written position by September 5. This is it."
+    },
+    {
+      "type": "p",
+      "text": "Numbers below are from August 2024 production, plus a 1.7% month-over-month compound that Chris Patel fitted on inbound file counts from January 2023 through August 2024. The fit is not pretty (R\u00b2 0.81, month-end spikes sit above the line) but it is better than 'volume is up'. I am using 1.7% on the month-end peak, not on the monthly average, because the SLA is a peak object. If you compound 8.2M at 1.7% for 13 months you get 10.16M. I am publishing 11.4M for September 2025 because the last three month-ends beat the fitted line by 11.6% and Helen Cho expects correspondent 4401 nested files to keep fattening the tail. 11.4M is the planning peak. 10.16M is the naive compound. Do not let Finance plan to the naive number."
+    },
+    {
+      "type": "h2",
+      "text": "Recommendation"
+    },
+    {
+      "type": "callout",
+      "label": "Decision",
+      "text": "Do not buy 12 Kafka brokers. Buy 4 r6i.xlarge brokers (same class as today), turn on compact+delete on clh.railclear.inbound.v2 and clh.street.inbound.v1 with a 26-hour retention on compacted keys, and buy 6TB more gp3 on ns-pg-clh-recon-01 plus the matching replica disks. Leave match-engine at 12 replicas, raise CPU request from 700m to 1100m in January 2025, not now. FY25 incremental run-rate is $41.7k, plus $6.8k one-time for the disk migrate. If we do nothing, 7:20 ET SLA misses go from 6% of month-end days to about 22% by September 2025.",
+      "kind": "decision"
+    },
+    {
+      "type": "p",
+      "text": "I want Priya to walk into the September 12 planning meeting with that paragraph and the do-nothing table, not with a doubling. Marcus Bell can tell Clearhaven we are adding Kafka capacity. He should not tell them we are doubling it. They will hear doubling as a price conversation."
+    },
+    {
+      "type": "h2",
+      "text": "Where the 8.2M and 11.4M come from"
+    },
+    {
+      "type": "p",
+      "text": "8.2M is the file-equivalent count for 2024-08-30 (August month-end, business day 1 of September wait, Helen's clock: the session we call August month-end peaked on 2024-08-30 18:40-21:10 ET). We counted Kafka records on clh.railclear.inbound.v2 plus clh.street.inbound.v1 plus the replay topic, minus retries. Raw produce count was 8.64M. After subtracting 0.44M retries and poison-pill replays we call it 8.2M. Diego's Grafana dashboard 221 still shows 8.64M. Use 8.2M in planning, 8.64M when you are talking about disk, because disk sees retries."
+    },
+    {
+      "type": "p",
+      "text": "11.4M is 8.2M * (1.017^13) * 1.116, then rounded to one decimal in millions. The 1.116 is the recent tail factor from nested RailClear. If Kavya's auto-split ships and nested files become many small records, the record count goes up while the byte count behaves. Kafka disk cares about bytes. SLA cares about time to drain records. I am planning both: bytes for disk, records for drain time. Split does not save us from 11.4M records. It saves us from OOM. Different memo (CLH-RB-2024-007)."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Month-end session",
+        "File-equivalent (M)",
+        "Kafka produce including retries (M)",
+        "Peak match-engine CPU (12-replica avg)",
+        "7:20 miss?"
+      ],
+      "rows": [
+        [
+          "2024-01-31",
+          "6.41",
+          "6.72",
+          "41.2%",
+          "No"
+        ],
+        [
+          "2024-03-28",
+          "7.04",
+          "7.41",
+          "48.8%",
+          "No"
+        ],
+        [
+          "2024-04-30",
+          "7.38",
+          "7.91",
+          "61.4%",
+          "No, but OOM on partition 7, queue delay 41 min"
+        ],
+        [
+          "2024-05-31",
+          "7.66",
+          "8.02",
+          "54.1%",
+          "No"
+        ],
+        [
+          "2024-06-28",
+          "7.89",
+          "8.28",
+          "57.6%",
+          "Yes, 7:31 ET, checksum incident overlap"
+        ],
+        [
+          "2024-07-31",
+          "8.01",
+          "8.44",
+          "59.2%",
+          "No"
+        ],
+        [
+          "2024-08-30",
+          "8.20",
+          "8.64",
+          "62.7%",
+          "Yes, 7:24 ET, 6 min late, compaction storm"
+        ],
+        [
+          "2025-09 modeled",
+          "11.40",
+          "12.06",
+          "84.1% if we do nothing on CPU requests",
+          "See do-nothing section"
+        ]
+      ],
+      "caption": "Two misses in eight sessions is 25% of this particular window, but the 6% figure later is 12-month month-end days (2 misses / 33 sessions). Do not mix those denominators in a slide."
+    },
+    {
+      "type": "h2",
+      "text": "Three bottlenecks, not one"
+    },
+    {
+      "type": "h3",
+      "text": "Kafka disk"
+    },
+    {
+      "type": "p",
+      "text": "Cluster kafka-clh-prod is 12 brokers, r6i.xlarge, 4TB gp3 each, 71.4% full on the worst broker as of 2024-09-04 11:10 ET. Skew is real: brokers 4, 7, and 11 hold the hot partitions for correspondent 4401 and 2219. Worst-broker-full is the number that pages, not average. At 1.7% MoM on bytes (bytes are growing 1.9% MoM actually, because nested XML is fatter than record count), worst broker hits 80% in January 2025 and 92% in June 2025 if retention stays 72 hours on all inbound topics. 80% is Diego's page. 92% is an incident. We do not ride to 92%."
+    },
+    {
+      "type": "p",
+      "text": "Twelve more brokers would drop per-broker bytes and help skew if we rebalance. They also add ISR traffic, more failure domains, and $7.2k/month. Four brokers plus a rebalance of the hot topics plus compact+delete on keys that are fileId-stable gets worst-broker-full to 58.4% modeled in September 2025. I will take 58.4% and a smaller bill. Kavya measured compact+delete on staging with a 26-hour retention: byte volume on clh.railclear.inbound.v2 dropped 38.6% because the same fileId is restated 3-7 times during a session. Live match only needs the latest. Audit needs the restatements in S3, which we already have in landing. Kafka does not need to be the audit log for restatements. Marcus agreed, with the condition that landing S3 lifecycle stays at 400 days. That lifecycle is already 400 days. Do not silently cut it to pay for this."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Kafka option",
+        "FY25 run-rate delta",
+        "Worst-broker-full Sep 2025",
+        "What else you buy",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing",
+          "$0",
+          "92.1%",
+          "Incidents, SLA misses",
+          "No"
+        ],
+        [
+          "12 more brokers, same retention",
+          "$86.4k/year",
+          "48.2% after rebalance",
+          "Operational load, still fat restatements",
+          "No"
+        ],
+        [
+          "4 more brokers, 72h retention, no compaction",
+          "$28.8k/year",
+          "71.6%",
+          "Hits 80% again in early FY26",
+          "Half measure"
+        ],
+        [
+          "4 more brokers + compact+delete 26h on inbound fileId topics",
+          "$28.8k/year + 40h engineering",
+          "58.4%",
+          "S3 remains audit",
+          "Yes"
+        ],
+        [
+          "Replace 12 r6i.xlarge with 12 r6i.2xlarge, no new nodes",
+          "$51.6k/year",
+          "71.4% (disk unchanged)",
+          "CPU you do not need",
+          "No"
+        ]
+      ],
+      "caption": "Diego agrees with row 4. He does not agree with 12 new brokers. Rahul's slide was row 2."
+    },
+    {
+      "type": "h3",
+      "text": "Postgres storage"
+    },
+    {
+      "type": "p",
+      "text": "ns-pg-clh-recon-01 is 8TB gp3, 5.86TB used, 2.14TB free as of 2024-09-04. The Spark backfill (CLH-TDD-2024-014) will ATTACH about 2.62TB data plus ~1.7TB indexes if we keep the live match-key index on history, or +1.48TB if we drop that index on historical partitions as Rina prefers. Either way, 2.14TB free does not hold a 4.6 billion row attach plus FY25 live growth. Live growth is about 94Gi/month on the hot partitions (Chris, 6-month fit). Twelve months is 1.13TB. Backfill plus live without a disk buy does not fit. This is not optional. This is the line item that 12 Kafka brokers does not touch."
+    },
+    {
+      "type": "p",
+      "text": "Ask: +6TB gp3 on primary and both replicas (the async replica is how we run pg_dump without hurting match). Cost $1,140/month at our gp3 12000 IOPS-equivalent, but we will not 12000-IOPS the extra 6TB; we will 4000 IOPS on the new allocation because historical partitions are cold. Rina wants two volumes, not one giant, so a cold volume can live on cheaper IOPS. I am putting $13.7k/year in the FY25 number for Postgres disk, which is 6TB * 3 instances * our internal rate, not the AWS public calculator. Finance has the rate card."
+    },
+    {
+      "type": "callout",
+      "label": "Warn",
+      "text": "If FY25 funds Kafka and not Postgres, the backfill ATTACH in October (it already slipped from August) will fill the primary. We will DETACH history and Helen will lose multi-year search the same week we promised it. Fund the disk.",
+      "kind": "warn"
+    },
+    {
+      "type": "h3",
+      "text": "match-engine CPU"
+    },
+    {
+      "type": "p",
+      "text": "Twelve replicas, 700m request, 2000m limit, r6i.xlarge node group. August month-end average CPU across replicas was 62.7% of requested, which sounds comfortable until you look at replica 7 during the nested file, which sat at 96.4% of limit for 6.2 minutes and then OOM'd for a different reason. CPU is not the OOM. CPU is the drain time. At 11.4M records, with split records making more messages not fewer, drain time at current CPU headroom goes from 48.6 minutes (August, after the 18:40 drop) to 67.4 minutes modeled. The 7:20 clock starts 06:50. 67 minutes of drain after a 06:10 restatement already pushes us into 7:17 on a good day and 7:31 on a bad one. That is the SLA mechanism, not disk."
+    },
+    {
+      "type": "p",
+      "text": "I do not want more replicas in FY25 Q1. More replicas on a skewed topic just give you more idle workers and the same hot partition. Split-plus-better keys (CLH-4502) is what spreads CPU. What I do want in January 2025 is a request bump 700m -> 1100m so the scheduler stops packing match-engine next to recon-query on the same 4-vCPU node. That packing is how we evicted a sidecar in April. Cost of the request bump is nodes, not replicas: Diego models +2 r6i.xlarge in the match node group, $1,140/month. Put it in Q3 FY25 (our FY starts October), not October, because auto-split should land first and might save a node. If auto-split slips past November month-end, pull the node buy forward. Priya owns that trigger."
+    },
+    {
+      "type": "h2",
+      "text": "What happens if we do nothing"
+    },
+    {
+      "type": "p",
+      "text": "Do nothing means: 12 brokers, 72h retention, 8TB Postgres, 12 match-engine at 700m, auto-split maybe, backfill maybe. I ran three month-end replay traces on staging with synthetic 1.7% growth and the nested-tail factor. Staging is not prod. The numbers are still the best forecast we have. Helen sat with me on September 3 for the SLA translation."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Month-end",
+        "Modeled produce (M)",
+        "Drain minutes after 06:10 restatement",
+        "P(finish after 7:20)",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "2024-09 (next, no buys yet)",
+          "8.41",
+          "51.2",
+          "8%",
+          "We will probably make it, compaction already noisy"
+        ],
+        [
+          "2024-12",
+          "8.84",
+          "55.8",
+          "11%",
+          "First month the backfill disk crunch appears if ATTACH happened"
+        ],
+        [
+          "2025-03",
+          "9.31",
+          "60.4",
+          "16%",
+          "Worst-broker Kafka ~84%"
+        ],
+        [
+          "2025-06",
+          "9.81",
+          "64.1",
+          "19%",
+          "Diego page on disk is routine by here"
+        ],
+        [
+          "2025-09",
+          "11.40 planning peak",
+          "71.6",
+          "22%",
+          "22% is the miss rate on month-end days, not on all days"
+        ]
+      ],
+      "caption": "Today's 12-month month-end miss rate is 6% (2 of 33). 22% is 2-3 misses per quarter instead of 2 per year. Clearhaven will notice. Marcus said so."
+    },
+    {
+      "type": "p",
+      "text": "The 7:20 SLA is 'ops queue unmatched < 2,400 by 07:20 ET on BD+1' as written in CLH-MTG-2024-015. It is not 'Kafka lag zero'. You can miss 7:20 with empty Kafka if Postgres VALIDATE is running, or with full Kafka and empty CPU if one partition is wedged. Do-nothing makes the wedged-partition and the slow-drain cases more common. It does not invent a new failure mode. It takes the April 30 and August 30 days and makes them a monthly habit."
+    },
+    {
+      "type": "p",
+      "text": "Cost of do-nothing is not $0. Two extra Sev-2s a quarter is on-call time, Helen's overtime, and a TAM conversation Marcus would rather not have. I did not dollarize that because Finance will invent a bigger number than I can defend. I am dollarizing hardware. I am stating SLA as a rate. Priya can mix them in the room."
+    },
+    {
+      "type": "h2",
+      "text": "Rejected alternative: the 12-broker ask, and why it died"
+    },
+    {
+      "type": "p",
+      "text": "Rahul's slide said 'double Kafka for FY25 volume, $86.4k, risk reduction'. Volume is 1.39x on the planning peak (11.4/8.2), not 2x. Kafka is one of three bottlenecks. Restatements mean bytes != useful bytes. Twelve new brokers without compaction preserve the restatement bloat. Twelve new brokers without a rebalance plan leave brokers 4/7/11 hot; we added 4 brokers in 2023 and forgot to rebalance for six weeks (CLH-RB-2023-012 still has that scar). A 12-broker buy is how you spend FY25 money and still page on worst-broker-full in June."
+    },
+    {
+      "type": "p",
+      "text": "Diego and I walked the slide on September 3. He is not willing to operate a 24-broker cluster for this workload without a dedicated Kafka person. We do not have a dedicated Kafka person. We have Diego, who also owns the EKS node groups and the forensic PVC. 16 brokers (12+4) is within what he will operate. 24 is a hiring conversation hiding in a hardware conversation. If Priya wants 24, she needs to say the hiring part out loud. I recommend she does not."
+    },
+    {
+      "type": "p",
+      "text": "Kavya floated 'just raise retention to 24h and buy zero brokers'. Died in 20 minutes. Helen and Marcus need more than 24h in Kafka when a Friday month-end meets a Monday holiday. 26-hour compact+delete on fileId keys is not the same as 24-hour delete-all. Compacted latest stays. Uncompacted restatements age out. Replay of a 30-hour-old restatement comes from S3 landing, which is the replay PRD path anyway. 26 hours is the number that survived that argument. Not 24. Not 72 on everything."
+    },
+    {
+      "type": "h2",
+      "text": "FY25 bill I want"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Item",
+        "When",
+        "FY25 $",
+        "Owner after buy"
+      ],
+      "rows": [
+        [
+          "4 x r6i.xlarge Kafka brokers + 4TB gp3 each",
+          "November 2024",
+          "$28.8k run-rate (8 months in FY25 if we buy in Nov: $19.2k this FY; I am showing full-year equivalent $28.8k so nobody is surprised in FY26)",
+          "Diego Alvarez"
+        ],
+        [
+          "compact+delete on inbound fileId topics, 26h",
+          "October 2024 engineering, enable November",
+          "$0 hardware, 40h Kavya + Aman",
+          "Kavya Menon"
+        ],
+        [
+          "+6TB gp3 primary + 2 replicas, cold IOPS on history vol",
+          "October 2024, before ATTACH",
+          "$13.7k/year",
+          "Rina Das"
+        ],
+        [
+          "Disk migrate one-time (snapshot, attach, follow)",
+          "October",
+          "$6.8k people + extra snapshot",
+          "Rina / Diego"
+        ],
+        [
+          "+2 r6i.xlarge match nodes, contingent on auto-split slip",
+          "January 2025 or later",
+          "$13.7k/year if triggered",
+          "Diego, trigger Priya"
+        ],
+        [
+          "Do not: 12 brokers",
+          "never",
+          "$86.4k avoided",
+          "Rahul to update the slide"
+        ]
+      ],
+      "caption": "The $41.7k incremental run-rate in the decision callout is 28.8 + 13.7 and ignores the contingent nodes. Call the contingent out separately so Finance does not treat it as committed."
+    },
+    {
+      "type": "p",
+      "text": "If Finance can only fund one thing, fund Postgres disk. The backfill is already in flight. Kafka worst-broker-full at 71% is ugly and not yet fatal. Postgres at 2.14TB free with a 4TB-class ATTACH coming is fatal. Order: disk, compaction, 4 brokers, then CPU nodes if split slips."
+    },
+    {
+      "type": "h2",
+      "text": "Implementation notes engineers can actually run"
+    },
+    {
+      "type": "p",
+      "text": "This is a memo, but the September 12 meeting will ask 'what would you do next week'. Next week, not after the PO:"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Diego: snapshot Kafka disk usage by broker and by topic to s3://ns-clh-capacity-prod/fy25/kafka-2024-09-05/. Keep this as the baseline the 4-broker rebalance will be judged against.",
+        "Kavya: on staging, compact+delete clh.railclear.inbound.v2 with min.cleanable.dirty.ratio=0.25 and delete.retention.ms=86400000 plus 2h. Measure consumer lag on match-engine-stg during a 8.2M replay. If lag during compact exceeds 90s, stop, do not promote.",
+        "Rina: price the two-volume layout (hot 8TB stays, cold 6TB new) versus a single 14TB resize. I prefer two volumes. She might prefer resize for operational simplicity. She gets the veto.",
+        "Aman: put the 11.4M model in a notebook that reads dashboard 221 so the number cannot drift from a pasted slide. Share with Chris.",
+        "Rahul: replace the 12-broker slide before September 12. If the packet already shipped, this memo is the errata.",
+        "Marcus: do not promise Clearhaven a Kafka doubling. Promise 'capacity through September 2025 month-end at 11.4M with the same 7:20 target'."
+      ]
+    },
+    {
+      "type": "code",
+      "text": "# baseline Diego wants, run from ops-bastion-03\n# Kafka disk by broker\nfor b in 01 02 03 04 05 06 07 08 09 10 11 12; do\n  echo -n \"kafka-clh-prod-$b \"\n  ssh kafka-clh-prod-$b.northstar.internal \\\n    df -B1 /var/lib/kafka | awk 'NR==2{print $3,$2,$5}'\ndone\n\n# topic bytes (worst offenders)\nkubectl -n clearhaven-prod exec deploy/kafka-tools -- \\\n  kafka-log-dirs.sh --bootstrap-server kafka-clh-prod-01.northstar.internal:9092 \\\n  --describe --json | python3 /opt/ns/logdirs-summary.py | head -40\n\n# Postgres free\nkubectl -n clearhaven-prod exec deploy/pg-toolbox -- \\\n  psql -c \"SELECT pg_size_pretty(pg_database_size('clearhaven_recon')) AS db,\n                   pg_size_pretty(pg_tablespace_size('pg_default')) AS ts;\"\n",
+      "caption": "Baseline commands for the September 5 snapshot. The python helper already exists in the tools image."
+    },
+    {
+      "type": "h2",
+      "text": "Risks in my own numbers"
+    },
+    {
+      "type": "p",
+      "text": "1.7% MoM is a fit on 20 months. Clearhaven could onboard two correspondents and break the fit. Marcus says no onboardings are committed for FY25 Q1-Q2. Q3 is 'maybe a small introducing broker'. I did not add a correspondent-shaped cliff. If that broker is real in March, we redo this memo, we do not stretch 1.7%."
+    },
+    {
+      "type": "p",
+      "text": "The 11.6% tail factor is three month-ends. It could be a nested-file fad that auto-split deletes from the CPU story. I still want it in the planning peak because the byte story remains until compaction lands. If I drop the tail, September 2025 is 10.16M and the 12-broker slide looks even worse, so I am not hiding behind the tail. The tail makes my Kafka buy more necessary, not less. I am disclosing it so Rahul cannot say I inflated."
+    },
+    {
+      "type": "p",
+      "text": "Staging replays do not include the 2019-2022 historical partitions under query load. Once Helen starts multi-year search, Postgres CPU on the primary will not look like August. I am betting historical queries stay off the 06:50-08:40 window because Helen agreed to default the toggle off. If she defaults it on, Rina and I need a replica for that search. Not in this FY25 ask. Flagged as an open question."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Question",
+        "Owner",
+        "Due",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "Two volumes vs 14TB resize on Postgres",
+          "Rina Das",
+          "2024-09-18",
+          "Veto is hers. Memo assumes two."
+        ],
+        [
+          "Will Finance accept full-year equivalent vs remaining-FY cash",
+          "Priya Nair",
+          "2024-09-12",
+          "I showed both in the bill table. Pick one in the room."
+        ],
+        [
+          "Auto-split date slipping past November month-end?",
+          "Kavya Menon",
+          "2024-10-04",
+          "Triggers the +2 match nodes"
+        ],
+        [
+          "Holiday Monday + Friday month-end: is 26h compact enough?",
+          "Helen Cho / Marcus Bell",
+          "2024-10-11",
+          "If they say no, we go 36h compacted, not 72h uncompacted"
+        ],
+        [
+          "Multi-year search during 7:20 window",
+          "Helen Cho",
+          "2024-09-20",
+          "Default off is the deal. Confirm after she has the backfill."
+        ],
+        [
+          "Do we need a Kafka person at 16 brokers?",
+          "Diego Alvarez / Priya Nair",
+          "2024-11-15",
+          "Diego says no at 16, yes at 24. I used that."
+        ]
+      ],
+      "caption": "Priya takes these into September 12. Unanswered questions do not revive the 12-broker line."
+    },
+    {
+      "type": "h2",
+      "text": "People"
+    },
+    {
+      "type": "p",
+      "text": "Aman Kumar wrote the model and this position. Diego Alvarez owns Kafka operations and the 16-vs-24 staffing limit. Rina Das owns Postgres disk layout. Priya Nair owns the meeting. Rahul Deshmukh owns the packet that needs errata. Chris Patel owns the 1.7% fit and the 94Gi/month live growth number. Kavya Menon owns compaction and auto-split. Helen Cho owns the SLA translation to unmatched < 2,400. Marcus Bell owns what Clearhaven hears. Wei Chen can run the disk migrate if Rina's October overlaps other work. Sneha Iyer owns a staging test that compact+delete does not drop a record match-engine has not consumed; without that test we do not enable compaction in prod."
+    },
+    {
+      "type": "h2",
+      "text": "Appendix: how 22% was computed, so someone can attack it"
+    },
+    {
+      "type": "p",
+      "text": "I took 33 month-end sessions from 2023-09 through 2024-08. Two missed 7:20 (2024-06-28, 2024-08-30). That is 6.06%, reported as 6%. For September 2025 I cannot wait for 33 future sessions. I used the staging replay: 50 synthetic month-ends at 11.4M with August's partition skew, August's restatement factor 1.054, and CPU requests held at 700m. 11 of 50 finished after 7:20. 22%. If you change skew to uniform, only 4 of 50 miss. If you believe auto-split plus key spread will make partitions uniform, the do-nothing CPU story is better than 22%. I do not believe partitions will be uniform by September 2025 even with split, because correspondent 4401 will still hash together unless we change the key. Changing the key is a compatibility project, not a compaction project. It is not in this ask. So I am keeping 22% as the do-nothing SLA miss rate on month-end days."
+    },
+    {
+      "type": "p",
+      "text": "If someone quotes 22% as 'we will miss one morning in five, every day', correct them. It is month-end days. Non-month-end volume is about 0.48x and does not miss 7:20 today. It will not start missing at 1.7% MoM. The SLA conversation is a month-end conversation. Keep it there."
+    }
+  ]
+}
