@@ -1,0 +1,488 @@
+{
+  "slug": "35-clearhaven-grpc-internal-adr",
+  "doc_id": "CLH-ADR-2024-003",
+  "title": "gRPC for the match-engine to break-svc open-break path",
+  "subtitle": "Accepted. REST stays on the Clearhaven-facing recon-query API.",
+  "doc_type": "Architecture decision record",
+  "kicker": "ADR / gRPC / internal",
+  "org": "Northstar Engineering",
+  "classification": "INTERNAL",
+  "version": "1.2",
+  "status": "Approved",
+  "date": "August 14, 2024",
+  "author": "Aman Kumar",
+  "role": "Software Engineer II",
+  "team": "Clearhaven recon platform",
+  "audience": "Backend engineers, SRE, and Priya Nair as the approver of internal protocol changes",
+  "owners": "Aman Kumar (match-engine client), Kavya Menon (break-svc), Diego Alvarez (mesh/mTLS)",
+  "related": "CLH-TDD-2022-021, CLH-TDD-2023-017, CLH-TDD-2024-006, CLH-MEM-2024-018, CLH-SOP-2024-011, proto/break/v1/open_break.proto",
+  "summary": "We will use gRPC (Protobuf, HTTP/2, mTLS) between match-engine and break-svc on the hot OpenBreak path, and we will keep REST/JSON on recon-query for Clearhaven-facing callers. Status: accepted, August 14, 2024. Month-end load on that internal path is 14k rps for about 11 minutes after the 06:10 restatement. REST+JSON on that path p99s at 41.6ms in August and drops match-engine's drain rate. GraphQL federation, which Kavya Menon floated, died. Rollback is the existing REST client behind a flag for one release. This ADR is the decision, the numbers, the consequences, and the rollback steps.",
+  "form_description": "Architecture decision record for putting gRPC on the internal open-break path while leaving REST on recon-query. Accepted. Written so the next protocol argument cites load numbers instead of taste.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "1.0",
+      "August 2, 2024",
+      "Aman Kumar",
+      "Draft after the 14k rps August rehearsal on staging."
+    ],
+    [
+      "1.1",
+      "August 8, 2024",
+      "Kavya Menon",
+      "GraphQL federation section, proto review, rollback flag name."
+    ],
+    [
+      "1.2",
+      "August 14, 2024",
+      "Aman Kumar",
+      "Accepted by Priya Nair. REST stays for recon-query."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "ADR: gRPC on OpenBreak, REST on recon-query"
+    },
+    {
+      "type": "p",
+      "text": "Status: accepted. Date: August 14, 2024. Deciders: Priya Nair (EM), Aman Kumar (match-engine), Kavya Menon (break-svc), Diego Alvarez (SRE, mTLS). Consulted: Helen Cho (ops, error shape), Marcus Bell (Clearhaven TAM, external API promise), Rahul Deshmukh (PM, SLA), Rina Das (not a protocol owner; we kept her in the thread because OpenBreak writes recon.leg_break and she wanted to know we were not changing SQL)."
+    },
+    {
+      "type": "p",
+      "text": "Context, short: match-engine decides a pair is a break and must create a break record before it acks the Kafka offset. That call is OpenBreak. Today it is HTTP/1.1 REST POST /internal/v1/breaks with a JSON body. At month-end, after the 06:10 ET restatement, we measured 14,040 rps on that path for 11.2 minutes on 2024-07-31, and 13,870 rps for 10.8 minutes on 2024-08-30. p99 on break-svc was 41.6ms. match-engine's worker threads sit on that p99. Drain time of the restatement is dominated by OpenBreak, not by XML, on days without a nested 90MB file. We have a nested-file runbook for the other days. This ADR is for the every-month-end 11 minutes."
+    },
+    {
+      "type": "h2",
+      "text": "Decision"
+    },
+    {
+      "type": "callout",
+      "label": "Decision",
+      "text": "OpenBreak between match-engine and break-svc becomes gRPC, service break.v1.BreakInternal, method OpenBreak, on port 8443 with mTLS. recon-query, which Clearhaven and Helen's Metabase-adjacent tools call, stays REST/JSON on api.clearhaven-recon.internal.northstar.example. No GraphQL. No gRPC to the world. Feature flag match.engine.openbreak.grpc=true ships off in 1.45, on in 1.46 after a month-end in staging. Rollback is the flag, not a schema migration.",
+      "kind": "decision"
+    },
+    {
+      "type": "p",
+      "text": "We are not making gRPC a religion. The hot path has a number. The Clearhaven-facing path has a promise Marcus made in 2022 that the external contract is JSON over HTTPS with the versioning rules in CLH-TDD-2023-017. Those are different paths. Mixing them to 'standardize' is how you break the TAM's promise and still miss 7:20."
+    },
+    {
+      "type": "h2",
+      "text": "The load number"
+    },
+    {
+      "type": "p",
+      "text": "14k rps is not a round marketing figure. 2024-07-31 06:12:08 through 06:23:20 ET, Datadog metric break_svc.http.server.requests{uri:/internal/v1/breaks,method:POST} had a 10-second max of 14,040. The window where the rate stayed above 12,000 rps was 11.2 minutes. 2024-08-30 was 13,870 max, 10.8 minutes above 12,000. I am using 14k rps for 11 minutes as the design load. FY25 at 11.4M files (CLH-MEM-2024-018) scales this to about 19.4k rps for 11 minutes if we do not change the call shape. gRPC does not remove those calls. It makes each call cheaper. If OpenBreak stays REST, 19.4k rps at 41.6ms p99 is 807 thread-seconds per second on the client if you naively multiply, which you should not, but the thread pool on match-engine is 96 workers today and we already see queue time 12-40ms in that window. That queue time is why drain slips."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Session",
+        "Peak rps OpenBreak",
+        "Minutes > 12k rps",
+        "break-svc p99 (ms)",
+        "match-engine OpenBreak wait p99 (ms)",
+        "7:20"
+      ],
+      "rows": [
+        [
+          "2024-04-30",
+          "11,220",
+          "8.4",
+          "36.1",
+          "48.2",
+          "made it, OOM elsewhere"
+        ],
+        [
+          "2024-05-31",
+          "12,410",
+          "9.1",
+          "38.4",
+          "51.6",
+          "made it"
+        ],
+        [
+          "2024-06-28",
+          "12,980",
+          "10.2",
+          "44.8",
+          "62.1",
+          "missed 7:31, checksum overlap"
+        ],
+        [
+          "2024-07-31",
+          "14,040",
+          "11.2",
+          "41.6",
+          "58.4",
+          "made it"
+        ],
+        [
+          "2024-08-30",
+          "13,870",
+          "10.8",
+          "42.9",
+          "59.7",
+          "missed 7:24, compaction storm"
+        ],
+        [
+          "2025-09 modeled REST",
+          "19,400",
+          "11 est.",
+          "54-70 est.",
+          "80+ est.",
+          "see capacity memo"
+        ],
+        [
+          "2025-09 modeled gRPC",
+          "19,400",
+          "11 est.",
+          "18-24 est. from staging 14k test",
+          "22-31 est.",
+          "headroom"
+        ]
+      ],
+      "caption": "Staging gRPC rehearsal at 14.2k rps ran 2024-08-01 for 15 minutes. p99 19.4ms on break-svc. That is the evidence, not a vendor slide."
+    },
+    {
+      "type": "h2",
+      "text": "Why REST is losing on this path"
+    },
+    {
+      "type": "p",
+      "text": "The JSON body for OpenBreak is 1.8-6.4KB depending on nested lot count. Jackson serialization on the client, HTTP/1.1 connection setup or checkout from a pool that still has idle-timeout surprises, Netty on break-svc, Jackson reverse. We already did the obvious REST work: keep-alive, pool 128, compression off (compression made p99 worse on small bodies, Kavya's May test). The remaining cost is encode/decode and HTTP/1.1 head-of-line on the few connections that go bad during the 11 minutes. Envoy in the mesh adds 1.8-3.1ms. We will keep Envoy for mTLS. gRPC over the same Envoy is still a win because Protobuf and HTTP/2 multiplexing cut the Jackson and HOL pieces."
+    },
+    {
+      "type": "p",
+      "text": "Helen asked whether ops would see different error messages. Internal gRPC errors will be translated at the match-engine log line into the same break_code_v2 values the REST path used. The ops queue does not speak gRPC status codes. If we leak INTERNAL to a dashboard, I will have failed this ADR. The translation table is in break-svc, not in a sidecar, so we can test it."
+    },
+    {
+      "type": "h2",
+      "text": "What stays REST"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "recon-query public and partner API: /v1/breaks, /v1/legs, /v2/breaks as versioned in CLH-TDD-2023-017.",
+        "Helen's CSV export endpoints. They return 40-200MB. gRPC streaming would work and would also force a new client on her laptop. No.",
+        "Metabase JDBC stays JDBC. Not a protocol conversation.",
+        "The vendor webhook we post to RailClear when a file is rejected. They specified JSON in 2023. Marcus will not reopen it.",
+        "Health checks. /healthz remains HTTP/1.1 for kubelet. Do not invent a grpc.health.v1 for kubelet until Diego asks. He has not asked."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "If a future reader tries to 'finish the job' by putting gRPC on recon-query, that is a new ADR. This one explicitly does not authorize it. Clearhaven's integration tests, which Marcus's side runs, POST JSON. A surprise protocol change there is INC-2023-061 all over again (the unversioned API incident). We already paid for that lesson."
+    },
+    {
+      "type": "h2",
+      "text": "Alternatives"
+    },
+    {
+      "type": "h3",
+      "text": "REST+JSON, keep optimizing"
+    },
+    {
+      "type": "p",
+      "text": "Stay on POST /internal/v1/breaks, add more pool tuning, maybe HTTP/2 via Envoy without changing the payload. We tried HTTP/2 + JSON on staging in July. p99 went from 41.6ms equivalent to 33.8ms. Not enough. Jackson on 14k rps still showed 18.4% of break-svc CPU in async-profiler. Protobuf dropped that to 4.1% in the August 1 rehearsal. REST+JSON died as the standing plan on August 8 in the backend review. We keep it as rollback, not as the target."
+    },
+    {
+      "type": "h3",
+      "text": "GraphQL federation (Kavya floated, died)"
+    },
+    {
+      "type": "p",
+      "text": "Kavya Menon wrote a two-page spike on August 5: expose break-svc and recon-query as subgraphs, Apollo-compatible federation, match-engine calls OpenBreak as a mutation. The pitch was one graph for internal and eventually for Clearhaven, plus the ability to fetch break + legs in one round trip. It died in review on August 7 for three reasons we should not forget when it comes back."
+    },
+    {
+      "type": "p",
+      "text": "First, federation adds a gateway hop. At 14k rps the gateway is a new hotspot. We would have to scale a gateway fleet for 11 minutes a month and keep it correct the other 43,000 minutes. Second, OpenBreak is a write with exactly-once intent tied to the Kafka ack. GraphQL mutation semantics plus a gateway retry policy is how you double-insert breaks. We already have idempotent consumers on Kafka (CLH-TDD-2023-014). We do not have idempotent GraphQL mutations, and Kavya's spike used a default gateway retry on 503. Third, Helen and Marcus do not want GraphQL on the Clearhaven-facing side. Marcus said the partner integration team has JSON contracts in PDF. A federated graph that 'could' be exposed is a political object. Priya did not want that object. Kavya agrees with the rejection; she asked that the spike be cited so nobody thinks we did not look."
+    },
+    {
+      "type": "h3",
+      "text": "Unix sockets / sidecar smuggling / 'just share the DB'"
+    },
+    {
+      "type": "p",
+      "text": "match-engine writing recon.leg_break directly would skip the network. Rina Das killed this in 2022 and again on August 6 when someone revived it in the ADR thread. break-svc owns break numbering, the expand/contract dual-write to break_code_v2, and the audit row. Two writers on that table is how you skip a Flyway phase. Not allowed. Unix sockets on the same pod would require colocation. We are not colocating match-engine and break-svc; they scale on different axes (Kafka partitions vs break write CPU). Died."
+    },
+    {
+      "type": "h2",
+      "text": "Protocol sketch"
+    },
+    {
+      "type": "code",
+      "text": "syntax = \"proto3\";\npackage break.v1;\noption java_package = \"com.northstar.clearhaven.breaksvc.v1\";\noption java_multiple_files = true;\n\nservice BreakInternal {\n  rpc OpenBreak (OpenBreakRequest) returns (OpenBreakResponse);\n  rpc OpenBreakBatch (OpenBreakBatchRequest) returns (OpenBreakBatchResponse);\n}\n\nmessage OpenBreakRequest {\n  string idempotency_key = 1;          // kafka topic-partition-offset\n  string leg_id = 2;\n  string source_system = 3;\n  string break_code_v2 = 4;\n  string break_code_legacy = 5;        // dual-write period, see SOP-2024-011\n  string railclear_file_id = 6;\n  int32 nesting_depth = 7;\n  repeated LotRef lots = 8;            // keep this small; S3 pointer if huge\n  string s3_payload_uri = 9;           // when lots would blow the 1MB default\n}\n\nmessage OpenBreakResponse {\n  string break_id = 1;\n  bool duplicate = 2;                  // idempotent hit\n  string break_code_v2 = 3;\n}\n\n// Batch is optional in 1.46. Single is required. Batch died as the v1 target\n// because partial failure semantics took more than the meeting had.\n",
+      "caption": "open_break.proto v1 as it will live in proto/break/v1/. Do not add Helen's note text to this message; that is a recon-query field."
+    },
+    {
+      "type": "p",
+      "text": "Default gRPC max message size is 4MB in our template. OpenBreakRequest must stay under 256KB in the client. If lots would exceed that, match-engine writes the lot list to s3://ns-clh-inbound-prod/openbreak-payloads/{idempotency_key}.json and sets s3_payload_uri. That is the same pattern we used when nested RailClear files blew the JVM. Do not raise the gRPC limit to 16MB to avoid S3. We know how that story ends."
+    },
+    {
+      "type": "h2",
+      "text": "Security and mesh"
+    },
+    {
+      "type": "p",
+      "text": "mTLS via the existing mesh (Envoy, SPIFFE ids spiffe://northstar.example/ns/clearhaven-prod/sa/match-engine and .../sa/break-svc). Diego already has the cluster. gRPC is just another HTTP/2 route. We will not put break.v1 on the public ALB. NetworkPolicy already denies cross-namespace to break-svc except from match-engine, replay-worker, and Diego's debug SA. Add replay-worker to the gRPC allow list before we enable the flag in prod or replay will silently REST-fallback, which is fine for a day and then becomes a second protocol in prod forever."
+    },
+    {
+      "type": "p",
+      "text": "Authz inside break-svc today is a static token on REST. gRPC will use the SPIFFE id, not the token. The token path stays on REST for rollback. If both succeed, we have two auth stories. Ticket CLH-4902 is Kavya's, due before 1.46 flag-on. If 4902 is not done, the flag stays off. I will not ship gRPC with the static token copied into a metadata header. That is the same token we almost logged in 2023."
+    },
+    {
+      "type": "h2",
+      "text": "Consequences"
+    },
+    {
+      "type": "h3",
+      "text": "Positive"
+    },
+    {
+      "type": "p",
+      "text": "Staging 14.2k rps for 15 minutes at p99 19.4ms gives match-engine about 20-30ms back per call in the hot window. On 14k rps that is a lot of worker-queue time. Drain after 06:10 should shrink 6-9 minutes if the rest of the system behaves. That is inside the 7:20 conversation. It is not a substitute for the Kafka and Postgres buys in the capacity memo. It is the CPU-side cousin of those buys."
+    },
+    {
+      "type": "p",
+      "text": "Protobuf schema in git is a better contract than a wiki JSON sample. Sneha Iyer can generate fixtures. The dual-write fields for break_code_v2 are explicit in the proto instead of optional JSON keys that vanish in a refactor."
+    },
+    {
+      "type": "h3",
+      "text": "Negative"
+    },
+    {
+      "type": "p",
+      "text": "Two protocols to operate. On-call must know that grpcurl is a tool, not a rumor. Diego will put grpcurl in the kafka-tools image so we do not kubectl debug a random image at 3 a.m. Load tests must hit gRPC, not only the REST path, or we will 'prove' we can take 14k rps on a path prod is not using."
+    },
+    {
+      "type": "p",
+      "text": "Local dev becomes slightly worse. match-engine developers need a proto generate step. We will generate in CI and commit the Java stubs for a quarter so laptops without buf still build. Kavya hates committed stubs. I hate broken laptops more. Revisit in Q1 2025."
+    },
+    {
+      "type": "p",
+      "text": "Partial rollout is mixed protocols. Old match-engine pods REST, new pods gRPC, break-svc must serve both for one release. That is required. break-svc 1.19 already has the REST path. 1.20 adds the gRPC server and keeps REST. match-engine 1.45 speaks REST. 1.46 speaks gRPC if the flag is on. Do not delete REST in 1.20. Delete REST internal path in 1.22 at the earliest, after one month-end on gRPC, after Sneha's suite is green, after Helen has seen no duplicate breaks."
+    },
+    {
+      "type": "h3",
+      "text": "Neutral but real"
+    },
+    {
+      "type": "p",
+      "text": "OpenBreakBatch did not make v1. We will look at it if 19.4k rps in FY25 still queues. Batch without a partial-failure rule is how you ack Kafka for 80 breaks and persist 79. Not in this ADR as accepted work. If someone implements it in a Friday PR, I will revert it."
+    },
+    {
+      "type": "h2",
+      "text": "Rollback"
+    },
+    {
+      "type": "p",
+      "text": "Flag match.engine.openbreak.grpc in the match-engine config map. false = REST client. true = gRPC client. break-svc keeps REST until 1.22. Rolling back is a config change, not a binary change, as long as we are still on 1.46/1.20. If we have already deleted REST, rollback is a chart version down. We will not delete REST in the same release we turn the flag on."
+    },
+    {
+      "type": "steps",
+      "items": [
+        "If gRPC p99 > 40ms or error rate > 0.4% for 3 minutes in the hot window, set the flag false. Diego has the dashboard. I have the pager.",
+        "If break_id duplicates exceed 0.05% (idempotency broken), flag false and page Kavya. Do not 'let it ride until 7:20'.",
+        "If Envoy rejects HTTP/2 (we have seen this after a mesh upgrade), flag false. REST is HTTP/1.1 and survived the last mesh bump.",
+        "If proto mismatch (we deployed match-engine 1.46 against break-svc 1.19 without gRPC), the client fails at startup on a channel check. That is intentional. Do not catch that exception and REST-fallback in 1.46; fail the pod so kube rolls back. Silent fallback is how you get two protocols with no metrics.",
+        "Write the incident in the same format as CLH-INC-2023-061 if the flag flip happens in prod. This is a protocol incident even if ops did not see it."
+      ]
+    },
+    {
+      "type": "code",
+      "text": "# flag off (rollback)\nkubectl -n clearhaven-prod set env deploy/match-engine MATCH_ENGINE_OPENBREAK_GRPC=false\n# wait rolling update\nkubectl -n clearhaven-prod rollout status deploy/match-engine\n\n# confirm clients\nkubectl -n clearhaven-prod logs -l app=match-engine --tail=20 | egrep 'OpenBreakClient|grpc|REST'\n\n# grpcurl from tools pod, mTLS via mesh sidecar, internal DNS\nkubectl -n clearhaven-prod exec deploy/kafka-tools -- \\\n  grpcurl -plaintext break-svc.clearhaven-prod.svc.cluster.local:8443 list\n# plaintext only works if you exec inside the sidecar-less debug pod.\n# the real call uses the mesh. Diego's runbook NS-MESH-RB-04 has the mTLS grpcurl.\n\n# REST still alive?\ncurl -sS -o /dev/null -w '%{http_code}\\n' \\\n  https://break-svc.clearhaven-prod.svc.cluster.local:8080/internal/v1/health\n",
+      "caption": "Rollback and probe. Do not grpcurl OpenBreak in prod with a real idempotency_key unless you want a break row."
+    },
+    {
+      "type": "h2",
+      "text": "Rollout plan"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "When",
+        "What",
+        "Success"
+      ],
+      "rows": [
+        [
+          "2024-08-16",
+          "proto merged, stubs generated, break-svc 1.20 on staging",
+          "grpcurl list works, REST still works"
+        ],
+        [
+          "2024-08-21",
+          "match-engine 1.45 on staging, flag false",
+          "month-end fixture REST path unchanged"
+        ],
+        [
+          "2024-08-23",
+          "flag true on staging, 14k rps replay",
+          "p99 < 25ms, duplicate < 0.02%, Sneha suite green"
+        ],
+        [
+          "2024-09-04",
+          "break-svc 1.20 prod, gRPC on, REST on, no match-engine change",
+          "mesh routes exist, no traffic yet"
+        ],
+        [
+          "2024-09-11",
+          "match-engine 1.46 prod, flag false",
+          "idle gRPC client in process, REST live"
+        ],
+        [
+          "2024-09-18",
+          "flag true prod, 10% pods via two replica sets if we can, else all",
+          "watch 06:10 next restatement; if none, synthetic 2k rps"
+        ],
+        [
+          "2024-10-31",
+          "first real month-end on gRPC",
+          "Helen unmatched curve looks like September or better"
+        ],
+        [
+          "2024-11-15 earliest",
+          "consider REST internal removal in 1.22",
+          "only after the October month-end writeup"
+        ]
+      ],
+      "caption": "Dates assume no Sev-2 in the week prior. Priya can slip. Authors cannot skip staging 14k."
+    },
+    {
+      "type": "h2",
+      "text": "Failure modes"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Failure",
+        "How we see it",
+        "What we do"
+      ],
+      "rows": [
+        [
+          "Message too large",
+          "RESOURCE_EXHAUSTED, lots > 256KB",
+          "s3_payload_uri path; if that code is missing, flag false"
+        ],
+        [
+          "Idempotency gap REST vs gRPC",
+          "two break_ids for one kafka offset during mixed rollout",
+          "break-svc must key idempotency on the key, not on the protocol. Test this. If broken, stop rollout."
+        ],
+        [
+          "Mesh HTTP/2 bug",
+          "upstream connect errors, REST still fine",
+          "flag false, Diego mesh rollback"
+        ],
+        [
+          "Clock skew on SPIFFE",
+          "UNAUTHENTICATED after a node reboot",
+          "not a reason to disable mTLS; fix the node. REST token would also fail if we had rotated."
+        ],
+        [
+          "grpcurl in prod creates a break",
+          "Helen sees a mystery open break",
+          "forbidden. Use a dummy in staging. Prod probes are health only."
+        ],
+        [
+          "Committed stubs drift from proto",
+          "CI generate-check fails",
+          "CI is right. Do not --no-verify."
+        ],
+        [
+          "OpenBreakBatch sneaks in",
+          "proto has a method we did not accept",
+          "revert. Partial failure not designed."
+        ],
+        [
+          "recon-query accidentally fronted by gRPC gateway",
+          "Marcus's partner tests fail JSON",
+          "that is a new incident class. This ADR forbids it."
+        ]
+      ],
+      "caption": "The mixed-rollout idempotency test is the one Sneha will fail us on. Good."
+    },
+    {
+      "type": "h2",
+      "text": "Rejected: gRPC-web to Clearhaven"
+    },
+    {
+      "type": "p",
+      "text": "Someone (not Kavya, a contractor on a two-week pairing) asked whether Clearhaven's future UI should speak gRPC-web. Out of scope, and no. Marcus's PDF, the versioning TDD, and INC-2023-061. If Clearhaven builds a new UI in 2026 they can file a new ADR. We will not prep a gateway 'just in case'."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Question",
+        "Owner",
+        "Due",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "CLH-4902 SPIFFE authz replacing the static token",
+          "Kavya Menon",
+          "2024-09-10",
+          "Flag stays off without this."
+        ],
+        [
+          "Do we need OpenBreakBatch before FY25 19.4k rps?",
+          "Aman Kumar / Priya Nair",
+          "2024-12-06",
+          "Default no. Reopen only with a partial-failure spec."
+        ],
+        [
+          "Committed stubs through Q1 2025 or earlier?",
+          "Kavya Menon / Aman Kumar",
+          "2024-10-18",
+          "I want them until laptops are uniform. She wants buf in the setup script."
+        ],
+        [
+          "replay-worker gRPC date",
+          "Aman Kumar",
+          "2024-09-18",
+          "Must not silent-REST-fallback after flag-on."
+        ],
+        [
+          "Will Helen's error text still match her runbook screenshots?",
+          "Helen Cho",
+          "2024-09-25",
+          "Translation table review. 30 minutes on a call, not a design doc."
+        ],
+        [
+          "Envoy timeout on OpenBreak: 200ms or 500ms?",
+          "Diego Alvarez",
+          "2024-09-04",
+          "Staging p99 is 19.4ms. 200ms is plenty. 500ms hides incidents."
+        ]
+      ],
+      "caption": "Priya accepted the ADR with these open. They do not reopen GraphQL."
+    },
+    {
+      "type": "h2",
+      "text": "People"
+    },
+    {
+      "type": "p",
+      "text": "Aman Kumar owns the match-engine client, the flag, and this ADR. Kavya Menon owns break-svc's gRPC server, the GraphQL spike that died, and CLH-4902. Diego Alvarez owns mesh routes, mTLS, grpcurl in the tools image, and the Envoy timeout. Priya Nair accepted the decision. Helen Cho owns the error-text check. Marcus Bell owns the external REST promise we are not touching. Rahul Deshmukh owns the SLA expectation that this 6-9 minute drain cut is real, not decorative. Rina Das owns the 'no second writer on leg_break' constraint that killed the shared-DB alternative. Sneha Iyer owns the mixed-protocol idempotency tests. Wei Chen does not own this; if you are about to add him to a proto review, you are in the wrong guild."
+    },
+    {
+      "type": "h2",
+      "text": "Appendix: staging rehearsal notes (2024-08-01)"
+    },
+    {
+      "type": "p",
+      "text": "Cluster ns-eks-clh-stg-01, break-svc 1.20-rc2, match-engine 1.46-rc1, flag true. Loadgen was the existing replay tool pointed at a captured 2024-07-31 restatement, sped up 1.04x to hit 14.2k rps. Duration 15 minutes because we wanted longer than 11. Error rate 0.018%, all RESOURCE_EXHAUSTED on three oversized lot lists that lacked s3_payload_uri in the fixture. We added the S3 path the next day. p50 8.6ms, p99 19.4ms, p99.9 27.8ms. CPU on break-svc 6 replicas went from 71.4% (REST baseline the previous night) to 44.2%. match-engine OpenBreak wait p99 24.1ms. Duplicate rate 0.006% (idempotency hits from the sped-up replay overlapping its own retries). Helen's unmatched curve on the staging Metabase was not comparable (staging data is 14 days). We did not call this a production proof. We called it enough to accept the ADR. A 19.4k rps test is scheduled for 2024-10-17 as CLH-TST-2024-008 if that load-test doc still lands in October."
+    },
+    {
+      "type": "p",
+      "text": "The REST baseline the previous night, same fixture, same 14.2k: p99 39.8ms on staging (prod was 41.6ms, staging is a bit faster), error rate 0.022%, CPU 71.4%. gRPC's win on that pair of nights is 20.4ms p99. I am publishing 18-24ms for FY25 modeled gRPC because 19.4k will be worse than 14.2k. If the October load test comes back at 35ms p99, we reopen Batch or we buy break-svc replicas. We do not reopen GraphQL."
+    }
+  ]
+}
