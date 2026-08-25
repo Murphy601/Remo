@@ -1,0 +1,517 @@
+{
+  "slug": "40-clearhaven-kafka-rebalance-incident",
+  "doc_id": "CLH-INC-2024-017",
+  "title": "Incident report: match-engine rebalance storm, January 8, 2024",
+  "subtitle": "session.timeout.ms=6000 on a rolling deploy. Lag 3.4M. Match window 41 minutes.",
+  "doc_type": "Incident report",
+  "kicker": "Clearhaven Markets / Reconciliation platform",
+  "org": "Northstar Engineering",
+  "classification": "INTERNAL",
+  "version": "1.2",
+  "status": "Approved",
+  "date": "January 11, 2024",
+  "author": "Aman Kumar",
+  "role": "Software Engineer II",
+  "team": "Clearhaven recon (match-engine, ingest)",
+  "audience": "Priya Nair, Diego Alvarez, Kavya Menon, Helen Cho, Marcus Bell, Sneha Iyer, Jules Park",
+  "owners": "Aman Kumar (writeup, consumer config), Diego Alvarez (PDB and deploy), Kavya Menon (match-engine)",
+  "related": "CLH-TDD-2023-008, CLH-RB-2023-012, CLH-SOP-2023-019, CLH-INC-2023-204, CLH-TCK-7104, CLH-TCK-7112, CLH-TCK-7120",
+  "summary": "On January 8, 2024 a rolling deploy of match-engine shipped session.timeout.ms=6000. Combined with a max.poll.interval.ms that was already too low (120000) and the default range assignor, the consumer group match-engine-prod entered a rebalance storm. Lag on clh.match.inbound hit 3.4 million. p95 match window hit 41 minutes, which is the old file-drop world we spent 2023 leaving. Staging did not catch it because staging has 1 partition. We fixed it the same morning with sticky assignor, longer timeouts, and pdb maxUnavailable=1. This report is the timeline, the contributing factors, and the list of things we will actually change.",
+  "form_description": "Incident report for the January 8 match-engine rebalance storm. Written for Priya, Marcus, and the on-call rotation so the timeout and staging-partition mistakes are not tribal knowledge.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.2",
+      "January 8, 2024",
+      "Aman Kumar",
+      "Timeline while the lag was still draining."
+    ],
+    [
+      "0.9",
+      "January 10, 2024",
+      "Aman Kumar",
+      "Contributing factors, staging gap, rejected pause-all-consumers."
+    ],
+    [
+      "1.0",
+      "January 11, 2024",
+      "Aman Kumar",
+      "Action items, configs, Helen's impact numbers."
+    ],
+    [
+      "1.2",
+      "January 11, 2024",
+      "Priya Nair",
+      "Approved. Staging partition count change is a must, not a should."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "1. User-facing summary"
+    },
+    {
+      "type": "p",
+      "text": "Between 09:41 and 11:18 ET on Monday, January 8, 2024, Clearhaven recon stopped matching in any way Helen Cho could use. Match window, her number, peaked at 41 minutes on the 09:32-09:33 slice and sat above 20 minutes for 86 minutes. Consumer lag on group match-engine-prod, topic clh.match.inbound, peaked at 3.41 million records at 10:07. No data was dropped. Kafka held. Ingest kept producing. The matcher was busy electing a new member set instead of polling. Desk impact: Helen's team worked off the previous day's late slice and a spreadsheet, 6 people, until 11:40. Marcus Bell told the TAM channel at 10:22. No regulatory clock was missed. End-of-day completeness still happened by 17:12 ET, which is inside the 18:30 contractual line and outside every ops agreement we have."
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "What we will change",
+      "text": "Sticky assignor. session.timeout.ms=45000. heartbeat.interval.ms=15000. max.poll.interval.ms=300000. pdb maxUnavailable=1 on match-engine. Staging clh.match.inbound partition count from 1 to 48, even if that looks silly on a quiet cluster. Deploy helm values for consumer timeouts become a reviewed artifact, not a 'tune it in the chart.' Date: all of this in prod by January 16, except staging partitions which Diego will do January 12."
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "What this was not",
+      "text": "Not a broker outage. Not a disk fill. Not the November settlement-break incident repeating. Not a poison message. Not 'Kafka is bad and we should go back to files.' Files gave us 41 minutes every day. This gave us 41 minutes once, because we shipped a 6 second session timeout."
+    },
+    {
+      "type": "h1",
+      "text": "2. Timeline (ET, January 8, 2024)"
+    },
+    {
+      "type": "p",
+      "text": "Times from Datadog, kube events, and #clh-inc. I was on the train until 10:05. Kavya was on-call. Diego joined at 09:52. Helen paged at 09:48."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Time",
+        "What happened",
+        "Source"
+      ],
+      "rows": [
+        [
+          "08:14",
+          "Change CLH-CHG-2024-009 approved. match-engine 1.14.2 -> 1.15.0. Notes say 'consumer cleanup, faster failure detection.' session.timeout.ms 45000 -> 6000 in values.yaml.",
+          "change ticket"
+        ],
+        [
+          "09:02",
+          "Helm deploy starts in prod, rollingUpdate maxUnavailable=2, maxSurge=1. 8 pods. Two come down at once.",
+          "kube events"
+        ],
+        [
+          "09:06",
+          "First rebalance. 6 members. Lag 12,400, normal-ish for the open.",
+          "Datadog kafka.consumer.lag"
+        ],
+        [
+          "09:11",
+          "Second pair of pods dies. Members 4. session.timeout 6s. Remaining members cannot heartbeat through a stop-the-world GC that 1.15.0 also made worse (G1, pause 1.4s p95, we did not notice in staging). Rebalance 2.",
+          "Datadog, GC logs"
+        ],
+        [
+          "09:18",
+          "Pods 5-6 start, join, trigger rebalance 3. Assignor is range. Partitions slosh. In-flight poll is aborted. max.poll.interval 120s starts to matter.",
+          "broker GroupCoordinator logs"
+        ],
+        [
+          "09:32",
+          "Open spike, 48,100 inbound/min. Group is in rebalance 6. Lag 410,000 and climbing.",
+          "Datadog"
+        ],
+        [
+          "09:41",
+          "Lag 1.12M. Match window on 09:32 slice already 9.4 min and not finishing. Helen Slack: 'are we in file-drop mode again.'",
+          "#clh-ops"
+        ],
+        [
+          "09:48",
+          "Helen pages #clh-inc. Kavya acks. She sees rebalances, not a crash loop. Restarts one pod. Makes it worse (rebalance 9).",
+          "pager, kube"
+        ],
+        [
+          "09:52",
+          "Diego on. Spots session.timeout.ms=6000 in the live Deployment env. Says the number out loud. I am still on the train.",
+          "#clh-inc"
+        ],
+        [
+          "10:07",
+          "Lag peak 3.41M. Match window 41 min on the 09:32 slice. p99 worse, 54 min, one slice.",
+          "Datadog"
+        ],
+        [
+          "10:11",
+          "Diego helm rollback to 1.14.2. Rollback still rollingUpdate maxUnavailable=2, so rollback itself rebalances. Lag holds high.",
+          "helm history"
+        ],
+        [
+          "10:18",
+          "I am on laptop. We freeze the Deployment, scale to 8 with the old image, wait. Group finally stable at 10:29, 8 members, sticky not yet, still range.",
+          "me"
+        ],
+        [
+          "10:22",
+          "Marcus in TAM channel. We tell him: no data loss, matcher behind, ETA 11:30 if lag drains at current 18k/sec.",
+          "Slack"
+        ],
+        [
+          "10:29-11:18",
+          "Drain. Lag 3.41M to 14,200. Match window on new slices back under 8 min at 11:12. 09:32 slice marked complete at 11:18 (41 min).",
+          "Datadog"
+        ],
+        [
+          "11:40",
+          "Helen: desk off the spreadsheet. After-action scheduled Wednesday.",
+          "#clh-inc"
+        ],
+        [
+          "14:05",
+          "We ship 1.15.1 to staging with sticky + timeouts, still 1 partition, tests green, which is the problem.",
+          "CI"
+        ],
+        [
+          "Jan 9 21:10",
+          "1.15.1 prod with sticky, session.timeout 45s, max.poll 300s, pdb maxUnavailable=1. Quiet night, lag never above 22,800.",
+          "change CLH-CHG-2024-011"
+        ]
+      ],
+      "caption": "Primary timeline. Rebalance numbers are from GroupCoordinator on kafka-prod-02.chi.northstar.internal."
+    },
+    {
+      "type": "p",
+      "text": "Duration of user impact: 09:41 to 11:18, 97 minutes of match window above the 8-minute ops line. Duration of group instability: 09:06 to 10:29. The 23 minutes between stable group and usable match window is drain, not more rebalances. If we had paused ingest we would have had a clean group and a hole in the day. We did not pause ingest. That was correct. See rejected alternatives."
+    },
+    {
+      "type": "h1",
+      "text": "3. Impact"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Thing",
+        "Number",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "Peak lag",
+          "3.41 million records",
+          "clh.match.inbound, group match-engine-prod"
+        ],
+        [
+          "Worst match window",
+          "41 minutes p95 on 09:32 slice, 54 minutes p99 one slice",
+          "Helen's definition"
+        ],
+        [
+          "Slices above 8 min",
+          "14 slices",
+          "09:32 through 10:45"
+        ],
+        [
+          "Desk workaround",
+          "6 people, spreadsheet, 09:50-11:40",
+          "Helen"
+        ],
+        [
+          "Messages lost",
+          "0",
+          "high water vs ingest.raw_event matched after drain, Chris checked 12:40"
+        ],
+        [
+          "Duplicates",
+          "2,184",
+          "in-flight acks aborted on rebalance, idempotency keys dropped them. CLH-TDD-2023-014 earning its keep"
+        ],
+        [
+          "Broker CPU",
+          "44.2% p95",
+          "not the bottleneck"
+        ],
+        [
+          "match-engine CPU during storm",
+          "11-18%",
+          "idle of useful work, busy of JoinGroup"
+        ],
+        [
+          "EOD completeness",
+          "17:12 ET",
+          "inside 18:30 MSA, outside Helen's 8 min"
+        ],
+        [
+          "Status page / external",
+          "none",
+          "recon is internal to Clearhaven. Marcus still had to talk to the desk"
+        ]
+      ],
+      "caption": "Impact table. The duplicate count is real and fine. Do not 'clean them up' in SQL."
+    },
+    {
+      "type": "p",
+      "text": "Helen compared it to 2022. She is allowed. 2022 was every day. This was a Monday we caused. I told her that on the 11:40 call and I am putting it here so nobody on our side gets cute about 'technically EOD was fine.' EOD was fine. The morning was not."
+    },
+    {
+      "type": "h1",
+      "text": "4. Technical cause"
+    },
+    {
+      "type": "h2",
+      "text": "4.1 session.timeout.ms=6000"
+    },
+    {
+      "type": "p",
+      "text": "1.15.0 values.yaml, comment in the PR: 'detect dead members faster, 6s is what the Kafka docs allow as a minimum with heartbeat 2s.' The docs allow it. The docs also say session.timeout must be above GC pauses plus network plus whatever stop-the-world you pretend you do not have. 1.15.0 switched default GC to G1 with a smaller heap (4.5g, was 5.5g) because of a memory note in December. G1 p95 pause on prod at the open is 1.1-1.4 seconds. Heartbeat thread plus a 1.4 second pause plus a rolling pod kill of 2 members is enough for the coordinator to drop members, which is a rebalance, which pauses polling, which trips max.poll.interval, which is another rebalance. We built a loop."
+    },
+    {
+      "type": "p",
+      "text": "Who set 6000: me, in the PR, on January 4. Kavya reviewed the code, not the values. Diego reviewed the helm chart structure, not the timeout. Sneha's suite does not assert consumer config. The PR title was 'match-engine 1.15.0: break lookup batching.' The timeout sat in the same values file as a 'also.' That is the process failure. The number is the technical failure."
+    },
+    {
+      "type": "h2",
+      "text": "4.2 max.poll.interval.ms=120000 was already too low"
+    },
+    {
+      "type": "p",
+      "text": "We have been at 120 seconds since the ingest redesign. A match-engine poll batch at the open can take 40-90 seconds when break-svc is slow (we already know break-svc PK lookups are the long pole, see every capacity conversation). 120 seconds leaves a 30-80 second cushion. During a rebalance, poll is aborted and the next successful poll is delayed by JoinGroup. 120 seconds is then too short. Members get kicked for not polling, which is another rebalance. Raising max.poll to 300 seconds does not make matching faster. It makes the group stop lying about who is alive. We should have done this in 2023. We did it on January 9."
+    },
+    {
+      "type": "h2",
+      "text": "4.3 Range assignor plus maxUnavailable=2"
+    },
+    {
+      "type": "p",
+      "text": "partition.assignment.strategy was the default range assignor. 48 partitions, 8 members. Range assignor gives contiguous ranges. When membership changes, almost every member's set changes, so almost every member stops and starts. Sticky assignor keeps most assignments. We knew sticky existed. We did not set it. maxUnavailable=2 meant two members vanished per rollout step. Combined with range, each step was a full reshuffle. pdb maxUnavailable=1 plus sticky turns a deploy into 'one member leaves, most partitions stay, one member comes back, most partitions stay.' That is the January 9 world. It is also the world the January 2023 ingest TDD told us to live in and we never finished."
+    },
+    {
+      "type": "h2",
+      "text": "4.4 Why staging did not catch this"
+    },
+    {
+      "type": "p",
+      "text": "clh.match.inbound in staging has 1 partition. Jules Park confirmed it on the January 5 staging walk-through when I asked him to tail lag during the 1.15.0 dress rehearsal. It has had 1 partition since someone 'simplified' it in 2022 so Sneha's tests would not have to pin keys. A 1-partition topic cannot rebalance in a way that sloshes work between members. There is one member that matters, the one that gets partition 0. Rolling deploy of 2 staging pods with 1 partition is a leader change, not a storm. Tests were green. k6 against staging was green. I watched a staging deploy on January 5 with the 6 second timeout and lag went to 40, then 0. I wrote 'looks fine' in the PR. I was looking at a different system."
+    },
+    {
+      "type": "p",
+      "text": "Priya asked whether we should have soaked prod at night. We could have. The change window was 09:02 because we treat matcher deploys as safe in the morning if staging is green, per CLH-SOP-2023-019, which we will amend. Night soak would have caught a rebalance storm only if traffic was high enough to blow max.poll. Night traffic is 4-11k/min, not 48k. Maybe we would have seen extra rebalances. Maybe not. The staging partition count is the actual miss. Night soak is extra. We will still add a 30-minute soak on consumer-config changes because this one hurt."
+    },
+    {
+      "type": "quote",
+      "text": "A one-partition staging cluster is a unit test that we named staging.",
+      "attrib": "Diego Alvarez, January 8 10:31, #clh-inc"
+    },
+    {
+      "type": "h1",
+      "text": "5. What we did during the incident"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Kavya acked the page, restarted one pod, which added a rebalance. Do not restart pods during a rebalance storm unless the pod is actually wedged (CPU 0, not joining). Restart is a membership change.",
+        "Diego found session.timeout=6000 in the live env. Named it.",
+        "Rollback to 1.14.2. Helped eventually. Hurt for 10 minutes because rollback used the same maxUnavailable=2. Next time: scale the bad Deployment to 0 only if the group is already empty, otherwise patch the env on the live pods with kubectl set env and a bounce of one pod. We did not know that in the minute. We do now.",
+        "Froze deploys. Told ingest to keep going. Told Helen the 09:32 slice would be late and would complete, not vanish.",
+        "Chris Patel ran the high-water vs raw_event check at 12:40. Zero loss. 2,184 duplicates absorbed.",
+        "Opened CLH-TCK-7104 (timeouts), 7112 (sticky + pdb), 7120 (staging partitions) before the 11:40 call so the after-action had tickets."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "We did not delete the consumer group. We did not reset offsets. We did not reboot brokers. We did not fail over Postgres. Someone in the TAM channel asked if this was 'the database.' It was not. recon-pg CPU was 54 percent, boring."
+    },
+    {
+      "type": "h1",
+      "text": "6. What we will change"
+    },
+    {
+      "type": "h2",
+      "text": "6.1 Consumer config (CLH-TCK-7104)"
+    },
+    {
+      "type": "code",
+      "text": "# match-engine values.yaml, shipped in 1.15.1\nconsumer:\n  partition.assignment.strategy: org.apache.kafka.clients.consumer.CooperativeStickyAssignor\n  session.timeout.ms: \"45000\"\n  heartbeat.interval.ms: \"15000\"\n  max.poll.interval.ms: \"300000\"\n  max.poll.records: \"200\"\n  enable.auto.commit: \"false\"\n",
+      "caption": "Prod values as of January 9 night. Cooperative sticky so a membership change does not stop all partitions. session.timeout back to 45s. heartbeat 15s, which is the 1/3 rule. max.poll 5 minutes. auto.commit stays false, we already had that."
+    },
+    {
+      "type": "p",
+      "text": "Sneha gets a test that reads the live consumer config from a /debug/consumer endpoint we will add, and fails CI if session.timeout.ms < 30000 or if the assignor is RangeAssignor. The test runs in staging and in a prod canary. It would have caught this PR. I will write it. Ticket is on 7104."
+    },
+    {
+      "type": "h2",
+      "text": "6.2 PDB and rollingUpdate (CLH-TCK-7112)"
+    },
+    {
+      "type": "p",
+      "text": "maxUnavailable=1, maxSurge=1, pdb maxUnavailable=1. We copied this from ingest, which already had it, which is why ingest did not storm. match-engine was created first and never got the pdb. Helm PR is Diego's. Do not set maxUnavailable=0. That blocks node drains. 1 is the number."
+    },
+    {
+      "type": "h2",
+      "text": "6.3 Staging partitions (CLH-TCK-7120)"
+    },
+    {
+      "type": "p",
+      "text": "Alter staging clh.match.inbound from 1 to 48 partitions. Yes, 48 on a cluster that does 2 messages a second. The point is membership math, not throughput. Sneha's tests that assumed partition 0 is the world will break. She and I will pin keys in the test harness on January 12-15. We will not 'use 8 partitions as a compromise.' 8 is still not 48 and still hides range-assignor slosh at prod cardinality. If test runtime gets worse, we pay it."
+    },
+    {
+      "type": "h2",
+      "text": "6.4 SOP amend"
+    },
+    {
+      "type": "p",
+      "text": "CLH-SOP-2023-019 currently says matcher deploys can go at 09:00 if staging is green. New line: consumer config changes (timeouts, assignor, poll interval, max.poll.records) go at 21:00 ET, soak 30 minutes against whatever the evening produce rate is, then we watch the open the next morning with the on-call on the dashboard. Batching changes in break-svc can still go in the morning. Timeouts cannot. I will send the SOP patch this week."
+    },
+    {
+      "type": "h1",
+      "text": "7. Rejected alternatives"
+    },
+    {
+      "type": "p",
+      "text": "Pause all consumers during deploy. Brett-from-architecture is not in this incident, but a similar idea showed up from a well-meaning Slack: stop the group, deploy, start the group, one rebalance. That turns every deploy into a planned lag spike. At 09:02, even a 3-minute pause is 100k+ records at the open, and people will start pausing 'just in case' on unrelated deploys. We rejected it. pdb plus sticky is the smaller hammer. Pause is for when we already know we have a bad config, as an incident move, not as the happy path."
+    },
+    {
+      "type": "p",
+      "text": "Rewrite the consumer in a different client. No. The Java client is not the bug. The numbers were the bug."
+    },
+    {
+      "type": "p",
+      "text": "Drop to 8 partitions so range assignor 'is simpler.' That raises produce hot-spot risk and fights the ingest redesign. No."
+    },
+    {
+      "type": "p",
+      "text": "Go back to file drop for the open. Helen said this as a joke at 11:41. I am recording it as rejected so it cannot grow legs in a TAM slide. File drop is how we got 41 minutes as a lifestyle."
+    },
+    {
+      "type": "h1",
+      "text": "8. Contributing factors, in one list"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "session.timeout.ms=6000 shipped in a PR whose title was about lookup batching. Reviewers did not read values.yaml.",
+        "max.poll.interval.ms=120000 already tight at the open, waiting to fail during membership changes.",
+        "Range assignor default, never set to sticky, despite the 2023 ingest TDD mentioning it.",
+        "maxUnavailable=2 on a 8-pod stateful consumer group.",
+        "No pdb.",
+        "G1 pause regression in 1.15.0 (heap 4.5g) not caught because staging has no open spike.",
+        "Staging partition count 1. Makes rebalance tests lie.",
+        "Morning deploy window for a consumer-config change.",
+        "On-call restart of a pod during the storm, one extra rebalance. Process, not character. Put it in the runbook: do not restart unless wedged."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "None of these alone is 41 minutes. 6 second session timeout plus two pods down plus range assignor plus a 48k/min open is 41 minutes. Take out any one of the first three and we maybe have a 12 minute slice and a bad morning, not a spreadsheet desk."
+    },
+    {
+      "type": "h1",
+      "text": "9. Engineer appendix: commands we used and commands to use next time"
+    },
+    {
+      "type": "code",
+      "text": "# group state during the storm (Diego, 09:54)\nkafka-consumer-groups.sh --bootstrap-server kafka-prod-01.chi.northstar.internal:9092 \\\n  --group match-engine-prod --describe\n# members bouncing, STATE=PreparingRebalance for minutes\n\n# live env on a pod (this is how we saw 6000)\nkubectl -n clh-prod set env deploy/match-engine --list | grep -i session\n\n# next time: patch one value without a full chart rollback\nkubectl -n clh-prod set env deploy/match-engine SESSION_TIMEOUT_MS=45000\nkubectl -n clh-prod rollout pause deploy/match-engine\n# then bounce one pod\nkubectl -n clh-prod delete pod match-engine-7b9c-xk2q\n\n# drain check, do not call the day done until:\nkafka-consumer-groups.sh --bootstrap-server kafka-prod-01.chi.northstar.internal:9092 \\\n  --group match-engine-prod --describe | awk '$6+0 > 10000 {print}'\n",
+      "caption": "Incident commands. The set env path is what we will try before helm rollback if the group is already in a storm. Rollback with maxUnavailable=2 is a second storm."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Symptom",
+        "Look at",
+        "Do",
+        "Do not"
+      ],
+      "rows": [
+        [
+          "Lag climbing, CPU low, JoinGroup in logs",
+          "session.timeout, members, assignor",
+          "Patch timeouts, one pod at a time, pdb 1",
+          "Restart all pods, reset offsets, restart brokers"
+        ],
+        [
+          "Lag climbing, CPU 90%+",
+          "break-svc PK, Postgres",
+          "That is a different incident (load-test story)",
+          "Blame Kafka"
+        ],
+        [
+          "Lag climbing, produce p95 high",
+          "brokers, ISR",
+          "Diego, broker runbook",
+          "Bounce match-engine"
+        ],
+        [
+          "Staging green, prod storm",
+          "partition counts, not just tests",
+          "Stop trusting 1-partition staging",
+          "Ship because k6 was green"
+        ]
+      ],
+      "caption": "Triage table for the next on-call. Stick it in CLH-RB-2023-012 when we amend that runbook."
+    },
+    {
+      "type": "h1",
+      "text": "10. Open questions"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Question",
+        "Owner",
+        "Due",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "Cooperative sticky vs eager sticky? We shipped cooperative.",
+          "Kavya Menon",
+          "January 18, 2024",
+          "Cooperative needs a two-step rebalance. If we see stuck generations, fall back to eager sticky."
+        ],
+        [
+          "Should staging also get a synthetic 40k/min open, or are 48 partitions enough of a lie-stopper?",
+          "Sneha Iyer",
+          "January 22, 2024",
+          "I want both. She has to run it."
+        ],
+        [
+          "G1 heap 4.5g vs 5.5g: keep the smaller heap now that timeouts are sane?",
+          "Aman Kumar",
+          "January 16, 2024",
+          "I am putting heap back to 5.5g unless Kavya objects. Pauses were a contributor."
+        ],
+        [
+          "SOP morning window: consumer config only at 21:00, or any match-engine helm values?",
+          "Priya Nair",
+          "January 15, 2024",
+          "I asked for consumer config only. She may widen it."
+        ],
+        [
+          "Do we tell Marcus this was a config miss in the TAM notes, or 'deploy issue'?",
+          "Priya Nair",
+          "January 12, 2024",
+          "Tell him the true version. He already saw the lag graph."
+        ],
+        [
+          "Runbook CLH-RB-2023-012: add 'do not restart during PreparingRebalance'?",
+          "Diego Alvarez",
+          "January 16, 2024",
+          "Yes. He will patch. I will review."
+        ]
+      ],
+      "caption": "Open questions. Staging load shape is the one that will slip if we let it."
+    },
+    {
+      "type": "h1",
+      "text": "11. After-action and sign-off"
+    },
+    {
+      "type": "p",
+      "text": "Wednesday January 10 we sat 40 minutes with Helen, Priya, Kavya, Diego, Sneha, me. Marcus on Zoom. Helen wants a Datadog board she can see without asking us, with lag and match window and a red line at 8 minutes. That board existed and was not in her bookmark. I sent the link. Not a platform fix, still our miss. Sneha will add the consumer-config assertion. Diego will alter staging partitions January 12 in the morning, not at the open. I will restore heap 5.5g in 1.15.2 unless the January 16 question goes the other way."
+    },
+    {
+      "type": "p",
+      "text": "We will not open a RCA theater beyond this document. The cause is known, the fix is in prod as of January 9 21:10, the remaining work is staging fidelity and SOP. If staging is still on 1 partition on January 19, Priya can yell at me in public. Until then the embarrassing part is already on paper: I wrote 6000, I watched staging, I said looks fine."
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Sign-off",
+      "text": "Priya approved v1.2 on January 11. Staging partition change is required, not optional. Marcus gets this PDF. Helen gets the dashboard link and the apology she already got on Monday. No further customer letter. No data loss."
+    },
+    {
+      "type": "p",
+      "text": "Related reading if you were not here in 2023: consumer lag runbook CLH-RB-2023-012, ingest redesign CLH-TDD-2023-008, idempotent consumers CLH-TDD-2023-014 (the 2,184 duplicates), deploy SOP CLH-SOP-2023-019 which we will amend. The November settlement-break incident CLH-INC-2023-204 is a different failure. Do not merge the writeups."
+    }
+  ]
+}
