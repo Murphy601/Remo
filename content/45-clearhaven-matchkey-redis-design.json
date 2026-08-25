@@ -1,0 +1,430 @@
+{
+  "slug": "45-clearhaven-matchkey-redis-design",
+  "doc_id": "CLH-TDD-2024-012",
+  "title": "Redis Hot Cache for Reconciliation Match Keys",
+  "subtitle": "account+cusip+settle_date lookup, 36h TTL, stampede control, 18.4GB month-end, degrade to Postgres",
+  "doc_type": "Technical design",
+  "kicker": "Cut PK lookups on recon.match_key without lying about Redis down",
+  "org": "Northstar Engineering",
+  "classification": "INTERNAL",
+  "version": "1.2",
+  "status": "Approved",
+  "date": "May 2, 2024",
+  "author": "Aman Kumar",
+  "role": "Software Engineer II",
+  "team": "Clearhaven Reconciliation",
+  "audience": "Kavya Menon, Diego Alvarez, Chris Patel, Priya Nair, on-call engineers",
+  "owners": "Aman Kumar (design + client), Diego Alvarez (ElastiCache, alerts), Kavya Menon (match-worker integration)",
+  "related": "CLH-TDD-2023-011, CLH-TDD-2022-021, CLH-RB-2023-012, CLH-TDD-2024-009, CLH-PERF-44, CLH-PERF-51",
+  "summary": "Match-worker spends 61.8% of query time on primary-key lookups against recon.match_key for the triple (account_id, cusip, settle_date). We put a Redis hash cache in front, key layout mk:{settle_date}:{account_id} field {cusip}, TTL 36 hours, ElastiCache r6g.2xlarge in us-east-1. Month-end cardinality makes the working set about 18.4GB. Stampede on expiry is real because NSCC arrives as a burst; we use probabilistic early expiry plus a single-flight lock. If Redis is down we degrade to Postgres. The matcher still works. The ingest-to-first-match SLA of 11.4 min mid-month (19.8 min month-end) will likely miss. We reject Memcached because we need per-key TTL and hash fields. This design includes eviction, failure modes, and the March 28 load-test number that killed the \"just cache 7 days\" idea.",
+  "form_description": "Technical design for a Redis hot cache of Clearhaven recon match keys. Written for the people who will implement the client, size the box, and sit the incident when Redis dies during the window.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.3",
+      "March 19, 2024",
+      "Aman Kumar",
+      "Problem numbers from pg_stat_statements, CLH-PERF-44"
+    ],
+    [
+      "0.8",
+      "April 11, 2024",
+      "Aman Kumar",
+      "Rejected Memcached. Memory 18.4GB. Stampede test."
+    ],
+    [
+      "1.0",
+      "April 24, 2024",
+      "Diego Alvarez",
+      "ElastiCache sizing, TLS, no cluster mode v1"
+    ],
+    [
+      "1.2",
+      "May 2, 2024",
+      "Aman Kumar",
+      "Approved. Degrade path and SLA miss stated in the decision."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Decision"
+    },
+    {
+      "type": "p",
+      "text": "Put recon match keys in Redis (Amazon ElastiCache, engine 7.2, instance cache.r6g.2xlarge, 52.82GB RAM, single primary plus replica, not cluster mode in v1) in front of recon.match_key. Lookup key is account_id + cusip + settle_date. TTL 36 hours from last write. Month-end working set estimated 18.4GB of data plus Redis overhead, comfortably under 52.82GB with headroom for fragmentation at 1.28x. On Redis failure, match-worker degrades to Postgres primary/RO as today. We will miss the 11.4 minute mid-month ingest SLA if Redis is down during the NSCC burst; say that out loud in the incident, do not pretend degrade is free. No Memcached. No 7-day TTL. No writing the cache from a sidecar CDC in v1; the matcher fills on miss and on persist."
+    },
+    {
+      "type": "callout",
+      "label": "Rejected: Memcached",
+      "text": "Diego suggested Memcached because we already have a tiny ElastiCache Memcached for session fluff on recon-ui. Memcached cannot TTL individual hash fields and cannot HGET a cusip out of an account-day object without us stuffing a blob and invalidating the whole account. We need hash fields (one account-day, many CUSIPs) and a 36h TTL. Memcached also has no wait/lock for single-flight. Died in the April 11 review. Do not \"just use the existing box.\"",
+      "kind": "decision"
+    },
+    {
+      "type": "p",
+      "text": "Priya asked if we can skip this and partition match_key harder (CLH-TDD-2023-011 already partitioned by settle_date). Partitioning helped sequential scans. It did not help the 14.2k QPS of point lookups during the 16:12-16:40 ET burst. pg_stat_statements for the week of March 11: the match_key PK query was 61.8% of total DB time on the writer, mean 1.84ms, p95 7.4ms, p99 22.1ms when buffer cache was cold on a new day's partition. Redis p95 on the stg twin was 0.41ms. That is the design. Not a rewrite of the matcher."
+    },
+    {
+      "type": "h1",
+      "text": "The lookup we are caching"
+    },
+    {
+      "type": "p",
+      "text": "Table recon.match_key, PK (account_id, cusip, settle_date), payload: last_match_id, last_qty, last_px, last_side, updated_at, book_hash. Match-worker, on each NSCC row, asks: have we seen this account+cusip+day. If yes, attach last_match_id and run the delta. If no, insert. Today that is SELECT then INSERT ON CONFLICT. The SELECT is the hot path. Month-end unique triples peak around 41.6 million for a 2-day window (today plus leftover yesterday because settlement is T+1-ish for this book). Mid-month is 18.9 million. The 36h TTL keeps yesterday plus today. We do not keep last week. March 28 I tried a 7-day TTL on stg with a 1/10 sample replay and hit 47.2GB estimated full-scale, which does not fit r6g.2xlarge with fragmentation. 36h fits. 7 days does not, not without cluster mode, which we are not doing in v1 because cluster mode plus hash tags plus stampede is a second design."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Period",
+        "Unique triples (account,cusip,settle_date)",
+        "Avg payload bytes",
+        "Raw data GB",
+        "Redis estimate GB (x1.48 overhead)"
+      ],
+      "rows": [
+        [
+          "Mid-month Tuesday",
+          "18.9M",
+          "96",
+          "1.69",
+          "2.50"
+        ],
+        [
+          "Average settlement day",
+          "24.7M",
+          "96",
+          "2.21",
+          "3.27"
+        ],
+        [
+          "Month-end peak (2-day window)",
+          "41.6M",
+          "118 (notes field on some)",
+          "4.57",
+          "6.76"
+        ],
+        [
+          "Month-end with hash envelope, dict, TTL metadata",
+          "41.6M keys as hash fields across ~2.1M hashes",
+          "see layout",
+          "n/a",
+          "18.4"
+        ],
+        [
+          "7-day TTL experiment (stg scaled)",
+          "~128M",
+          "96-118",
+          "12.8",
+          "47.2 (does not fit)"
+        ]
+      ],
+      "caption": "18.4GB is the month-end working set I am signing up for, including Redis hash overhead, not the raw 4.57GB spreadsheet number. Do not size from the raw number."
+    },
+    {
+      "type": "p",
+      "text": "Where 18.4GB comes from, because Priya will ask. 2.1 million hashes (one per account_id+settle_date that has at least one CUSIP that day). Each hash has on average 19.8 CUSIP fields at month-end (distribution is ugly: 0.4% of accounts have >200 CUSIPs). Each field value is a 96-118 byte payload plus Redis hash ziplist/listpack overhead. Plus the key string mk:2024-04-30:4A-1882. Plus expire metadata. I measured on stg with redis-cli --bigkeys and MEMORY STATS after a replay of April month-end sampled at 100% against a throwaway r6g.2xlarge. Used_memory 18.41GB. That is the number. If you change the key layout you remeasure. Do not scale 4.57GB by a vibe."
+    },
+    {
+      "type": "h1",
+      "text": "Key layout"
+    },
+    {
+      "type": "code",
+      "text": "# Redis key\nmk:{settle_date}:{account_id}\n# example\nmk:2024-04-30:4A-1882\n\n# hash field: cusip\n# hash value: JSON object, compact, no whitespace\n# {\"mid\":\"m_918274\",\"q\":1000,\"p\":\"99.03125\",\"s\":\"B\",\"u\":1714499402,\"h\":\"a91c\"}\n\nHSET mk:2024-04-30:4A-1882 91282CHT1 '{\"mid\":\"m_918274\",\"q\":1000,\"p\":\"99.03125\",\"s\":\"B\",\"u\":1714499402,\"h\":\"a91c\"}'\nEXPIRE mk:2024-04-30:4A-1882 129600   # 36h in seconds, set on write\n\n# read\nHGET mk:2024-04-30:4A-1882 91282CHT1\n\n# negative cache (no row in PG): field value \"-\"\nHSET mk:2024-04-30:4A-1882 91282CHT1 \"-\"\n",
+      "caption": "Key layout. settle_date first so an operator can SCAN mk:2024-04-30:* in an incident. Do not SCAN in the app."
+    },
+    {
+      "type": "p",
+      "text": "Why hash per account-day, not one string key per triple. 41.6M keys as standalone strings explodes dictionary overhead. Hashes with listpack (Redis 7) pack better when we keep field count reasonable. Accounts with >200 CUSIPs convert to hashtable encoding; that is fine, they are 0.4%. Why not one giant key per settle_date. That hash would have tens of millions of fields and a single EXPIRE would drop the whole day. We expire per account-day so a quiet account leaves. Why settle_date in the key, not only in the payload. So we can delete a bad day with a known prefix if we ever have to (ops script, not the app), and so TTL naturally drops yesterday without a sweeper job."
+    },
+    {
+      "type": "p",
+      "text": "Negative cache: if PG says no row, we still HSET \"-\" so the next 200 rows for that new CUSIP in the same burst do not all miss to PG. TTL on negatives is 90 seconds, not 36h, because a concurrent INSERT from another worker should become visible. Implementation: EXPIRE on the whole hash is 36h; negatives cannot have a shorter field TTL in Redis without a second key. So negatives live in a separate key nx:{settle_date}:{account_id}:{cusip} with TTL 90s. Slightly messier. Worth it. The April 4 stampede test without negatives produced 8.2k identical SELECTs for one new CUSIP in 3.1 seconds."
+    },
+    {
+      "type": "h2",
+      "text": "TTL 36 hours"
+    },
+    {
+      "type": "p",
+      "text": "36h is yesterday plus today plus a 12h cushion for late NSCC .retrans and for the matcher running past midnight ET on month-end. 24h dropped a .retrans at 17:55 ET the next day (Helen will have a makeup). 48h still fit memory in the April test (used_memory 21.7GB) but I want headroom for fragmentation and for a bad deploy that stops EXPIRE (see failure modes). 36h is the number. The client sets EXPIRE on every write, not only on create, so a hot account-day stays. Idle ones die."
+    },
+    {
+      "type": "h1",
+      "text": "Stampede"
+    },
+    {
+      "type": "p",
+      "text": "NSCC file lands, 180-260MB, ingest bursts ~14.2k lookups/s for 8-12 minutes. If a popular hash expires at 16:12 ET, 40 workers will miss together, all hit PG, all HSET, all EXPIRE. That is a stampede. We saw it on stg April 4 when I set TTL to 120s to force expiry during a replay. Writer CPU jumped from 18% to 74% for 47 seconds. p99 PG lookup 22.1ms to 81ms. The cache was the incident."
+    },
+    {
+      "type": "p",
+      "text": "Mitigations we will ship:"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Single-flight in match-worker process: a striped mutex on hash(account,cusip,day) so one goroutine (we are Go) fetches PG per process. 40 pods still = 40 PG gets. Not enough alone.",
+        "Redis lock mklock:{settle_date}:{account_id}:{cusip} SET NX EX 2. Winner loads PG, fills cache, deletes lock. Losers wait 20ms x 5 then HGET again, then PG if still empty. 2s lock expiry so a dead winner cannot pin a key.",
+        "Probabilistic early expiry: if remaining TTL < 120s, 1/20 of requests refresh from PG and HSET. Spreads the reload before the cliff. Chris suggested 1/5; that is too much extra PG on a quiet afternoon. 1/20 of 14.2k is still spicy; we only early-refresh when remaining TTL < 120s, which is a small slice of keys.",
+        "Negative cache 90s as above.",
+        "Do not expire all hashes at the same wall clock. TTL is 36h from last write, writes are spread, so expiry is spread. The remaining risk is a flushall or a failover that empty-starts. Treat empty-start as a known event, see failure modes."
+      ]
+    },
+    {
+      "type": "code",
+      "text": "# single-flight + lock sketch (Go, match-worker)\nfunc lookup(ctx context.Context, acct, cusip, day string) (payload []byte, err error) {\n    key := fmt.Sprintf(\"mk:%s:%s\", day, acct)\n    if v, err := rdb.HGet(ctx, key, cusip).Bytes(); err == nil {\n        if string(v) == \"-\" { return nil, errMissSentinel }\n        return v, nil\n    }\n    lock := fmt.Sprintf(\"mklock:%s:%s:%s\", day, acct, cusip)\n    ok, _ := rdb.SetNX(ctx, lock, hostname, 2*time.Second).Result()\n    if !ok {\n        time.Sleep(20 * time.Millisecond)\n        if v, err := rdb.HGet(ctx, key, cusip).Bytes(); err == nil {\n            return v, nil\n        }\n        return lookupPG(ctx, acct, cusip, day) // degrade, do not loop forever\n    }\n    defer rdb.Del(ctx, lock)\n    payload, err = lookupPG(ctx, acct, cusip, day)\n    if err == errNotFound {\n        rdb.Set(ctx, fmt.Sprintf(\"nx:%s:%s:%s\", day, acct, cusip), \"-\", 90*time.Second)\n        return nil, err\n    }\n    rdb.HSet(ctx, key, cusip, payload)\n    rdb.Expire(ctx, key, 36*time.Hour)\n    return payload, err\n}\n",
+      "caption": "Sketch, not the final PR. Timeouts on every Redis call are 40ms. If Redis is slow, we degrade, we do not wait 2s in the matcher hot path."
+    },
+    {
+      "type": "h1",
+      "text": "When Redis is down"
+    },
+    {
+      "type": "p",
+      "text": "Circuit: consecutive Redis errors >= 5 in 8 seconds on a pod, or p95 Redis RTT > 80ms for 15 seconds, open circuit for 30 seconds, all lookups go to PG. Half-open: one probe HGET. Closed if probe ok. Metrics: clh.match.cache.hit, miss, degrade, lock_wait. Dashboard 1842 gets a row. Alert clh-recon-redis-degrade pages SEV3 daytime, SEV2 if inside settlement window because SLA miss is likely."
+    },
+    {
+      "type": "p",
+      "text": "Degrade is correct, not heroic. Postgres still has the data. Match-worker still matches. What you lose: the 0.41ms lookups become 1.84ms mean and 22.1ms p99, the writer takes the 14.2k QPS again, ingest-to-first-match climbs. Mid-month SLA 11.4 min becomes something like 16-24 min based on the March 11 day we lost buffer cache on a new partition (that was a PG-only day, which is the analog). Month-end 19.8 min becomes 28-40 min, which crosses Helen's 45.2 min page line if we are also unlucky on file size. Say this in the PD note: \"Redis down, degraded to PG, expect SLA miss, not a matcher bug.\" Do not restart match-worker in a loop. Do not fail the whole ingest because cache.OnError is default fail-open to PG."
+    },
+    {
+      "type": "callout",
+      "label": "Fail open to Postgres",
+      "text": "A proposal to fail-closed (stop matching if Redis is down) died in 15 minutes. Matching is the product. Redis is an acceleration. Helen would rather have a slow book than a stopped book. Circuit opens to PG. The page is for capacity and SLA, not for \"matcher is wrong.\"",
+      "kind": "warn"
+    },
+    {
+      "type": "p",
+      "text": "RDS will hurt. If Redis is down during the window, Diego and I join, we do not also apply Terraform, we do not also failover RDS \"speculatively.\" We watch writer CPU and lag. If writer CPU > 85% for 5 minutes, we shed: drop the replay-job, drop UI preview queries, leave ingest+match. The UI can wait. The window cannot."
+    },
+    {
+      "type": "h1",
+      "text": "Eviction and memory"
+    },
+    {
+      "type": "p",
+      "text": "maxmemory 48gb (leave ~4.8gb for OS and replication backlog on the 52.82GB box). maxmemory-policy volatile-ttl. We want expired keys to go first. We do not use allkeys-lru because a hot account-day that is still inside 36h should not lose CUSIPs while a cold one sits. If we hit maxmemory anyway, volatile-ttl evicts nearest-to-expire, which is yesterday's quiet accounts, which is acceptable. Metric used_memory_dataset vs used_memory. Alert at 36GB (warning, #clh-recon-ops) and 44GB (page Diego SEV3). 18.4GB month-end is the design point. If we see 40GB we have a TTL bug or a key-layout bug, not a \"need r6g.4xlarge\" yet."
+    },
+    {
+      "type": "p",
+      "text": "noeviction as a policy would make Redis start failing writes at cap, which turns into a self-stampede to PG plus errors. Died. volatile-ttl."
+    },
+    {
+      "type": "p",
+      "text": "Fragmentation: used_memory_rss / used_memory. If that ratio > 1.45 for 2 hours after month-end, Diego schedules a failover to the replica to compact, Tuesday 10:15 ET, not during the window. I saw 1.28x after the April replay. Live with it until 1.45."
+    },
+    {
+      "type": "h1",
+      "text": "What we will not put in Redis"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Full break rows. Those are PG, and they mutate with ops notes. Cache invalidation would be a second product.",
+        "exception_code (CLH-PRD-2024-021). Ops writes those. Matcher should not cache them.",
+        "The NSCC file itself. S3.",
+        "Session cookies. Different box, different team.",
+        "Seven days of keys. Memory."
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "Client, timeouts, TLS"
+    },
+    {
+      "type": "p",
+      "text": "Go redis/go-redis/v9, TLS required, in-transit encryption on ElastiCache. Auth token in Secrets Manager, IRSA on match-worker (CLH-TDD-2024-009) to read the secret. Dial timeout 50ms, read 40ms, write 40ms, pool 32 per pod, 40 pods = 1280 connections, ElastiCache default is enough. Do not set read timeout 2s \"to be safe.\" Safe is 40ms then PG."
+    },
+    {
+      "type": "p",
+      "text": "Writes to the cache happen after PG persist of match_key, not before. If we HSET then PG insert fails, we have a ghost payload. Order: PG first, then HSET. On PG success and Redis fail, we log and continue; next read misses and refills. That is a miss, not a lie."
+    },
+    {
+      "type": "h1",
+      "text": "Failure modes"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Failure",
+        "Symptom",
+        "User impact",
+        "What you do"
+      ],
+      "rows": [
+        [
+          "Redis primary crash, replica promotes",
+          "10-25s of errors, circuit may open",
+          "Brief degrade to PG, possible SLA nick",
+          "Wait for ElastiCache. Do not kubectl rollout restart. Watch used_memory after promote (can look empty if you pointed at the wrong endpoint)."
+        ],
+        [
+          "Empty cache after failover or flush",
+          "Miss storm, writer CPU up",
+          "SLA miss likely if during burst",
+          "Single-flight + lock should cap it. If CPU > 85%, shed replay+UI. Do not disable ingest."
+        ],
+        [
+          "Stampede on TTL cliff",
+          "PG p99 up, cache miss ratio > 40%",
+          "Window risk",
+          "Check remaining TTL histogram. If someone set TTL 120s in prod, revert. Early-refresh should be on."
+        ],
+        [
+          "maxmemory eviction of live day",
+          "Random misses on today's keys, used_memory at cap",
+          "Slow, confusing mismatches if negative cache evicted wrong",
+          "Alert at 44GB. Confirm TTL 36h not 7d. Do not switch to allkeys-lru in a panic."
+        ],
+        [
+          "Ghost payload (Redis ahead of PG)",
+          "Matcher thinks last_qty is X, PG says Y",
+          "Wrong delta, bad breaks",
+          "Should not happen if PG-first. If it does, delete the hash field, do not flushall."
+        ],
+        [
+          "nx: negative cache hiding a just-inserted row",
+          "90s of treating a new CUSIP as missing",
+          "Duplicate insert attempts, ON CONFLICT saves us",
+          "Keep negatives at 90s. Do not copy 36h."
+        ],
+        [
+          "Redis down for 20+ min in window",
+          "Full PG path, 14.2k QPS",
+          "SLA miss, Helen queue grows",
+          "SEV2. Comms: degrade, not data loss. Diego on ElastiCache. Aman on whether to shed."
+        ],
+        [
+          "Clock skew on expire",
+          "Keys die early or late",
+          "Misses or memory creep",
+          "NTP on the box is AWS. App uses duration 36h, not a wall timestamp from the worker."
+        ]
+      ],
+      "caption": "Failure modes we will actually hit. flushall is not in any runbook as a fix."
+    },
+    {
+      "type": "p",
+      "text": "flushall: there is no reason to run it. A bad key layout is deleted with a scanned prefix in a script Diego reviews, rate-limited, not with flushall. If you flushall during the window you have created the empty-cache stampede on purpose. The PD note writes itself and I will write your name."
+    },
+    {
+      "type": "h1",
+      "text": "Load test evidence"
+    },
+    {
+      "type": "p",
+      "text": "CLH-PERF-51, April 4-5, stg replay of March month-end NSCC at 1.0x, then 1.4x. With cache warm, matcher p95 row time 6.2ms, PG writer CPU 22.4%, ingest-to-first-match 9.7 min on a file that was 241MB. With Redis stopped (we simulated down), p95 19.4ms, writer CPU 71.8%, ingest-to-first-match 23.6 min. With TTL 120s forcing stampede, writer CPU 74% spike 47s. With 7-day TTL, memory 47.2GB estimated, OOM avoided only because we aborted. Those four runs are why the decision looks the way it looks."
+    },
+    {
+      "type": "p",
+      "text": "We did not test cluster mode. We did not test encryption-at-rest off. We did not test 80 pods. If match-worker replica count goes past 55, revisit pool size and the 1280 connection math. Kavya owns that trigger."
+    },
+    {
+      "type": "h1",
+      "text": "Rejected alternatives (rest)"
+    },
+    {
+      "type": "p",
+      "text": "CDC from PG WAL into Redis via a Debezium consumer. Chris likes it because the cache would be warm before the NSCC burst. Cost: a new consumer, lag of 0.8-3.4s on our CDC path (CLH-TDD-2023-002), and a consistency story when CDC lags during the window, which is when we need the cache. Also CDC would push 41.6M updates at month-end into Redis and fight the matcher for memory. Died for v1. Matcher fill-on-miss is enough if we do not empty the box at 16:00. Revisit if degrade incidents > 2 in a quarter."
+    },
+    {
+      "type": "p",
+      "text": "Local LRU in each match-worker process, no Redis. 40 pods times overlapping 18.4GB is not 40 times, working set per pod is not the full set, but the burst still thunders to PG on every deploy (empty local cache). Deploys happen. Redis outlives a pod. Died as a primary. A small per-process LRU in front of Redis is allowed later as a micro-optimization, max 256MB, not as the design."
+    },
+    {
+      "type": "p",
+      "text": "Keep everything in PG and buy db.r6g.4xlarge. Price: RDS would go from ~$4,180/month to ~$8,360. ElastiCache r6g.2xlarge is ~$1,120/month. And the p99 problem is seek time plus buffer cache on a new partition, which a larger box only partly fixes. We might still resize RDS later (capacity memo). It is not the first move."
+    },
+    {
+      "type": "p",
+      "text": "Cluster mode, 3 shards, 7-day TTL. Fits 47.2GB. Adds hash-tag rules for mk:{settle_date}:{account} so HSET stays on one slot. Adds reshard fear. Diego said v1 no. I agreed. Memory 18.4GB on one primary is the boring version."
+    },
+    {
+      "type": "h1",
+      "text": "Rollout"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Week of May 6: ElastiCache in stg, TLS, secret, IRSA. Empty.",
+        "Week of May 13: match-worker flag match_key_redis=true on stg, shadow mode: read Redis, always also read PG, log mismatch, do not trust Redis for deltas yet.",
+        "Week of May 20: Sneha compares 50k shadow mismatches. Target mismatch < 0.02% excluding known race on insert. If higher, stop.",
+        "Week of May 27: stg trust-on-hit. Replay a month-end file. Diego watches memory.",
+        "Week of June 3: prod ElastiCache, flag off. Then 10% of pods on, then 100%, all outside the window, Tuesday 11:00 ET.",
+        "Shadow in prod 4 settlement days before we trust-on-hit. Priya gates the last flag."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Rollback: flag off, pods to PG only, leave Redis running so we can inspect keys. Do not destroy the ElastiCache in a panic; it is the evidence. Jordan Hale owns the first two shadow days in prod (he is on-call that week and already knows the lag SOP). Lena Park owns the kubectl rollout that flips the flag 10% then 100%, using the same freeze rules as CLH-SOP-2023-028: no flip after 16:00 ET. If Jordan sees mismatch rate above 0.02% he pages me, not Helen. Helen does not need a Redis incident unless the degrade is already eating her queue."
+    },
+    {
+      "type": "h1",
+      "text": "Open questions"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Question",
+        "Owner",
+        "Due",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "Is 90s negative cache too long for a CUSIP that is mid-insert from another pod?",
+          "Kavya Menon",
+          "May 16, 2024",
+          "ON CONFLICT should save us. Measure duplicate insert rate in shadow."
+        ],
+        [
+          "Replica read for HGET to spare primary? Replica lag on ElastiCache under burst?",
+          "Diego Alvarez",
+          "May 22, 2024",
+          "If lag > 50ms, stay on primary for reads. Cache stale last_qty is a wrong break."
+        ],
+        [
+          "Do we expose cache hit ratio on Helen's ops UI? ",
+          "Rahul Deshmukh",
+          "June 6, 2024",
+          "Default no. She does not need it. Dashboard 1842 is enough."
+        ],
+        [
+          "r6g.2xlarge reserved instance or on-demand for 90 days?",
+          "Priya Nair",
+          "May 9, 2024",
+          "$1,120/mo on-demand. Do not RI until we survive one month-end."
+        ],
+        [
+          "Should replay-job fill the cache before the window on month-end?",
+          "Aman Kumar",
+          "May 30, 2024",
+          "A warm script might help. Also might stampede if written badly. Prototype in stg only."
+        ]
+      ],
+      "caption": "Open questions as of May 2, 2024."
+    },
+    {
+      "type": "h1",
+      "text": "Recommendation (skim)"
+    },
+    {
+      "type": "p",
+      "text": "Approve Redis (not Memcached), key mk:{settle_date}:{account_id} hash field cusip, TTL 36h, negative keys 90s, r6g.2xlarge, volatile-ttl, fail open to PG, admit SLA miss on degrade, no cluster mode v1, no 7-day TTL, no fail-closed. I write the client. Kavya integrates match-worker. Diego owns ElastiCache and the 36/44GB alerts. Sneha owns shadow mismatch. Priya owns the prod trust flag. The 18.4GB month-end number is measured, not guessed. If month-end 2024 exceeds 24GB used_memory we reopen sizing before we reopen cluster mode."
+    },
+    {
+      "type": "h2",
+      "text": "Alerts to add"
+    },
+    {
+      "type": "code",
+      "text": "# Datadog, service:clh-recon, env:prod\n# 1. used_memory_bytes > 36e9  -> slack #clh-recon-ops\n# 2. used_memory_bytes > 44e9  -> PD SEV3 Diego\n# 3. clh.match.cache.degrade{env:prod} > 0 for 5 min in 16:00-19:30 ET -> PD SEV2\n# 4. clh.match.cache.hit_ratio < 0.82 during burst (16:10-16:45) for 3 min -> slack, not page\n# 5. evicted_keys > 1000 in 1 min -> PD SEV3, likely TTL or maxmemory bug\n",
+      "caption": "Alert intents. Diego will put the actual monitor JSON in the terraform eks-irsa follow-up or the Datadog provider, not in a click."
+    },
+    {
+      "type": "p",
+      "text": "Last operational note. Redis is not a source of truth. PG is. If they disagree, believe PG, delete the field, file a ticket with both payloads. Do not write a reconciler that copies Redis into PG. That sentence is here because someone always proposes it in week three."
+    }
+  ]
+}

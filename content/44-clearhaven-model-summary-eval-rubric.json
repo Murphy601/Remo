@@ -1,0 +1,452 @@
+{
+  "slug": "44-clearhaven-model-summary-eval-rubric",
+  "doc_id": "CLH-EVAL-2025-003",
+  "title": "Evaluation Rubric for Model-Generated Reconciliation Summaries",
+  "subtitle": "Operational scoring for engineer review of break summaries: facts, invented cash, missing CUSIPs, false \"solved\" tone",
+  "doc_type": "Evaluation rubric",
+  "kicker": "Score the summary, not the model vendor",
+  "org": "Northstar Engineering",
+  "classification": "INTERNAL",
+  "version": "1.2",
+  "status": "Approved",
+  "date": "February 13, 2025",
+  "author": "Aman Kumar",
+  "role": "Software Engineer II",
+  "team": "Clearhaven Reconciliation",
+  "audience": "Engineers reviewing model summaries, Sneha Iyer, Rahul Deshmukh, Priya Nair",
+  "owners": "Aman Kumar (rubric), Sneha Iyer (review queue), Kavya Menon (prompt + UI flag)",
+  "related": "CLH-PRD-2024-021, CLH-INC-2023-204, CLH-TDD-2024-006, CLH-EVAL-2025-001, CLH-ML-12",
+  "summary": "Internal quality programme: recon-ui can show a model-generated summary of an open break. Engineers review a sample before Helen's desk sees any of it. This rubric is how we score those summaries. Dimensions: factual match to break fields, invented cash figures (automatic fail), missing the actual unmatched CUSIP, and tone that sounds like the break is solved when it is open. I wrote it because the December prototype kept missing the late-file case and wrote \"positions aligned after ingest\" while file_late=true and unmatched_cnt=184. Scores are 1-5 per dimension, with a kill switch. This is not a research paper. It is how two reviewers disagree and who adjudicates so we can ship or kill the flag.",
+  "form_description": "Operational evaluation rubric for Northstar engineers scoring model-written Clearhaven recon break summaries. Used in the weekly review queue, not as an academic benchmark.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.4",
+      "December 18, 2024",
+      "Aman Kumar",
+      "First rubric after prototype missed LATE on 22 of 40 sampled breaks"
+    ],
+    [
+      "0.9",
+      "January 16, 2025",
+      "Aman Kumar",
+      "Auto-fail for invented cash. Tone dimension added after Rahul's comment."
+    ],
+    [
+      "1.0",
+      "February 3, 2025",
+      "Sneha Iyer",
+      "Disagreement protocol. Golden set of 35 breaks."
+    ],
+    [
+      "1.2",
+      "February 13, 2025",
+      "Aman Kumar",
+      "Approved for weekly ops. Flag stays off for Helen until pass rate holds."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Decision"
+    },
+    {
+      "type": "p",
+      "text": "We score model-generated break summaries with four dimensions on a 1-5 scale, plus two automatic fails. A summary that invents a cash figure fails the whole item, regardless of how well it writes. A summary that omits the unmatched CUSIP when exactly one CUSIP is unmatched on the break fails the whole item. Weekly sample is 40 breaks, two engineer reviewers, adjudication by me when they differ by 2 or more on any dimension or when either marks auto-fail and the other does not. Helen's desk does not see summaries until we post three consecutive weeks with pass rate >= 82% and auto-fail rate <= 4.0%. Pass means no auto-fail and all dimensions >= 3. The product flag recon_ui.model_summary stays off in prod for ops users until Priya signs that readout."
+    },
+    {
+      "type": "callout",
+      "label": "This is an ops rubric",
+      "text": "We are not publishing a leaderboard of vendors. We are not claiming F1. We are deciding whether a paragraph next to an open break will mislead Helen Cho at 16:40 ET. If a sentence would make Dana close OTHER, it fails. Write comments like an on-call note, not like a paper.",
+      "kind": "decision"
+    },
+    {
+      "type": "p",
+      "text": "I am the rubric owner because I watched the December 11 prototype (CLH-ML-12) summarize break 9_184_220 as \"NSCC and book cash now match at $2.14M\" when the break had no cash field populated, unmatched CUSIP 91282CHT1, and file_late=true. The $2.14M was a hallucination of notional from a different account in the prompt dump. Kavya fixed the prompt dump. The rubric exists so we catch the next one without waiting for Helen to yell."
+    },
+    {
+      "type": "h1",
+      "text": "What we are scoring"
+    },
+    {
+      "type": "p",
+      "text": "Object: the paragraph (max 600 characters) written by the model for one recon.break row, given a structured bundle: account, settle_date, cusips unmatched, qty_delta, px_delta, side_delta, file_late, exception_code if present, last two history notes, match_run_id. The model does not get raw reason_text from the 1,247-string era after February 1, 2025. The model does not get other accounts. The model does not get a \"suggested close.\" If the bundle is missing the unmatched CUSIP list, that is an engineering bug, not a model fail; mark the item invalid and skip."
+    },
+    {
+      "type": "p",
+      "text": "We are not scoring: latency, cost per 1k summaries, vendor choice, prompt style except as it shows up in the paragraph, or whether the matcher was right. Wrong matcher, right summary of the wrong matcher, can still score a 5 on facts. File a matcher ticket separately."
+    },
+    {
+      "type": "h1",
+      "text": "Dimensions (1-5)"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Dimension",
+        "1",
+        "3",
+        "5",
+        "Auto-fail overlap"
+      ],
+      "rows": [
+        [
+          "D1 Factual match",
+          "Contradicts a field (wrong date, wrong account, wrong qty sign)",
+          "Fields are not contradicted but one material field is glossed into mush",
+          "Every material field is correctly stated or correctly omitted as unknown",
+          "Invented cash is auto-fail, not a 1"
+        ],
+        [
+          "D2 CUSIP coverage",
+          "Unmatched CUSIP absent or a different CUSIP present",
+          "CUSIP present but buried after a generic sentence, easy to miss",
+          "Unmatched CUSIP(s) stated early, correct check digit",
+          "Single unmatched CUSIP missing is auto-fail"
+        ],
+        [
+          "D3 Late-file handling",
+          "file_late=true ignored or described as completed ingest",
+          "Mentions delay but implies the break is only a clock issue when qty/px also differ",
+          "If file_late, says so and does not claim positions aligned",
+          "\"aligned after ingest\" while file_late is a D3=1 and usually D4 fail"
+        ],
+        [
+          "D4 Open-break tone",
+          "Sounds solved, closed, matched, good to settle",
+          "Mostly open, one verb slides toward done",
+          "States the break is open, next action is human",
+          "\"solved\" / \"resolved\" / \"matched now\" on an open break: cap D4 at 1"
+        ]
+      ],
+      "caption": "Four dimensions. Two auto-fails sit outside the average and kill the item."
+    },
+    {
+      "type": "h2",
+      "text": "D1 Factual match"
+    },
+    {
+      "type": "p",
+      "text": "Read the bundle. Read the paragraph. If the paragraph states a number, it must appear in the bundle or be a trivial count of items that are in the bundle (\"two CUSIPs unmatched\" when the list has two). Arithmetic the model invents is a fail even if the arithmetic is correct, because Helen will not re-add it, she will trust it. Example: bundle has qty_book=1000, qty_nscc=900. Allowed: \"qty differs by 100 shares.\" Forbidden: \"shortfall is $184,250 at last price\" if last price is not in the bundle. That cash figure is invented even if you, the reviewer, know the price from Bloomberg. You are scoring the paragraph against the bundle, not against the market."
+    },
+    {
+      "type": "p",
+      "text": "Pass example (D1=5): \"Open break acct 4A-1882 settle 2025-02-11. CUSIP 91282CHT1 qty_book 1000 vs qty_nscc 900. px within tolerance. file_late=false. exception_code QTY. Still open.\" That is ugly and correct. Fail example (D1 auto-fail): \"Cash impact about $184,250, likely a price issue on the note.\" Bundle had no cash, code was QTY, CUSIP missing from the sentence. Two kills."
+    },
+    {
+      "type": "h2",
+      "text": "D2 CUSIP coverage"
+    },
+    {
+      "type": "p",
+      "text": "If unmatched_cusips has one entry, the paragraph must contain that CUSIP string. Not \"the treasury.\" Not \"the note.\" The identifier. If it has three, the paragraph must list all three or say \"3 unmatched CUSIPs:\" and list them. If it has 12, the paragraph must say the count and list the first five plus \"and 7 more in the break,\" because 600 characters will not hold 12 CUSIPs with deltas. Missing the only unmatched CUSIP is auto-fail. I am not flexible here. December's model wrote fluent paragraphs about \"the position\" while 91282CHT1 sat unmatched. Helen's eye goes to CUSIP. If the summary hides it, the summary is worse than nothing."
+    },
+    {
+      "type": "h2",
+      "text": "D3 Late-file handling"
+    },
+    {
+      "type": "p",
+      "text": "This dimension exists because the prototype failed it 22/40 times. When file_late=true, the summary must say the file was late (or \"NSCC object after expected drop\"). It must not say ingest completed cleanly as if lateness were over. LATE breaks are often still LATE and also QTY. The model loves to tell a story: file arrived, therefore we are fine. We are not fine. The break is open. Score 1 if lateness is omitted when file_late=true. Score 5 if lateness is explicit and the other deltas are still listed. Score 3 if lateness is mentioned and the rest is mush."
+    },
+    {
+      "type": "quote",
+      "text": "If your summary says the file landed and the book looks aligned, and my queue still has 184 unmatched on that settle_date, you have written fiction. I will ignore the feature. I might also ignore you.",
+      "attrib": "Helen Cho, after reading 8 prototype summaries on January 9, 2025"
+    },
+    {
+      "type": "h2",
+      "text": "D4 Open-break tone"
+    },
+    {
+      "type": "p",
+      "text": "The break is open. The paragraph may not use resolved, solved, matched, closed, good to settle, no action needed, positions aligned, cash matched, ready for window, unless those words are quoting a field that actually says that, which it will not, because the break is open. \"Still open\" or \"needs ops review\" is the expected landing. Rahul wanted friendlier copy. Friendlier copy made Dana mark two sample breaks closed in a tabletop on January 16. That is the whole risk. D4=1 if a reasonable ops person could think the work is done. D4=5 if a reasonable ops person would still open the break. Do not score D4 down for being blunt."
+    },
+    {
+      "type": "callout",
+      "label": "Invented cash figures",
+      "text": "Any dollar amount, USD, or \"cash\" quantity that is not in the bundle is an automatic fail of the item. Not a 1 on D1. A fail. Includes \"$0 impact.\" Includes \"immaterial cash.\" Includes copied notionals from another break if they are not in this bundle. Reviewers who \"know the notional\" still fail it. Write auto_fail=cash in the form.",
+      "kind": "warn"
+    },
+    {
+      "type": "h1",
+      "text": "Scoring mechanics"
+    },
+    {
+      "type": "p",
+      "text": "Form is a Google Form (yes, ugly) dumping to a sheet eval_summaries_2025, one row per reviewer per break_id per week. Fields: week, reviewer, break_id, d1, d2, d3, d4, auto_fail (none|cash|cusip|both), pass (formula), comment (required if any dimension <=2 or auto_fail). Do not skip comments on fails. Future prompt changes need the comment more than the integer."
+    },
+    {
+      "type": "p",
+      "text": "Item pass: auto_fail=none AND d1>=3 AND d2>=3 AND d3>=3 AND d4>=3. We do not average. A 5,5,5,1 is a fail. Tone can kill. A 3,3,3,3 is a pass. We are not awarding style points. Week pass rate = passed items / scored items, after dropping invalids. Two reviewers per item; the item's pass for the weekly rate uses the adjudicated scores, not a mean of the two raw forms."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Week of (examples)",
+        "n scored",
+        "Pass rate",
+        "Auto-fail rate",
+        "What we changed"
+      ],
+      "rows": [
+        [
+          "Dec 16, 2024 (prototype)",
+          "40",
+          "41.2%",
+          "22.5% cash or cusip",
+          "Prompt dump included other accounts. Stopped."
+        ],
+        [
+          "Jan 13, 2025",
+          "40",
+          "67.5%",
+          "9.1% ",
+          "Forced CUSIP list into the first sentence instruction."
+        ],
+        [
+          "Jan 27, 2025",
+          "40",
+          "76.8%",
+          "6.4%",
+          "Banned the words resolved/aligned in the system prompt. Still leaked \"matched.\""
+        ],
+        [
+          "Feb 10, 2025",
+          "40",
+          "81.4%",
+          "3.8%",
+          "Close to the 82% bar. Late-file still the weak dimension (mean D3=3.1)."
+        ]
+      ],
+      "caption": "History of the programme. We do not ship to Helen on a single good week."
+    },
+    {
+      "type": "h1",
+      "text": "Fail vs pass examples"
+    },
+    {
+      "type": "h3",
+      "text": "Example A, late file, pass"
+    },
+    {
+      "type": "p",
+      "text": "Bundle: account 4A-1882, settle_date 2025-02-11, unmatched_cusips [91282CHT1], qty_delta -100, px_delta 0.000, file_late=true, exception_code LATE, state open. Summary: \"Still open. NSCC file late relative to expected drop. CUSIP 91282CHT1 qty_book 1000 vs nscc 900. px in tolerance. Do not treat as settled.\" Scores: D1=5, D2=5, D3=5, D4=5. Pass. Ugly. Good."
+    },
+    {
+      "type": "h3",
+      "text": "Example B, late file, fail (the original sin)"
+    },
+    {
+      "type": "p",
+      "text": "Same bundle. Summary: \"Ingest completed and positions aligned after the delayed file. Cash is consistent at $2.14M.\" Auto-fail cash. D2 fail (no CUSIP). D3=1 (aligned after delayed file). D4=1 (aligned). Item fail. This is the December 11 shape. If you see it again, paste the comment \"late-file fiction\" so we can grep."
+    },
+    {
+      "type": "h3",
+      "text": "Example C, PRICE, borderline pass"
+    },
+    {
+      "type": "p",
+      "text": "Bundle: CUSIP 037833100, px_book 192.41, px_nscc 191.10, qty both 250, file_late=false, code PRICE, open. Summary: \"Open PRICE break on 037833100. Book 192.41 vs NSCC 191.10, qty 250 both sides. Needs ops.\" D1=5, D2=5, D3=5 (n/a lateness correctly omitted), D4=5. Pass. Note D3 is scored 5 when file_late=false and the summary does not invent a delay. Omitting a false thing is correct."
+    },
+    {
+      "type": "h3",
+      "text": "Example D, PRICE, fail on tone"
+    },
+    {
+      "type": "p",
+      "text": "Same bundle. Summary: \"Price discrepancy on 037833100 looks like a stale NSCC print, should match once the file refreshes.\" No invented cash, CUSIP present, but \"should match once\" is a prediction and a close-sounding story. D4=1, D3=3 (invented a refresh). Fail. Ops does not need a story about prints."
+    },
+    {
+      "type": "h3",
+      "text": "Example E, OTHER, pass"
+    },
+    {
+      "type": "p",
+      "text": "Bundle: three CUSIPs unmatched, mixed deltas, file_late=false, code OTHER, last note \"desk checking corp action.\" Summary: \"Still open OTHER. Unmatched CUSIPs 91282CHT1, 912828ZM8, 037833100. Mixed qty/px deltas. Last ops note: desk checking corp action. No close.\" Pass. Lists CUSIPs. Repeats OTHER. Does not solve the corp action."
+    },
+    {
+      "type": "h3",
+      "text": "Example F, OTHER, fail"
+    },
+    {
+      "type": "p",
+      "text": "Same bundle. Summary: \"Likely corporate action, safe to ignore qty on the treasuries, cash wash nets to zero.\" Invented cash wash. Missing one CUSIP maybe, but cash already killed it. Also D4=1 (safe to ignore). Fail. OTHER is where fiction is most tempting. Be harsher, not kinder."
+    },
+    {
+      "type": "h1",
+      "text": "How reviewers disagree and adjudication"
+    },
+    {
+      "type": "p",
+      "text": "Two reviewers: the week's designated pair from the pool (Aman, Kavya, Sneha, Jordan Hale, Lena Park). They score independently. They do not look at each other's form until both are submitted. Sneha closes the form at Thursday 17:00 ET."
+    },
+    {
+      "type": "p",
+      "text": "Agreement: if both pass or both fail, and no dimension differs by 2 or more, the item stands as the mean rounded down on each dimension (we are stingy), auto_fail if either said auto_fail. Either-said-auto-fail is intentional. Cash is not a debate. If one reviewer missed a dollar amount, the other caught it, the item fails. Discuss in adjudication only if the \"cash\" was actually in the bundle and the first reviewer missed it in the bundle, not in the paragraph."
+    },
+    {
+      "type": "p",
+      "text": "Disagreement triggers adjudication if: (a) pass vs fail split, (b) any dimension differs by >=2, (c) auto_fail split. Adjudicator is Aman except when Aman was a reviewer, then Priya Nair. Priya does not rescore every dimension for fun. She reads the bundle, the paragraph, the two comments, and writes a final row in the sheet tab adjudication. Time budget 4 minutes per item. If we have more than 8 adjudications in a week, the prompt is unstable or the rubric is unclear. We fix one of those, we do not add a third reviewer to every item."
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Monday 10:00 ET: Sneha samples 40 open or recently-closed breaks from last 7 settlement days, stratified: at least 8 LATE, 8 OTHER, 8 PRICE, rest mixed. Closed breaks are allowed only if they were open when the summary was generated. We score the summary against the bundle as of generation time, snapshotted in recon.model_summary_eval.",
+        "Monday 10:30: form assignments posted in #clh-recon-ml. Reviewers finish by Thursday 17:00.",
+        "Thursday 17:15: Sneha runs the sheet formula, lists adjudication ids in the channel.",
+        "Friday 11:00: 25-minute adjudication huddle. Aman or Priya. Decisions written in the sheet, not only in Slack.",
+        "Friday 11:30: pass rate posted. If below 82% or auto-fail above 4.0%, Kavya owns a prompt change or we keep the flag off. No silent tweaks."
+      ]
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Split type",
+        "What we do",
+        "Who",
+        "What we do not do"
+      ],
+      "rows": [
+        [
+          "Pass/fail split, no auto-fail",
+          "Reread bundle vs paragraph in huddle, final pass/fail",
+          "Aman (or Priya if Aman reviewed)",
+          "Average the booleans"
+        ],
+        [
+          "Auto-fail split on cash",
+          "Search paragraph for $ or USD or \"cash\". If present and not in bundle, fail. If reviewer imagined it, drop auto-fail.",
+          "Same",
+          "Keep auto-fail out of politeness to the nervous reviewer"
+        ],
+        [
+          "D3 differs by 2+ on file_late=true",
+          "If paragraph lacks late/delay/after-expected, D3=1. Else argue.",
+          "Same",
+          "Let D3=4 because the writing was pretty"
+        ],
+        [
+          "D4 split on \"matched\"",
+          "If state is open and the word matched refers to the break, D4=1. If it refers to qty matching on other legs, read carefully.",
+          "Same",
+          "Give tone a 3 as a compromise by default"
+        ],
+        [
+          "Invalid item (bundle missing CUSIPs)",
+          "Drop from rate, file bug on snapshot job",
+          "Kavya",
+          "Score it anyway and punish the model"
+        ]
+      ],
+      "caption": "Adjudication recipes. Write the outcome in the sheet the same day."
+    },
+    {
+      "type": "p",
+      "text": "Repeated disagreement: if the same two reviewers split on D4 three weeks in a row, I will sit with them and 10 golden items from Sneha's set of 35. Golden items have a known score. Calibration is 40 minutes. We have done this once (January 21, Jordan vs Lena on tone). Jordan was scoring D4=3 on \"should clear after review.\" That phrase is D4=1. He moved. If calibration fails, that reviewer sits out a week. The queue is not a training camp for infinite time."
+    },
+    {
+      "type": "h1",
+      "text": "Golden set"
+    },
+    {
+      "type": "p",
+      "text": "Sneha holds 35 breaks with agreed scores, including 6 late-file, 6 OTHER, 4 invented-cash traps (paragraphs we wrote by hand as negative fixtures), 4 missing-CUSIP traps. New reviewers score the golden set once before they score production weeks. Pass the golden set means they match auto-fail 100% and are within 1 on each dimension for >= 30/35. Jordan failed D4 on 8/35 the first try. Second try 33/35. He reviews now. The golden set is in the repo ns-clh-recon under eval/golden/2025-02.json, not in a private Drive folder that Marta cannot imagine and that we will lose. Paragraphs in the golden set include the December fiction so we never \"fix\" the rubric by forgetting it."
+    },
+    {
+      "type": "h1",
+      "text": "Rejected alternatives"
+    },
+    {
+      "type": "p",
+      "text": "A 1-7 Likert with ten dimensions including fluency, grammar, and \"helpfulness.\" Rahul asked. Died. Helpfulness is how we got solved-tone. Grammar does not close breaks. Four dimensions plus kill switches."
+    },
+    {
+      "type": "p",
+      "text": "Blind A/B of two vendors every week. Died for now. We have one prompt path in recon-ui. Switching vendors while the rubric is still teaching reviewers will confound pass rate with vendor noise. Revisit after three green weeks in front of Helen."
+    },
+    {
+      "type": "p",
+      "text": "Auto-scoring with another model. Chris Patel offered. Died for v1. The failure mode is invented cash. A second model is happy to agree with invented cash. Humans read the bundle. Maybe later as a prefilter that cannot pass, only flag."
+    },
+    {
+      "type": "p",
+      "text": "Show summaries to Helen immediately with a \"draft\" badge. Died. January tabletop: Dana treated draft as done. Badges are not process."
+    },
+    {
+      "type": "h1",
+      "text": "How to run a review hour (execute this)"
+    },
+    {
+      "type": "code",
+      "text": "# snapshot already in RDS; pull this week's sample ids\npsql \"$RECON_RO\" -c \"select break_id, generated_at, left(summary,80) from recon.model_summary_eval\n  where week = date_trunc('week', current_date) order by break_id;\"\n\n# open the bundle sidecar (json) Kavya writes next to the summary\naws s3 cp s3://clh-recon-eval/2025/week-$(date +%V)/bundles/ . --recursive --profile clh-recon-prod\n\n# you score in the Form. after adjudication, export:\n# sheet tab 'adjudication' -> csv to repo\ngit add eval/weeks/2025-W07.csv\n# comment in PR: pass_rate, auto_fail_rate, n_adjudicated\n\n# tripwire: summaries containing $ must have that string in the bundle\npython3 eval/tripwire_cash.py --week 2025-W07\n# exit 1 if a passed item has cash not in bundle. Sneha runs this Friday 11:40.\n",
+      "caption": "Reviewer execute path. If tripwire_cash.py fails after a \"green\" week, the week is not green."
+    },
+    {
+      "type": "h1",
+      "text": "Open questions"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Question",
+        "Owner",
+        "Due",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "Do we add a D5 for exception_code mismatch once codes are on 95% of new breaks?",
+          "Aman Kumar",
+          "March 20, 2025",
+          "Not before. Dual-running a fifth dimension while ops is still mapping OTHER will noise the rate."
+        ],
+        [
+          "Should Marta Quinn see the weekly pass rate?",
+          "Rahul Deshmukh",
+          "February 20, 2025",
+          "Default no. It is an internal engineering gate, not a compliance control. If she asks, show her the rubric, not a vendor claim."
+        ],
+        [
+          "Golden set refresh cadence?",
+          "Sneha Iyer",
+          "April 1, 2025",
+          "Add 5 items per month from real fails. Retire items the prompt has memorized if n-gram overlap with prod prompt dump is high."
+        ],
+        [
+          "Helen as a third reviewer one week a month?",
+          "Helen Cho + Priya",
+          "March 6, 2025",
+          "Valuable. Expensive. Try one Friday in March, 10 items not 40."
+        ],
+        [
+          "If pass rate holds, who turns on the flag for Dana first?",
+          "Kavya Menon",
+          "after 3 green weeks",
+          "Dana before the junior analyst. Helen last. Helen is the loudest fail-safe."
+        ]
+      ],
+      "caption": "Open questions. The rubric can change; changing it resets the three-week clock."
+    },
+    {
+      "type": "h1",
+      "text": "Changing the rubric"
+    },
+    {
+      "type": "p",
+      "text": "If you change a dimension definition, you reset the three consecutive green weeks. You version this doc (1.3+) and you keep the old CSV weeks with a column rubric_version. Do not silently retcon December as a pass under a kinder D4. Priya will look at the readout. The readout includes the version. I will refuse a 1.3 that deletes auto-fail cash. That fail is the programme."
+    },
+    {
+      "type": "p",
+      "text": "If the model starts emitting \"still open\" as a magic phrase and then lying in the next sentence, D4 still fails on the lie. We will not add a regex for \"still open\" as a pass. Regex passes are how Example B comes back wearing a hat."
+    },
+    {
+      "type": "h1",
+      "text": "Recommendation (skim)"
+    },
+    {
+      "type": "p",
+      "text": "Use this rubric weekly. Forty items, two reviewers, adjudication on splits, auto-fail on invented cash and on a missing single unmatched CUSIP. Late-file fiction is D3=1. Solved tone is D4=1. Ship to Helen only after three weeks >= 82% pass and <= 4.0% auto-fail, tripwire_cash.py green. I own the words. Sneha owns the queue. Kavya owns the prompt and the flag. Rahul does not rewrite D4 to be friendlier."
+    }
+  ]
+}

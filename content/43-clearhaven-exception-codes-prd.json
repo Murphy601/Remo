@@ -1,0 +1,436 @@
+{
+  "slug": "43-clearhaven-exception-codes-prd",
+  "doc_id": "CLH-PRD-2024-021",
+  "title": "Structured Exception Codes for Reconciliation Breaks",
+  "subtitle": "Replace Helen Cho's 1,200 distinct free-text break reasons with PRICE, QTY, CUSIP, SIDE, LATE, OTHER, and an immutable reason history",
+  "doc_type": "PRD",
+  "kicker": "Break reasons you can count",
+  "org": "Northstar Engineering",
+  "classification": "INTERNAL",
+  "version": "1.2",
+  "status": "Approved",
+  "date": "December 5, 2024",
+  "author": "Aman Kumar",
+  "role": "Software Engineer II",
+  "team": "Clearhaven Reconciliation",
+  "audience": "Rahul Deshmukh, Helen Cho, Sneha Iyer, Kavya Menon, compliance reviewers at Clearhaven",
+  "owners": "Rahul Deshmukh (PM), Aman Kumar (engineering), Helen Cho (ops mapping), Sneha Iyer (QA)",
+  "related": "CLH-REQ-2022-033, CLH-TDD-2022-021, CLH-PRD-2024-002, CLH-INC-2023-204, CLH-UI-88, CLH-OPS-214",
+  "summary": "Helen Cho's ops team types free-text break reasons. Distinct strings in recon.break_reason_raw hit 1,247 in November 2024, of which 811 appeared once. Reporting is a lie. This PRD replaces that field with a required exception_code from {PRICE, QTY, CUSIP, SIDE, LATE, OTHER}, an optional subtype, a free-text note that cannot exist without a code, and an immutable reason history table. OTHER must not auto-close. Success is ops time per break, currently 7.4 min median, target 4.8 min by March 2025, plus a weekly report Rahul can show without grepping. Compliance (Marta Quinn, Clearhaven) wants every code change kept, including the note, including who, including the previous code. We will not update-in-place.",
+  "form_description": "Product requirements for structured recon exception codes, mapping, UI, reporting, and immutable history. Written for engineering, ops, QA, and the Clearhaven compliance reviewer who asked for history in November.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.3",
+      "October 22, 2024",
+      "Rahul Deshmukh",
+      "Problem statement after Helen's 1,200-string screenshot"
+    ],
+    [
+      "0.7",
+      "November 12, 2024",
+      "Aman Kumar",
+      "Taxonomy freeze. OTHER auto-close banned. History table sketch."
+    ],
+    [
+      "1.0",
+      "November 26, 2024",
+      "Aman Kumar",
+      "UI mock from Kavya. Sneha test notes. Mapping spreadsheet v3."
+    ],
+    [
+      "1.2",
+      "December 5, 2024",
+      "Aman Kumar",
+      "Approved. Compliance history requirement in scope, not a phase 2."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Decision"
+    },
+    {
+      "type": "p",
+      "text": "Ship structured exception codes on recon breaks in Q1 2025. Six codes, not a folksonomy, not a 40-item tree. Mapping from the 1,247 historical strings is a one-time job Helen owns with engineering support, not an ML classifier in v1. UI on the break detail page requires a code before save. Reporting groups by code and settle_date. OTHER never auto-closes, never batch-closes, never gets a \"close all OTHER older than 2 days\" job. Reason history is append-only in recon.break_reason_history. Success metric is median ops handling time per break on Helen's desk, measured from break_open_ts to first_terminal_state, currently 7.4 min, target 4.8 min for PRICE/QTY/SIDE (the mechanical ones) and no regression on CUSIP/LATE/OTHER."
+    },
+    {
+      "type": "callout",
+      "label": "OTHER does not auto-close",
+      "text": "A proposed nightly job would close OTHER breaks older than 48 hours if match_rate recovered. Rahul killed it in the November 12 review. OTHER is the bucket where a CUSIP mismatch hides when someone is tired. Auto-close is how you settle a book with a silent wrong CUSIP. Humans close OTHER. The UI will refuse a bulk action that includes OTHER.",
+      "kind": "decision"
+    },
+    {
+      "type": "p",
+      "text": "Compliance is in v1. Marta Quinn (Clearhaven compliance, not a Northstar employee) asked on November 6 for an immutable reason history after she sampled 40 closed breaks and found 11 where the free-text had been edited after close, including one that changed \"qty off by 100\" to \"ok per desk\" with no name. That is the audit finding waiting to happen. We append. We do not update recon.break_reason_raw in place after this ships. The old column stays readable for 180 days, then we drop it in a later SOP."
+    },
+    {
+      "type": "h1",
+      "text": "Problem"
+    },
+    {
+      "type": "p",
+      "text": "The column recon.break.reason_text is varchar(512), nullable, no check constraint. Ops types whatever. I pulled distinct values for settle_date in 2024 through November 30: 1,247 distinct strings, 811 singletons, top string \"price\" at 4,182 occurrences, then \"Price\" at 2,019, then \"px\" at 1,104, then \"price diff\" at 880, then \"PRCE\" at 12 because someone fat-fingered. Helen's weekly report to Marcus is a Google Sheet with a hand-built mapping she spends 48-65 minutes on every Friday. She hates it. She said so in CLH-OPS-214. Rahul asked engineering to make the report a query. We cannot query this."
+    },
+    {
+      "type": "p",
+      "text": "Time per break: Sneha Iyer clocked Helen's desk for 3 days in October (ticket CLH-UI-88). Median 7.4 min from opening the break to a terminal state. 2.1 min of that is rereading the free-text, arguing in Slack about whether \"late file leftover\" is LATE or OTHER, and recoding after Helen's lead (Priya on their side, Dana Voss) rejects the wording. Structured codes should eat that 2.1 min for PRICE/QTY/SIDE. CUSIP and LATE still need a human who can read a header. OTHER still needs a human who can think. We are not promising 4.8 min on OTHER."
+    },
+    {
+      "type": "quote",
+      "text": "I have 1,200 ways to say the price is wrong. Give me six buckets and a box for the rest. If you give me thirty buckets I will still type in the box.",
+      "attrib": "Helen Cho, October 22, 2024 intake with Rahul"
+    },
+    {
+      "type": "h1",
+      "text": "Who this is for"
+    },
+    {
+      "type": "p",
+      "text": "Helen Cho and the two ops analysts on her desk (Dana Voss, Priya on their side is a different Priya: Priya Nair is our EM; Clearhaven ops lead is Dana). Rahul Deshmukh needs a weekly count by code for Marcus's TAM report. Sneha Iyer needs cases she can automate. Kavya Menon will own the API. I own the schema and the history table. Marta Quinn needs to export history for a sampled break in under 5 minutes without asking me to run SQL. Chris Patel wants the codes in the lake by settle_date+1. Diego does not care unless the migration locks match_break during the window, in which case he cares a lot and we will not do that."
+    },
+    {
+      "type": "h2",
+      "text": "Out of scope"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Auto-classifying new breaks with a model. That is a later experiment and it will not write OTHER for you.",
+        "Changing the matcher. Codes describe breaks the matcher already emitted. If the matcher is wrong, that is a different TDD.",
+        "Clearhaven's downstream accounting codes. We will emit ours. They can map.",
+        "Rewriting 2022-2023 history into the six codes except for a sampled backfill Helen chooses. Full backfill of 1,247 strings is a 3-week ops tax we are not silently signing up for.",
+        "A 40-node taxonomy copied from a vendor. We looked. It died. See rejected alternatives."
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "Taxonomy"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Code",
+        "Meaning",
+        "Typical evidence on the break",
+        "May auto-suggest?",
+        "May auto-close?"
+      ],
+      "rows": [
+        [
+          "PRICE",
+          "Economic value disagrees, CUSIP/qty/side/date match",
+          "abs(nscc_px - book_px) > 0.012 on the pair, or 0.0001 on treasuries per recon.match_rule",
+          "Yes, if the matcher already tagged px_delta",
+          "No. Ops confirms. Tiny px_delta can be a CUSIP collision."
+        ],
+        [
+          "QTY",
+          "Quantity disagrees, identity fields match",
+          "qty_nscc != qty_book, same CUSIP, same side",
+          "Yes, if qty_delta != 0 and px within tolerance",
+          "No. Same reason. Partial fills look like qty."
+        ],
+        [
+          "CUSIP",
+          "Identifier mismatch or unknown CUSIP",
+          "cusip not in recon.instrument or two CUSIPs on one intended pair",
+          "Weak. Suggest only if instrument missing.",
+          "No."
+        ],
+        [
+          "SIDE",
+          "Buy/sell or long/short disagree",
+          "side_nscc != side_book, other keys match",
+          "Yes, if side differs and qty/px match",
+          "No."
+        ],
+        [
+          "LATE",
+          "File or row arrived after the expected drop, break is aging because of clock not economics",
+          "object_created_at > expected_drop_ts + 18 min, or .retrans etag",
+          "Yes, if ingest marked file_late=true",
+          "No. LATE can hide a short file."
+        ],
+        [
+          "OTHER",
+          "Anything else, including mixed, unknown, \"desk said so,\" wash, as-of, corporate action leftovers",
+          "None of the above fits without lying",
+          "No. Never suggest OTHER. Make them pick it.",
+          "No. Never. Not in bulk. Not overnight."
+        ]
+      ],
+      "caption": "Six codes. Subtypes are optional strings from a small list, not a second taxonomy explosion."
+    },
+    {
+      "type": "h3",
+      "text": "Subtypes (optional)"
+    },
+    {
+      "type": "p",
+      "text": "Subtype is a second select, enabled after code is chosen, values per code. PRICE: PX_TOLERANCE, PX_FACTOR, PX_STALE_REF. QTY: QTY_PARTIAL, QTY_SPLIT, QTY_ROUND. CUSIP: CUSIP_UNKNOWN, CUSIP_COLLISION, CUSIP_EXPIRED. SIDE: SIDE_FLIP, SIDE_MISSING. LATE: LATE_NSCC, LATE_DTC, LATE_INTERNAL. OTHER: no subtypes in v1. If you need a subtype on OTHER you probably needed a real code. Helen can add subtypes later via a config table recon.exception_subtype owned by her with my review, not via a deploy of enum values in Java. The code list itself is an enum in the database domain recon.exception_code. Adding a seventh code is a PRD amendment, not a config row. We are stubborn on purpose. The 1,247 strings grew because the field was a text box."
+    },
+    {
+      "type": "h1",
+      "text": "Mapping the 1,247 strings"
+    },
+    {
+      "type": "p",
+      "text": "Helen gets a spreadsheet (Google, not Excel emailed) with columns: raw_string, count_2024, proposed_code, proposed_subtype, notes, helen_ok. I prefill proposed_code with a boring ruleset: regex on price/px/prce -> PRICE, qty/quantity/shares -> QTY, cusip/identifier/isin -> CUSIP, side/buy/sell/b/s -> SIDE, late/delay/retrans/makeup -> LATE, else OTHER. Prefill accuracy on a 200-row sample Sneha scored: 73.4%. The misses are the interesting ones (\"px off because wrong cusip\" is CUSIP not PRICE). Helen's job is to flip those. Time budget: 8 hours over two weeks, Dana helping. We do not ship the UI until the mapping covers every raw_string with count >= 4. Singletons can fall to OTHER on backfill and get recoded if they reappear."
+    },
+    {
+      "type": "p",
+      "text": "Backfill job: for breaks with settle_date >= 2024-01-01 and a mapped raw_string, insert a history row with actor=system:backfill, to_code=mapped, note=\"mapped from reason_text\". Do not overwrite reason_text yet. Dual-write starts at UI launch: new saves write code + history + still fill reason_text with a generated sentence so old reports do not blank out. After 180 days, drop dual-write in a separate SOP. Breaks older than 2024 stay as text. Marta agreed. She sampled 2024."
+    },
+    {
+      "type": "callout",
+      "label": "Do not map \"ok\" or \"closed\" to PRICE",
+      "text": "41 strings are variants of done/ok/closed/fine/ignore. Those are not exception codes. They are states. The break state machine already has closed. Mapping them to OTHER is also wrong. Backfill those as history note \"legacy close text, no code\" and leave exception_code null with a flag legacy_uncoded=true. Null is allowed only on pre-launch rows. Post-launch, code is NOT NULL.",
+      "kind": "warn"
+    },
+    {
+      "type": "h1",
+      "text": "UI"
+    },
+    {
+      "type": "p",
+      "text": "Break detail, recon-ui, route /breaks/:id. Today's page is a textarea. Tomorrow's page: required select Exception code, optional select Subtype, textarea Note (max 280 chars, not 512, we are done with novels), read-only history timeline newest first. Save is disabled until code is set. Bulk edit from the queue list allows PRICE, QTY, SIDE, LATE, CUSIP. Bulk edit hides OTHER. If the selection contains a break already coded OTHER, bulk save fails with \"OTHER must be edited one at a time.\" Kavya mocked this in Figma CLH-UI-88. Helen clicked through on November 20 and asked for the history to show initials, not just emails. We will show display name + email."
+    },
+    {
+      "type": "p",
+      "text": "Queue filters: add exception_code facets. Default sort remains age. A saved view \"OTHER only\" is pinned for Dana because that is the work that needs a brain. A saved view \"PRICE today\" is pinned for the junior analyst. If we skip facets, Helen will export CSV and we will have failed even if the column exists."
+    },
+    {
+      "type": "p",
+      "text": "Keyboard: ops live in the queue. Tab to code, type P for PRICE, enter, tab to note, save with Ctrl-Enter. If we ship a mouse-only select, time per break will not move. Sneha will test this with a stopwatch, not with a screenshot."
+    },
+    {
+      "type": "h1",
+      "text": "API and schema"
+    },
+    {
+      "type": "code",
+      "text": "-- domain is frozen. adding a value is a PRD change.\ncreate type recon.exception_code as enum (\n  'PRICE','QTY','CUSIP','SIDE','LATE','OTHER'\n);\n\nalter table recon.break\n  add column exception_code recon.exception_code,\n  add column exception_subtype text,\n  add column legacy_uncoded boolean not null default false;\n\ncreate table recon.break_reason_history (\n  id bigserial primary key,\n  break_id bigint not null references recon.break(id),\n  at timestamptz not null default now(),\n  actor_email text not null,\n  actor_display text not null,\n  from_code recon.exception_code,\n  to_code recon.exception_code,\n  from_subtype text,\n  to_subtype text,\n  note text,\n  ui_session_id uuid,\n  immutable hashbytea generated always as (\n    digest(break_id::text || at::text || actor_email || coalesce(to_code::text,'') || coalesce(note,''), 'sha256')\n  ) stored\n);\ncreate index on recon.break_reason_history (break_id, at desc);\n-- no update, no delete grants to recon_app\nrevoke update, delete on recon.break_reason_history from recon_app;\ngrant insert, select on recon.break_reason_history to recon_app;\n\n-- trigger: any change to exception_code/subtype/note inserts history\n-- do not update history rows. there is no update path.\n",
+      "caption": "Schema sketch. Final SQL lives in the migration PR. History has no UPDATE grant. Hash is a tamper-evidence convenience, not a legal seal."
+    },
+    {
+      "type": "p",
+      "text": "PATCH /v2/breaks/{id}/exception body: {code, subtype, note}. 409 if the break is in a terminal state and the caller is not in role ops-lead (Dana, Helen). Closed breaks can still grow history if Dana recodes for audit, which Marta wanted. Recoding a closed break does not reopen it. That was an argument. Rahul wanted recode-to-reopen. Helen said no, because reopen starts her aging clock. We side with Helen. Recode is history. State is state."
+    },
+    {
+      "type": "p",
+      "text": "GET /v2/breaks/{id}/exception-history returns the array newest first, paginated 50. CSV export /v2/reports/exception-codes?from=&to= for Rahul. Lake: Chris gets recon.break_reason_history daily via the existing CDC (CLH-TDD-2023-002). If CDC lags, the report still runs off primary RO, not off the lake. Do not make Rahul's Friday wait for Spark."
+    },
+    {
+      "type": "h1",
+      "text": "Reporting"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Report",
+        "Consumer",
+        "Grain",
+        "Query home"
+      ],
+      "rows": [
+        [
+          "Weekly counts by code",
+          "Rahul -> Marcus",
+          "settle_date, exception_code, count, median_minutes",
+          "recon.v_exception_weekly, Grafana dashboard 2210"
+        ],
+        [
+          "OTHER aging",
+          "Dana / Helen",
+          "break_id, age_hours, last_note",
+          "queue saved view + email 16:00 ET if OTHER > 40 open"
+        ],
+        [
+          "Recode rate",
+          "Sneha / Aman",
+          "share of breaks whose code changed at least once",
+          "history table, target < 8.5% after week 6"
+        ],
+        [
+          "Ops time per break",
+          "Priya Nair / Rahul",
+          "median open-to-terminal minutes by code",
+          "already have open_ts/close_ts, group by code"
+        ],
+        [
+          "Audit export",
+          "Marta Quinn",
+          "one break_id, full history",
+          "UI button + GET history, also SQL she can request"
+        ]
+      ],
+      "caption": "If a report is not in this table it is a hallway request. Hallway requests wait."
+    },
+    {
+      "type": "p",
+      "text": "Success: median ops time per break. Baseline 7.4 min (October clock study, n=186 breaks). Target 4.8 min on PRICE+QTY+SIDE combined by March 14, 2025. Guardrail: OTHER median must not exceed 9.6 min (it is 8.9 now). Guardrail: recode rate after week 6 under 8.5%. Guardrail: zero auto-closes of OTHER, which we will assert with a monitor on history rows where actor_email=system:autoclose and to_code is null and state went closed. There should be no such actor. If someone adds it, the monitor pages me."
+    },
+    {
+      "type": "h1",
+      "text": "Do not auto-close OTHER"
+    },
+    {
+      "type": "p",
+      "text": "I am repeating this because it will come back as a \"small job.\" Match rate recovered does not mean the OTHER break was a false alarm. On November 16, 2023 (CLH-INC-2023-204) we had breaks that looked like noise while a lock sat on match_break. Ops typed various leftovers. Auto-closing those because the next file matched would have deleted the only breadcrumb. OTHER is a holding pen for \"we do not know.\" Known things get real codes. The UI bulk path excludes OTHER. The API bulk path returns 422 if any id is OTHER. The nightly jobs list in recon.job_registry must not gain a closer. Sneha tests this with a job that tries; it must fail CI if someone adds it."
+    },
+    {
+      "type": "h1",
+      "text": "Rollout"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Week of Dec 9: mapping spreadsheet to Helen, prefill v3, Sneha samples 200 rows.",
+        "Week of Dec 16: schema migration on stg, dual-write off. Kavya UI on stg.",
+        "Week of Jan 6, 2025: Helen+Dana dogfood stg with 40 real copied breaks (sanitized).",
+        "Week of Jan 13: prod schema, dual-write on, UI flag exception_codes=true for Helen's user only.",
+        "Week of Jan 20: flag on for all ops. Training 35 minutes. Rahul on the call.",
+        "Week of Jan 27: backfill mapped strings count>=4. Facets on. Dashboard 2210 live.",
+        "March 14: success readout. If median PRICE+QTY+SIDE > 5.6 min, we did not ship a keyboard path or the mapping is wrong. Fix, do not add codes."
+      ]
+    },
+    {
+      "type": "p",
+      "text": "Migration lock: ALTER TYPE add value is fine. Adding columns with default false is fine on pg 15 with a short rewrite risk we will run Tuesday 10:30 ET, not in the window. Backfill inserts into history are batched 2,000 rows, sleep 200ms, on the writer after hours? No, after hours is freeze for deploys, but this is a data backfill. Priya and Diego agreed backfills can run 20:00-22:00 ET if they are insert-only and CPU < 25% on the writer. We watch. We stop if Helen's UI slows. We do not run this during 16:00-19:30."
+    },
+    {
+      "type": "h1",
+      "text": "Rejected alternatives"
+    },
+    {
+      "type": "p",
+      "text": "Vendor taxonomy, 42 codes, from a clearing-vendor PDF Marcus forwarded. Helen lasted 11 minutes in the review. She said she would pick OTHER 80% of the time. Died. Six codes survive contact with a tired analyst. Forty do not."
+    },
+    {
+      "type": "p",
+      "text": "Free-text plus an NLP tagger that writes a code asynchronously. Chris Patel offered a notebook. Accuracy on the 200-row sample was 61.8% when the note was short, 44% when the note was a paragraph. Wrong codes are worse than no codes because Rahul's report would look precise. Died for v1. Revisit when OTHER is < 12% of volume and we have a gold set. The gold set is this project."
+    },
+    {
+      "type": "p",
+      "text": "Auto-close OTHER after 48h if subsequent match_run has match_rate_pct > 99.1. Rahul floated it as ops-saving. Helen and Marta both said no, for different reasons (Helen: hides shorts; Marta: hides evidence). Died. Documented above so it cannot return as a two-line cron."
+    },
+    {
+      "type": "p",
+      "text": "Mutable reason field with an audit log in app logs. App logs roll at 30 days. Marta needs 7 years. RDS is the system of record. Died."
+    },
+    {
+      "type": "h1",
+      "text": "Test notes (Sneha)"
+    },
+    {
+      "type": "p",
+      "text": "Sneha Iyer's bar, copied from her November 26 comment so it does not evaporate: (1) cannot save a new break action without a code, (2) cannot bulk-include OTHER, (3) history row appears within 400ms of save, (4) history API does not accept PATCH, (5) recode of closed break appends and leaves state=closed, (6) keyboard P, Q, C, S, L, O pick codes, (7) dual-write fills reason_text with a stable generated sentence so old Grafana panels do not blank, (8) backfill does not touch settle_date < 2024-01-01, (9) a fake job named autoclose_other fails CI if merged, (10) Marta can export one break from UI without SSO to Grafana. Item 9 is a tripwire test in the jobs package, not a joke."
+    },
+    {
+      "type": "h1",
+      "text": "Open questions"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Question",
+        "Owner",
+        "Due",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "Is ISIN-only mismatch CUSIP or OTHER? Book still keys on CUSIP.",
+          "Helen Cho",
+          "December 13, 2024",
+          "If ISIN shows up 30+ times in Q1, we still do not add a seventh code without a PRD change."
+        ],
+        [
+          "Can Dana have ops-lead recode on closed breaks, or only Helen?",
+          "Rahul Deshmukh",
+          "December 12, 2024",
+          "API role ops-lead. Default Helen+Dana."
+        ],
+        [
+          "Lake SLA for history: T+1 06:00 ET enough for Marta's ad hoc, or does she need 15 min?",
+          "Chris Patel + Marta Quinn",
+          "December 18, 2024",
+          "If 15 min, we point her at the API, not the lake."
+        ],
+        [
+          "Generated reason_text sentence format, so old panels stay parseable?",
+          "Kavya Menon",
+          "January 3, 2025",
+          "Propose: \"[CODE] subtype=... note=...\" cap 280."
+        ],
+        [
+          "Do we show codes to Clearhaven advisors in the customer UI, or ops-only?",
+          "Marcus Bell + Rahul",
+          "January 10, 2025",
+          "Default ops-only. Advisors see \"in review\" still."
+        ]
+      ],
+      "caption": "Open questions as of December 5, 2024."
+    },
+    {
+      "type": "h1",
+      "text": "Risks"
+    },
+    {
+      "type": "p",
+      "text": "Ops will park 40% in OTHER for two weeks out of habit. Mitigation: daily OTHER count in #clh-recon-ops, Rahul nags, Helen's saved view. If OTHER > 28% of new codes in week 3, we schedule a 20-minute desk huddle, we do not add codes."
+    },
+    {
+      "type": "p",
+      "text": "Matcher auto-suggest will be wrong on CUSIP collisions that look like PRICE. Mitigation: auto-suggest is a highlight, not a preselected value. The select starts empty. Empty cannot be submitted."
+    },
+    {
+      "type": "p",
+      "text": "History table grows. Rough math: 18.6k breaks/month, 1.14 history rows per break (some recodes), ~21k rows/month, tiny. Not a partition problem in 2025. Revisit in 2027."
+    },
+    {
+      "type": "p",
+      "text": "Compliance will ask for a cryptographic ledger. The SHA256 column is a courtesy. If they need more, that is a different product and a different budget. Do not pretend the hash is a WORM drive."
+    },
+    {
+      "type": "h1",
+      "text": "Failure modes after launch"
+    },
+    {
+      "type": "p",
+      "text": "Jordan Hale asked what happens if ops keeps typing in the note and picking OTHER because the select feels slower than the old textarea. That is the actual risk, not a missing seventh code. Week 1 we will watch OTHER share. If it sits above 28% of new codes, Rahul runs a 20-minute huddle with Dana and we recode a sample of 40 together. We do not add PRICE_QTY as a combo code. Mixed breaks are OTHER plus a note that names both. Kavya will log select-open to save time; if that is 11.2 seconds because the dropdown is a custom React pile, we ripped the custom widget and use a native select. Native was 1.4 seconds in her stg probe on a 2019 laptop Helen still uses."
+    },
+    {
+      "type": "table",
+      "headers": ["Failure", "How we notice", "What we do", "What we refuse"],
+      "rows": [
+        ["OTHER parking lot", "OTHER > 28% of new codes in week 3", "Huddle, recode sample of 40, maybe a tooltip", "Add codes from the hallway"],
+        ["History UPDATE attempt", "Grant error in API logs, or a 405 on PATCH /history", "Leave it failing. File a ticket if a client library retries loudly", "Grant UPDATE to recon_app \"temporarily\""],
+        ["Dual-write blanks old Grafana", "Dashboard 1842 panel 6 empty", "Kavya's generated sentence must land in reason_text. Fix generator, backfill the gap.", "Drop the old panel the same week as launch"],
+        ["Bulk close includes OTHER", "422s in UI, or worse, a 200 if someone bypasses UI", "Sneha's tripwire job plus API 422. If 200 happened, reopen those breaks.", "A nightly closer that \"only runs on OTHER with match_rate > 99\""],
+        ["Migration during window", "Writer CPU and Helen Slack", "We scheduled Tuesday 10:30. If someone reruns Friday 17:00, stop.", "apply_immediately on the type add"],
+        ["Marta cannot export", "Email to Marcus then to Rahul", "UI button is the path. If SSO blocks her, Priya adds her to recon-ui-readonly.", "Aman runs SQL as a standing process"]
+      ],
+      "caption": "Post-launch failures. Most of them are people trying to recreate free-text or auto-close."
+    },
+    {
+      "type": "callout",
+      "label": "Note field is not the old reason",
+      "text": "If we catch a week where note length p50 is 240 chars and code is OTHER 61% of the time, the note has become the old varchar(512). Rahul and I will sit with Dana and recode, then we shorten the note max to 160 if needed. The code is the product. The note is a footnote.",
+      "kind": "note"
+    },
+    {
+      "type": "p",
+      "text": "Lena Park will watch API 422 rates the first Friday. If bulk 422 is the top error, that is the feature working (people tried to bulk OTHER). If PATCH /breaks/{id}/exception 500s, that is me. The 500 playbook is: check the trigger on break_reason_history, check that recon_app still has INSERT, check we did not wrap the insert in a transaction that also updates history. There is no update. A 500 that looks like a conflict is probably a missing enum value from a stale API pod. Roll the pod. Do not add the value to the enum from a laptop."
+    },
+    {
+      "type": "h1",
+      "text": "Recommendation (skim)"
+    },
+    {
+      "type": "p",
+      "text": "Approve six codes, mapping with Helen, mandatory UI select, no OTHER auto-close, append-only history in RDS, dual-write 180 days, success = 4.8 min median on PRICE/QTY/SIDE by March 14, 2025. Rahul is PM. I am engineering owner. Kavya UI+API. Sneha test plan. Helen mapping. Marta gets export in v1. No vendor taxonomy. No NLP writer. No seventh code without a new PRD."
+    }
+  ]
+}

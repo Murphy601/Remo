@@ -1,0 +1,462 @@
+{
+  "slug": "42-clearhaven-terraform-aws-design",
+  "doc_id": "CLH-TDD-2024-009",
+  "title": "Clearhaven Recon Terraform Modules for AWS",
+  "subtitle": "MSK, RDS, EKS IRSA, inbound S3, KMS, remote state, and why we will not ship a 4k-line main.tf",
+  "doc_type": "Technical design",
+  "kicker": "Infrastructure as code for recon, after two years of click-ops",
+  "org": "Northstar Engineering",
+  "classification": "INTERNAL",
+  "version": "1.2",
+  "status": "Approved",
+  "date": "March 28, 2024",
+  "author": "Aman Kumar",
+  "role": "Software Engineer II",
+  "team": "Clearhaven Reconciliation",
+  "audience": "Diego Alvarez, Kavya Menon, Priya Nair, anyone who still has console admin from 2022",
+  "owners": "Aman Kumar (module layout), Diego Alvarez (state bucket, apply windows, MSK)",
+  "related": "CLH-TDD-2022-021, CLH-SOP-2023-019, CLH-SOP-2023-028, CLH-TDD-2023-008, NS-SRE-TF-001, CLH-INFRA-77, CLH-INFRA-91",
+  "summary": "This design splits Clearhaven recon AWS into Terraform modules (MSK, RDS, EKS IRSA, inbound S3, KMS) with state at s3://ns-tf-state/clh-recon. Console clicks are out of policy as of this approval. We are paying down 2022 click-ops drift: security groups that exist only in us-east-1 reality, an MSK cluster created in the console named msk-clh-recon-1, and an inbound bucket with a public-access block that someone toggled by hand after a failed Firehose experiment. Diego Alvarez and I own the import. We reject a single 4k-line main.tf. We also document the March 7 failure when an MSK broker count change was applied during the settlement window and took 47.3 minutes of rolling restart.",
+  "form_description": "Technical design for moving Clearhaven recon AWS resources under Terraform modules and a locked apply path. Written for engineers who will import, plan, and apply, and for Priya who needs a one-screen decision.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.2",
+      "February 14, 2024",
+      "Aman Kumar",
+      "Skeleton after CLH-INFRA-77 drift report"
+    ],
+    [
+      "0.8",
+      "March 8, 2024",
+      "Aman Kumar",
+      "Added MSK broker-count failure from March 7 apply"
+    ],
+    [
+      "1.0",
+      "March 21, 2024",
+      "Diego Alvarez",
+      "State bucket layout and IRSA trust conditions"
+    ],
+    [
+      "1.2",
+      "March 28, 2024",
+      "Aman Kumar",
+      "Priya approved. Console click ban. Module boundaries frozen."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Decision"
+    },
+    {
+      "type": "p",
+      "text": "We manage Clearhaven recon AWS with Terraform 1.6.6, AWS provider 5.41.0, modules under infra/modules/{msk,rds,eks-irsa,s3-inbound,kms}, root stacks per env under infra/live/{stg,prod}/clh-recon. Remote state is s3://ns-tf-state/clh-recon/${env}/terraform.tfstate with DynamoDB lock table ns-tf-lock, kms key alias/ns-tf-state. Applies go through GitHub Actions workflow tf-clh-recon.yml on self-hosted runners with OIDC. Humans do not click the AWS console to create or mutate recon resources. Drift from 2022 click-ops gets imported, then the console IAM policies for the old admin roles lose ec2:*, kafka:*, rds:*, s3:Put* on the recon accounts. Diego holds the break-glass role for 90 days."
+    },
+    {
+      "type": "callout",
+      "label": "Rejected: one 4,182-line main.tf",
+      "text": "Kavya prototyped a single root module that declared MSK, RDS, node groups, IRSA, buckets, and KMS in one file because \"plan is easier to read.\" Plan was 19.4 minutes. Review was impossible. A CIDR change for the inbound bucket policy redrew 60 resources. We split modules. Root main.tf in live/prod/clh-recon stays under 220 lines of module blocks. If your PR pushes it past 300, Diego will bounce it.",
+      "kind": "decision"
+    },
+    {
+      "type": "p",
+      "text": "Priya asked if we could wait until FY25 capacity work. No. CLH-INFRA-77 found 14 resources in prod that Terraform did not know about, including a security group sg-0c8k2reconjunk that still allowed 0.0.0.0/0:9092 from a 2022 MSK tutorial click-through. That group is attached to nothing now, but it exists, and every SOC questionnaire Helen forwards to Marcus asks whether we have inbound 9092 from the world. We do, on paper, until this import lands."
+    },
+    {
+      "type": "h1",
+      "text": "Why this, why now"
+    },
+    {
+      "type": "p",
+      "text": "Clearhaven recon has lived in AWS since September 2022 (CLH-TDD-2022-021). The first MSK cluster, the first RDS, and the first inbound bucket were created in the console because we had a file-drop deadline and two engineers. I was one of them. Diego was the other, though he was not SRE-of-record yet. We promised ourselves we would come back. We came back in pieces: some Terraform for EKS node groups in late 2023, a handwritten CloudFormation stack for the KMS key that signs S3 objects, and a shell script Diego runs to rotate the MSK scram secret. Three tools, none of which know the others' tags. Cost explorer thinks the RDS instance is untagged. It is not untagged in the console. It is tagged with a key Terraform does not emit."
+    },
+    {
+      "type": "p",
+      "text": "Drift report CLH-INFRA-77 (February 9, 2024) compared a hand inventory against a terraform plan in a scratch workspace. Hits: MSK broker type mismatch (console says kafka.m5.large, an old tfvars said kafka.t3.small, neither was applying). RDS backup window 07:11-07:41 UTC which is 02:11-02:41 ET, overlapping nothing useful and colliding with a vacuum we scheduled in application code. S3 bucket clh-recon-inbound-prod had BlockPublicAcls true but RestrictPublicBuckets false leftover from a Firehose experiment Chris Patel killed in January 2023. EKS OIDC provider existed; three service accounts still used long-lived access keys sitting in a Kubernetes secret named leftover-aws-key, last rotated 14 months ago. That secret is the actual incident waiting to happen. IRSA is the point of the eks-irsa module."
+    },
+    {
+      "type": "p",
+      "text": "Console click policy: after this design is applied and the import PR is green, the AWS IAM permission boundary ns-boundary-clh-recon denies kafka:Create*, rds:Create*, s3:CreateBucket, kms:CreateKey, eks:Create* for every human except the break-glass role. Read remains. Screenshot remains. Click-to-create dies. If you need a new topic, you open a PR to the msk module's topics.tf map. If you need a new IRSA role, you open a PR to eks-irsa. Diego will still have console for debugging, with CloudTrail alerts on PutBucketPolicy and UpdateBrokerCount."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "us-east-1 only for recon prod. No multi-region in this design. DR is a later TDD.",
+        "State in s3://ns-tf-state/clh-recon. Not local. Not Terraform Cloud. Northstar already pays for this bucket. New backend is wasted money and a second lock story.",
+        "No terraform apply from a laptop against prod. CI only. Laptop apply against stg is allowed if you are Diego or Aman and the lock is held.",
+        "Settlement window (16:00-19:30 ET) is an apply freeze, same spirit as CLH-SOP-2023-028. MSK broker count changes are freeze-plus: they roll brokers and we already burned March 7.",
+        "Do not recreate RDS. Import. A new instance means a 4.8 hour dump/restore we will not schedule for a tidy state file.",
+        "Tags: Service=clh-recon, Env=prod|stg, ManagedBy=terraform, Owner=aman.kumar. Anything without ManagedBy=terraform is either imported next or scheduled for delete."
+      ]
+    },
+    {
+      "type": "h1",
+      "text": "State and backend"
+    },
+    {
+      "type": "p",
+      "text": "Bucket s3://ns-tf-state already exists, account 881736291104, versioning on, encryption aws:kms key alias/ns-tf-state. We add prefix clh-recon/stg/ and clh-recon/prod/. DynamoDB table ns-tf-lock already has LockID. We do not make a second lock table. Diego's SRE standard NS-SRE-TF-001 says one lock table per account. I wanted a per-stack table so a stuck ingest apply would not block an IRSA apply. He is right that we should not have two lock stories. We split by state key, not by table. If you need to apply IRSA while someone is applying MSK, that is two state files, two locks, same table, different LockID values. That is the point of modules plus live stacks that bind one module group per apply."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Live stack",
+        "State key",
+        "What it owns",
+        "Apply blast radius"
+      ],
+      "rows": [
+        [
+          "infra/live/prod/clh-recon/kms",
+          "clh-recon/prod/kms/terraform.tfstate",
+          "KMS keys for S3, RDS, MSK at-rest, secrets",
+          "Key policy only. Cannot accidentally recreate RDS."
+        ],
+        [
+          "infra/live/prod/clh-recon/s3-inbound",
+          "clh-recon/prod/s3-inbound/terraform.tfstate",
+          "Bucket clh-recon-inbound-prod, notifications, lifecycle",
+          "Bucket policy. Do not force-destroy."
+        ],
+        [
+          "infra/live/prod/clh-recon/msk",
+          "clh-recon/prod/msk/terraform.tfstate",
+          "Cluster msk-clh-recon-1, scram, topics map, SG",
+          "Broker count, instance type, config. Window-sensitive."
+        ],
+        [
+          "infra/live/prod/clh-recon/rds",
+          "clh-recon/prod/rds/terraform.tfstate",
+          "clh-pg-recon instance, subnet group, param group, SG",
+          "Param group changes can bounce. Backup window."
+        ],
+        [
+          "infra/live/prod/clh-recon/eks-irsa",
+          "clh-recon/prod/eks-irsa/terraform.tfstate",
+          "IAM roles + SA annotations for match-worker, ingest, ui",
+          "Role trust. Pods pick up on restart, not on apply."
+        ]
+      ],
+      "caption": "Five state files. Five plans. No god-stack. Stg mirrors the same keys under clh-recon/stg/."
+    },
+    {
+      "type": "code",
+      "text": "terraform {\n  required_version = \">= 1.6.6\"\n  backend \"s3\" {\n    bucket         = \"ns-tf-state\"\n    key            = \"clh-recon/prod/msk/terraform.tfstate\"\n    region         = \"us-east-1\"\n    dynamodb_table = \"ns-tf-lock\"\n    encrypt        = true\n    kms_key_id     = \"alias/ns-tf-state\"\n  }\n  required_providers {\n    aws = { source = \"hashicorp/aws\", version = \"5.41.0\" }\n  }\n}\n\n# from a runner, never from a random laptop against prod\nexport AWS_ROLE_ARN=arn:aws:iam::881736291104:role/ns-gha-tf-clh-recon\naws sts assume-role --role-arn $AWS_ROLE_ARN --role-session-name tf-msk-prod\nterraform -chdir=infra/live/prod/clh-recon/msk init\nterraform -chdir=infra/live/prod/clh-recon/msk plan -out=msk.plan\nterraform -chdir=infra/live/prod/clh-recon/msk show -json msk.plan | jq '.resource_changes[] | {addr:.address, actions:.change.actions}'\n",
+      "caption": "Backend snippet for the MSK live stack and the only apply path we will review in PRs."
+    },
+    {
+      "type": "h1",
+      "text": "Module boundaries"
+    },
+    {
+      "type": "h2",
+      "text": "kms"
+    },
+    {
+      "type": "p",
+      "text": "Module infra/modules/kms creates two customer managed keys: clh-recon-data (S3 inbound, RDS storage, MSK encryption at rest) and clh-recon-secrets (scram passwords, the IRSA-adjacent Secrets Manager entries). Rotation enabled, 365 days. Key policy allows the live-stack roles and the EKS IRSA roles by ARN, not by account-star. The 2022 console key alias/clh-recon-old is aliased but unused; we schedule deletion 30 days after import once we prove no object still lists that key id. Chris Patel thinks Spark jobs in the lake still point at it. He will grep. Until he greps, we do not schedule deletion."
+    },
+    {
+      "type": "h2",
+      "text": "s3-inbound"
+    },
+    {
+      "type": "p",
+      "text": "Bucket name stays clh-recon-inbound-prod. Renaming is a vanity that costs every producer and the IAM of Clearhaven's file-drop role. Versioning on. Lifecycle: abort incomplete MPU at 7 days, noncurrent versions expire at 31 days, current objects in prefix nscc/ expire at 96 days because Helen still asks for day-90 file pulls 6.2 times a year. Notifications: S3 event to SQS clh-recon-inbound-notify, which the ingest service already consumes. We do not put a Lambda in this module. The leftover Firehose delivery stream is not imported; it is deleted in a separate CLH-INFRA-91 ticket after Chris confirms nothing reads it. Public access: all four Block Public Access settings true. The February drift of RestrictPublicBuckets=false is the first apply."
+    },
+    {
+      "type": "h2",
+      "text": "msk"
+    },
+    {
+      "type": "p",
+      "text": "Cluster name stays msk-clh-recon-1. Import. Broker type kafka.m5.large, broker count 3, Kafka 3.5.1 (what is running, not what an old tfvars wished). Encryption at rest via clh-recon-data. Client broker TLS. SASL/SCRAM. Topics are a map in topics.tf, currently 11 topic names including clh.recon.nscc.inbound, clh.recon.match.consumer is a group not a topic, do not put groups in the topic map. Config: auto.create.topics.enable=false, which is already the cluster config in the console. If someone enables auto-create to \"unblock a test,\" Terraform will drift-detect and we will revert. Partition counts are in the map. Changing partition count is allowed. Changing broker count is a window-sensitive apply, see failure section."
+    },
+    {
+      "type": "h2",
+      "text": "rds"
+    },
+    {
+      "type": "p",
+      "text": "Identifier clh-pg-recon, engine postgres 15.5, instance class db.r6g.xlarge, Multi-AZ true, storage 2.4 TB gp3, iops 12000, backup retention 11 days, backup window 08:17-08:47 UTC (03:17-03:47 ET), maintenance window Tue 09:12-09:42 UTC. Those odd minutes are intentional so we do not sit on the hour with every other Northstar database. Parameter group clh-recon-pg15: max_connections 340, random_page_cost 1.1, idle_in_transaction_session_timeout 12min. Import the instance. Do not set apply_immediately=true in prod tfvars. Ever. The March instinct to \"just bounce it\" is how you take the matcher down. apply_immediately is true in stg only."
+    },
+    {
+      "type": "h2",
+      "text": "eks-irsa"
+    },
+    {
+      "type": "p",
+      "text": "EKS cluster clh-recon-prod-eks already exists and is managed in a different live stack (ns-eks-prod) that Diego owns. We do not fork that. This module creates IAM roles plus kubernetes_service_account annotations for: match-worker, ingest-api, recon-ui, replay-job. Trust policy is the OIDC provider of that cluster, sub condition system:serviceaccount:recon:${sa}. Permissions: match-worker can read s3 inbound, write CloudWatch, produce/consume MSK via the scram secret in Secrets Manager, connect to RDS via IRSA-issued user recon_irsa_match (RDS IAM auth, not a password in a secret). The leftover-aws-key Kubernetes secret is deleted in the same PR that flips the service account annotation. If you flip the annotation without deleting the key, some pod will still source AWS_ACCESS_KEY_ID from the secret because the old deployment yaml exports it. Kavya will grep the helm chart. I already found two references in match-worker values-prod.yaml lines 88 and 141."
+    },
+    {
+      "type": "table",
+      "headers": [
+        "SA",
+        "Namespace",
+        "Role name",
+        "What it can do",
+        "What it must not"
+      ],
+      "rows": [
+        [
+          "match-worker",
+          "recon",
+          "clh-recon-irsa-match",
+          "S3 Get on inbound, MSK, RDS IAM auth, KMS decrypt data key",
+          "S3 Put on inbound, iam:PassRole, kafka:UpdateCluster"
+        ],
+        [
+          "ingest-api",
+          "recon",
+          "clh-recon-irsa-ingest",
+          "S3 Get/Put on inbound prefix staging/, MSK produce, KMS",
+          "RDS delete, S3 delete on nscc/"
+        ],
+        [
+          "recon-ui",
+          "recon",
+          "clh-recon-irsa-ui",
+          "RDS IAM auth read-mostly, S3 Get on inbound for file preview",
+          "MSK admin, KMS CreateKey"
+        ],
+        [
+          "replay-job",
+          "recon",
+          "clh-recon-irsa-replay",
+          "S3 Get, MSK produce to replay topic, RDS write match_run",
+          "Broker count, bucket policy"
+        ]
+      ],
+      "caption": "IRSA roles. Trust is OIDC-conditioned. Copy-paste trust from another cluster will fail the subject check, which is the feature."
+    },
+    {
+      "type": "h1",
+      "text": "Import plan"
+    },
+    {
+      "type": "p",
+      "text": "We do not recreate. We import. Order: kms, s3-inbound, rds, msk, eks-irsa. KMS first because everything else references the key arn. If you import S3 first, the bucket encryption block will want to create a key. Do not let it. Pass the existing key arn as a variable once kms state exists."
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Freeze console writes. Diego attaches the permission boundary to human roles. Break-glass remains.",
+        "terraform import in stg for each module against stg twins. Stg is allowed to be wrong for a day. Prod is not.",
+        "terraform plan in stg until 0 destroy, < 8 update in-place, 0 create of named existing resources.",
+        "Same import in prod during a Thursday 11:00-15:00 ET window, not a settlement-heavy month-end Thursday. Target April 11, 2024.",
+        "Apply the first real change: S3 RestrictPublicBuckets true, leftover Firehose untagged resources left for CLH-INFRA-91.",
+        "Delete leftover-aws-key after IRSA annotation is live and two match-worker rollouts have run without the env vars.",
+        "CloudTrail metric filter on kafka:UpdateBrokerCount, rds:ModifyDBInstance, s3:PutBucketPolicy. Alarm to #clh-sre."
+      ]
+    },
+    {
+      "type": "code",
+      "text": "# example imports, prod, after assuming ns-gha-tf-clh-recon\ncd infra/live/prod/clh-recon/s3-inbound\nterraform init\nterraform import 'module.inbound.aws_s3_bucket.this' clh-recon-inbound-prod\nterraform import 'module.inbound.aws_s3_bucket_public_access_block.this' clh-recon-inbound-prod\nterraform import 'module.inbound.aws_s3_bucket_notification.this' clh-recon-inbound-prod\n\ncd ../msk\nterraform import 'module.msk.aws_msk_cluster.this' arn:aws:kafka:us-east-1:881736291104:cluster/msk-clh-recon-1/c8k2aabb-7e19-4c21-9d44-0b1a2c3d4e5f-2\nterraform import 'module.msk.aws_security_group.msk' sg-0aa91c8k2msk\n\ncd ../rds\nterraform import 'module.rds.aws_db_instance.this' clh-pg-recon\nterraform import 'module.rds.aws_db_parameter_group.this' clh-recon-pg15\n",
+      "caption": "Import addresses must match the module resource names. If you invent a new name, state will create a second cluster. Do not invent."
+    },
+    {
+      "type": "h1",
+      "text": "Failure: MSK broker count during the window"
+    },
+    {
+      "type": "p",
+      "text": "On March 7, 2024 at 16:22 ET, Diego applied a scratch Terraform in a personal workspace to bump msk-clh-recon-1 from 3 brokers to 6 because month-end lag on March 6 hit 41.8 minutes and we were scared of 45.2. The change was not in Git. The workspace was his laptop. AWS MSK treated broker count as a rolling operation. Brokers restarted one at a time. Each restart took 11.4-14.7 minutes. ISR shrank. match-worker SASL connections dropped. Consumer group clh.recon.match.consumer rebalanced four times. Lag went from 6.1 minutes to 52.4 minutes while we were \"adding capacity.\" Helen Cho saw match_rate fall to 88.7% at 17:03. We were inside the settlement window. I was primary. We declared SEV1, froze more changes, and waited. The cluster returned to three healthy plus three new brokers at 17:09. We did not get the capacity win during the window. We got a self-inflicted outage. The next morning we scaled back to 3 in a 10:40 ET apply that still took 39 minutes but hurt nobody."
+    },
+    {
+      "type": "p",
+      "text": "Root cause was not MSK being fragile. Root cause was an apply with no window check, no PR, and a parameter (broker count) whose AWS API is a rolling restart, not a hot add. Terraform aws_msk_cluster.number_of_broker_nodes will do this every time. The module will have a precondition:"
+    },
+    {
+      "type": "code",
+      "text": "variable \"broker_count\" {\n  type = number\n  validation {\n    condition     = var.broker_count == 3 || var.broker_count == 6\n    error_message = \"Broker count is 3 or 6. Other values are an incident report.\"\n  }\n}\n\n# in CI, fail the apply job if ET hour is 16, 17, 18, 19\n# see .github/workflows/tf-clh-recon.yml step \"window-guard\"\npython3 tools/window_guard.py --freeze-hours 16-19 --tz America/New_York --also-block-sat-sun\n",
+      "caption": "Broker count is discrete. Window guard is CI, not a hope. Laptop applies bypass CI, which is why laptop applies against prod are banned."
+    },
+    {
+      "type": "callout",
+      "label": "Window guard",
+      "text": "tf-clh-recon.yml fails closed if the runner's ET hour is 16-19 on a weekday, or if recon.clh_settlement_calendar says is_makeup for today. Diego can override with a workflow_dispatch input override_window=yes plus a PR comment that cites Priya. An override for broker_count still requires Aman + Diego. March 7 was the training cost. We are not paying it again.",
+      "kind": "warn"
+    },
+    {
+      "type": "p",
+      "text": "Capacity itself: we may still want 6 brokers before May month-end. That apply is a Tuesday 10:15 ET, with Helen warned, with match-worker max.poll.interval.ms raised to 8 minutes for the duration, and with a rollback plan that is \"wait, do not terraform apply 3 during the roll.\" Rolling from 6 to 3 is another rolling restart. If the 6-broker apply goes badly, you wait for MSK to finish, you do not stack a second mutate."
+    },
+    {
+      "type": "h1",
+      "text": "What CI looks like"
+    },
+    {
+      "type": "p",
+      "text": "Workflow .github/workflows/tf-clh-recon.yml on repo ns-clh-recon. Pull request runs fmt, validate, tflint, tfsec, and plan against stg for the stack named in the label tf-stack=msk|rds|s3-inbound|kms|eks-irsa. Missing label fails the workflow. Plan output is a bot comment. Prod apply is workflow_dispatch on main, environment prod, reviewers Diego and Aman. The runner is ns-gha-runner-tf-3 in the SRE account, not a GitHub-hosted runner, because MSK import needs VPC reachability for a couple of data sources we should probably delete. I will delete those data sources in a follow-up so a hosted runner would work. Until then, self-hosted."
+    },
+    {
+      "type": "p",
+      "text": "tfsec findings we will suppress with documented reasons: AWS-S3-001 on inbound because Clearhaven's file-drop role is an external account 442190887761 and the bucket policy must allow that principal. That is not public. tfsec thinks cross-account is spicy. We write the exception in modules/s3-inbound/.tfsec.yml. We will not suppress AWS-MSK-002 (unencrypted in transit). Transit is TLS. If tfsec still yells, the resource attribute is wrong and we fix the resource."
+    },
+    {
+      "type": "h1",
+      "text": "Rejected alternatives (the rest)"
+    },
+    {
+      "type": "p",
+      "text": "Terraform Cloud, Northstar org, paid. Diego priced it at $14.6k/year for the seat count SRE already has plus our five stacks. We already have s3://ns-tf-state and OIDC runners. TFC would add a second lock and a second place for Priya to look during an audit. Died in the March 21 review. Revisit if we leave GitHub."
+    },
+    {
+      "type": "p",
+      "text": "Pulumi TypeScript, Kavya's preference. She is right that loops are nicer. She is wrong that the SRE review bar will move. Diego's team reviews Terraform. A Pulumi stack for recon only would be the only Pulumi in the account. On-call at 02:00 would hit a tool the SRE secondary does not run. Died."
+    },
+    {
+      "type": "p",
+      "text": "Keep click-ops and write a weekly drift cron that opens tickets. That is how sg-0c8k2reconjunk lived a year. Tickets without an apply path are decoration. Died."
+    },
+    {
+      "type": "p",
+      "text": "One live stack with five modules but one state file. Plan time 19.4 minutes on the prototype. A kms key policy change would still show msk broker attributes as refresh. Refresh of MSK from AWS is slow (8.2-11 minutes). Split state so a key policy PR does not refresh brokers."
+    },
+    {
+      "type": "h1",
+      "text": "Failure modes"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Failure",
+        "What you see",
+        "What you do",
+        "What you do not do"
+      ],
+      "rows": [
+        [
+          "State lock stuck",
+          "Error acquiring lock, uuid in DynamoDB",
+          "Diego checks the runner is dead, then clears the DynamoDB lock row with the uuid from the error. Log the uuid in the PR.",
+          "clear the lock because you are impatient and the other apply is live"
+        ],
+        [
+          "Import address wrong",
+          "Plan wants to create msk-clh-recon-1-2",
+          "terraform state rm the new addr, fix the import, reimport. Do not apply.",
+          "apply and then delete the old cluster by hand"
+        ],
+        [
+          "IRSA trust subject mismatch",
+          "Pods AccessDenied on S3, still have leftover key",
+          "Compare aud/sub in the role with the SA namespace. kubectl describe sa.",
+          "Create a long-lived key \"temporarily\""
+        ],
+        [
+          "RDS param group pending-reboot",
+          "Plan in-place, AWS says pending",
+          "Wait for the Tuesday maintenance window or a scheduled bounce with Helen.",
+          "apply_immediately=true in prod tfvars"
+        ],
+        [
+          "Broker count change",
+          "Rolling restart, lag climb, Helen Slack",
+          "See March 7. Window guard should have blocked. If it did not, stop, wait, do not stack applies.",
+          "terraform apply broker_count=3 while 6 is still rolling"
+        ],
+        [
+          "Someone clicks the console anyway",
+          "CloudTrail alarm in #clh-sre",
+          "Revert the click with Terraform apply, then talk to the clicker.",
+          "Update tfvars to match the click so plan is clean. That is how drift wins."
+        ]
+      ],
+      "caption": "Failure modes for people who will apply this, not for a whitepaper."
+    },
+    {
+      "type": "p",
+      "text": "A quieter failure: terraform refresh on aws_msk_cluster returns broker disk used and AWS decides a default changed under us. Pin provider 5.41.0. Do not float. A provider bump is its own PR with a plan attached for every live stack. I watched a 5.32 to 5.38 bump in another team recreate an MSK configuration because an attribute moved. We are not that team next month."
+    },
+    {
+      "type": "h1",
+      "text": "Open questions"
+    },
+    {
+      "type": "table",
+      "headers": [
+        "Question",
+        "Owner",
+        "Due",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "Does Chris Patel's Spark job still call alias/clh-recon-old?",
+          "Chris Patel",
+          "April 5, 2024",
+          "If yes, migrate the job before we schedule key deletion."
+        ],
+        [
+          "Can we drop MSK data sources so CI can leave self-hosted runners?",
+          "Diego Alvarez",
+          "April 18, 2024",
+          "Saves $220/month of runner idle if we succeed."
+        ],
+        [
+          "Six brokers before May month-end or stay at three and raise partitions?",
+          "Aman Kumar + Diego",
+          "April 9, 2024",
+          "Lag 41.8 min on March 6 is the exhibit. Decision in #clh-recon-ops, not a hallway."
+        ],
+        [
+          "Who loses console Create on April 12, names on the IAM list?",
+          "Priya Nair",
+          "April 4, 2024",
+          "Include Jordan Hale and Lena Park. Exclude break-glass."
+        ],
+        [
+          "Inbound bucket lifecycle 96 days vs Helen's 90-day pulls. 96 enough?",
+          "Helen Cho",
+          "April 8, 2024",
+          "If she needs 120, we pay for 120. Do not silently expire under her."
+        ]
+      ],
+      "caption": "Open questions. Owners named. No \"the team.\""
+    },
+    {
+      "type": "h1",
+      "text": "Rollout recommendation (skim)"
+    },
+    {
+      "type": "p",
+      "text": "Approve the module split, the five state keys under s3://ns-tf-state/clh-recon, the console create ban, and the window guard. Import week of April 8, first mutating apply is S3 public access block. MSK broker count stays 3 until the April 9 capacity decision. leftover-aws-key deleted after IRSA is proven. I implement modules. Diego reviews state and IAM. Kavya greps helm for static keys. Priya names the IAM list. We do not wait for a perfect inventory of every 2022 click. We import what CLH-INFRA-77 listed and we treat new unknowns as incidents, not as folklore."
+    },
+    {
+      "type": "p",
+      "text": "If you are the engineer applying: read the import addresses twice. Run plan. If the plan creates a named existing resource, you are wrong. If the plan destroys RDS, you are wrong. If the plan updates MSK number_of_broker_nodes and the ET hour is 16, you are wrong and CI should have stopped you. If CI did not stop you, stop yourself."
+    },
+    {
+      "type": "h2",
+      "text": "File layout"
+    },
+    {
+      "type": "code",
+      "text": "infra/\n  modules/\n    kms/        main.tf variables.tf outputs.tf\n    s3-inbound/ main.tf variables.tf outputs.tf lifecycle.tf\n    msk/        main.tf variables.tf outputs.tf topics.tf\n    rds/        main.tf variables.tf outputs.tf params.tf\n    eks-irsa/   main.tf variables.tf outputs.tf trust.tf\n  live/\n    stg/clh-recon/{kms,s3-inbound,msk,rds,eks-irsa}/\n    prod/clh-recon/{kms,s3-inbound,msk,rds,eks-irsa}/\n.github/workflows/tf-clh-recon.yml\ntools/window_guard.py\n",
+      "caption": "If you add a sixth module, you add a sixth live stack and a sixth state key. You do not tuck it into msk/main.tf because it is \"kind of networking.\""
+    },
+    {
+      "type": "p",
+      "text": "topics.tf is a map, not 11 resource blocks copy-pasted. The March prototype of main.tf that Kavya showed at 4,182 lines had 11 copy-pasted aws_msk_topic resources with comments like \"copied from inbound, change name.\" Two of them still had the inbound retention.ms. That is the entire argument against the god file, restated as a retention bug waiting for month-end."
+    },
+    {
+      "type": "h1",
+      "text": "Appendix: tagging and cost"
+    },
+    {
+      "type": "p",
+      "text": "Cost explorer today cannot tell recon RDS from a shared analytics box because tags were console-typed and Terraform did not re-emit them. After import, every module sets default_tags on the provider in the live stack: Service=clh-recon, Env, ManagedBy=terraform, Owner=aman.kumar, Ticket=CLH-TDD-2024-009. Expected visibility: RDS $4,180/month, MSK $2,640/month at 3x kafka.m5.large, S3 inbound $310-890/month (month-end spike), KMS pennies, IRSA free. The 6-broker trial would have been +$2,640/month. If April 9 decides 6, that number goes into CLH-MEM-2024-018 capacity work as an actual, not a guess. The March 7 6-broker cluster existed for 17.4 hours and billed a partial day we will not try to reclaim. Fine."
+    },
+    {
+      "type": "p",
+      "text": "sg-0c8k2reconjunk gets a lifecycle prevent_destroy until we prove it is attached to nothing, then a dedicated destroy PR with a screenshot of the ENI list. Do not delete it in the import PR. Import PRs that also destroy unattached SGs are how you delete an SG that was attached to a forgotten ENI on an old MSK broker that AWS has not reaped. We will be boring."
+    }
+  ]
+}
