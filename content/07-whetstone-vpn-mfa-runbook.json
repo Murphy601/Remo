@@ -1,0 +1,336 @@
+{
+  "slug": "07-whetstone-vpn-mfa-runbook",
+  "doc_id": "WTS-RB-2023-019",
+  "title": "Runbook: plant VPN with MFA, no trusted-subnet exception",
+  "subtitle": "Always On VPN on vpn-01.whetstone.internal, Authenticator, ticket WTS-4530",
+  "doc_type": "Runbook / SOP",
+  "form_type": "Runbook / SOPs",
+  "kicker": "Whetstone Industrial  \u00b7  VPN  \u00b7  WTS-4530",
+  "org": "Whetstone Industrial",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "In force",
+  "date": "April 11, 2023",
+  "author": "Michael Gilfilian",
+  "role": "IT Support Intern",
+  "team": "Whetstone IT, service desk and plant support",
+  "audience": "Devon Hale (requester); Brett Holtz (acceptor); Carla Nguyen and Michael Gilfilian (build); Owen Briggs (leftover host); Rita Cho (absentee pack)",
+  "owners": "Brett Holtz (acceptor), Devon Hale (requester), Carla Nguyen (ops), Michael Gilfilian (this document)",
+  "related": "WTS-4530; WTS-RB-2023-019; WTS-4530-NET",
+  "summary": "Devon Hale asked for a written cut of Runbook. Current path: IKEv2 VPN, password only, 64 concurrent, NPS on nps-01.whetstone.internal. This document locks MFA every session, 64 concurrent still the cap, split tunnel for Windows Update only. skip MFA on the 10.18.0.0/16 plant subnet is out because A contractor laptop on that subnet already had a stale DNS suffix and would have walked onto fs01.",
+  "form_description": "On-call runbook for Whetstone plant VPN with MFA, written so a desk person who did not set it up can diagnose a failed login without waking Brett.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "March 18, 2023",
+      "Michael Gilfilian",
+      "Outline after WTS-4530 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "March 30, 2023",
+      "Michael Gilfilian",
+      "Numbers from Devon Hale. skip MFA on the 10.18.0.0/16 plant subnet still in the room."
+    ],
+    [
+      "0.9",
+      "April 7, 2023",
+      "Michael Gilfilian",
+      "skip MFA on the 10.18.0.0/16 plant subnet written up as a refuse. Carla Nguyen review."
+    ],
+    [
+      "1.0",
+      "April 11, 2023",
+      "Michael Gilfilian",
+      "Cut. Host vpn-01.whetstone.internal. Ticket WTS-4530."
+    ],
+    [
+      "1.1",
+      "April 11, 2023",
+      "Michael Gilfilian",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Runbook: plant VPN with MFA, no trusted-subnet exception"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for WTS-4530 on April 11, 2023. Devon Hale asked for a written bound after the current path (IKEv2 VPN, password only, 64 concurrent, NPS on nps-01.whetstone.internal) stopped being honest. I am Michael Gilfilian, IT Support Intern, writing for Brett Holtz, Carla Nguyen, and Owen Briggs. Primary host vpn-01.whetstone.internal. If you are skimming, jump the decision callout, then the refuse on skip MFA on the 10.18.0.0/16 plant subnet, then open questions. If you are implementing next week, jump the constraints, the numbers table, and the commands or contracts."
+    },
+    {
+      "type": "p",
+      "text": "Always On VPN plus Authenticator for every remote and every after-hours plant login. No trusted-subnet bypass. I am not restating a hallway yes. skip MFA on the 10.18.0.0/16 plant subnet is out because A contractor laptop on that subnet already had a stale DNS suffix and would have walked onto fs01. Cost of doing nothing is already in the numbers: look at cidr=10.18, concurrent=64, stale=1, prompts=1.6, fail=3.2, hours=0.4, users=208, weeks=3. Sibling tickets WTS-RB-2023-019 and WTS-4530-NET. I will not reopen skip MFA on the 10.18.0.0/16 plant subnet in a side thread because a vendor sent a discount. Carla Nguyen is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Always On VPN plus Authenticator for every remote and every after-hours plant login. No trusted-subnet bypass."
+    },
+    {
+      "type": "p",
+      "text": "Background on vpn-01.whetstone.internal. IKEv2 VPN, password only, 64 concurrent, NPS on nps-01.whetstone.internal. That is the system Brett Holtz lives with, not a slide. I timed or pulled the leftover on nps-01.whetstone.internal the week before this file. Lag, stale minutes, or miss counts in this file are from that pull, not a round number I liked. Ticket WTS-4530 names the pull. If those numbers moved after April 11, 2023, update this file in review, do not 'correct' them in Slack."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for WTS-RB-2023-019. skip MFA on the 10.18.0.0/16 plant subnet is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep IKEv2 VPN, password only, 64 concurrent, NPS on nps-01.whetstone.internal",
+          "Numbers already in play: cidr=10.18, concurrent=64, stale=1, prompts=1.6, fail=3.2, hours=0.4, users=208, weeks=3",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "skip MFA on the 10.18.0.0/16 plant subnet",
+          "A contractor laptop on that subnet already had a stale DNS suffix and would have walked on",
+          "Named on WTS-4530-NET",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Days, not cash",
+          "Scope returns as Slack",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "MFA every session, 64 concurrent still the cap, split tunnel for Windows Update only",
+          "Host vpn-01.whetstone.internal, ticket WTS-4530",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Owen Briggs owns a leftover that is easy to skip: helpdesk.whetstone.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (07): refuse on skip MFA on the 10.18.0.0/16 plant subnet, lock is MFA every session, 64 concurrent still the cap, split tunnel for Windows Update only. I will not hide a product change inside a 'quick align' on WTS-RB-2023-019."
+    },
+    {
+      "type": "quote",
+      "text": "If the plant subnet skips MFA because it is 'ours,' we already lost the argument.",
+      "attrib": "Devon Hale, network, March 30 review"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical user would try first on vpn-01.whetstone.internal: the path Devon Hale actually has, not a desktop demo. Metric I will argue is time-to-useful, not a vanity QPS. If we cannot show that path on nps-01.whetstone.internal with the numbers already in this file, we do not have a cut. Michael Gilfilian will not accept a laptop screenshot as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "MFA every session, 64 concurrent still the cap, split tunnel for Windows Update only Host vpn-01.whetstone.internal. Ticket WTS-4530. Acceptor Brett Holtz."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: MFA every session, 64 concurrent still the cap, split tunnel for Windows Update only. If that clock collides with a freeze, the date moves and the scope does not. Brett Holtz hears the new date on WTS-4530. I will not book a change in the last 40 minutes of a freeze because it is 'just config.' Config is a change. Host if we have to prove a count: vpn-01.whetstone.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for WTS-RB-2023-019. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "cidr",
+          "10.18",
+          "vpn-01.whetstone.internal",
+          "WTS-4530"
+        ],
+        [
+          "concurrent",
+          "64",
+          "vpn-01.whetstone.internal",
+          "WTS-4530"
+        ],
+        [
+          "stale",
+          "1",
+          "vpn-01.whetstone.internal",
+          "WTS-4530"
+        ],
+        [
+          "prompts",
+          "1.6",
+          "vpn-01.whetstone.internal",
+          "WTS-4530"
+        ],
+        [
+          "fail",
+          "3.2",
+          "vpn-01.whetstone.internal",
+          "WTS-4530"
+        ],
+        [
+          "hours",
+          "0.4",
+          "vpn-01.whetstone.internal",
+          "WTS-4530"
+        ],
+        [
+          "users",
+          "208",
+          "vpn-01.whetstone.internal",
+          "WTS-4530"
+        ],
+        [
+          "weeks",
+          "3",
+          "vpn-01.whetstone.internal",
+          "WTS-4530"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: skip MFA on the 10.18.0.0/16 plant subnet"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "skip MFA on the 10.18.0.0/16 plant subnet is out. A contractor laptop on that subnet already had a stale DNS suffix and would have walked onto fs01. I will not reopen it because a vendor emailed a discount."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: skip MFA on the 10.18.0.0/16 plant subnet comes back wearing a new coat. I want that named in review notes, not rediscovered by Owen Briggs on a Monday. Ticket WTS-RB-2023-019. Numbers I will not 'simplify': cidr=10.18, concurrent=64, stale=1, prompts=1.6, fail=3.2, hours=0.4, users=208, weeks=3. Same clock as the front. I will not mix clocks to make vpn-01.whetstone.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Owen Briggs: does helpdesk.whetstone.internal stay in the path? Yes, no, or a new date on WTS-4530-NET.",
+        "Carla Nguyen: freeze collision for the first useful slice. Date moves, scope does not.",
+        "Devon Hale: weekend coverage is not implied. Sign it or it stays out.",
+        "Michael Gilfilian: leftover access on vpn-01.whetstone.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits vpn-01.whetstone.internal, WTS-4530, and the last three working pages. Access that has to move is who can change nps-01.whetstone.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Carla Nguyen accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. WTS-4530. vpn-01.whetstone.internal.",
+      "text": "# WTS-RB-2023-019 read-only first\ndate -u\naz account show --query name -o tsv\nssh vpn-01.whetstone.internal 'uptime; df -h | head'\n# stop. write the last error in one sentence on WTS-4530\n# do not apply from a laptop in a freeze"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on WTS-4530 before any write.",
+        "Confirm on vpn-01.whetstone.internal with the read-only commands above.",
+        "If the refuse on skip MFA on the 10.18.0.0/16 plant subnet is being reopened, stop and ping Brett Holtz.",
+        "Wake Carla Nguyen only after a one-line diagnosis.",
+        "Do not apply from a laptop in a freeze."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for WTS-RB-2023-019. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Michael Gilfilian",
+          "Brett Holtz",
+          "Carla Nguyen"
+        ],
+        [
+          "Refuse on skip MFA on the 10.18.0.0/16 plant subnet",
+          "Michael Gilfilian",
+          "Brett Holtz",
+          "Owen Briggs"
+        ],
+        [
+          "Host vpn-01.whetstone.internal",
+          "Carla Nguyen",
+          "Brett Holtz",
+          "Michael Gilfilian"
+        ],
+        [
+          "Requester path",
+          "Owen Briggs",
+          "Devon Hale",
+          "Michael Gilfilian"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Rita Cho is on that list. Object on WTS-4530. Michael Gilfilian will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to WTS-RB-2023-019"
+    },
+    {
+      "type": "p",
+      "text": "nps-01.whetstone.internal is in this file because skipping it is how the last near-miss happened. Owen Briggs owns the check. I want a count on WTS-4530-NET before anyone says the leftover is 'implied.' Implied leftovers are how skip MFA on the 10.18.0.0/16 plant subnet almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in WTS-RB-2023-019"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim skip MFA on the 10.18.0.0/16 plant subnet is impossible for a competitor. I will claim we will not buy it. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host vpn-01.whetstone.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for WTS-4530"
+    },
+    {
+      "type": "p",
+      "text": "First useful is MFA every session, 64 concurrent still the cap, split tunnel for Windows Update only, not a prettier theme or a bigger box. Devon Hale sees that slice on vpn-01.whetstone.internal. If the slice needs a second product, that is a new ticket and Brett Holtz is in the thread. I will not hide it inside WTS-RB-2023-019."
+    },
+    {
+      "type": "h2",
+      "text": "Support zip and identifiers (07)"
+    },
+    {
+      "type": "p",
+      "text": "A support zip for this work goes through redaction. Customer email, card PAN, and passwords come back. Pressure is not a reason to paste them into WTS-4530. Michael Gilfilian will bounce the zip. Host if we have to prove a redaction: helpdesk.whetstone.internal."
+    }
+  ]
+}

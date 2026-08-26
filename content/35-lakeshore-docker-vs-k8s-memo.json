@@ -1,0 +1,336 @@
+{
+  "slug": "35-lakeshore-docker-vs-k8s-memo",
+  "doc_id": "LSH-MEM-2024-006",
+  "title": "Memo: Docker Compose for Woo, Kubernetes only for inventory-api",
+  "subtitle": "Do not move four WordPress sites onto a cluster this quarter, ticket LSH-5108",
+  "doc_type": "Recommendation memo",
+  "form_type": "Other",
+  "kicker": "Lakeshore Hardware Group  \u00b7  Runtime  \u00b7  LSH-5108",
+  "org": "Hillcrest Digital",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "For decision",
+  "date": "January 18, 2024",
+  "author": "Michael Gilfilian",
+  "role": "Web Developer",
+  "team": "Hillcrest Digital, Lakeshore Hardware Group engagement",
+  "audience": "Luis Ortega (requester); Luis Ortega (acceptor); Cole Brennan and Michael Gilfilian (build); Mara Singh (leftover host); Theo Walsh (absentee pack)",
+  "owners": "Luis Ortega (acceptor), Luis Ortega (requester), Cole Brennan (ops), Michael Gilfilian (this document)",
+  "related": "LSH-MEM-2024-006; LSH-5108; LSH-SOP-2023-033",
+  "summary": "Luis Ortega asked for a written cut of Memo. Current path: Compose for Woo, k8s for API. This document locks split runtime, no Woo-on-k8s this quarter. Helm the four Woo sites is out because WordPress plus a cluster is a new product. Luis does not have freeze budget for a new product in Q1.",
+  "form_description": "Recommendation memo keeping Lakeshore WooCommerce on Docker Compose and Kubernetes only for inventory-api, refusing a four-site Helm move.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "December 25, 2023",
+      "Michael Gilfilian",
+      "Outline after LSH-MEM-2024-006 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "January 6, 2024",
+      "Michael Gilfilian",
+      "Numbers from Luis Ortega. Helm the four Woo sites still in the room."
+    ],
+    [
+      "0.9",
+      "January 14, 2024",
+      "Michael Gilfilian",
+      "Helm the four Woo sites written up as a refuse. Cole Brennan review."
+    ],
+    [
+      "1.0",
+      "January 18, 2024",
+      "Michael Gilfilian",
+      "Cut. Host k8s.lakeshore.internal. Ticket LSH-5108."
+    ],
+    [
+      "1.1",
+      "January 18, 2024",
+      "Michael Gilfilian",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Memo: Docker Compose for Woo, Kubernetes only for inventory-api"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for LSH-MEM-2024-006 on January 18, 2024. Luis Ortega asked for a written bound after the current path (Compose for Woo, k8s for API) stopped being honest. I am Michael Gilfilian, Web Developer, writing for Luis Ortega, Cole Brennan, and Mara Singh. Primary host k8s.lakeshore.internal. If you are skimming, jump the decision callout, then the refuse on Helm the four Woo sites, then open questions. If you are implementing next week, jump the constraints, the numbers table, and the commands or contracts."
+    },
+    {
+      "type": "p",
+      "text": "inventory-api stays on k8s.lakeshore.internal. Woo stays Docker Compose. Reject a four-site Helm chart this quarter ($0 cash, ~6 weeks of freeze risk). I am not restating a hallway yes. Helm the four Woo sites is out because WordPress plus a cluster is a new product. Luis does not have freeze budget for a new product in Q1. Cost of doing nothing is already in the numbers: look at sites=4, weeks=6, nodes=3, api=1, year1=0.0, freeze=Fri, plugins=22, risk=6.0. Sibling tickets LSH-5108 and LSH-SOP-2023-033. I will not reopen Helm the four Woo sites in a side thread because a vendor sent a discount. Cole Brennan is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "inventory-api stays on k8s.lakeshore.internal. Woo stays Docker Compose. Reject a four-site Helm chart this quarter ($0 cash, ~6 weeks of freeze risk)."
+    },
+    {
+      "type": "p",
+      "text": "Background on k8s.lakeshore.internal. Compose for Woo, k8s for API. That is the system Luis Ortega lives with, not a slide. I timed or pulled the leftover on woo-prod.lakeshore.internal the week before this file. Lag, stale minutes, or miss counts in this file are from that pull, not a round number I liked. Ticket LSH-MEM-2024-006 names the pull. If those numbers moved after January 18, 2024, update this file in review, do not 'correct' them in Slack."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for LSH-MEM-2024-006. Helm the four Woo sites is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Compose for Woo, k8s for API",
+          "Numbers already in play: sites=4, weeks=6, nodes=3, api=1, year1=0.0, freeze=Fri, plugins=22, risk=6.0",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "Helm the four Woo sites",
+          "WordPress plus a cluster is a new product. Luis does not have freeze budget for a new prod",
+          "Named on LSH-SOP-2023-033",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Days, not cash",
+          "Scope returns as Slack",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "split runtime, no Woo-on-k8s this quarter",
+          "Host k8s.lakeshore.internal, ticket LSH-5108",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Mara Singh owns a leftover that is easy to skip: inv-api.lakeshore.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (35): refuse on Helm the four Woo sites, lock is split runtime, no Woo-on-k8s this quarter. I will not hide a product change inside a 'quick align' on LSH-5108."
+    },
+    {
+      "type": "quote",
+      "text": "I asked if Kubernetes would make the site faster. I need a no that I can show a contractor.",
+      "attrib": "Luis Ortega, January 4"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical user would try first on k8s.lakeshore.internal: the path Luis Ortega actually has, not a desktop demo. Metric I will argue is time-to-useful, not a vanity QPS. If we cannot show that path on woo-prod.lakeshore.internal with the numbers already in this file, we do not have a cut. Michael Gilfilian will not accept a laptop screenshot as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "split runtime, no Woo-on-k8s this quarter Host k8s.lakeshore.internal. Ticket LSH-5108. Acceptor Luis Ortega."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: split runtime, no Woo-on-k8s this quarter. If that clock collides with a freeze, the date moves and the scope does not. Luis Ortega hears the new date on LSH-MEM-2024-006. I will not book a change in the last 40 minutes of a freeze because it is 'just config.' Config is a change. Host if we have to prove a count: k8s.lakeshore.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for LSH-MEM-2024-006. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "sites",
+          "4",
+          "k8s.lakeshore.internal",
+          "LSH-5108"
+        ],
+        [
+          "weeks",
+          "6",
+          "k8s.lakeshore.internal",
+          "LSH-5108"
+        ],
+        [
+          "nodes",
+          "3",
+          "k8s.lakeshore.internal",
+          "LSH-5108"
+        ],
+        [
+          "api",
+          "1",
+          "k8s.lakeshore.internal",
+          "LSH-5108"
+        ],
+        [
+          "year1",
+          "0.0",
+          "k8s.lakeshore.internal",
+          "LSH-5108"
+        ],
+        [
+          "freeze",
+          "Fri",
+          "k8s.lakeshore.internal",
+          "LSH-5108"
+        ],
+        [
+          "plugins",
+          "22",
+          "k8s.lakeshore.internal",
+          "LSH-5108"
+        ],
+        [
+          "risk",
+          "6.0",
+          "k8s.lakeshore.internal",
+          "LSH-5108"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: Helm the four Woo sites"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "Helm the four Woo sites is out. WordPress plus a cluster is a new product. Luis does not have freeze budget for a new product in Q1. I will not reopen it because a vendor emailed a discount."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: Helm the four Woo sites comes back wearing a new coat. I want that named in review notes, not rediscovered by Mara Singh on a Monday. Ticket LSH-5108. Numbers I will not 'simplify': sites=4, weeks=6, nodes=3, api=1, year1=0.0, freeze=Fri, plugins=22, risk=6.0. Same clock as the front. I will not mix clocks to make k8s.lakeshore.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Mara Singh: does inv-api.lakeshore.internal stay in the path? Yes, no, or a new date on LSH-SOP-2023-033.",
+        "Cole Brennan: freeze collision for the first useful slice. Date moves, scope does not.",
+        "Luis Ortega: weekend coverage is not implied. Sign it or it stays out.",
+        "Michael Gilfilian: leftover access on k8s.lakeshore.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits k8s.lakeshore.internal, LSH-MEM-2024-006, and the last three working pages. Access that has to move is who can change woo-prod.lakeshore.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Cole Brennan accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. LSH-5108. k8s.lakeshore.internal.",
+      "text": "# LSH-MEM-2024-006 read-only first\ndate -u\nssh k8s.lakeshore.internal 'uptime; df -h | head'\nkubectl -n lakeshore get pods -o wide | head\n# stop. write the last error in one sentence on LSH-5108\n# do not helm upgrade from a laptop in a freeze"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on LSH-5108 before any write.",
+        "Confirm on k8s.lakeshore.internal with the read-only commands above.",
+        "If the refuse on Helm the four Woo sites is being reopened, stop and ping Luis Ortega.",
+        "Wake Cole Brennan only after a one-line diagnosis.",
+        "Do not apply from a laptop in a freeze."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for LSH-MEM-2024-006. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Michael Gilfilian",
+          "Luis Ortega",
+          "Cole Brennan"
+        ],
+        [
+          "Refuse on Helm the four Woo sites",
+          "Michael Gilfilian",
+          "Luis Ortega",
+          "Mara Singh"
+        ],
+        [
+          "Host k8s.lakeshore.internal",
+          "Cole Brennan",
+          "Luis Ortega",
+          "Michael Gilfilian"
+        ],
+        [
+          "Requester path",
+          "Mara Singh",
+          "Luis Ortega",
+          "Michael Gilfilian"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Theo Walsh is on that list. Object on LSH-5108. Michael Gilfilian will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to LSH-MEM-2024-006"
+    },
+    {
+      "type": "p",
+      "text": "woo-prod.lakeshore.internal is in this file because skipping it is how the last near-miss happened. Mara Singh owns the check. I want a count on LSH-SOP-2023-033 before anyone says the leftover is 'implied.' Implied leftovers are how Helm the four Woo sites almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in LSH-MEM-2024-006"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim Helm the four Woo sites is impossible for a competitor. I will claim we will not buy it. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host k8s.lakeshore.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for LSH-5108"
+    },
+    {
+      "type": "p",
+      "text": "First useful is split runtime, no Woo-on-k8s this quarter, not a prettier theme or a bigger box. Luis Ortega sees that slice on k8s.lakeshore.internal. If the slice needs a second product, that is a new ticket and Luis Ortega is in the thread. I will not hide it inside LSH-MEM-2024-006."
+    },
+    {
+      "type": "h2",
+      "text": "Support zip and identifiers (35)"
+    },
+    {
+      "type": "p",
+      "text": "A support zip for this work goes through redaction. Customer email, card PAN, and passwords come back. Pressure is not a reason to paste them into LSH-MEM-2024-006. Michael Gilfilian will bounce the zip. Host if we have to prove a redaction: inv-api.lakeshore.internal."
+    }
+  ]
+}

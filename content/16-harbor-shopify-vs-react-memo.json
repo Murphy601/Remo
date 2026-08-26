@@ -1,0 +1,336 @@
+{
+  "slug": "16-harbor-shopify-vs-react-memo",
+  "doc_id": "HBR-MEM-2021-077",
+  "title": "Memo: stay on Shopify for storefront, React only for admin later",
+  "subtitle": "Cost of a custom storefront vs theme work, ticket HBR-2560",
+  "doc_type": "Recommendation memo",
+  "form_type": "Other",
+  "kicker": "Harbor & Oak Outfitters  \u00b7  Storefront  \u00b7  HBR-2560",
+  "org": "Hillcrest Digital",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "For decision",
+  "date": "December 7, 2021",
+  "author": "Michael Gilfilian",
+  "role": "Web Developer",
+  "team": "Hillcrest Digital, Harbor & Oak Outfitters engagement",
+  "audience": "Dana Whitlock (requester); Dana Whitlock (acceptor); Jenna Park and Michael Gilfilian (build); Nia Brooks (leftover host); Evan Cole (absentee pack)",
+  "owners": "Dana Whitlock (acceptor), Dana Whitlock (requester), Jenna Park (ops), Michael Gilfilian (this document)",
+  "related": "HBR-MEM-2021-077; HBR-2560; HBR-REQ-2020-008",
+  "summary": "Dana Whitlock asked for a written cut of Memo. Current path: Shopify theme v1 in production, React not in the storefront path. This document locks theme stays, React not funded this winter. custom React storefront is out because Dana does not want to own card data. Shopify already does. A nephew demo is not a PCI plan.",
+  "form_description": "Recommendation memo telling Dana Whitlock to stay on Shopify for the Harbor & Oak storefront and to refuse a custom React rebuild.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "November 13, 2021",
+      "Michael Gilfilian",
+      "Outline after HBR-MEM-2021-077 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "November 25, 2021",
+      "Michael Gilfilian",
+      "Numbers from Dana Whitlock. custom React storefront still in the room."
+    ],
+    [
+      "0.9",
+      "December 3, 2021",
+      "Michael Gilfilian",
+      "custom React storefront written up as a refuse. Jenna Park review."
+    ],
+    [
+      "1.0",
+      "December 7, 2021",
+      "Michael Gilfilian",
+      "Cut. Host shop.harbor.internal. Ticket HBR-2560."
+    ],
+    [
+      "1.1",
+      "December 7, 2021",
+      "Michael Gilfilian",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Memo: stay on Shopify for storefront, React only for admin later"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for HBR-MEM-2021-077 on December 7, 2021. Dana Whitlock asked for a written bound after the current path (Shopify theme v1 in production, React not in the storefront path) stopped being honest. I am Michael Gilfilian, Web Developer, writing for Dana Whitlock, Jenna Park, and Nia Brooks. Primary host shop.harbor.internal. If you are skimming, jump the decision callout, then the refuse on custom React storefront, then open questions. If you are implementing next week, jump the constraints, the numbers table, and the commands or contracts."
+    },
+    {
+      "type": "p",
+      "text": "Stay on Shopify for the customer site. A React admin for shelf counts can wait. Reject a custom Next storefront (~$28.5k, Dana becomes the PCI owner). I am not restating a hallway yes. custom React storefront is out because Dana does not want to own card data. Shopify already does. A nephew demo is not a PCI plan. Cost of doing nothing is already in the numbers: look at cost=28.5, theme=6.8, lcp=2.11, conv=1.31, weeks=16, pci=1, skus=412, admin=0. Sibling tickets HBR-2560 and HBR-REQ-2020-008. I will not reopen custom React storefront in a side thread because a vendor sent a discount. Jenna Park is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Stay on Shopify for the customer site. A React admin for shelf counts can wait. Reject a custom Next storefront (~$28.5k, Dana becomes the PCI owner)."
+    },
+    {
+      "type": "p",
+      "text": "Background on shop.harbor.internal. Shopify theme v1 in production, React not in the storefront path. That is the system Dana Whitlock lives with, not a slide. I timed or pulled the leftover on admin.harbor.internal the week before this file. Lag, stale minutes, or miss counts in this file are from that pull, not a round number I liked. Ticket HBR-MEM-2021-077 names the pull. If those numbers moved after December 7, 2021, update this file in review, do not 'correct' them in Slack."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for HBR-MEM-2021-077. custom React storefront is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Shopify theme v1 in production, React not in the storefront path",
+          "Numbers already in play: cost=28.5, theme=6.8, lcp=2.11, conv=1.31, weeks=16, pci=1, skus=412, admin=0",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "custom React storefront",
+          "Dana does not want to own card data. Shopify already does. A nephew demo is not a PCI plan",
+          "Named on HBR-REQ-2020-008",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Days, not cash",
+          "Scope returns as Slack",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "theme stays, React not funded this winter",
+          "Host shop.harbor.internal, ticket HBR-2560",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Nia Brooks owns a leftover that is easy to skip: stg-shop.harbor.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (16): refuse on custom React storefront, lock is theme stays, React not funded this winter. I will not hide a product change inside a 'quick align' on HBR-2560."
+    },
+    {
+      "type": "quote",
+      "text": "I asked if we should rebuild the site in React because a nephew said so. I need you to say no in writing.",
+      "attrib": "Dana Whitlock, November 18 email"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical user would try first on shop.harbor.internal: the path Dana Whitlock actually has, not a desktop demo. Metric I will argue is time-to-useful, not a vanity QPS. If we cannot show that path on admin.harbor.internal with the numbers already in this file, we do not have a cut. Michael Gilfilian will not accept a laptop screenshot as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "theme stays, React not funded this winter Host shop.harbor.internal. Ticket HBR-2560. Acceptor Dana Whitlock."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: theme stays, React not funded this winter. If that clock collides with a freeze, the date moves and the scope does not. Dana Whitlock hears the new date on HBR-MEM-2021-077. I will not book a change in the last 40 minutes of a freeze because it is 'just config.' Config is a change. Host if we have to prove a count: shop.harbor.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for HBR-MEM-2021-077. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "cost",
+          "28.5",
+          "shop.harbor.internal",
+          "HBR-2560"
+        ],
+        [
+          "theme",
+          "6.8",
+          "shop.harbor.internal",
+          "HBR-2560"
+        ],
+        [
+          "lcp",
+          "2.11",
+          "shop.harbor.internal",
+          "HBR-2560"
+        ],
+        [
+          "conv",
+          "1.31",
+          "shop.harbor.internal",
+          "HBR-2560"
+        ],
+        [
+          "weeks",
+          "16",
+          "shop.harbor.internal",
+          "HBR-2560"
+        ],
+        [
+          "pci",
+          "1",
+          "shop.harbor.internal",
+          "HBR-2560"
+        ],
+        [
+          "skus",
+          "412",
+          "shop.harbor.internal",
+          "HBR-2560"
+        ],
+        [
+          "admin",
+          "0",
+          "shop.harbor.internal",
+          "HBR-2560"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: custom React storefront"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "custom React storefront is out. Dana does not want to own card data. Shopify already does. A nephew demo is not a PCI plan. I will not reopen it because a vendor emailed a discount."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: custom React storefront comes back wearing a new coat. I want that named in review notes, not rediscovered by Nia Brooks on a Monday. Ticket HBR-2560. Numbers I will not 'simplify': cost=28.5, theme=6.8, lcp=2.11, conv=1.31, weeks=16, pci=1, skus=412, admin=0. Same clock as the front. I will not mix clocks to make shop.harbor.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Nia Brooks: does stg-shop.harbor.internal stay in the path? Yes, no, or a new date on HBR-REQ-2020-008.",
+        "Jenna Park: freeze collision for the first useful slice. Date moves, scope does not.",
+        "Dana Whitlock: weekend coverage is not implied. Sign it or it stays out.",
+        "Michael Gilfilian: leftover access on shop.harbor.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits shop.harbor.internal, HBR-MEM-2021-077, and the last three working pages. Access that has to move is who can change admin.harbor.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Jenna Park accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. HBR-2560. shop.harbor.internal.",
+      "text": "# HBR-MEM-2021-077 read-only first\ndate -u\nssh shop.harbor.internal 'uptime; df -h | head'\nshopify theme list | head\n# stop. write the last error in one sentence on HBR-2560\n# do not publish from a laptop on Friday afternoon"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on HBR-2560 before any write.",
+        "Confirm on shop.harbor.internal with the read-only commands above.",
+        "If the refuse on custom React storefront is being reopened, stop and ping Dana Whitlock.",
+        "Wake Jenna Park only after a one-line diagnosis.",
+        "Do not apply from a laptop in a freeze."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for HBR-MEM-2021-077. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Michael Gilfilian",
+          "Dana Whitlock",
+          "Jenna Park"
+        ],
+        [
+          "Refuse on custom React storefront",
+          "Michael Gilfilian",
+          "Dana Whitlock",
+          "Nia Brooks"
+        ],
+        [
+          "Host shop.harbor.internal",
+          "Jenna Park",
+          "Dana Whitlock",
+          "Michael Gilfilian"
+        ],
+        [
+          "Requester path",
+          "Nia Brooks",
+          "Dana Whitlock",
+          "Michael Gilfilian"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Evan Cole is on that list. Object on HBR-2560. Michael Gilfilian will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to HBR-MEM-2021-077"
+    },
+    {
+      "type": "p",
+      "text": "admin.harbor.internal is in this file because skipping it is how the last near-miss happened. Nia Brooks owns the check. I want a count on HBR-REQ-2020-008 before anyone says the leftover is 'implied.' Implied leftovers are how custom React storefront almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in HBR-MEM-2021-077"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim custom React storefront is impossible for a competitor. I will claim we will not buy it. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host shop.harbor.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for HBR-2560"
+    },
+    {
+      "type": "p",
+      "text": "First useful is theme stays, React not funded this winter, not a prettier theme or a bigger box. Dana Whitlock sees that slice on shop.harbor.internal. If the slice needs a second product, that is a new ticket and Dana Whitlock is in the thread. I will not hide it inside HBR-MEM-2021-077."
+    },
+    {
+      "type": "h2",
+      "text": "Support zip and identifiers (16)"
+    },
+    {
+      "type": "p",
+      "text": "A support zip for this work goes through redaction. Customer email, card PAN, and passwords come back. Pressure is not a reason to paste them into HBR-MEM-2021-077. Michael Gilfilian will bounce the zip. Host if we have to prove a redaction: stg-shop.harbor.internal."
+    }
+  ]
+}

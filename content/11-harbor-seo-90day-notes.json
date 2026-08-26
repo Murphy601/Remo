@@ -1,0 +1,336 @@
+{
+  "slug": "11-harbor-seo-90day-notes",
+  "doc_id": "HBR-MTG-2021-033",
+  "title": "Harbor & Oak SEO 90-day notes, March 12",
+  "subtitle": "Title pattern, collection index, local pack, ticket HBR-2210",
+  "doc_type": "Meeting notes",
+  "form_type": "Other",
+  "kicker": "Harbor & Oak Outfitters  \u00b7  SEO  \u00b7  HBR-2210",
+  "org": "Hillcrest Digital",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Issued",
+  "date": "March 12, 2021",
+  "author": "Michael Gilfilian",
+  "role": "Web Developer",
+  "team": "Hillcrest Digital, Harbor & Oak Outfitters engagement",
+  "audience": "Nia Brooks (requester); Dana Whitlock (acceptor); Jenna Park and Michael Gilfilian (build); Nia Brooks (leftover host); Evan Cole (absentee pack)",
+  "owners": "Dana Whitlock (acceptor), Nia Brooks (requester), Jenna Park (ops), Michael Gilfilian (this document)",
+  "related": "HBR-MTG-2021-033; HBR-2210; HBR-2210-COPY",
+  "summary": "Nia Brooks asked for a written cut of Harbor & Oak SEO 90-day notes. Current path: Search Console on seo.harbor.internal, 14 collections, 412 SKUs. This document locks title pattern, 14 collection indexes, no city stuffing. city name in every product title is out because That pattern cannibalized 22 product URLs against the Bloomington collection. Nia showed the Search Console pile on the call.",
+  "form_description": "Decision notes from the Harbor & Oak 90-day SEO review, capturing the title pattern, collection index, and the refuse on city stuffing.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "February 16, 2021",
+      "Michael Gilfilian",
+      "Outline after HBR-MTG-2021-033 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "February 28, 2021",
+      "Michael Gilfilian",
+      "Numbers from Nia Brooks. city name in every product title still in the room."
+    ],
+    [
+      "0.9",
+      "March 8, 2021",
+      "Michael Gilfilian",
+      "city name in every product title written up as a refuse. Jenna Park review."
+    ],
+    [
+      "1.0",
+      "March 12, 2021",
+      "Michael Gilfilian",
+      "Cut. Host seo.harbor.internal. Ticket HBR-2210."
+    ],
+    [
+      "1.1",
+      "March 12, 2021",
+      "Michael Gilfilian",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Harbor & Oak SEO 90-day notes, March 12"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for HBR-MTG-2021-033 on March 12, 2021. Nia Brooks asked for a written bound after the current path (Search Console on seo.harbor.internal, 14 collections, 412 SKUs) stopped being honest. I am Michael Gilfilian, Web Developer, writing for Dana Whitlock, Jenna Park, and Nia Brooks. Primary host seo.harbor.internal. If you are skimming, jump the decision callout, then the refuse on city name in every product title, then open questions. If you are implementing next week, jump the constraints, the numbers table, and the commands or contracts."
+    },
+    {
+      "type": "p",
+      "text": "Title pattern: product, then brand, then Harbor & Oak. Collection index for 14 collections. Local pack work is Nia's, not a theme rewrite. I am not restating a hallway yes. city name in every product title is out because That pattern cannibalized 22 product URLs against the Bloomington collection. Nia showed the Search Console pile on the call. Cost of doing nothing is already in the numbers: look at days=90, vis=38.6, cannibal=22, collections=14, skus=412, clicks=1.9, pos=12.4, weeks=13. Sibling tickets HBR-2210 and HBR-2210-COPY. I will not reopen city name in every product title in a side thread because a vendor sent a discount. Jenna Park is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Title pattern: product, then brand, then Harbor & Oak. Collection index for 14 collections. Local pack work is Nia's, not a theme rewrite."
+    },
+    {
+      "type": "p",
+      "text": "Background on seo.harbor.internal. Search Console on seo.harbor.internal, 14 collections, 412 SKUs. That is the system Dana Whitlock lives with, not a slide. I timed or pulled the leftover on shop.harbor.internal the week before this file. Lag, stale minutes, or miss counts in this file are from that pull, not a round number I liked. Ticket HBR-MTG-2021-033 names the pull. If those numbers moved after March 12, 2021, update this file in review, do not 'correct' them in Slack."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for HBR-MTG-2021-033. city name in every product title is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Search Console on seo.harbor.internal, 14 collections, 412 SKUs",
+          "Numbers already in play: days=90, vis=38.6, cannibal=22, collections=14, skus=412, clicks=1.9, pos=12.4, weeks=13",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "city name in every product title",
+          "That pattern cannibalized 22 product URLs against the Bloomington collection. Nia showed t",
+          "Named on HBR-2210-COPY",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Days, not cash",
+          "Scope returns as Slack",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "title pattern, 14 collection indexes, no city stuffing",
+          "Host seo.harbor.internal, ticket HBR-2210",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Nia Brooks owns a leftover that is easy to skip: ga4.harbor.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (11): refuse on city name in every product title, lock is title pattern, 14 collection indexes, no city stuffing. I will not hide a product change inside a 'quick align' on HBR-2210."
+    },
+    {
+      "type": "quote",
+      "text": "Visibility is up because we stopped stuffing the same city name into every title. Do not put it back.",
+      "attrib": "Nia Brooks, SEO, March 12"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical user would try first on seo.harbor.internal: the path Nia Brooks actually has, not a desktop demo. Metric I will argue is time-to-useful, not a vanity QPS. If we cannot show that path on shop.harbor.internal with the numbers already in this file, we do not have a cut. Michael Gilfilian will not accept a laptop screenshot as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "title pattern, 14 collection indexes, no city stuffing Host seo.harbor.internal. Ticket HBR-2210. Acceptor Dana Whitlock."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: title pattern, 14 collection indexes, no city stuffing. If that clock collides with a freeze, the date moves and the scope does not. Dana Whitlock hears the new date on HBR-MTG-2021-033. I will not book a change in the last 40 minutes of a freeze because it is 'just config.' Config is a change. Host if we have to prove a count: seo.harbor.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for HBR-MTG-2021-033. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "days",
+          "90",
+          "seo.harbor.internal",
+          "HBR-2210"
+        ],
+        [
+          "vis",
+          "38.6",
+          "seo.harbor.internal",
+          "HBR-2210"
+        ],
+        [
+          "cannibal",
+          "22",
+          "seo.harbor.internal",
+          "HBR-2210"
+        ],
+        [
+          "collections",
+          "14",
+          "seo.harbor.internal",
+          "HBR-2210"
+        ],
+        [
+          "skus",
+          "412",
+          "seo.harbor.internal",
+          "HBR-2210"
+        ],
+        [
+          "clicks",
+          "1.9",
+          "seo.harbor.internal",
+          "HBR-2210"
+        ],
+        [
+          "pos",
+          "12.4",
+          "seo.harbor.internal",
+          "HBR-2210"
+        ],
+        [
+          "weeks",
+          "13",
+          "seo.harbor.internal",
+          "HBR-2210"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: city name in every product title"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "city name in every product title is out. That pattern cannibalized 22 product URLs against the Bloomington collection. Nia showed the Search Console pile on the call. I will not reopen it because a vendor emailed a discount."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: city name in every product title comes back wearing a new coat. I want that named in review notes, not rediscovered by Nia Brooks on a Monday. Ticket HBR-2210. Numbers I will not 'simplify': days=90, vis=38.6, cannibal=22, collections=14, skus=412, clicks=1.9, pos=12.4, weeks=13. Same clock as the front. I will not mix clocks to make seo.harbor.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Nia Brooks: does ga4.harbor.internal stay in the path? Yes, no, or a new date on HBR-2210-COPY.",
+        "Jenna Park: freeze collision for the first useful slice. Date moves, scope does not.",
+        "Nia Brooks: weekend coverage is not implied. Sign it or it stays out.",
+        "Michael Gilfilian: leftover access on seo.harbor.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits seo.harbor.internal, HBR-MTG-2021-033, and the last three working pages. Access that has to move is who can change shop.harbor.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Jenna Park accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. HBR-2210. seo.harbor.internal.",
+      "text": "# HBR-MTG-2021-033 read-only first\ndate -u\nssh seo.harbor.internal 'uptime; df -h | head'\nshopify theme list | head\n# stop. write the last error in one sentence on HBR-2210\n# do not publish from a laptop on Friday afternoon"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on HBR-2210 before any write.",
+        "Confirm on seo.harbor.internal with the read-only commands above.",
+        "If the refuse on city name in every product title is being reopened, stop and ping Dana Whitlock.",
+        "Wake Jenna Park only after a one-line diagnosis.",
+        "Do not apply from a laptop in a freeze."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for HBR-MTG-2021-033. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Michael Gilfilian",
+          "Dana Whitlock",
+          "Jenna Park"
+        ],
+        [
+          "Refuse on city name in every product title",
+          "Michael Gilfilian",
+          "Dana Whitlock",
+          "Nia Brooks"
+        ],
+        [
+          "Host seo.harbor.internal",
+          "Jenna Park",
+          "Dana Whitlock",
+          "Michael Gilfilian"
+        ],
+        [
+          "Requester path",
+          "Nia Brooks",
+          "Nia Brooks",
+          "Michael Gilfilian"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Evan Cole is on that list. Object on HBR-2210. Michael Gilfilian will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to HBR-MTG-2021-033"
+    },
+    {
+      "type": "p",
+      "text": "shop.harbor.internal is in this file because skipping it is how the last near-miss happened. Nia Brooks owns the check. I want a count on HBR-2210-COPY before anyone says the leftover is 'implied.' Implied leftovers are how city name in every product title almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in HBR-MTG-2021-033"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim city name in every product title is impossible for a competitor. I will claim we will not buy it. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host seo.harbor.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for HBR-2210"
+    },
+    {
+      "type": "p",
+      "text": "First useful is title pattern, 14 collection indexes, no city stuffing, not a prettier theme or a bigger box. Nia Brooks sees that slice on seo.harbor.internal. If the slice needs a second product, that is a new ticket and Dana Whitlock is in the thread. I will not hide it inside HBR-MTG-2021-033."
+    },
+    {
+      "type": "h2",
+      "text": "Support zip and identifiers (11)"
+    },
+    {
+      "type": "p",
+      "text": "A support zip for this work goes through redaction. Customer email, card PAN, and passwords come back. Pressure is not a reason to paste them into HBR-MTG-2021-033. Michael Gilfilian will bounce the zip. Host if we have to prove a redaction: ga4.harbor.internal."
+    }
+  ]
+}

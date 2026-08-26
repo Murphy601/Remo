@@ -1,0 +1,336 @@
+{
+  "slug": "36-lakeshore-tls-cert-incident",
+  "doc_id": "LSH-INC-2024-014",
+  "title": "Incident: expired TLS certificate on pickup.lakeshore.internal",
+  "subtitle": "February 9, 2024, browsers refused the store picker for 2.4 hours, ticket LSH-INC-2024-014",
+  "doc_type": "Incident report",
+  "form_type": "Incident report",
+  "kicker": "Lakeshore Hardware Group  \u00b7  TLS  \u00b7  LSH-INC-2024-014",
+  "org": "Hillcrest Digital",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Closed",
+  "date": "February 12, 2024",
+  "author": "Michael Gilfilian",
+  "role": "Web Developer",
+  "team": "Hillcrest Digital, Lakeshore Hardware Group engagement",
+  "audience": "Greta Holm (requester); Luis Ortega (acceptor); Cole Brennan and Michael Gilfilian (build); Mara Singh (leftover host); Theo Walsh (absentee pack)",
+  "owners": "Luis Ortega (acceptor), Greta Holm (requester), Cole Brennan (ops), Michael Gilfilian (this document)",
+  "related": "LSH-INC-2024-014; LSH-4718; LSH-INC-2024-014-CERT",
+  "summary": "Greta Holm asked for a written cut of Incident. Current path: Let\u2019s Encrypt on edge-01, pickup host missed the list. This document locks named host, 21-day alert, 30-day renew, inventory the list. one wildcard for every *.lakeshore.internal leftover is out because A wildcard we do not inventory is how pickup.lakeshore.internal expired while shop certs looked fine.",
+  "form_description": "Incident report for an expired TLS certificate on the Lakeshore pickup host, with renew windows and a refuse on an uninventoried wildcard.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "January 19, 2024",
+      "Michael Gilfilian",
+      "Outline after LSH-INC-2024-014 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "January 31, 2024",
+      "Michael Gilfilian",
+      "Numbers from Greta Holm. one wildcard for every *.lakeshore.internal leftover still in the room."
+    ],
+    [
+      "0.9",
+      "February 8, 2024",
+      "Michael Gilfilian",
+      "one wildcard for every *.lakeshore.internal leftover written up as a refuse. Cole Brennan review."
+    ],
+    [
+      "1.0",
+      "February 12, 2024",
+      "Michael Gilfilian",
+      "Cut. Host pickup.lakeshore.internal. Ticket LSH-INC-2024-014."
+    ],
+    [
+      "1.1",
+      "February 12, 2024",
+      "Michael Gilfilian",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Incident: expired TLS certificate on pickup.lakeshore.internal"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for LSH-INC-2024-014 on February 12, 2024. Greta Holm asked for a written bound after the current path (Let\u2019s Encrypt on edge-01, pickup host missed the list) stopped being honest. I am Michael Gilfilian, Web Developer, writing for Luis Ortega, Cole Brennan, and Mara Singh. Primary host pickup.lakeshore.internal. If you are skimming, jump the decision callout, then the refuse on one wildcard for every *.lakeshore.internal leftover, then open questions. If you are implementing next week, jump the constraints, the numbers table, and the commands or contracts."
+    },
+    {
+      "type": "p",
+      "text": "Renew 30 days before expiry. Alert at 21 days. Do not wait for browsers to refuse the connect. Wildcard leftover is out; name the host. I am not restating a hallway yes. one wildcard for every *.lakeshore.internal leftover is out because A wildcard we do not inventory is how pickup.lakeshore.internal expired while shop certs looked fine. Cost of doing nothing is already in the numbers: look at hours=2.4, days=21, renew=30, hosts_miss=1, start=08:44, page=11:06, orders=9, lost=0.8. Sibling tickets LSH-4718 and LSH-INC-2024-014-CERT. I will not reopen one wildcard for every *.lakeshore.internal leftover in a side thread because a vendor sent a discount. Cole Brennan is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Renew 30 days before expiry. Alert at 21 days. Do not wait for browsers to refuse the connect. Wildcard leftover is out; name the host."
+    },
+    {
+      "type": "p",
+      "text": "Background on pickup.lakeshore.internal. Let\u2019s Encrypt on edge-01, pickup host missed the list. That is the system Luis Ortega lives with, not a slide. I timed or pulled the leftover on edge-01.lakeshore.internal the week before this file. Lag, stale minutes, or miss counts in this file are from that pull, not a round number I liked. Ticket LSH-INC-2024-014 names the pull. If those numbers moved after February 12, 2024, update this file in review, do not 'correct' them in Slack."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for LSH-INC-2024-014. one wildcard for every *.lakeshore.internal leftover is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Let\u2019s Encrypt on edge-01, pickup host missed the list",
+          "Numbers already in play: hours=2.4, days=21, renew=30, hosts_miss=1, start=08:44, page=11:06, orders=9, lost=0.8",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "one wildcard for every *.lakeshore.internal leftover",
+          "A wildcard we do not inventory is how pickup.lakeshore.internal expired while shop certs l",
+          "Named on LSH-INC-2024-014-CERT",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Days, not cash",
+          "Scope returns as Slack",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "named host, 21-day alert, 30-day renew, inventory the list",
+          "Host pickup.lakeshore.internal, ticket LSH-INC-2024-014",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Mara Singh owns a leftover that is easy to skip: woo-prod.lakeshore.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (36): refuse on one wildcard for every *.lakeshore.internal leftover, lock is named host, 21-day alert, 30-day renew, inventory the list. I will not hide a product change inside a 'quick align' on LSH-4718."
+    },
+    {
+      "type": "quote",
+      "text": "Customers saw a scary page. They did not see a pickup button. That is the incident.",
+      "attrib": "Greta Holm, February 9 11:06"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical user would try first on pickup.lakeshore.internal: the path Greta Holm actually has, not a desktop demo. Metric I will argue is time-to-useful, not a vanity QPS. If we cannot show that path on edge-01.lakeshore.internal with the numbers already in this file, we do not have a cut. Michael Gilfilian will not accept a laptop screenshot as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "named host, 21-day alert, 30-day renew, inventory the list Host pickup.lakeshore.internal. Ticket LSH-INC-2024-014. Acceptor Luis Ortega."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: named host, 21-day alert, 30-day renew, inventory the list. If that clock collides with a freeze, the date moves and the scope does not. Luis Ortega hears the new date on LSH-INC-2024-014. I will not book a change in the last 40 minutes of a freeze because it is 'just config.' Config is a change. Host if we have to prove a count: pickup.lakeshore.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for LSH-INC-2024-014. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "hours",
+          "2.4",
+          "pickup.lakeshore.internal",
+          "LSH-INC-2024-014"
+        ],
+        [
+          "days",
+          "21",
+          "pickup.lakeshore.internal",
+          "LSH-INC-2024-014"
+        ],
+        [
+          "renew",
+          "30",
+          "pickup.lakeshore.internal",
+          "LSH-INC-2024-014"
+        ],
+        [
+          "hosts_miss",
+          "1",
+          "pickup.lakeshore.internal",
+          "LSH-INC-2024-014"
+        ],
+        [
+          "start",
+          "08:44",
+          "pickup.lakeshore.internal",
+          "LSH-INC-2024-014"
+        ],
+        [
+          "page",
+          "11:06",
+          "pickup.lakeshore.internal",
+          "LSH-INC-2024-014"
+        ],
+        [
+          "orders",
+          "9",
+          "pickup.lakeshore.internal",
+          "LSH-INC-2024-014"
+        ],
+        [
+          "lost",
+          "0.8",
+          "pickup.lakeshore.internal",
+          "LSH-INC-2024-014"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: one wildcard for every *.lakeshore.internal leftover"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "one wildcard for every *.lakeshore.internal leftover is out. A wildcard we do not inventory is how pickup.lakeshore.internal expired while shop certs looked fine. I will not reopen it because a vendor emailed a discount."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: one wildcard for every *.lakeshore.internal leftover comes back wearing a new coat. I want that named in review notes, not rediscovered by Mara Singh on a Monday. Ticket LSH-4718. Numbers I will not 'simplify': hours=2.4, days=21, renew=30, hosts_miss=1, start=08:44, page=11:06, orders=9, lost=0.8. Same clock as the front. I will not mix clocks to make pickup.lakeshore.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Mara Singh: does woo-prod.lakeshore.internal stay in the path? Yes, no, or a new date on LSH-INC-2024-014-CERT.",
+        "Cole Brennan: freeze collision for the first useful slice. Date moves, scope does not.",
+        "Greta Holm: weekend coverage is not implied. Sign it or it stays out.",
+        "Michael Gilfilian: leftover access on pickup.lakeshore.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits pickup.lakeshore.internal, LSH-INC-2024-014, and the last three working pages. Access that has to move is who can change edge-01.lakeshore.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Cole Brennan accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. LSH-INC-2024-014. pickup.lakeshore.internal.",
+      "text": "# LSH-INC-2024-014 read-only first\ndate -u\nssh pickup.lakeshore.internal 'uptime; df -h | head'\nkubectl -n lakeshore get pods -o wide | head\n# stop. write the last error in one sentence on LSH-INC-2024-014\n# do not helm upgrade from a laptop in a freeze"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on LSH-INC-2024-014 before any write.",
+        "Confirm on pickup.lakeshore.internal with the read-only commands above.",
+        "If the refuse on one wildcard for every *.lakeshore.internal leftover is being reopened, stop and ping Luis Ortega.",
+        "Wake Cole Brennan only after a one-line diagnosis.",
+        "Do not apply from a laptop in a freeze."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for LSH-INC-2024-014. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Michael Gilfilian",
+          "Luis Ortega",
+          "Cole Brennan"
+        ],
+        [
+          "Refuse on one wildcard for every *.lakeshore.internal leftover",
+          "Michael Gilfilian",
+          "Luis Ortega",
+          "Mara Singh"
+        ],
+        [
+          "Host pickup.lakeshore.internal",
+          "Cole Brennan",
+          "Luis Ortega",
+          "Michael Gilfilian"
+        ],
+        [
+          "Requester path",
+          "Mara Singh",
+          "Greta Holm",
+          "Michael Gilfilian"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Theo Walsh is on that list. Object on LSH-INC-2024-014. Michael Gilfilian will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to LSH-INC-2024-014"
+    },
+    {
+      "type": "p",
+      "text": "edge-01.lakeshore.internal is in this file because skipping it is how the last near-miss happened. Mara Singh owns the check. I want a count on LSH-INC-2024-014-CERT before anyone says the leftover is 'implied.' Implied leftovers are how one wildcard for every *.lakeshore.internal leftover almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in LSH-INC-2024-014"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim one wildcard for every *.lakeshore.internal leftover is impossible for a competitor. I will claim we will not buy it. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host pickup.lakeshore.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for LSH-INC-2024-014"
+    },
+    {
+      "type": "p",
+      "text": "First useful is named host, 21-day alert, 30-day renew, inventory the list, not a prettier theme or a bigger box. Greta Holm sees that slice on pickup.lakeshore.internal. If the slice needs a second product, that is a new ticket and Luis Ortega is in the thread. I will not hide it inside LSH-INC-2024-014."
+    },
+    {
+      "type": "h2",
+      "text": "Support zip and identifiers (36)"
+    },
+    {
+      "type": "p",
+      "text": "A support zip for this work goes through redaction. Customer email, card PAN, and passwords come back. Pressure is not a reason to paste them into LSH-INC-2024-014. Michael Gilfilian will bounce the zip. Host if we have to prove a redaction: woo-prod.lakeshore.internal."
+    }
+  ]
+}

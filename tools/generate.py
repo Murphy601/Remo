@@ -81,6 +81,7 @@ def main():
             "est_pages": est_pages,
             "description": spec.get("form_description") or spec.get("summary", "")[:400],
             "field": spec.get("field", "Software Engineering / Data Science"),
+            "form_type": spec.get("form_type", "Other"),
         }
         catalog.append(rec)
         flag = "OK" if 40 <= est_pages <= 50 else "CHECK"

@@ -1,0 +1,336 @@
+{
+  "slug": "37-lakeshore-aws-capacity-memo",
+  "doc_id": "LSH-MEM-2024-022",
+  "title": "Memo: AWS capacity for weekend sales, stay on two API pods until 40 percent headroom fails",
+  "subtitle": "Luis asked for a bigger box after Presidents Day, ticket LSH-5211",
+  "doc_type": "Capacity memo",
+  "form_type": "Other",
+  "kicker": "Lakeshore Hardware Group  \u00b7  AWS  \u00b7  LSH-5211",
+  "org": "Hillcrest Digital",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "For decision",
+  "date": "March 7, 2024",
+  "author": "Michael Gilfilian",
+  "role": "Web Developer",
+  "team": "Hillcrest Digital, Lakeshore Hardware Group engagement",
+  "audience": "Luis Ortega (requester); Luis Ortega (acceptor); Cole Brennan and Michael Gilfilian (build); Mara Singh (leftover host); Theo Walsh (absentee pack)",
+  "owners": "Luis Ortega (acceptor), Luis Ortega (requester), Cole Brennan (ops), Michael Gilfilian (this document)",
+  "related": "LSH-MEM-2024-022; LSH-5211; LSH-TST-2024-037",
+  "summary": "Luis Ortega asked for a written cut of Memo. Current path: two pods, t3.large class, p95 0.42s Tuesday. This document locks two pods, scale on p95 0.9s or 22 percent headroom, not on orange. m6i.4xlarge because the graph was orange is out because Presidents Day p95 was 0.61s. Orange was Woo PHP, not the API. Buying the API box would not have moved pickup.",
+  "form_description": "Capacity memo for Lakeshore inventory-api on AWS, refusing a larger instance after a weekend graph that was Woo PHP, not the API.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "February 12, 2024",
+      "Michael Gilfilian",
+      "Outline after LSH-MEM-2024-022 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "February 24, 2024",
+      "Michael Gilfilian",
+      "Numbers from Luis Ortega. m6i.4xlarge because the graph was orange still in the room."
+    ],
+    [
+      "0.9",
+      "March 3, 2024",
+      "Michael Gilfilian",
+      "m6i.4xlarge because the graph was orange written up as a refuse. Cole Brennan review."
+    ],
+    [
+      "1.0",
+      "March 7, 2024",
+      "Michael Gilfilian",
+      "Cut. Host inv-api.lakeshore.internal. Ticket LSH-5211."
+    ],
+    [
+      "1.1",
+      "March 7, 2024",
+      "Michael Gilfilian",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Memo: AWS capacity for weekend sales, stay on two API pods until 40 percent headroom fails"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for LSH-MEM-2024-022 on March 7, 2024. Luis Ortega asked for a written bound after the current path (two pods, t3.large class, p95 0.42s Tuesday) stopped being honest. I am Michael Gilfilian, Web Developer, writing for Luis Ortega, Cole Brennan, and Mara Singh. Primary host inv-api.lakeshore.internal. If you are skimming, jump the decision callout, then the refuse on m6i.4xlarge because the graph was orange, then open questions. If you are implementing next week, jump the constraints, the numbers table, and the commands or contracts."
+    },
+    {
+      "type": "p",
+      "text": "Stay at two API pods. Scale when p95 is over 0.9s or headroom under 22 percent on a Tuesday. Reject a jump to m6i.4xlarge because a weekend graph was orange. I am not restating a hallway yes. m6i.4xlarge because the graph was orange is out because Presidents Day p95 was 0.61s. Orange was Woo PHP, not the API. Buying the API box would not have moved pickup. Cost of doing nothing is already in the numbers: look at pods=2, p95=0.42, weekend=0.61, head=34.8, thresh=22, target=0.9, weeks=1, inst=t3. Sibling tickets LSH-5211 and LSH-TST-2024-037. I will not reopen m6i.4xlarge because the graph was orange in a side thread because a vendor sent a discount. Cole Brennan is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Stay at two API pods. Scale when p95 is over 0.9s or headroom under 22 percent on a Tuesday. Reject a jump to m6i.4xlarge because a weekend graph was orange."
+    },
+    {
+      "type": "p",
+      "text": "Background on inv-api.lakeshore.internal. two pods, t3.large class, p95 0.42s Tuesday. That is the system Luis Ortega lives with, not a slide. I timed or pulled the leftover on k8s.lakeshore.internal the week before this file. Lag, stale minutes, or miss counts in this file are from that pull, not a round number I liked. Ticket LSH-MEM-2024-022 names the pull. If those numbers moved after March 7, 2024, update this file in review, do not 'correct' them in Slack."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for LSH-MEM-2024-022. m6i.4xlarge because the graph was orange is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep two pods, t3.large class, p95 0.42s Tuesday",
+          "Numbers already in play: pods=2, p95=0.42, weekend=0.61, head=34.8, thresh=22, target=0.9, weeks=1, inst=t3",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "m6i.4xlarge because the graph was orange",
+          "Presidents Day p95 was 0.61s. Orange was Woo PHP, not the API. Buying the API box would no",
+          "Named on LSH-TST-2024-037",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Days, not cash",
+          "Scope returns as Slack",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "two pods, scale on p95 0.9s or 22 percent headroom, not on orange",
+          "Host inv-api.lakeshore.internal, ticket LSH-5211",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Mara Singh owns a leftover that is easy to skip: woo-prod.lakeshore.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (37): refuse on m6i.4xlarge because the graph was orange, lock is two pods, scale on p95 0.9s or 22 percent headroom, not on orange. I will not hide a product change inside a 'quick align' on LSH-5211."
+    },
+    {
+      "type": "quote",
+      "text": "CPU looked busy. Pickup still worked. I need to know if we buy metal or if we were looking at the wrong graph.",
+      "attrib": "Luis Ortega, February 20"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical user would try first on inv-api.lakeshore.internal: the path Luis Ortega actually has, not a desktop demo. Metric I will argue is time-to-useful, not a vanity QPS. If we cannot show that path on k8s.lakeshore.internal with the numbers already in this file, we do not have a cut. Michael Gilfilian will not accept a laptop screenshot as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "two pods, scale on p95 0.9s or 22 percent headroom, not on orange Host inv-api.lakeshore.internal. Ticket LSH-5211. Acceptor Luis Ortega."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: two pods, scale on p95 0.9s or 22 percent headroom, not on orange. If that clock collides with a freeze, the date moves and the scope does not. Luis Ortega hears the new date on LSH-MEM-2024-022. I will not book a change in the last 40 minutes of a freeze because it is 'just config.' Config is a change. Host if we have to prove a count: inv-api.lakeshore.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for LSH-MEM-2024-022. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "pods",
+          "2",
+          "inv-api.lakeshore.internal",
+          "LSH-5211"
+        ],
+        [
+          "p95",
+          "0.42",
+          "inv-api.lakeshore.internal",
+          "LSH-5211"
+        ],
+        [
+          "weekend",
+          "0.61",
+          "inv-api.lakeshore.internal",
+          "LSH-5211"
+        ],
+        [
+          "head",
+          "34.8",
+          "inv-api.lakeshore.internal",
+          "LSH-5211"
+        ],
+        [
+          "thresh",
+          "22",
+          "inv-api.lakeshore.internal",
+          "LSH-5211"
+        ],
+        [
+          "target",
+          "0.9",
+          "inv-api.lakeshore.internal",
+          "LSH-5211"
+        ],
+        [
+          "weeks",
+          "1",
+          "inv-api.lakeshore.internal",
+          "LSH-5211"
+        ],
+        [
+          "inst",
+          "t3",
+          "inv-api.lakeshore.internal",
+          "LSH-5211"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: m6i.4xlarge because the graph was orange"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "m6i.4xlarge because the graph was orange is out. Presidents Day p95 was 0.61s. Orange was Woo PHP, not the API. Buying the API box would not have moved pickup. I will not reopen it because a vendor emailed a discount."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: m6i.4xlarge because the graph was orange comes back wearing a new coat. I want that named in review notes, not rediscovered by Mara Singh on a Monday. Ticket LSH-5211. Numbers I will not 'simplify': pods=2, p95=0.42, weekend=0.61, head=34.8, thresh=22, target=0.9, weeks=1, inst=t3. Same clock as the front. I will not mix clocks to make inv-api.lakeshore.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Mara Singh: does woo-prod.lakeshore.internal stay in the path? Yes, no, or a new date on LSH-TST-2024-037.",
+        "Cole Brennan: freeze collision for the first useful slice. Date moves, scope does not.",
+        "Luis Ortega: weekend coverage is not implied. Sign it or it stays out.",
+        "Michael Gilfilian: leftover access on inv-api.lakeshore.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits inv-api.lakeshore.internal, LSH-MEM-2024-022, and the last three working pages. Access that has to move is who can change k8s.lakeshore.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Cole Brennan accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. LSH-5211. inv-api.lakeshore.internal.",
+      "text": "# LSH-MEM-2024-022 read-only first\ndate -u\nssh inv-api.lakeshore.internal 'uptime; df -h | head'\nkubectl -n lakeshore get pods -o wide | head\n# stop. write the last error in one sentence on LSH-5211\n# do not helm upgrade from a laptop in a freeze"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on LSH-5211 before any write.",
+        "Confirm on inv-api.lakeshore.internal with the read-only commands above.",
+        "If the refuse on m6i.4xlarge because the graph was orange is being reopened, stop and ping Luis Ortega.",
+        "Wake Cole Brennan only after a one-line diagnosis.",
+        "Do not apply from a laptop in a freeze."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for LSH-MEM-2024-022. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Michael Gilfilian",
+          "Luis Ortega",
+          "Cole Brennan"
+        ],
+        [
+          "Refuse on m6i.4xlarge because the graph was orange",
+          "Michael Gilfilian",
+          "Luis Ortega",
+          "Mara Singh"
+        ],
+        [
+          "Host inv-api.lakeshore.internal",
+          "Cole Brennan",
+          "Luis Ortega",
+          "Michael Gilfilian"
+        ],
+        [
+          "Requester path",
+          "Mara Singh",
+          "Luis Ortega",
+          "Michael Gilfilian"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Theo Walsh is on that list. Object on LSH-5211. Michael Gilfilian will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to LSH-MEM-2024-022"
+    },
+    {
+      "type": "p",
+      "text": "k8s.lakeshore.internal is in this file because skipping it is how the last near-miss happened. Mara Singh owns the check. I want a count on LSH-TST-2024-037 before anyone says the leftover is 'implied.' Implied leftovers are how m6i.4xlarge because the graph was orange almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in LSH-MEM-2024-022"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim m6i.4xlarge because the graph was orange is impossible for a competitor. I will claim we will not buy it. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host inv-api.lakeshore.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for LSH-5211"
+    },
+    {
+      "type": "p",
+      "text": "First useful is two pods, scale on p95 0.9s or 22 percent headroom, not on orange, not a prettier theme or a bigger box. Luis Ortega sees that slice on inv-api.lakeshore.internal. If the slice needs a second product, that is a new ticket and Luis Ortega is in the thread. I will not hide it inside LSH-MEM-2024-022."
+    },
+    {
+      "type": "h2",
+      "text": "Support zip and identifiers (37)"
+    },
+    {
+      "type": "p",
+      "text": "A support zip for this work goes through redaction. Customer email, card PAN, and passwords come back. Pressure is not a reason to paste them into LSH-MEM-2024-022. Michael Gilfilian will bounce the zip. Host if we have to prove a redaction: woo-prod.lakeshore.internal."
+    }
+  ]
+}

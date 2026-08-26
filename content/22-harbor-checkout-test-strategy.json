@@ -1,0 +1,336 @@
+{
+  "slug": "22-harbor-checkout-test-strategy",
+  "doc_id": "HBR-TST-2022-041",
+  "title": "Harbor & Oak checkout test strategy",
+  "subtitle": "Pickup, gift wrap off, gift card, GA4 purchase once, ticket HBR-2988",
+  "doc_type": "Test strategy",
+  "form_type": "Other",
+  "kicker": "Harbor & Oak Outfitters  \u00b7  Checkout QA  \u00b7  HBR-2988",
+  "org": "Hillcrest Digital",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "In use",
+  "date": "July 21, 2022",
+  "author": "Michael Gilfilian",
+  "role": "Web Developer",
+  "team": "Hillcrest Digital, Harbor & Oak Outfitters engagement",
+  "audience": "Jenna Park (requester); Dana Whitlock (acceptor); Jenna Park and Michael Gilfilian (build); Nia Brooks (leftover host); Evan Cole (absentee pack)",
+  "owners": "Dana Whitlock (acceptor), Jenna Park (requester), Jenna Park (ops), Michael Gilfilian (this document)",
+  "related": "HBR-TST-2022-041; HBR-2988; HBR-INC-2021-044",
+  "summary": "Jenna Park asked for a written cut of Harbor & Oak checkout test strategy. Current path: Manual checkout on preview theme, no CI case for wrap. This document locks four block-merge cases, invented fixtures, wrap flag. record a production checkout as a fixture is out because A live order in CI is how we almost emailed a real customer from staging in June. Paige caught it.",
+  "form_description": "Checkout test strategy for Harbor & Oak, locking block-merge cases for pickup, wrap-off, gift card, and a single GA4 purchase event.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "June 27, 2022",
+      "Michael Gilfilian",
+      "Outline after HBR-TST-2022-041 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "July 9, 2022",
+      "Michael Gilfilian",
+      "Numbers from Jenna Park. record a production checkout as a fixture still in the room."
+    ],
+    [
+      "0.9",
+      "July 17, 2022",
+      "Michael Gilfilian",
+      "record a production checkout as a fixture written up as a refuse. Jenna Park review."
+    ],
+    [
+      "1.0",
+      "July 21, 2022",
+      "Michael Gilfilian",
+      "Cut. Host stg-shop.harbor.internal. Ticket HBR-2988."
+    ],
+    [
+      "1.1",
+      "July 21, 2022",
+      "Michael Gilfilian",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Harbor & Oak checkout test strategy"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for HBR-TST-2022-041 on July 21, 2022. Jenna Park asked for a written bound after the current path (Manual checkout on preview theme, no CI case for wrap) stopped being honest. I am Michael Gilfilian, Web Developer, writing for Dana Whitlock, Jenna Park, and Nia Brooks. Primary host stg-shop.harbor.internal. If you are skimming, jump the decision callout, then the refuse on record a production checkout as a fixture, then open questions. If you are implementing next week, jump the constraints, the numbers table, and the commands or contracts."
+    },
+    {
+      "type": "p",
+      "text": "Block-merge cases: pickup rate present, wrap app absent on flagged weekends, gift card tender, GA4 purchase fires once. Fixtures invented, no live orders in CI. I am not restating a hallway yes. record a production checkout as a fixture is out because A live order in CI is how we almost emailed a real customer from staging in June. Paige caught it. Cost of doing nothing is already in the numbers: look at cases=4, wrap=1, ga4=1, hours=0.9, weeks=3, live=0, miss=17.4, pixels=1. Sibling tickets HBR-2988 and HBR-INC-2021-044. I will not reopen record a production checkout as a fixture in a side thread because a vendor sent a discount. Jenna Park is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Block-merge cases: pickup rate present, wrap app absent on flagged weekends, gift card tender, GA4 purchase fires once. Fixtures invented, no live orders in CI."
+    },
+    {
+      "type": "p",
+      "text": "Background on stg-shop.harbor.internal. Manual checkout on preview theme, no CI case for wrap. That is the system Dana Whitlock lives with, not a slide. I timed or pulled the leftover on ga4.harbor.internal the week before this file. Lag, stale minutes, or miss counts in this file are from that pull, not a round number I liked. Ticket HBR-TST-2022-041 names the pull. If those numbers moved after July 21, 2022, update this file in review, do not 'correct' them in Slack."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for HBR-TST-2022-041. record a production checkout as a fixture is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Manual checkout on preview theme, no CI case for wrap",
+          "Numbers already in play: cases=4, wrap=1, ga4=1, hours=0.9, weeks=3, live=0, miss=17.4, pixels=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "record a production checkout as a fixture",
+          "A live order in CI is how we almost emailed a real customer from staging in June. Paige ca",
+          "Named on HBR-INC-2021-044",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Days, not cash",
+          "Scope returns as Slack",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "four block-merge cases, invented fixtures, wrap flag",
+          "Host stg-shop.harbor.internal, ticket HBR-2988",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Nia Brooks owns a leftover that is easy to skip: gift.harbor.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (22): refuse on record a production checkout as a fixture, lock is four block-merge cases, invented fixtures, wrap flag. I will not hide a product change inside a 'quick align' on HBR-2988."
+    },
+    {
+      "type": "quote",
+      "text": "If the suite does not fail when gift wrap comes back, the suite is decoration.",
+      "attrib": "Jenna Park, July 7"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical user would try first on stg-shop.harbor.internal: the path Jenna Park actually has, not a desktop demo. Metric I will argue is time-to-useful, not a vanity QPS. If we cannot show that path on ga4.harbor.internal with the numbers already in this file, we do not have a cut. Michael Gilfilian will not accept a laptop screenshot as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "four block-merge cases, invented fixtures, wrap flag Host stg-shop.harbor.internal. Ticket HBR-2988. Acceptor Dana Whitlock."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: four block-merge cases, invented fixtures, wrap flag. If that clock collides with a freeze, the date moves and the scope does not. Dana Whitlock hears the new date on HBR-TST-2022-041. I will not book a change in the last 40 minutes of a freeze because it is 'just config.' Config is a change. Host if we have to prove a count: stg-shop.harbor.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for HBR-TST-2022-041. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "cases",
+          "4",
+          "stg-shop.harbor.internal",
+          "HBR-2988"
+        ],
+        [
+          "wrap",
+          "1",
+          "stg-shop.harbor.internal",
+          "HBR-2988"
+        ],
+        [
+          "ga4",
+          "1",
+          "stg-shop.harbor.internal",
+          "HBR-2988"
+        ],
+        [
+          "hours",
+          "0.9",
+          "stg-shop.harbor.internal",
+          "HBR-2988"
+        ],
+        [
+          "weeks",
+          "3",
+          "stg-shop.harbor.internal",
+          "HBR-2988"
+        ],
+        [
+          "live",
+          "0",
+          "stg-shop.harbor.internal",
+          "HBR-2988"
+        ],
+        [
+          "miss",
+          "17.4",
+          "stg-shop.harbor.internal",
+          "HBR-2988"
+        ],
+        [
+          "pixels",
+          "1",
+          "stg-shop.harbor.internal",
+          "HBR-2988"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: record a production checkout as a fixture"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "record a production checkout as a fixture is out. A live order in CI is how we almost emailed a real customer from staging in June. Paige caught it. I will not reopen it because a vendor emailed a discount."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: record a production checkout as a fixture comes back wearing a new coat. I want that named in review notes, not rediscovered by Nia Brooks on a Monday. Ticket HBR-2988. Numbers I will not 'simplify': cases=4, wrap=1, ga4=1, hours=0.9, weeks=3, live=0, miss=17.4, pixels=1. Same clock as the front. I will not mix clocks to make stg-shop.harbor.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Nia Brooks: does gift.harbor.internal stay in the path? Yes, no, or a new date on HBR-INC-2021-044.",
+        "Jenna Park: freeze collision for the first useful slice. Date moves, scope does not.",
+        "Jenna Park: weekend coverage is not implied. Sign it or it stays out.",
+        "Michael Gilfilian: leftover access on stg-shop.harbor.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits stg-shop.harbor.internal, HBR-TST-2022-041, and the last three working pages. Access that has to move is who can change ga4.harbor.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Jenna Park accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. HBR-2988. stg-shop.harbor.internal.",
+      "text": "# HBR-TST-2022-041 read-only first\ndate -u\nssh stg-shop.harbor.internal 'uptime; df -h | head'\nshopify theme list | head\n# stop. write the last error in one sentence on HBR-2988\n# do not publish from a laptop on Friday afternoon"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on HBR-2988 before any write.",
+        "Confirm on stg-shop.harbor.internal with the read-only commands above.",
+        "If the refuse on record a production checkout as a fixture is being reopened, stop and ping Dana Whitlock.",
+        "Wake Jenna Park only after a one-line diagnosis.",
+        "Do not apply from a laptop in a freeze."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for HBR-TST-2022-041. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Michael Gilfilian",
+          "Dana Whitlock",
+          "Jenna Park"
+        ],
+        [
+          "Refuse on record a production checkout as a fixture",
+          "Michael Gilfilian",
+          "Dana Whitlock",
+          "Nia Brooks"
+        ],
+        [
+          "Host stg-shop.harbor.internal",
+          "Jenna Park",
+          "Dana Whitlock",
+          "Michael Gilfilian"
+        ],
+        [
+          "Requester path",
+          "Nia Brooks",
+          "Jenna Park",
+          "Michael Gilfilian"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Evan Cole is on that list. Object on HBR-2988. Michael Gilfilian will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to HBR-TST-2022-041"
+    },
+    {
+      "type": "p",
+      "text": "ga4.harbor.internal is in this file because skipping it is how the last near-miss happened. Nia Brooks owns the check. I want a count on HBR-INC-2021-044 before anyone says the leftover is 'implied.' Implied leftovers are how record a production checkout as a fixture almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in HBR-TST-2022-041"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim record a production checkout as a fixture is impossible for a competitor. I will claim we will not buy it. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host stg-shop.harbor.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for HBR-2988"
+    },
+    {
+      "type": "p",
+      "text": "First useful is four block-merge cases, invented fixtures, wrap flag, not a prettier theme or a bigger box. Jenna Park sees that slice on stg-shop.harbor.internal. If the slice needs a second product, that is a new ticket and Dana Whitlock is in the thread. I will not hide it inside HBR-TST-2022-041."
+    },
+    {
+      "type": "h2",
+      "text": "Support zip and identifiers (22)"
+    },
+    {
+      "type": "p",
+      "text": "A support zip for this work goes through redaction. Customer email, card PAN, and passwords come back. Pressure is not a reason to paste them into HBR-TST-2022-041. Michael Gilfilian will bounce the zip. Host if we have to prove a redaction: gift.harbor.internal."
+    }
+  ]
+}

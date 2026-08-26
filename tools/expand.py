@@ -13,7 +13,7 @@ from datetime import date, timedelta
 
 
 TICKET_RE = re.compile(
-    r"\b(?:CLH|RVH|OAK|NS|REC|INC|TDD|PRD|SOP|RB|ADR|REQ|MEM|MTG|EVAL|TST)-[A-Z0-9-]{2,20}\b"
+    r"\b(?:CLH|RVH|OAK|NS|REC|INC|TDD|PRD|SOP|RB|ADR|REQ|MEM|MTG|EVAL|TST|WTS|HBR|LSH|HIL)-[A-Z0-9-]{2,20}\b"
 )
 HOST_RE = re.compile(r"\b[a-z0-9._-]+\.(?:internal|net|example|local)\b", re.I)
 
@@ -52,8 +52,9 @@ def extract_facts(spec: dict) -> dict:
         ),
     )
     named = list(dict.fromkeys(named))[:14]
-    if "Aman Kumar" not in named:
-        named = ["Aman Kumar"] + named
+    author = spec.get("author") or "Michael Gilfilian"
+    if author not in named:
+        named = [author] + named
     slug = spec.get("slug", "doc")
     seed = int(hashlib.md5(slug.encode()).hexdigest()[:8], 16)
     dt = spec.get("doc_type", "").lower()
@@ -78,16 +79,18 @@ def extract_facts(spec: dict) -> dict:
         "title": spec.get("title", "Untitled"),
         "doc_type": spec.get("doc_type", "Internal document"),
         "date": spec.get("date", "January 1, 2023"),
-        "author": spec.get("author", "Aman Kumar"),
+        "author": spec.get("author", "Michael Gilfilian"),
         "tickets": tickets or [spec.get("doc_id", "DOC-1")],
         "hosts": hosts or ["ops-bastion-01.internal"],
-        "people": named or ["Aman Kumar", "Priya Nair"],
+        "people": named or [author, "Brett Holtz"],
         "client": (
-            "Oakridge"
-            if "oakridge" in slug
-            else "Riverview"
-            if "riverview" in slug
-            else "Clearhaven"
+            "Whetstone"
+            if "whetstone" in slug
+            else "Harbor"
+            if "harbor" in slug
+            else "Lakeshore"
+            if "lakeshore" in slug
+            else "Hillcrest"
         ),
         "genre": genre,
         "rng": random.Random(seed),
@@ -115,6 +118,59 @@ def _n(f, a, b):
 
 def _choice(f, seq):
     return f["rng"].choice(seq)
+
+
+def _ns(f):
+    c = f.get("client") or "Hillcrest"
+    table = {
+        "Whetstone": ["helpdesk", "aad-sync", "imaging", "wts-it"],
+        "Harbor": ["shopify", "harbor-web", "seo-jobs", "pickup"],
+        "Lakeshore": ["inv-api", "woo-prod", "stock-sync", "storefront"],
+        "Hillcrest": ["client-ops", "staging", "hillcrest", "access"],
+    }
+    return _choice(f, table.get(c, table["Hillcrest"]))
+
+
+def _deploy(f):
+    c = f.get("client") or "Hillcrest"
+    table = {
+        "Whetstone": ["mailbox-sync", "triage-bot", "intune-pkg", "fileshare-agent"],
+        "Harbor": ["theme-preview", "inventory-sync", "checkout", "ga4-proxy"],
+        "Lakeshore": ["inventory-api", "woo-app", "stock-worker", "react-admin"],
+        "Hillcrest": ["onboard-bot", "secrets-proxy", "staging-router", "pipeline"],
+    }
+    return _choice(f, table.get(c, table["Hillcrest"]))
+
+
+def _read_only_commands(f, host, ticket, topic, extra=""):
+    ns = _ns(f)
+    deploy = _deploy(f)
+    c = f.get("client") or "Hillcrest"
+    head = f"# {f['doc_id']} / {ticket} / {topic}\ndate -u\n"
+    if extra:
+        head += extra.rstrip() + "\n"
+    if c == "Whetstone":
+        body = (
+            f"az account show --query name -o tsv\n"
+            f"ssh {host} 'uptime; df -h | head'\n"
+            f"az ad user list --query '[].userPrincipalName' -o tsv | head\n"
+        )
+    elif c == "Harbor":
+        body = (
+            f"ssh {host} 'uptime; df -h | head'\n"
+            f"shopify theme list | head\n"
+        )
+    else:
+        body = (
+            f"ssh {host} 'uptime; df -h | head'\n"
+            f"kubectl -n {ns} get pods -l app={deploy} -o wide | head\n"
+            f"kubectl -n {ns} logs deploy/{deploy} --tail=80 | tail\n"
+        )
+    tail = (
+        f"# stop. write the last error in one sentence on {ticket}\n"
+        f"# do not apply a change from a laptop in a freeze"
+    )
+    return head + body + tail
 
 
 def _parse_anchor(s: str) -> date:
@@ -156,12 +212,13 @@ def expand_spec(spec: dict, min_words: int = 14200, max_words: int = 15400) -> d
         extra += _closing_remainder(f, min_words - _wc_blocks(spec, extra))
     topics = _genre_topics(f)
     i = 0
-    while _wc_blocks(spec, extra) < min_words and i < 80:
-        extra += _take_paras(f, 1, topics[i % len(topics)])
+    while _wc_blocks(spec, extra) < min_words and i < 250:
+        extra += _take_paras(f, 2, topics[i % len(topics)])
         i += 1
     j = 0
-    while _wc_blocks(spec, extra) < min_words and j < 50:
+    while _wc_blocks(spec, extra) < min_words and j < 200:
         extra.append(pad_paragraph(f, j))
+        extra.append(pad_paragraph(f, j + 200))
         j += 1
     out = dict(spec)
     out["blocks"] = list(spec.get("blocks", [])) + extra
@@ -211,12 +268,12 @@ def _cont_notes(f):
     topics = [
         ("WIP / extra scope", "out of v1 unless the acceptor signs a new slice"),
         ("date pressure", "the earlier date is a wish; the later date is the one with owners"),
-        ("serial / special inventory", "Longview-only or equivalent leftover, not a silent include"),
+        ("serial / special inventory", "one-store leftover, not a silent include"),
         ("in-transit / cross-site", "needs a written rule, not a hallway yes"),
         ("tooling rewrite", "rejected if it is a second product"),
         ("header vs URI / protocol", "the main body already picked; do not relitigate in Slack"),
-        ("weekend coverage", "not in the SLA unless Helen or the ops owner signs it"),
-        ("PHI / identifiers in chat", "never; redact_dump or equivalent first"),
+        ("weekend coverage", "not in the SLA unless the ops owner signs it"),
+        ("PII / identifiers in chat", "never; redact_dump or equivalent first"),
     ]
     f["rng"].shuffle(topics)
     rows = []
@@ -239,7 +296,7 @@ def _cont_notes(f):
             {
                 "type": "p",
                 "text": (
-                    f"Check that this does not collide with the freeze or clinical/ops window already named in the main notes. "
+                    f"Check that this does not collide with the freeze or store/ops window already named in the main notes. "
                     f"Host in play if we have to prove it: {_host(f, i)}. "
                     f"{_person(f, 0)} will ping once. After that the owner is late, not blocked."
                 ),
@@ -329,12 +386,10 @@ def _cont_runbook(f):
         ("rollback vs roll forward", "migrate already expanded a column"),
         ("split brain / two primaries", "stop writes, call the DBA path"),
         ("facility or plant isolation", "take one feed down, not the API"),
-        ("PHI or identifier in a dump", "stop pasting, run redaction"),
+        ("PII or identifier in a dump", "stop pasting, run redaction"),
     ]
     f["rng"].shuffle(branches)
     for i, (name, tell) in enumerate(branches, 1):
-        ns = _choice(f, ["recon", "riverview-chart", "oakridge-inv", "clh-prod", "batch"])
-        deploy = _choice(f, ["match-engine", "ingest-api", "patient-api", "inventory-api", "break-svc"])
         blocks.append({"type": "h2", "text": f"Branch {i}: {name}"})
         blocks.append(
             {
@@ -351,14 +406,7 @@ def _cont_runbook(f):
             {
                 "type": "code",
                 "caption": f"Read-only first. {name}.",
-                "text": (
-                    f"# {f['doc_id']} branch {i}: {name}\n"
-                    f"date -u\n"
-                    f"kubectl -n {ns} get pods -l app={deploy} -o wide\n"
-                    f"kubectl -n {ns} logs deploy/{deploy} --tail=120 | tail\n"
-                    f"# stop here if you cannot explain the last error in one sentence\n"
-                    f"# do not helm upgrade from a laptop in a freeze"
-                ),
+                "text": _read_only_commands(f, _host(f, i), _ticket(f, i), name),
             }
         )
         blocks.append(
@@ -588,7 +636,7 @@ def _cont_prd(f):
         ("empty result", "explain empty, do not look broken"),
         ("late data", "show stale with a time, do not hide it"),
         ("export / audit", "what a control owner can replay"),
-        ("mobile / floor / nursing", "the actual device, not a desktop lie"),
+        ("mobile / floor / store staff", "the actual device, not a desktop lie"),
     ]
     f["rng"].shuffle(stories)
     rows = []
@@ -602,7 +650,7 @@ def _cont_prd(f):
                     f"Good: {good}. "
                     f"Metric I will argue for: time-to-first-useful-screen under {_n(f, 2, 12)}.{_n(f, 0, 9)}s on campus or ops VLAN, "
                     f"not a vanity QPS number. "
-                    f"Out of scope: {_choice(f, ['pretty formatting', 'a second write-back EMR', 'editing payloads in the UI', 'GraphQL for v1', 'notes full-text search'])}."
+                    f"Out of scope: {_choice(f, ['pretty formatting', 'a second write-back to the POS', 'editing payloads in the UI', 'GraphQL for v1', 'notes full-text search'])}."
                 ),
             }
         )
@@ -645,8 +693,8 @@ def _cont_prd(f):
             "type": "p",
             "text": (
                 f"Device leftover: the actual device the user holds, not a desktop lie. "
-                f"If nursing or floor ops is the user, I will time the P0 path on that "
-                f"device on campus or ops VLAN. Metric is time-to-first-useful-screen, "
+                f"If store staff or floor ops is the user, I will time the P0 path on that "
+                f"device on store VLAN or ops VLAN. Metric is time-to-first-useful-screen, "
                 f"not QPS. Host if we have to prove it: {_host(f, 0)}. {f['author']} will "
                 f"not accept a laptop demo as that proof."
             ),
@@ -663,18 +711,18 @@ def _cont_test(f):
             "text": (
                 f"The suite exists to catch the regressions we already caught once. "
                 f"This section names them so they cannot be deleted as noise. "
-                f"Sneha or the QA owner listed in the front still owns golden fixtures. {f['author']} owns the case list."
+                f"The QA owner listed in the front still owns golden fixtures. {f['author']} owns the case list."
             ),
         },
     ]
     cases = [
-        ("timezone on discharge", "Arizona / no DST vs a contractor default"),
-        ("allergy merge 'no known'", "dropping the negative is a clinical miss"),
+        ("timezone on order close", "store timezone vs a contractor default"),
+        ("SKU merge 'no substitute'", "dropping the negative is a stock miss"),
         ("pagination over 10k", "page 2 must not repeat page 1"),
         ("401 vs 403", "break-glass is not a missing token"),
         ("idempotent replay", "second POST does not double"),
         ("partition count in staging", "1 partition will not catch a rebalance bug"),
-        ("PHI in logs", "CI fails if MRN/DOB appear"),
+        ("PII in logs", "CI fails if email/phone appear"),
         ("float qty", "decimal string or you are wrong"),
         ("header version vs URI", "contract test pins the one we chose"),
         ("empty batch alert", "green job, zero rows, must page"),
@@ -690,7 +738,7 @@ def _cont_test(f):
                 "type": "p",
                 "text": (
                     f"Why it stays: {why}. "
-                    f"Fixture lives next to the test, not in a laptop path. No PHI. "
+                    f"Fixture lives next to the test, not in a laptop path. No PII. "
                     f"If someone deletes this test, they also delete the incident it maps to ({_ticket(f, i)}) and they do that in review, not in a drive-by. "
                     f"Host used in soak if needed: {_host(f, i)}."
                 ),
@@ -735,7 +783,7 @@ def _cont_test(f):
         {
             "type": "p",
             "text": (
-                f"PHI in CI is a fail, not a warning. I will not 'sanitize later.' Fixture "
+                f"PII in CI is a fail, not a warning. I will not 'sanitize later.' Fixture "
                 f"rows are invented. If someone wants a production-shaped dump, they get a "
                 f"redaction SOP and a no. Hash changes without {_ticket(f, 0)} fail the build. "
                 f"Deleting a case in a drive-by is how the last regression returned."
@@ -764,7 +812,7 @@ def _cont_design(f):
         ("clocks", "settlement_date vs created_at, pick one partition key"),
         ("cardinality", "do not put sku on a span attribute"),
         ("residency", "us-east-1, no 'just a replica in another region'"),
-        ("PII/PHI", "not in logs, not in Slack, redact before a zip"),
+        ("PII", "not in logs, not in Slack, redact before a zip"),
         ("versioning", "URI or it is not versioned for this client"),
         ("backfill vs OLTP", "historical load never on the primary"),
         ("cache down", "degrade, miss the SLA, do not lie"),
@@ -789,7 +837,7 @@ def _cont_design(f):
             {
                 "type": "p",
                 "text": (
-                    f"Failure mode if we ignore it: {_choice(f, ['duplicate postings', 'inflated counts', 'client mapping death at 06:12', 'rebalance storm', 'OOM on one partition', 'audit gap', 'PHI in a support zip'])}. "
+                    f"Failure mode if we ignore it: {_choice(f, ['duplicate postings', 'inflated counts', 'client mapping death at 06:12', 'rebalance storm', 'OOM on one partition', 'audit gap', 'PII in a support zip'])}. "
                     f"Test: the case in the suite or the drill named under {_ticket(f, 0)}. "
                     f"I want this edge in the design review notes, not rediscovered by {_person(f, 3)} on a Monday."
                 ),
@@ -871,7 +919,7 @@ def _remainder_h1(f):
         ],
         "test": [
             f"Cases that stay in CI ({f['doc_id']})",
-            f"Fixture rules Sneha will not relitigate",
+            f"Fixture rules the QA owner will not relitigate",
             f"Regressions we already paid for",
         ],
         "design": [
@@ -1168,7 +1216,7 @@ def _para_deck(f):
         ),
         lambda topic: (
             f"Internal line can name {host(3)} and the error class. It still does not paste "
-            f"identifiers. Money and medical data in outbound mail go through legal. "
+            f"identifiers. Money and card data in outbound mail go through legal. "
             f"{topic} being loud is not an exception."
         ),
         lambda topic: (
@@ -1231,7 +1279,7 @@ def _para_deck(f):
         ),
         lambda topic: (
             f"Support zip for {topic} goes through redaction. Identifiers still in it come back. "
-            f"{f['author']} will reject it on {ticket(0)}. Pressure is not a reason to paste an MRN."
+            f"{f['author']} will reject it on {ticket(0)}. Pressure is not a reason to paste a customer email."
         ),
         lambda topic: (
             f"If the clock on {host(3)} jumped, I will not debate {_num(f, 3)} for {topic}. "
@@ -1358,8 +1406,8 @@ def _genre_topics(f):
         ],
         "test": [
             "fixture hash change without a ticket",
-            "timezone on discharge or settlement_date",
-            "PHI in CI logs",
+            "timezone on order close or settlement_date",
+            "PII in CI logs",
             "pagination that repeats page 1",
         ],
         "design": [
@@ -1499,7 +1547,7 @@ def _shape_comms(f, i, topic):
                 f"Internal note can name {host}, {_ticket(f, i + 1)}, and the last error line. "
                 f"It still does not paste identifiers. If someone asks for a root cause the "
                 f"same day, they get the user-visible version. Legal reads outbound mail that "
-                f"names money or medical data. I will not put a hostname in a customer ticket "
+                f"names money or card data. I will not put a hostname in a customer ticket "
                 f"because it makes me look precise."
             ),
         },
@@ -1508,7 +1556,7 @@ def _shape_comms(f, i, topic):
             "items": [
                 f"External: window, effect, done or not. Owner {who}.",
                 f"Internal: {host}, counts, {ticket}. Owner {f['author']}.",
-                "Never: payloads, PAN, SSN, MRN, secrets, unredacted logs.",
+                "Never: payloads, PAN, SSN, customer email, secrets, unredacted logs.",
                 f"If {_person(f, 3)} is the TAM, they get the external version first.",
             ],
         },
@@ -1519,7 +1567,7 @@ def _shape_comms(f, i, topic):
                 f"If the incident is still open, the draft says 'still open' and a next update "
                 f"time we can actually hit, usually {_n(f, 30, 90)} minutes. If we are done, "
                 f"the draft says what changed for the user and what did not. I will not "
-                f"apologize in a way that implies a cash or clinical miss we did not have."
+                f"apologize in a way that implies a cash or stock miss we did not have."
             ),
         },
     ]
@@ -1579,8 +1627,6 @@ def _shape_commands(f, i, topic):
     who = _person(f, i + 1)
     ticket = _ticket(f, i)
     host = _host(f, i)
-    ns = _choice(f, ["recon", "riverview-chart", "oakridge-inv", "clh-prod", "batch"])
-    deploy = _choice(f, ["match-engine", "ingest-api", "patient-api", "inventory-api", "break-svc"])
     return [
         {"type": "h2", "text": f"Read-only first: {topic}"},
         {
@@ -1595,15 +1641,7 @@ def _shape_commands(f, i, topic):
         {
             "type": "code",
             "caption": f"Read-only. {ticket}. {host}.",
-            "text": (
-                f"# {f['doc_id']} / {ticket} / {topic}\n"
-                f"date -u\n"
-                f"ssh {host} 'uptime; df -h | head'\n"
-                f"kubectl -n {ns} get pods -l app={deploy} -o wide | head\n"
-                f"kubectl -n {ns} logs deploy/{deploy} --tail=80 | tail\n"
-                f"# stop. write the last error in one sentence on {ticket}\n"
-                f"# do not helm upgrade from a laptop in a freeze"
-            ),
+            "text": _read_only_commands(f, host, ticket, topic),
         },
         {
             "type": "steps",
@@ -1818,7 +1856,7 @@ def _shape_fixture(f, i, topic):
         {
             "type": "p",
             "text": (
-                f"Fixture for {topic} lives next to the test, not in a laptop path. No PHI, "
+                f"Fixture for {topic} lives next to the test, not in a laptop path. No PII, "
                 f"no PAN. Host if we have to soak: {host}. Assert the smallest row that still "
                 f"fails without the fix. I will not copy a sanitized production dump; it is "
                 f"too big and it hid the bug twice. Owner {who}. Ticket {ticket}. If the test "
@@ -1830,7 +1868,7 @@ def _shape_fixture(f, i, topic):
             "caption": f"Name the test after the bug. {ticket}.",
             "text": (
                 f"# {f['doc_id']} / {topic}\n"
-                f"pytest -k '{_choice(f, ['timezone', 'idempotent', 'empty_batch', 'pagination', 'phi_log'])}' -q\n"
+                f"pytest -k '{_choice(f, ['timezone', 'idempotent', 'empty_batch', 'pagination', 'pii_log'])}' -q\n"
                 f"# fail if the fixture hash changes without {ticket}\n"
                 f"# do not record against {host} from a laptop"
             ),
@@ -2100,7 +2138,7 @@ def _shape_freeze(f, i, topic):
             "type": "p",
             "text": (
                 f"Calendar leftovers I will not hide inside {topic}: weekend coverage that "
-                f"is not in the SLA, a plant shutdown, a clinical quiet hours window, month-end "
+                f"is not in the SLA, a plant shutdown, a store quiet hours window, month-end "
                 f"16:00-21:00 ET. If the leftover date lands inside one of those, the date "
                 f"moves. The scope does not. {_person(f, 1)} hears the new date on {ticket}."
             ),

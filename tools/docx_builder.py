@@ -84,7 +84,7 @@ def theme_for(spec: dict) -> Theme:
     slug = spec.get("slug") or "doc"
     rng = random.Random(int(hashlib.md5(slug.encode()).hexdigest()[:8], 16))
     dt = (spec.get("doc_type") or "").lower()
-    if "oakridge" in slug:
+    if "whetstone" in slug or "oakridge" in slug:
         palettes = [
             ("3D4F5F", "4A5A6A", "4A5560", "E8ECF0"),
             ("4A545C", "5A646C", "3F474E", "EEEFEF"),
@@ -94,7 +94,7 @@ def theme_for(spec: dict) -> Theme:
             ("Liberation Serif", "Liberation Sans", "Liberation Mono"),
             ("DejaVu Serif", "DejaVu Sans", "DejaVu Sans Mono"),
         ]
-    elif "riverview" in slug:
+    elif "harbor" in slug or "riverview" in slug:
         palettes = [
             ("1A5F6A", "2A6B74", "1A5F6A", "E6F0F1"),
             ("215E5A", "2F6E69", "215E5A", "E5EFEE"),
@@ -102,6 +102,15 @@ def theme_for(spec: dict) -> Theme:
         ]
         faces = [
             ("Noto Serif", "Noto Sans", "Noto Mono"),
+            ("Liberation Serif", "Liberation Sans", "Liberation Mono"),
+            ("DejaVu Serif", "Liberation Sans", "Liberation Mono"),
+        ]
+    elif "hillcrest" in slug:
+        palettes = [
+            ("3B3F46", "4C525A", "3B3F46", "EEEFF1"),
+            ("4A4037", "5C5348", "4A4037", "F0EEEA"),
+        ]
+        faces = [
             ("Liberation Serif", "Liberation Sans", "Liberation Mono"),
             ("DejaVu Serif", "Liberation Sans", "Liberation Mono"),
         ]
@@ -617,8 +626,8 @@ def _build_title_block(doc: Document, spec: dict, theme: Theme | None = None):
         ("Version", str(spec.get("version", "1.0"))),
         ("Status", spec.get("status", "Draft")),
         ("Date", spec.get("date", "")),
-        ("Author", spec.get("author", "Aman Kumar")),
-        ("Role", spec.get("role", "Software Engineer II")),
+        ("Author", spec.get("author", "Michael Gilfilian")),
+        ("Role", spec.get("role", "Web Developer")),
         ("Team / engagement", spec.get("team", "")),
         ("Audience", spec.get("audience", "")),
         ("Classification", spec.get("classification", "INTERNAL")),
@@ -846,10 +855,10 @@ def _spec_datetime(s: str, hour: int, minute: int) -> dt.datetime:
 def stamp_docx_metadata(path: Path, spec: dict, words: int | None = None, pages: int | None = None) -> None:
     """Replace python-docx package stamps so File > Info looks like a Word file."""
     path = Path(path)
-    author = spec.get("author") or "Aman Kumar"
+    author = spec.get("author") or "Michael Gilfilian"
     title = spec.get("title") or ""
     subject = spec.get("doc_type") or ""
-    company = spec.get("org") or "Northstar Engineering"
+    company = spec.get("org") or "Hillcrest Digital"
     seed = int(hashlib.md5(spec.get("slug", path.stem).encode()).hexdigest()[:8], 16)
     created = _spec_datetime(spec.get("date", ""), 8 + (seed % 8), (seed // 8) % 60)
     modified = created

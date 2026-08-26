@@ -1,0 +1,336 @@
+{
+  "slug": "45-lakeshore-redis-stock-design",
+  "doc_id": "LSH-TDD-2025-018",
+  "title": "Lakeshore Redis cache for on-hand reads, technical design",
+  "subtitle": "Cache beside MySQL, 45s TTL, ticket LSH-5722",
+  "doc_type": "Technical design document",
+  "form_type": "Technical design doc",
+  "kicker": "Lakeshore Hardware Group  \u00b7  Redis  \u00b7  LSH-5722",
+  "org": "Hillcrest Digital",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Accepted",
+  "date": "March 13, 2025",
+  "author": "Michael Gilfilian",
+  "role": "Web Developer",
+  "team": "Hillcrest Digital, Lakeshore Hardware Group engagement",
+  "audience": "Greta Holm (requester); Luis Ortega (acceptor); Cole Brennan and Michael Gilfilian (build); Mara Singh (leftover host); Theo Walsh (absentee pack)",
+  "owners": "Luis Ortega (acceptor), Greta Holm (requester), Cole Brennan (ops), Michael Gilfilian (this document)",
+  "related": "LSH-TDD-2025-018; LSH-5722; LSH-MEM-2024-022",
+  "summary": "Greta Holm asked for a written cut of Lakeshore Redis cache for on-hand reads. Current path: API hits mysql-ro every read, p95 0.42s Tuesday, 0.61s weekend. This document locks 45s TTL, fail open to MySQL, never lie fresh. serve last-known forever if Redis is down is out because Stale-as-fresh is how we oversold 4418-SP. Slow and true beats fast and wrong.",
+  "form_description": "Technical design for a Redis cache in front of Lakeshore on-hand reads, with a 45s TTL and fail-open to MySQL instead of stale-as-fresh.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "February 17, 2025",
+      "Michael Gilfilian",
+      "Outline after LSH-TDD-2025-018 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "March 1, 2025",
+      "Michael Gilfilian",
+      "Numbers from Greta Holm. serve last-known forever if Redis is down still in the room."
+    ],
+    [
+      "0.9",
+      "March 9, 2025",
+      "Michael Gilfilian",
+      "serve last-known forever if Redis is down written up as a refuse. Cole Brennan review."
+    ],
+    [
+      "1.0",
+      "March 13, 2025",
+      "Michael Gilfilian",
+      "Cut. Host redis.lakeshore.internal. Ticket LSH-5722."
+    ],
+    [
+      "1.1",
+      "March 13, 2025",
+      "Michael Gilfilian",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Lakeshore Redis cache for on-hand reads, technical design"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for LSH-TDD-2025-018 on March 13, 2025. Greta Holm asked for a written bound after the current path (API hits mysql-ro every read, p95 0.42s Tuesday, 0.61s weekend) stopped being honest. I am Michael Gilfilian, Web Developer, writing for Luis Ortega, Cole Brennan, and Mara Singh. Primary host redis.lakeshore.internal. If you are skimming, jump the decision callout, then the refuse on serve last-known forever if Redis is down, then open questions. If you are implementing next week, jump the constraints, the numbers table, and the commands or contracts."
+    },
+    {
+      "type": "p",
+      "text": "Redis on redis.lakeshore.internal, key store:sku, TTL 45s. On cache miss, MySQL. On Redis down, MySQL, miss the p95, do not serve stale as fresh. I am not restating a hallway yes. serve last-known forever if Redis is down is out because Stale-as-fresh is how we oversold 4418-SP. Slow and true beats fast and wrong. Cost of doing nothing is already in the numbers: look at ttl=45, p95=0.42, weekend=0.61, keys=18.4k, stores=4, weeks=5, sku=4418-SP, stale=0. Sibling tickets LSH-5722 and LSH-MEM-2024-022. I will not reopen serve last-known forever if Redis is down in a side thread because a vendor sent a discount. Cole Brennan is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Redis on redis.lakeshore.internal, key store:sku, TTL 45s. On cache miss, MySQL. On Redis down, MySQL, miss the p95, do not serve stale as fresh."
+    },
+    {
+      "type": "p",
+      "text": "Background on redis.lakeshore.internal. API hits mysql-ro every read, p95 0.42s Tuesday, 0.61s weekend. That is the system Luis Ortega lives with, not a slide. I timed or pulled the leftover on inv-api.lakeshore.internal the week before this file. Lag, stale minutes, or miss counts in this file are from that pull, not a round number I liked. Ticket LSH-TDD-2025-018 names the pull. If those numbers moved after March 13, 2025, update this file in review, do not 'correct' them in Slack."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for LSH-TDD-2025-018. serve last-known forever if Redis is down is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep API hits mysql-ro every read, p95 0.42s Tuesday, 0.61s weekend",
+          "Numbers already in play: ttl=45, p95=0.42, weekend=0.61, keys=18.4k, stores=4, weeks=5, sku=4418-SP, stale=0",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "serve last-known forever if Redis is down",
+          "Stale-as-fresh is how we oversold 4418-SP. Slow and true beats fast and wrong.",
+          "Named on LSH-MEM-2024-022",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Days, not cash",
+          "Scope returns as Slack",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "45s TTL, fail open to MySQL, never lie fresh",
+          "Host redis.lakeshore.internal, ticket LSH-5722",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Mara Singh owns a leftover that is easy to skip: mysql-ro.lakeshore.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (45): refuse on serve last-known forever if Redis is down, lock is 45s TTL, fail open to MySQL, never lie fresh. I will not hide a product change inside a 'quick align' on LSH-5722."
+    },
+    {
+      "type": "quote",
+      "text": "If Redis is down, the API should be slow, not fictional.",
+      "attrib": "Greta Holm, February 27"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical user would try first on redis.lakeshore.internal: the path Greta Holm actually has, not a desktop demo. Metric I will argue is time-to-useful, not a vanity QPS. If we cannot show that path on inv-api.lakeshore.internal with the numbers already in this file, we do not have a cut. Michael Gilfilian will not accept a laptop screenshot as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "45s TTL, fail open to MySQL, never lie fresh Host redis.lakeshore.internal. Ticket LSH-5722. Acceptor Luis Ortega."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: 45s TTL, fail open to MySQL, never lie fresh. If that clock collides with a freeze, the date moves and the scope does not. Luis Ortega hears the new date on LSH-TDD-2025-018. I will not book a change in the last 40 minutes of a freeze because it is 'just config.' Config is a change. Host if we have to prove a count: redis.lakeshore.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for LSH-TDD-2025-018. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "ttl",
+          "45",
+          "redis.lakeshore.internal",
+          "LSH-5722"
+        ],
+        [
+          "p95",
+          "0.42",
+          "redis.lakeshore.internal",
+          "LSH-5722"
+        ],
+        [
+          "weekend",
+          "0.61",
+          "redis.lakeshore.internal",
+          "LSH-5722"
+        ],
+        [
+          "keys",
+          "18.4k",
+          "redis.lakeshore.internal",
+          "LSH-5722"
+        ],
+        [
+          "stores",
+          "4",
+          "redis.lakeshore.internal",
+          "LSH-5722"
+        ],
+        [
+          "weeks",
+          "5",
+          "redis.lakeshore.internal",
+          "LSH-5722"
+        ],
+        [
+          "sku",
+          "4418-SP",
+          "redis.lakeshore.internal",
+          "LSH-5722"
+        ],
+        [
+          "stale",
+          "0",
+          "redis.lakeshore.internal",
+          "LSH-5722"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: serve last-known forever if Redis is down"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "serve last-known forever if Redis is down is out. Stale-as-fresh is how we oversold 4418-SP. Slow and true beats fast and wrong. I will not reopen it because a vendor emailed a discount."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: serve last-known forever if Redis is down comes back wearing a new coat. I want that named in review notes, not rediscovered by Mara Singh on a Monday. Ticket LSH-5722. Numbers I will not 'simplify': ttl=45, p95=0.42, weekend=0.61, keys=18.4k, stores=4, weeks=5, sku=4418-SP, stale=0. Same clock as the front. I will not mix clocks to make redis.lakeshore.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Mara Singh: does mysql-ro.lakeshore.internal stay in the path? Yes, no, or a new date on LSH-MEM-2024-022.",
+        "Cole Brennan: freeze collision for the first useful slice. Date moves, scope does not.",
+        "Greta Holm: weekend coverage is not implied. Sign it or it stays out.",
+        "Michael Gilfilian: leftover access on redis.lakeshore.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits redis.lakeshore.internal, LSH-TDD-2025-018, and the last three working pages. Access that has to move is who can change inv-api.lakeshore.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Cole Brennan accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. LSH-5722. redis.lakeshore.internal.",
+      "text": "# LSH-TDD-2025-018 read-only first\ndate -u\nssh redis.lakeshore.internal 'uptime; df -h | head'\nkubectl -n lakeshore get pods -o wide | head\n# stop. write the last error in one sentence on LSH-5722\n# do not helm upgrade from a laptop in a freeze"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on LSH-5722 before any write.",
+        "Confirm on redis.lakeshore.internal with the read-only commands above.",
+        "If the refuse on serve last-known forever if Redis is down is being reopened, stop and ping Luis Ortega.",
+        "Wake Cole Brennan only after a one-line diagnosis.",
+        "Do not apply from a laptop in a freeze."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for LSH-TDD-2025-018. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Michael Gilfilian",
+          "Luis Ortega",
+          "Cole Brennan"
+        ],
+        [
+          "Refuse on serve last-known forever if Redis is down",
+          "Michael Gilfilian",
+          "Luis Ortega",
+          "Mara Singh"
+        ],
+        [
+          "Host redis.lakeshore.internal",
+          "Cole Brennan",
+          "Luis Ortega",
+          "Michael Gilfilian"
+        ],
+        [
+          "Requester path",
+          "Mara Singh",
+          "Greta Holm",
+          "Michael Gilfilian"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Theo Walsh is on that list. Object on LSH-5722. Michael Gilfilian will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to LSH-TDD-2025-018"
+    },
+    {
+      "type": "p",
+      "text": "inv-api.lakeshore.internal is in this file because skipping it is how the last near-miss happened. Mara Singh owns the check. I want a count on LSH-MEM-2024-022 before anyone says the leftover is 'implied.' Implied leftovers are how serve last-known forever if Redis is down almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in LSH-TDD-2025-018"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim serve last-known forever if Redis is down is impossible for a competitor. I will claim we will not buy it. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host redis.lakeshore.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for LSH-5722"
+    },
+    {
+      "type": "p",
+      "text": "First useful is 45s TTL, fail open to MySQL, never lie fresh, not a prettier theme or a bigger box. Greta Holm sees that slice on redis.lakeshore.internal. If the slice needs a second product, that is a new ticket and Luis Ortega is in the thread. I will not hide it inside LSH-TDD-2025-018."
+    },
+    {
+      "type": "h2",
+      "text": "Support zip and identifiers (45)"
+    },
+    {
+      "type": "p",
+      "text": "A support zip for this work goes through redaction. Customer email, card PAN, and passwords come back. Pressure is not a reason to paste them into LSH-TDD-2025-018. Michael Gilfilian will bounce the zip. Host if we have to prove a redaction: mysql-ro.lakeshore.internal."
+    }
+  ]
+}

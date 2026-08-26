@@ -1,4 +1,4 @@
-# House style for Northstar engineering Word files
+# House style for Hillcrest Digital Word files
 
 World file: `catalog/world.json`
 Schema: `catalog/SCHEMA.txt`
@@ -15,13 +15,13 @@ Output: `documents/<slug>.docx`
   "subtitle": "...",
   "doc_type": "...",
   "kicker": "...",
-  "org": "Northstar Engineering",
+  "org": "Hillcrest Digital" | "Whetstone Industrial",
   "classification": "INTERNAL",
   "version": "last revision row",
   "status": "matches the kind of document",
   "date": "November 18, 2019",
-  "author": "Aman Kumar",
-  "role": "...",
+  "author": "Michael Gilfilian",
+  "role": "Web Developer" | "IT Support Intern",
   "team": "...",
   "audience": "...",
   "owners": "...",
@@ -38,7 +38,7 @@ Date in the JSON `date` field must be English: "April 11, 2023".
 
 Status follows the document kind (runbook In force, incident Closed, memo For decision, notes Issued, design Accepted). Do not stamp every file Approved / v1.2.
 
-Hosts use `.internal` (northstar.internal, riverview.internal, and the rest). Do not use the RFC documentation TLD `.example` except in a Spring filename such as `application-local.yml.example`.
+Hosts use `.internal` (`whetstone.internal`, `harbor.internal`, `lakeshore.internal`, `hillcrest.internal`). Do not use the RFC documentation TLD `.example` except in a Spring filename such as `application-local.yml.example`.
 
 ## Length
 
@@ -46,7 +46,7 @@ The generator expands each file into the 40-50 page band. Front matter must stil
 
 ## Voice (non-negotiable)
 
-Write like a working engineer sending this to colleagues. Concrete. A little uneven. Specific names, hostnames, lag numbers, ticket IDs, plant codes, SQL object names.
+Write like a working engineer sending this to colleagues. Concrete. A little uneven. Specific names, hostnames, lag numbers, ticket IDs, SQL object names, theme files.
 
 Banned words/phrases: handshake, furthermore, moreover, additionally, leverage, utilize, robust, seamless, holistic, landscape, delve, cutting-edge, empower, streamline, it's important to note, in order to, at the end of the day, moving forward (unless literal calendar), synergy, paradigm, unlock, comprehensive, ensure, facilitate, pivotal, nestled, tapestry.
 
@@ -58,6 +58,8 @@ Every document must include:
 - open questions with owners
 - numbers that are not round (8.2M, 7.4 min, 12-40s, $14.6k)
 - one section a VP could skim (decision / recommendation) AND one section a working engineer could execute (commands, schemas, failure modes)
+
+Do not put a home address, phone, or LinkedIn in the Word files. Do not name Cummins. Do not write pentest or exploit procedures.
 
 ## Block mix
 

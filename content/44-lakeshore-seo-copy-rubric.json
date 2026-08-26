@@ -1,0 +1,336 @@
+{
+  "slug": "44-lakeshore-seo-copy-rubric",
+  "doc_id": "LSH-EVAL-2025-011",
+  "title": "Eval rubric: Lakeshore category copy and title pattern",
+  "subtitle": "Pass/fail for collection pages, ticket LSH-5670",
+  "doc_type": "Evaluation rubric",
+  "form_type": "Other",
+  "kicker": "Lakeshore Hardware Group  \u00b7  SEO rubric  \u00b7  LSH-5670",
+  "org": "Hillcrest Digital",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "In use",
+  "date": "February 20, 2025",
+  "author": "Michael Gilfilian",
+  "role": "Web Developer",
+  "team": "Hillcrest Digital, Lakeshore Hardware Group engagement",
+  "audience": "Nia Brooks (requester); Luis Ortega (acceptor); Cole Brennan and Michael Gilfilian (build); Mara Singh (leftover host); Theo Walsh (absentee pack)",
+  "owners": "Luis Ortega (acceptor), Nia Brooks (requester), Cole Brennan (ops), Michael Gilfilian (this document)",
+  "related": "LSH-EVAL-2025-011; LSH-5670; LSH-ADR-2024-029",
+  "summary": "Nia Brooks asked for a written cut of Eval rubric. Current path: Uneven contractor copy, 22 collection pages. This document locks title pattern, H1 rule, fail on stuffing, 22 pages in scope. city name in every H1 is out because Four stores would rank for each other. Nia already paid that tax at Harbor. Do not import it.",
+  "form_description": "Evaluation rubric for Lakeshore category copy and titles, failing city stuffing and locking a product-category-store pattern.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "January 27, 2025",
+      "Michael Gilfilian",
+      "Outline after LSH-EVAL-2025-011 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "February 8, 2025",
+      "Michael Gilfilian",
+      "Numbers from Nia Brooks. city name in every H1 still in the room."
+    ],
+    [
+      "0.9",
+      "February 16, 2025",
+      "Michael Gilfilian",
+      "city name in every H1 written up as a refuse. Cole Brennan review."
+    ],
+    [
+      "1.0",
+      "February 20, 2025",
+      "Michael Gilfilian",
+      "Cut. Host seo.lakeshore.internal. Ticket LSH-5670."
+    ],
+    [
+      "1.1",
+      "February 20, 2025",
+      "Michael Gilfilian",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Eval rubric: Lakeshore category copy and title pattern"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for LSH-EVAL-2025-011 on February 20, 2025. Nia Brooks asked for a written bound after the current path (Uneven contractor copy, 22 collection pages) stopped being honest. I am Michael Gilfilian, Web Developer, writing for Luis Ortega, Cole Brennan, and Mara Singh. Primary host seo.lakeshore.internal. If you are skimming, jump the decision callout, then the refuse on city name in every H1, then open questions. If you are implementing next week, jump the constraints, the numbers table, and the commands or contracts."
+    },
+    {
+      "type": "p",
+      "text": "Title: product, then category, then store only on local landing pages. Collection H1 is category, not city. Fail if keyword density is a scoring trick. I am not restating a hallway yes. city name in every H1 is out because Four stores would rank for each other. Nia already paid that tax at Harbor. Do not import it. Cost of doing nothing is already in the numbers: look at pages=22, stores=4, density=2.8, weeks=2, fail=1, local=4, h1=1, contractor=1. Sibling tickets LSH-5670 and LSH-ADR-2024-029. I will not reopen city name in every H1 in a side thread because a vendor sent a discount. Cole Brennan is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Title: product, then category, then store only on local landing pages. Collection H1 is category, not city. Fail if keyword density is a scoring trick."
+    },
+    {
+      "type": "p",
+      "text": "Background on seo.lakeshore.internal. Uneven contractor copy, 22 collection pages. That is the system Luis Ortega lives with, not a slide. I timed or pulled the leftover on woo-prod.lakeshore.internal the week before this file. Lag, stale minutes, or miss counts in this file are from that pull, not a round number I liked. Ticket LSH-EVAL-2025-011 names the pull. If those numbers moved after February 20, 2025, update this file in review, do not 'correct' them in Slack."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for LSH-EVAL-2025-011. city name in every H1 is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Uneven contractor copy, 22 collection pages",
+          "Numbers already in play: pages=22, stores=4, density=2.8, weeks=2, fail=1, local=4, h1=1, contractor=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "city name in every H1",
+          "Four stores would rank for each other. Nia already paid that tax at Harbor. Do not import ",
+          "Named on LSH-ADR-2024-029",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Days, not cash",
+          "Scope returns as Slack",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "title pattern, H1 rule, fail on stuffing, 22 pages in scope",
+          "Host seo.lakeshore.internal, ticket LSH-5670",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Mara Singh owns a leftover that is easy to skip: admin.lakeshore.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (44): refuse on city name in every H1, lock is title pattern, H1 rule, fail on stuffing, 22 pages in scope. I will not hide a product change inside a 'quick align' on LSH-5670."
+    },
+    {
+      "type": "quote",
+      "text": "If a contractor dumps the city name into every H1, we cannibalize four stores against each other.",
+      "attrib": "Nia Brooks, February 6 (Harbor leftover applied here)"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical user would try first on seo.lakeshore.internal: the path Nia Brooks actually has, not a desktop demo. Metric I will argue is time-to-useful, not a vanity QPS. If we cannot show that path on woo-prod.lakeshore.internal with the numbers already in this file, we do not have a cut. Michael Gilfilian will not accept a laptop screenshot as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "title pattern, H1 rule, fail on stuffing, 22 pages in scope Host seo.lakeshore.internal. Ticket LSH-5670. Acceptor Luis Ortega."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: title pattern, H1 rule, fail on stuffing, 22 pages in scope. If that clock collides with a freeze, the date moves and the scope does not. Luis Ortega hears the new date on LSH-EVAL-2025-011. I will not book a change in the last 40 minutes of a freeze because it is 'just config.' Config is a change. Host if we have to prove a count: seo.lakeshore.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for LSH-EVAL-2025-011. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "pages",
+          "22",
+          "seo.lakeshore.internal",
+          "LSH-5670"
+        ],
+        [
+          "stores",
+          "4",
+          "seo.lakeshore.internal",
+          "LSH-5670"
+        ],
+        [
+          "density",
+          "2.8",
+          "seo.lakeshore.internal",
+          "LSH-5670"
+        ],
+        [
+          "weeks",
+          "2",
+          "seo.lakeshore.internal",
+          "LSH-5670"
+        ],
+        [
+          "fail",
+          "1",
+          "seo.lakeshore.internal",
+          "LSH-5670"
+        ],
+        [
+          "local",
+          "4",
+          "seo.lakeshore.internal",
+          "LSH-5670"
+        ],
+        [
+          "h1",
+          "1",
+          "seo.lakeshore.internal",
+          "LSH-5670"
+        ],
+        [
+          "contractor",
+          "1",
+          "seo.lakeshore.internal",
+          "LSH-5670"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: city name in every H1"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "city name in every H1 is out. Four stores would rank for each other. Nia already paid that tax at Harbor. Do not import it. I will not reopen it because a vendor emailed a discount."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: city name in every H1 comes back wearing a new coat. I want that named in review notes, not rediscovered by Mara Singh on a Monday. Ticket LSH-5670. Numbers I will not 'simplify': pages=22, stores=4, density=2.8, weeks=2, fail=1, local=4, h1=1, contractor=1. Same clock as the front. I will not mix clocks to make seo.lakeshore.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Mara Singh: does admin.lakeshore.internal stay in the path? Yes, no, or a new date on LSH-ADR-2024-029.",
+        "Cole Brennan: freeze collision for the first useful slice. Date moves, scope does not.",
+        "Nia Brooks: weekend coverage is not implied. Sign it or it stays out.",
+        "Michael Gilfilian: leftover access on seo.lakeshore.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits seo.lakeshore.internal, LSH-EVAL-2025-011, and the last three working pages. Access that has to move is who can change woo-prod.lakeshore.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Cole Brennan accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. LSH-5670. seo.lakeshore.internal.",
+      "text": "# LSH-EVAL-2025-011 read-only first\ndate -u\nssh seo.lakeshore.internal 'uptime; df -h | head'\nkubectl -n lakeshore get pods -o wide | head\n# stop. write the last error in one sentence on LSH-5670\n# do not helm upgrade from a laptop in a freeze"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on LSH-5670 before any write.",
+        "Confirm on seo.lakeshore.internal with the read-only commands above.",
+        "If the refuse on city name in every H1 is being reopened, stop and ping Luis Ortega.",
+        "Wake Cole Brennan only after a one-line diagnosis.",
+        "Do not apply from a laptop in a freeze."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for LSH-EVAL-2025-011. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Michael Gilfilian",
+          "Luis Ortega",
+          "Cole Brennan"
+        ],
+        [
+          "Refuse on city name in every H1",
+          "Michael Gilfilian",
+          "Luis Ortega",
+          "Mara Singh"
+        ],
+        [
+          "Host seo.lakeshore.internal",
+          "Cole Brennan",
+          "Luis Ortega",
+          "Michael Gilfilian"
+        ],
+        [
+          "Requester path",
+          "Mara Singh",
+          "Nia Brooks",
+          "Michael Gilfilian"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Theo Walsh is on that list. Object on LSH-5670. Michael Gilfilian will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to LSH-EVAL-2025-011"
+    },
+    {
+      "type": "p",
+      "text": "woo-prod.lakeshore.internal is in this file because skipping it is how the last near-miss happened. Mara Singh owns the check. I want a count on LSH-ADR-2024-029 before anyone says the leftover is 'implied.' Implied leftovers are how city name in every H1 almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in LSH-EVAL-2025-011"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim city name in every H1 is impossible for a competitor. I will claim we will not buy it. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host seo.lakeshore.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for LSH-5670"
+    },
+    {
+      "type": "p",
+      "text": "First useful is title pattern, H1 rule, fail on stuffing, 22 pages in scope, not a prettier theme or a bigger box. Nia Brooks sees that slice on seo.lakeshore.internal. If the slice needs a second product, that is a new ticket and Luis Ortega is in the thread. I will not hide it inside LSH-EVAL-2025-011."
+    },
+    {
+      "type": "h2",
+      "text": "Support zip and identifiers (44)"
+    },
+    {
+      "type": "p",
+      "text": "A support zip for this work goes through redaction. Customer email, card PAN, and passwords come back. Pressure is not a reason to paste them into LSH-EVAL-2025-011. Michael Gilfilian will bounce the zip. Host if we have to prove a redaction: admin.lakeshore.internal."
+    }
+  ]
+}

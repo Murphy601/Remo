@@ -1,0 +1,336 @@
+{
+  "slug": "41-lakeshore-oncall-sop",
+  "doc_id": "LSH-SOP-2024-051",
+  "title": "On-call SOP for Lakeshore inventory-api and Woo projection",
+  "subtitle": "Pages, tells, wake list, ticket LSH-5488",
+  "doc_type": "Runbook / SOP",
+  "form_type": "Runbook / SOPs",
+  "kicker": "Lakeshore Hardware Group  \u00b7  On-call  \u00b7  LSH-5488",
+  "org": "Hillcrest Digital",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "In force",
+  "date": "August 22, 2024",
+  "author": "Michael Gilfilian",
+  "role": "Web Developer",
+  "team": "Hillcrest Digital, Lakeshore Hardware Group engagement",
+  "audience": "Luis Ortega (requester); Luis Ortega (acceptor); Cole Brennan and Michael Gilfilian (build); Mara Singh (leftover host); Theo Walsh (absentee pack)",
+  "owners": "Luis Ortega (acceptor), Luis Ortega (requester), Cole Brennan (ops), Michael Gilfilian (this document)",
+  "related": "LSH-SOP-2024-051; LSH-5488; LSH-RB-2023-008",
+  "summary": "Luis Ortega asked for a written cut of On-call SOP for Lakeshore inventory-api and Woo projection. Current path: Luis's phone, no rotation, Grafana screenshots in Slack. This document locks named tells, Hillcrest primary, Luis for customer sentences. page body 'check Grafana' is out because That body trained people to restart pods. Restarts without a tell wasted March 11.",
+  "form_description": "On-call SOP for Lakeshore inventory-api and Woo projection, with named tells and a refuse on 'check Grafana' page bodies.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "July 29, 2024",
+      "Michael Gilfilian",
+      "Outline after LSH-SOP-2024-051 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "August 10, 2024",
+      "Michael Gilfilian",
+      "Numbers from Luis Ortega. page body 'check Grafana' still in the room."
+    ],
+    [
+      "0.9",
+      "August 18, 2024",
+      "Michael Gilfilian",
+      "page body 'check Grafana' written up as a refuse. Cole Brennan review."
+    ],
+    [
+      "1.0",
+      "August 22, 2024",
+      "Michael Gilfilian",
+      "Cut. Host ops.lakeshore.internal. Ticket LSH-5488."
+    ],
+    [
+      "1.1",
+      "August 22, 2024",
+      "Michael Gilfilian",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "On-call SOP for Lakeshore inventory-api and Woo projection"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for LSH-SOP-2024-051 on August 22, 2024. Luis Ortega asked for a written bound after the current path (Luis's phone, no rotation, Grafana screenshots in Slack) stopped being honest. I am Michael Gilfilian, Web Developer, writing for Luis Ortega, Cole Brennan, and Mara Singh. Primary host ops.lakeshore.internal. If you are skimming, jump the decision callout, then the refuse on page body 'check Grafana', then open questions. If you are implementing next week, jump the constraints, the numbers table, and the commands or contracts."
+    },
+    {
+      "type": "p",
+      "text": "Primary on-call is Hillcrest. Luis is acceptor for customer sentences. Tells: zero-row job, p95 over 0.9s, pickup 5xx, replica lag over 180s. I am not restating a hallway yes. page body 'check Grafana' is out because That body trained people to restart pods. Restarts without a tell wasted March 11. Cost of doing nothing is already in the numbers: look at tells=4, p95=0.9, lag=180, weeks=4, restarts=2, pages_mo=3.1, primary=1, grafana=0. Sibling tickets LSH-5488 and LSH-RB-2023-008. I will not reopen page body 'check Grafana' in a side thread because a vendor sent a discount. Cole Brennan is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Primary on-call is Hillcrest. Luis is acceptor for customer sentences. Tells: zero-row job, p95 over 0.9s, pickup 5xx, replica lag over 180s."
+    },
+    {
+      "type": "p",
+      "text": "Background on ops.lakeshore.internal. Luis's phone, no rotation, Grafana screenshots in Slack. That is the system Luis Ortega lives with, not a slide. I timed or pulled the leftover on inv-api.lakeshore.internal the week before this file. Lag, stale minutes, or miss counts in this file are from that pull, not a round number I liked. Ticket LSH-SOP-2024-051 names the pull. If those numbers moved after August 22, 2024, update this file in review, do not 'correct' them in Slack."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for LSH-SOP-2024-051. page body 'check Grafana' is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Luis's phone, no rotation, Grafana screenshots in Slack",
+          "Numbers already in play: tells=4, p95=0.9, lag=180, weeks=4, restarts=2, pages_mo=3.1, primary=1, grafana=0",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "page body 'check Grafana'",
+          "That body trained people to restart pods. Restarts without a tell wasted March 11.",
+          "Named on LSH-RB-2023-008",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Days, not cash",
+          "Scope returns as Slack",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "named tells, Hillcrest primary, Luis for customer sentences",
+          "Host ops.lakeshore.internal, ticket LSH-5488",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Mara Singh owns a leftover that is easy to skip: woo-prod.lakeshore.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (41): refuse on page body 'check Grafana', lock is named tells, Hillcrest primary, Luis for customer sentences. I will not hide a product change inside a 'quick align' on LSH-5488."
+    },
+    {
+      "type": "quote",
+      "text": "A page that says check Grafana is not a page. Name the tell.",
+      "attrib": "Luis Ortega, August 8"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical user would try first on ops.lakeshore.internal: the path Luis Ortega actually has, not a desktop demo. Metric I will argue is time-to-useful, not a vanity QPS. If we cannot show that path on inv-api.lakeshore.internal with the numbers already in this file, we do not have a cut. Michael Gilfilian will not accept a laptop screenshot as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "named tells, Hillcrest primary, Luis for customer sentences Host ops.lakeshore.internal. Ticket LSH-5488. Acceptor Luis Ortega."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: named tells, Hillcrest primary, Luis for customer sentences. If that clock collides with a freeze, the date moves and the scope does not. Luis Ortega hears the new date on LSH-SOP-2024-051. I will not book a change in the last 40 minutes of a freeze because it is 'just config.' Config is a change. Host if we have to prove a count: ops.lakeshore.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for LSH-SOP-2024-051. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "tells",
+          "4",
+          "ops.lakeshore.internal",
+          "LSH-5488"
+        ],
+        [
+          "p95",
+          "0.9",
+          "ops.lakeshore.internal",
+          "LSH-5488"
+        ],
+        [
+          "lag",
+          "180",
+          "ops.lakeshore.internal",
+          "LSH-5488"
+        ],
+        [
+          "weeks",
+          "4",
+          "ops.lakeshore.internal",
+          "LSH-5488"
+        ],
+        [
+          "restarts",
+          "2",
+          "ops.lakeshore.internal",
+          "LSH-5488"
+        ],
+        [
+          "pages_mo",
+          "3.1",
+          "ops.lakeshore.internal",
+          "LSH-5488"
+        ],
+        [
+          "primary",
+          "1",
+          "ops.lakeshore.internal",
+          "LSH-5488"
+        ],
+        [
+          "grafana",
+          "0",
+          "ops.lakeshore.internal",
+          "LSH-5488"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: page body 'check Grafana'"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "page body 'check Grafana' is out. That body trained people to restart pods. Restarts without a tell wasted March 11. I will not reopen it because a vendor emailed a discount."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: page body 'check Grafana' comes back wearing a new coat. I want that named in review notes, not rediscovered by Mara Singh on a Monday. Ticket LSH-5488. Numbers I will not 'simplify': tells=4, p95=0.9, lag=180, weeks=4, restarts=2, pages_mo=3.1, primary=1, grafana=0. Same clock as the front. I will not mix clocks to make ops.lakeshore.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Mara Singh: does woo-prod.lakeshore.internal stay in the path? Yes, no, or a new date on LSH-RB-2023-008.",
+        "Cole Brennan: freeze collision for the first useful slice. Date moves, scope does not.",
+        "Luis Ortega: weekend coverage is not implied. Sign it or it stays out.",
+        "Michael Gilfilian: leftover access on ops.lakeshore.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits ops.lakeshore.internal, LSH-SOP-2024-051, and the last three working pages. Access that has to move is who can change inv-api.lakeshore.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Cole Brennan accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. LSH-5488. ops.lakeshore.internal.",
+      "text": "# LSH-SOP-2024-051 read-only first\ndate -u\nssh ops.lakeshore.internal 'uptime; df -h | head'\nkubectl -n lakeshore get pods -o wide | head\n# stop. write the last error in one sentence on LSH-5488\n# do not helm upgrade from a laptop in a freeze"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on LSH-5488 before any write.",
+        "Confirm on ops.lakeshore.internal with the read-only commands above.",
+        "If the refuse on page body 'check Grafana' is being reopened, stop and ping Luis Ortega.",
+        "Wake Cole Brennan only after a one-line diagnosis.",
+        "Do not apply from a laptop in a freeze."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for LSH-SOP-2024-051. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Michael Gilfilian",
+          "Luis Ortega",
+          "Cole Brennan"
+        ],
+        [
+          "Refuse on page body 'check Grafana'",
+          "Michael Gilfilian",
+          "Luis Ortega",
+          "Mara Singh"
+        ],
+        [
+          "Host ops.lakeshore.internal",
+          "Cole Brennan",
+          "Luis Ortega",
+          "Michael Gilfilian"
+        ],
+        [
+          "Requester path",
+          "Mara Singh",
+          "Luis Ortega",
+          "Michael Gilfilian"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Theo Walsh is on that list. Object on LSH-5488. Michael Gilfilian will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to LSH-SOP-2024-051"
+    },
+    {
+      "type": "p",
+      "text": "inv-api.lakeshore.internal is in this file because skipping it is how the last near-miss happened. Mara Singh owns the check. I want a count on LSH-RB-2023-008 before anyone says the leftover is 'implied.' Implied leftovers are how page body 'check Grafana' almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in LSH-SOP-2024-051"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim page body 'check Grafana' is impossible for a competitor. I will claim we will not buy it. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host ops.lakeshore.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for LSH-5488"
+    },
+    {
+      "type": "p",
+      "text": "First useful is named tells, Hillcrest primary, Luis for customer sentences, not a prettier theme or a bigger box. Luis Ortega sees that slice on ops.lakeshore.internal. If the slice needs a second product, that is a new ticket and Luis Ortega is in the thread. I will not hide it inside LSH-SOP-2024-051."
+    },
+    {
+      "type": "h2",
+      "text": "Support zip and identifiers (41)"
+    },
+    {
+      "type": "p",
+      "text": "A support zip for this work goes through redaction. Customer email, card PAN, and passwords come back. Pressure is not a reason to paste them into LSH-SOP-2024-051. Michael Gilfilian will bounce the zip. Host if we have to prove a redaction: woo-prod.lakeshore.internal."
+    }
+  ]
+}

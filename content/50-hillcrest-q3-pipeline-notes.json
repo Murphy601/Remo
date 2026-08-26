@@ -1,0 +1,336 @@
+{
+  "slug": "50-hillcrest-q3-pipeline-notes",
+  "doc_id": "HIL-MTG-2025-016",
+  "title": "Hillcrest Q3 pipeline notes, August 7",
+  "subtitle": "Who is in, who is paused, first windows, ticket HIL-2388",
+  "doc_type": "Meeting notes",
+  "form_type": "Other",
+  "kicker": "Hillcrest Digital  \u00b7  Q3 pipeline  \u00b7  HIL-2388",
+  "org": "Hillcrest Digital",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Issued",
+  "date": "August 7, 2025",
+  "author": "Michael Gilfilian",
+  "role": "Web Developer",
+  "team": "Hillcrest Digital, practice operations",
+  "audience": "Renee Alvarez (requester); Aisha Rahman (acceptor); Sam Reid and Michael Gilfilian (build); Keisha Ward (leftover host); Jonah Pell (absentee pack)",
+  "owners": "Aisha Rahman (acceptor), Renee Alvarez (requester), Sam Reid (ops), Michael Gilfilian (this document)",
+  "related": "HIL-MTG-2025-016; HIL-2388; HIL-SOP-2024-031",
+  "summary": "Renee Alvarez asked for a written cut of Hillcrest Q3 pipeline notes. Current path: Lakeshore active, Harbor maintenance, one unnamed inbound. This document locks one new onboard max, Harbor maintenance, no double first-publish week. two first-publishes the week of September 8 is out because We do not have two Dana-equivalents that week. Renee will not stack them because a calendar looks empty.",
+  "form_description": "Q3 pipeline notes for Hillcrest Digital: Lakeshore active work, Harbor maintenance, one new onboard maximum, and a refuse on two first-publishes in one week.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "July 14, 2025",
+      "Michael Gilfilian",
+      "Outline after HIL-MTG-2025-016 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "July 26, 2025",
+      "Michael Gilfilian",
+      "Numbers from Renee Alvarez. two first-publishes the week of September 8 still in the room."
+    ],
+    [
+      "0.9",
+      "August 3, 2025",
+      "Michael Gilfilian",
+      "two first-publishes the week of September 8 written up as a refuse. Sam Reid review."
+    ],
+    [
+      "1.0",
+      "August 7, 2025",
+      "Michael Gilfilian",
+      "Cut. Host ops.hillcrest.internal. Ticket HIL-2388."
+    ],
+    [
+      "1.1",
+      "August 7, 2025",
+      "Michael Gilfilian",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Hillcrest Q3 pipeline notes, August 7"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for HIL-MTG-2025-016 on August 7, 2025. Renee Alvarez asked for a written bound after the current path (Lakeshore active, Harbor maintenance, one unnamed inbound) stopped being honest. I am Michael Gilfilian, Web Developer, writing for Aisha Rahman, Sam Reid, and Keisha Ward. Primary host ops.hillcrest.internal. If you are skimming, jump the decision callout, then the refuse on two first-publishes the week of September 8, then open questions. If you are implementing next week, jump the constraints, the numbers table, and the commands or contracts."
+    },
+    {
+      "type": "p",
+      "text": "Q3 holds Lakeshore exception codes and Redis, plus one new small-business site if onboard SOP is complete. Harbor is maintenance only. Two first-publishes in one week is out. I am not restating a hallway yes. two first-publishes the week of September 8 is out because We do not have two Dana-equivalents that week. Renee will not stack them because a calendar looks empty. Cost of doing nothing is already in the numbers: look at q=3, active=1, maint=1, inbound=1, week=Sep 8, publishes=1, hours=3.2, people=3. Sibling tickets HIL-2388 and HIL-SOP-2024-031. I will not reopen two first-publishes the week of September 8 in a side thread because a vendor sent a discount. Sam Reid is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Q3 holds Lakeshore exception codes and Redis, plus one new small-business site if onboard SOP is complete. Harbor is maintenance only. Two first-publishes in one week is out."
+    },
+    {
+      "type": "p",
+      "text": "Background on ops.hillcrest.internal. Lakeshore active, Harbor maintenance, one unnamed inbound. That is the system Aisha Rahman lives with, not a slide. I timed or pulled the leftover on onboard.hillcrest.internal the week before this file. Lag, stale minutes, or miss counts in this file are from that pull, not a round number I liked. Ticket HIL-MTG-2025-016 names the pull. If those numbers moved after August 7, 2025, update this file in review, do not 'correct' them in Slack."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for HIL-MTG-2025-016. two first-publishes the week of September 8 is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Lakeshore active, Harbor maintenance, one unnamed inbound",
+          "Numbers already in play: q=3, active=1, maint=1, inbound=1, week=Sep 8, publishes=1, hours=3.2, people=3",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "two first-publishes the week of September 8",
+          "We do not have two Dana-equivalents that week. Renee will not stack them because a calenda",
+          "Named on HIL-SOP-2024-031",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Days, not cash",
+          "Scope returns as Slack",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "one new onboard max, Harbor maintenance, no double first-publish week",
+          "Host ops.hillcrest.internal, ticket HIL-2388",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Keisha Ward owns a leftover that is easy to skip: mail.hillcrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (50): refuse on two first-publishes the week of September 8, lock is one new onboard max, Harbor maintenance, no double first-publish week. I will not hide a product change inside a 'quick align' on HIL-2388."
+    },
+    {
+      "type": "quote",
+      "text": "A pipeline that is a vibe is how we promise two first-publishes on the same Tuesday.",
+      "attrib": "Renee Alvarez, August 7"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical user would try first on ops.hillcrest.internal: the path Renee Alvarez actually has, not a desktop demo. Metric I will argue is time-to-useful, not a vanity QPS. If we cannot show that path on onboard.hillcrest.internal with the numbers already in this file, we do not have a cut. Michael Gilfilian will not accept a laptop screenshot as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "one new onboard max, Harbor maintenance, no double first-publish week Host ops.hillcrest.internal. Ticket HIL-2388. Acceptor Aisha Rahman."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: one new onboard max, Harbor maintenance, no double first-publish week. If that clock collides with a freeze, the date moves and the scope does not. Aisha Rahman hears the new date on HIL-MTG-2025-016. I will not book a change in the last 40 minutes of a freeze because it is 'just config.' Config is a change. Host if we have to prove a count: ops.hillcrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for HIL-MTG-2025-016. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "q",
+          "3",
+          "ops.hillcrest.internal",
+          "HIL-2388"
+        ],
+        [
+          "active",
+          "1",
+          "ops.hillcrest.internal",
+          "HIL-2388"
+        ],
+        [
+          "maint",
+          "1",
+          "ops.hillcrest.internal",
+          "HIL-2388"
+        ],
+        [
+          "inbound",
+          "1",
+          "ops.hillcrest.internal",
+          "HIL-2388"
+        ],
+        [
+          "week",
+          "Sep 8",
+          "ops.hillcrest.internal",
+          "HIL-2388"
+        ],
+        [
+          "publishes",
+          "1",
+          "ops.hillcrest.internal",
+          "HIL-2388"
+        ],
+        [
+          "hours",
+          "3.2",
+          "ops.hillcrest.internal",
+          "HIL-2388"
+        ],
+        [
+          "people",
+          "3",
+          "ops.hillcrest.internal",
+          "HIL-2388"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: two first-publishes the week of September 8"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "two first-publishes the week of September 8 is out. We do not have two Dana-equivalents that week. Renee will not stack them because a calendar looks empty. I will not reopen it because a vendor emailed a discount."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: two first-publishes the week of September 8 comes back wearing a new coat. I want that named in review notes, not rediscovered by Keisha Ward on a Monday. Ticket HIL-2388. Numbers I will not 'simplify': q=3, active=1, maint=1, inbound=1, week=Sep 8, publishes=1, hours=3.2, people=3. Same clock as the front. I will not mix clocks to make ops.hillcrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Keisha Ward: does mail.hillcrest.internal stay in the path? Yes, no, or a new date on HIL-SOP-2024-031.",
+        "Sam Reid: freeze collision for the first useful slice. Date moves, scope does not.",
+        "Renee Alvarez: weekend coverage is not implied. Sign it or it stays out.",
+        "Michael Gilfilian: leftover access on ops.hillcrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits ops.hillcrest.internal, HIL-MTG-2025-016, and the last three working pages. Access that has to move is who can change onboard.hillcrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Sam Reid accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. HIL-2388. ops.hillcrest.internal.",
+      "text": "# HIL-MTG-2025-016 read-only first\ndate -u\nssh ops.hillcrest.internal 'uptime; df -h | head'\nkubectl -n hillcrest get pods -o wide | head\n# stop. write the last error in one sentence on HIL-2388\n# do not helm upgrade from a laptop in a freeze"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on HIL-2388 before any write.",
+        "Confirm on ops.hillcrest.internal with the read-only commands above.",
+        "If the refuse on two first-publishes the week of September 8 is being reopened, stop and ping Aisha Rahman.",
+        "Wake Sam Reid only after a one-line diagnosis.",
+        "Do not apply from a laptop in a freeze."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for HIL-MTG-2025-016. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Michael Gilfilian",
+          "Aisha Rahman",
+          "Sam Reid"
+        ],
+        [
+          "Refuse on two first-publishes the week of September 8",
+          "Michael Gilfilian",
+          "Aisha Rahman",
+          "Keisha Ward"
+        ],
+        [
+          "Host ops.hillcrest.internal",
+          "Sam Reid",
+          "Aisha Rahman",
+          "Michael Gilfilian"
+        ],
+        [
+          "Requester path",
+          "Keisha Ward",
+          "Renee Alvarez",
+          "Michael Gilfilian"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Jonah Pell is on that list. Object on HIL-2388. Michael Gilfilian will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to HIL-MTG-2025-016"
+    },
+    {
+      "type": "p",
+      "text": "onboard.hillcrest.internal is in this file because skipping it is how the last near-miss happened. Keisha Ward owns the check. I want a count on HIL-SOP-2024-031 before anyone says the leftover is 'implied.' Implied leftovers are how two first-publishes the week of September 8 almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in HIL-MTG-2025-016"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim two first-publishes the week of September 8 is impossible for a competitor. I will claim we will not buy it. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host ops.hillcrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for HIL-2388"
+    },
+    {
+      "type": "p",
+      "text": "First useful is one new onboard max, Harbor maintenance, no double first-publish week, not a prettier theme or a bigger box. Renee Alvarez sees that slice on ops.hillcrest.internal. If the slice needs a second product, that is a new ticket and Aisha Rahman is in the thread. I will not hide it inside HIL-MTG-2025-016."
+    },
+    {
+      "type": "h2",
+      "text": "Support zip and identifiers (50)"
+    },
+    {
+      "type": "p",
+      "text": "A support zip for this work goes through redaction. Customer email, card PAN, and passwords come back. Pressure is not a reason to paste them into HIL-MTG-2025-016. Michael Gilfilian will bounce the zip. Host if we have to prove a redaction: mail.hillcrest.internal."
+    }
+  ]
+}

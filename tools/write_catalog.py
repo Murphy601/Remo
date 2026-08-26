@@ -60,9 +60,9 @@ def main() -> None:
     lines.append("")
     lines.append("## Answers that are the same for every file")
     lines.append("")
-    lines.append("1. **Current or most recent job title:** Software Engineer II")
+    lines.append("1. **Current or most recent job title:** Web Developer")
     lines.append(
-        "2. **Years of professional experience:** 5–10 (about six years, 2019–present)"
+        "2. **Years of professional experience:** 5–10 (about six years, freelance 2020–present)"
     )
     lines.append("3. **Field:** Software Engineering / Data Science")
     page_vals = [pages.get(Path(r["file"]).stem, r.get("est_pages")) for r in catalog]
@@ -75,8 +75,9 @@ def main() -> None:
         lines.append("4. **Pages:** see table (LibreOffice Writer → PDF)")
     lines.append("")
     lines.append(
-        "Author on every document: Aman Kumar, Software Engineer II, Northstar Engineering. "
-        "Engagements covered: Oakridge Industrial, Riverview Health Network, Clearhaven Markets."
+        "Author on every document: Michael Gilfilian, Web Developer, Hillcrest Digital. "
+        "Engagements covered: Harbor & Oak Outfitters, Lakeshore Hardware Group, "
+        "and a 2023 IT support internship at Whetstone Industrial."
     )
     lines.append("")
     lines.append("## Per-document answers (questions 4–7)")
@@ -117,15 +118,42 @@ def main() -> None:
         lines.append(f"- **File:** `{fn}`")
         lines.append(f"- **Doc ID:** {rec.get('doc_id','')}")
         lines.append(f"- **Type:** {rec.get('doc_type','')}")
+        lines.append(f"- **Form type (dropdown):** {rec.get('form_type','Other')}")
         lines.append(f"- **4. Pages:** {pg} (LibreOffice), {rec.get('words','')} words")
         lines.append(f"- **6. Description:** {desc}")
         lines.append(f"- **7. Written:** {dmy} ({written})")
-        lines.append(f"- **Role at the time:** {rec.get('role','Software Engineer II')}")
+        lines.append(f"- **Role at the time:** {rec.get('role','Web Developer')}")
         lines.append("")
     (ROOT / "catalog" / "FORM_ANSWERS.md").write_text(
         "\n".join(lines), encoding="utf-8"
     )
     print("wrote catalog/FORM_ANSWERS.md")
+    write_downloads(catalog, pages)
+
+
+BRANCH = "cursor/michael-gilfilian-docs-6e93"
+RAW = f"https://github.com/Murphy601/Remo/raw/{BRANCH}"
+
+
+def write_downloads(catalog: list, pages: dict) -> None:
+    lines = []
+    lines.append("# Download the Word files")
+    lines.append("")
+    lines.append("Repo is public. Each link below is a direct `.docx` download (GitHub `raw`).")
+    lines.append("")
+    lines.append(f"- **All 50 as a zip:** [documents.zip]({RAW}/documents.zip)")
+    lines.append(f"- Branch: `{BRANCH}`")
+    lines.append("")
+    lines.append("| # | Document | Direct download |")
+    lines.append("|---|---|---|")
+    for i, rec in enumerate(catalog, 1):
+        fn = Path(rec["file"]).name
+        title = rec.get("title") or fn
+        url = f"{RAW}/documents/{fn}"
+        lines.append(f"| {i} | {title} | [{fn}]({url}) |")
+    lines.append("")
+    (ROOT / "DOWNLOADS.md").write_text("\n".join(lines), encoding="utf-8")
+    print("wrote DOWNLOADS.md")
 
 
 if __name__ == "__main__":
