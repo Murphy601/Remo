@@ -1,0 +1,336 @@
+{
+  "slug": "04-whetstone-aad-duplicate-incident",
+  "doc_id": "WTS-INC-2023-031",
+  "title": "Incident: duplicate Azure AD accounts after HRIS feed retry",
+  "subtitle": "86 duplicate UPNs on aad-sync-01.whetstone.internal, April 11, ticket WTS-INC-2023-031",
+  "doc_type": "Incident report",
+  "form_type": "Incident report",
+  "kicker": "Whetstone Industrial  \u00b7  Azure AD  \u00b7  WTS-INC-2023-031",
+  "org": "Whetstone Industrial",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Closed",
+  "date": "April 18, 2023",
+  "author": "Michael Gilfilian",
+  "role": "IT Support Intern",
+  "team": "Whetstone IT, service desk and plant support",
+  "audience": "Rita Cho (requester); Brett Holtz (acceptor); Carla Nguyen and Michael Gilfilian (build); Owen Briggs (leftover host); Rita Cho (absentee pack)",
+  "owners": "Brett Holtz (acceptor), Rita Cho (requester), Carla Nguyen (ops), Michael Gilfilian (this document)",
+  "related": "WTS-INC-2023-031; WTS-4419; WTS-INC-2023-031-HR",
+  "summary": "Rita Cho asked for a written cut of Incident. Current path: Azure AD Connect on aad-sync-01.whetstone.internal, CSV from hris-01.whetstone.internal at 05:10. This document locks idempotent employeeId, no retry without a dry-run count. auto-merge duplicate UPNs by prefix is out because A prefix merge would have bound 9 contractors onto employee mailboxes. Brett stopped the script at 16:22.",
+  "form_description": "Incident report for duplicate Azure AD accounts after an HRIS feed retry, covering timeline, impact, and the refuse on auto-merge.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "March 25, 2023",
+      "Michael Gilfilian",
+      "Outline after WTS-INC-2023-031 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "April 6, 2023",
+      "Michael Gilfilian",
+      "Numbers from Rita Cho. auto-merge duplicate UPNs by prefix still in the room."
+    ],
+    [
+      "0.9",
+      "April 14, 2023",
+      "Michael Gilfilian",
+      "auto-merge duplicate UPNs by prefix written up as a refuse. Carla Nguyen review."
+    ],
+    [
+      "1.0",
+      "April 18, 2023",
+      "Michael Gilfilian",
+      "Cut. Host aad-sync-01.whetstone.internal. Ticket WTS-INC-2023-031."
+    ],
+    [
+      "1.1",
+      "April 18, 2023",
+      "Michael Gilfilian",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Incident: duplicate Azure AD accounts after HRIS feed retry"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for WTS-INC-2023-031 on April 18, 2023. Rita Cho asked for a written bound after the current path (Azure AD Connect on aad-sync-01.whetstone.internal, CSV from hris-01.whetstone.internal at 05:10) stopped being honest. I am Michael Gilfilian, IT Support Intern, writing for Brett Holtz, Carla Nguyen, and Owen Briggs. Primary host aad-sync-01.whetstone.internal. If you are skimming, jump the decision callout, then the refuse on auto-merge duplicate UPNs by prefix, then open questions. If you are implementing next week, jump the constraints, the numbers table, and the commands or contracts."
+    },
+    {
+      "type": "p",
+      "text": "Stop the HRIS retry job. Soft-delete the 86 duplicate UPNs with the .dup suffix. Do not auto-merge on prefix. I am not restating a hallway yes. auto-merge duplicate UPNs by prefix is out because A prefix merge would have bound 9 contractors onto employee mailboxes. Brett stopped the script at 16:22. Cost of doing nothing is already in the numbers: look at dups=86, hires=14, contractors=9, minutes=47, start=05:10, stop=16:22, pages=23, cost=0. Sibling tickets WTS-4419 and WTS-INC-2023-031-HR. I will not reopen auto-merge duplicate UPNs by prefix in a side thread because a vendor sent a discount. Carla Nguyen is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Stop the HRIS retry job. Soft-delete the 86 duplicate UPNs with the .dup suffix. Do not auto-merge on prefix."
+    },
+    {
+      "type": "p",
+      "text": "Background on aad-sync-01.whetstone.internal. Azure AD Connect on aad-sync-01.whetstone.internal, CSV from hris-01.whetstone.internal at 05:10. That is the system Brett Holtz lives with, not a slide. I timed or pulled the leftover on hris-01.whetstone.internal the week before this file. Lag, stale minutes, or miss counts in this file are from that pull, not a round number I liked. Ticket WTS-INC-2023-031 names the pull. If those numbers moved after April 18, 2023, update this file in review, do not 'correct' them in Slack."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for WTS-INC-2023-031. auto-merge duplicate UPNs by prefix is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Azure AD Connect on aad-sync-01.whetstone.internal, CSV from hris-01.whetstone.i",
+          "Numbers already in play: dups=86, hires=14, contractors=9, minutes=47, start=05:10, stop=16:22, pages=23, cost=0",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "auto-merge duplicate UPNs by prefix",
+          "A prefix merge would have bound 9 contractors onto employee mailboxes. Brett stopped the s",
+          "Named on WTS-INC-2023-031-HR",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Days, not cash",
+          "Scope returns as Slack",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "idempotent employeeId, no retry without a dry-run count",
+          "Host aad-sync-01.whetstone.internal, ticket WTS-INC-2023-031",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Owen Briggs owns a leftover that is easy to skip: helpdesk.whetstone.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (04): refuse on auto-merge duplicate UPNs by prefix, lock is idempotent employeeId, no retry without a dry-run count. I will not hide a product change inside a 'quick align' on WTS-4419."
+    },
+    {
+      "type": "quote",
+      "text": "I re-ran the feed because 14 new hires were missing. I did not know it would clone the other 86.",
+      "attrib": "Rita Cho, HRIS, April 11 bridge"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical user would try first on aad-sync-01.whetstone.internal: the path Rita Cho actually has, not a desktop demo. Metric I will argue is time-to-useful, not a vanity QPS. If we cannot show that path on hris-01.whetstone.internal with the numbers already in this file, we do not have a cut. Michael Gilfilian will not accept a laptop screenshot as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "idempotent employeeId, no retry without a dry-run count Host aad-sync-01.whetstone.internal. Ticket WTS-INC-2023-031. Acceptor Brett Holtz."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: idempotent employeeId, no retry without a dry-run count. If that clock collides with a freeze, the date moves and the scope does not. Brett Holtz hears the new date on WTS-INC-2023-031. I will not book a change in the last 40 minutes of a freeze because it is 'just config.' Config is a change. Host if we have to prove a count: aad-sync-01.whetstone.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for WTS-INC-2023-031. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "dups",
+          "86",
+          "aad-sync-01.whetstone.internal",
+          "WTS-INC-2023-031"
+        ],
+        [
+          "hires",
+          "14",
+          "aad-sync-01.whetstone.internal",
+          "WTS-INC-2023-031"
+        ],
+        [
+          "contractors",
+          "9",
+          "aad-sync-01.whetstone.internal",
+          "WTS-INC-2023-031"
+        ],
+        [
+          "minutes",
+          "47",
+          "aad-sync-01.whetstone.internal",
+          "WTS-INC-2023-031"
+        ],
+        [
+          "start",
+          "05:10",
+          "aad-sync-01.whetstone.internal",
+          "WTS-INC-2023-031"
+        ],
+        [
+          "stop",
+          "16:22",
+          "aad-sync-01.whetstone.internal",
+          "WTS-INC-2023-031"
+        ],
+        [
+          "pages",
+          "23",
+          "aad-sync-01.whetstone.internal",
+          "WTS-INC-2023-031"
+        ],
+        [
+          "cost",
+          "0",
+          "aad-sync-01.whetstone.internal",
+          "WTS-INC-2023-031"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: auto-merge duplicate UPNs by prefix"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "auto-merge duplicate UPNs by prefix is out. A prefix merge would have bound 9 contractors onto employee mailboxes. Brett stopped the script at 16:22. I will not reopen it because a vendor emailed a discount."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: auto-merge duplicate UPNs by prefix comes back wearing a new coat. I want that named in review notes, not rediscovered by Owen Briggs on a Monday. Ticket WTS-4419. Numbers I will not 'simplify': dups=86, hires=14, contractors=9, minutes=47, start=05:10, stop=16:22, pages=23, cost=0. Same clock as the front. I will not mix clocks to make aad-sync-01.whetstone.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Owen Briggs: does helpdesk.whetstone.internal stay in the path? Yes, no, or a new date on WTS-INC-2023-031-HR.",
+        "Carla Nguyen: freeze collision for the first useful slice. Date moves, scope does not.",
+        "Rita Cho: weekend coverage is not implied. Sign it or it stays out.",
+        "Michael Gilfilian: leftover access on aad-sync-01.whetstone.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits aad-sync-01.whetstone.internal, WTS-INC-2023-031, and the last three working pages. Access that has to move is who can change hris-01.whetstone.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Carla Nguyen accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. WTS-INC-2023-031. aad-sync-01.whetstone.internal.",
+      "text": "# WTS-INC-2023-031 read-only first\ndate -u\naz account show --query name -o tsv\nssh aad-sync-01.whetstone.internal 'uptime; df -h | head'\n# stop. write the last error in one sentence on WTS-INC-2023-031\n# do not apply from a laptop in a freeze"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on WTS-INC-2023-031 before any write.",
+        "Confirm on aad-sync-01.whetstone.internal with the read-only commands above.",
+        "If the refuse on auto-merge duplicate UPNs by prefix is being reopened, stop and ping Brett Holtz.",
+        "Wake Carla Nguyen only after a one-line diagnosis.",
+        "Do not apply from a laptop in a freeze."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for WTS-INC-2023-031. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Michael Gilfilian",
+          "Brett Holtz",
+          "Carla Nguyen"
+        ],
+        [
+          "Refuse on auto-merge duplicate UPNs by prefix",
+          "Michael Gilfilian",
+          "Brett Holtz",
+          "Owen Briggs"
+        ],
+        [
+          "Host aad-sync-01.whetstone.internal",
+          "Carla Nguyen",
+          "Brett Holtz",
+          "Michael Gilfilian"
+        ],
+        [
+          "Requester path",
+          "Owen Briggs",
+          "Rita Cho",
+          "Michael Gilfilian"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Rita Cho is on that list. Object on WTS-INC-2023-031. Michael Gilfilian will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to WTS-INC-2023-031"
+    },
+    {
+      "type": "p",
+      "text": "hris-01.whetstone.internal is in this file because skipping it is how the last near-miss happened. Owen Briggs owns the check. I want a count on WTS-INC-2023-031-HR before anyone says the leftover is 'implied.' Implied leftovers are how auto-merge duplicate UPNs by prefix almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in WTS-INC-2023-031"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim auto-merge duplicate UPNs by prefix is impossible for a competitor. I will claim we will not buy it. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host aad-sync-01.whetstone.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for WTS-INC-2023-031"
+    },
+    {
+      "type": "p",
+      "text": "First useful is idempotent employeeId, no retry without a dry-run count, not a prettier theme or a bigger box. Rita Cho sees that slice on aad-sync-01.whetstone.internal. If the slice needs a second product, that is a new ticket and Brett Holtz is in the thread. I will not hide it inside WTS-INC-2023-031."
+    },
+    {
+      "type": "h2",
+      "text": "Support zip and identifiers (04)"
+    },
+    {
+      "type": "p",
+      "text": "A support zip for this work goes through redaction. Customer email, card PAN, and passwords come back. Pressure is not a reason to paste them into WTS-INC-2023-031. Michael Gilfilian will bounce the zip. Host if we have to prove a redaction: helpdesk.whetstone.internal."
+    }
+  ]
+}

@@ -1,0 +1,336 @@
+{
+  "slug": "08-whetstone-imaging-test-notes",
+  "doc_id": "WTS-TST-2023-024",
+  "title": "Imaging acceptance notes, four shop-floor SKUs",
+  "subtitle": "Pass/fail on serial driver, BitLocker, Intune join, ticket WTS-4588-QA",
+  "doc_type": "Test strategy notes",
+  "form_type": "Other",
+  "kicker": "Whetstone Industrial  \u00b7  Imaging QA  \u00b7  WTS-4588-QA",
+  "org": "Whetstone Industrial",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Issued",
+  "date": "May 2, 2023",
+  "author": "Michael Gilfilian",
+  "role": "IT Support Intern",
+  "team": "Whetstone IT, service desk and plant support",
+  "audience": "Owen Briggs (requester); Brett Holtz (acceptor); Carla Nguyen and Michael Gilfilian (build); Owen Briggs (leftover host); Rita Cho (absentee pack)",
+  "owners": "Brett Holtz (acceptor), Owen Briggs (requester), Carla Nguyen (ops), Michael Gilfilian (this document)",
+  "related": "WTS-TST-2023-024; WTS-4588; WTS-SOP-2023-022",
+  "summary": "Owen Briggs asked for a written cut of Imaging acceptance notes. Current path: Four SKUs on the bench, golden WTS-IMG-22H2-04. This document locks four SKUs, three checks, no laptop demo as proof. skip Toughbook in the sample is out because That SKU is 11 of 62 floor boxes. Skipping it is how the April 6 dry run came back without a driver.",
+  "form_description": "Acceptance notes for the Whetstone Windows 11 golden image, written so Owen and the intern share one pass/fail list before the golden is marked current.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "April 8, 2023",
+      "Michael Gilfilian",
+      "Outline after WTS-TST-2023-024 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "April 20, 2023",
+      "Michael Gilfilian",
+      "Numbers from Owen Briggs. skip Toughbook in the sample still in the room."
+    ],
+    [
+      "0.9",
+      "April 28, 2023",
+      "Michael Gilfilian",
+      "skip Toughbook in the sample written up as a refuse. Carla Nguyen review."
+    ],
+    [
+      "1.0",
+      "May 2, 2023",
+      "Michael Gilfilian",
+      "Cut. Host bench-03.whetstone.internal. Ticket WTS-4588."
+    ],
+    [
+      "1.1",
+      "May 2, 2023",
+      "Michael Gilfilian",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Imaging acceptance notes, four shop-floor SKUs"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for WTS-TST-2023-024 on May 2, 2023. Owen Briggs asked for a written bound after the current path (Four SKUs on the bench, golden WTS-IMG-22H2-04) stopped being honest. I am Michael Gilfilian, IT Support Intern, writing for Brett Holtz, Carla Nguyen, and Owen Briggs. Primary host bench-03.whetstone.internal. If you are skimming, jump the decision callout, then the refuse on skip Toughbook in the sample, then open questions. If you are implementing next week, jump the constraints, the numbers table, and the commands or contracts."
+    },
+    {
+      "type": "p",
+      "text": "Block the golden if any of the four SKUs fail serial, BitLocker, or Intune join. Do not waive the Panasonic Toughbook because 'it is old.' I am not restating a hallway yes. skip Toughbook in the sample is out because That SKU is 11 of 62 floor boxes. Skipping it is how the April 6 dry run came back without a driver. Cost of doing nothing is already in the numbers: look at skus=4, floor=62, tough=11, minutes=41.8, fail=1, bit=128, apps=3, hours=3.5. Sibling tickets WTS-4588 and WTS-SOP-2023-022. I will not reopen skip Toughbook in the sample in a side thread because a vendor sent a discount. Carla Nguyen is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Block the golden if any of the four SKUs fail serial, BitLocker, or Intune join. Do not waive the Panasonic Toughbook because 'it is old.'"
+    },
+    {
+      "type": "p",
+      "text": "Background on bench-03.whetstone.internal. Four SKUs on the bench, golden WTS-IMG-22H2-04. That is the system Brett Holtz lives with, not a slide. I timed or pulled the leftover on intune-01.whetstone.internal the week before this file. Lag, stale minutes, or miss counts in this file are from that pull, not a round number I liked. Ticket WTS-TST-2023-024 names the pull. If those numbers moved after May 2, 2023, update this file in review, do not 'correct' them in Slack."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for WTS-TST-2023-024. skip Toughbook in the sample is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Four SKUs on the bench, golden WTS-IMG-22H2-04",
+          "Numbers already in play: skus=4, floor=62, tough=11, minutes=41.8, fail=1, bit=128, apps=3, hours=3.5",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "skip Toughbook in the sample",
+          "That SKU is 11 of 62 floor boxes. Skipping it is how the April 6 dry run came back without",
+          "Named on WTS-SOP-2023-022",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Days, not cash",
+          "Scope returns as Slack",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "four SKUs, three checks, no laptop demo as proof",
+          "Host bench-03.whetstone.internal, ticket WTS-4588",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Owen Briggs owns a leftover that is easy to skip: wds-01.whetstone.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (08): refuse on skip Toughbook in the sample, lock is four SKUs, three checks, no laptop demo as proof. I will not hide a product change inside a 'quick align' on WTS-4588."
+    },
+    {
+      "type": "quote",
+      "text": "Pass means the CNC app opens and the serial port enumerates. A pretty desktop is not a pass.",
+      "attrib": "Owen Briggs, May 2 bench"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical user would try first on bench-03.whetstone.internal: the path Owen Briggs actually has, not a desktop demo. Metric I will argue is time-to-useful, not a vanity QPS. If we cannot show that path on intune-01.whetstone.internal with the numbers already in this file, we do not have a cut. Michael Gilfilian will not accept a laptop screenshot as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "four SKUs, three checks, no laptop demo as proof Host bench-03.whetstone.internal. Ticket WTS-4588. Acceptor Brett Holtz."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: four SKUs, three checks, no laptop demo as proof. If that clock collides with a freeze, the date moves and the scope does not. Brett Holtz hears the new date on WTS-TST-2023-024. I will not book a change in the last 40 minutes of a freeze because it is 'just config.' Config is a change. Host if we have to prove a count: bench-03.whetstone.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for WTS-TST-2023-024. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "skus",
+          "4",
+          "bench-03.whetstone.internal",
+          "WTS-4588"
+        ],
+        [
+          "floor",
+          "62",
+          "bench-03.whetstone.internal",
+          "WTS-4588"
+        ],
+        [
+          "tough",
+          "11",
+          "bench-03.whetstone.internal",
+          "WTS-4588"
+        ],
+        [
+          "minutes",
+          "41.8",
+          "bench-03.whetstone.internal",
+          "WTS-4588"
+        ],
+        [
+          "fail",
+          "1",
+          "bench-03.whetstone.internal",
+          "WTS-4588"
+        ],
+        [
+          "bit",
+          "128",
+          "bench-03.whetstone.internal",
+          "WTS-4588"
+        ],
+        [
+          "apps",
+          "3",
+          "bench-03.whetstone.internal",
+          "WTS-4588"
+        ],
+        [
+          "hours",
+          "3.5",
+          "bench-03.whetstone.internal",
+          "WTS-4588"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: skip Toughbook in the sample"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "skip Toughbook in the sample is out. That SKU is 11 of 62 floor boxes. Skipping it is how the April 6 dry run came back without a driver. I will not reopen it because a vendor emailed a discount."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: skip Toughbook in the sample comes back wearing a new coat. I want that named in review notes, not rediscovered by Owen Briggs on a Monday. Ticket WTS-4588. Numbers I will not 'simplify': skus=4, floor=62, tough=11, minutes=41.8, fail=1, bit=128, apps=3, hours=3.5. Same clock as the front. I will not mix clocks to make bench-03.whetstone.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Owen Briggs: does wds-01.whetstone.internal stay in the path? Yes, no, or a new date on WTS-SOP-2023-022.",
+        "Carla Nguyen: freeze collision for the first useful slice. Date moves, scope does not.",
+        "Owen Briggs: weekend coverage is not implied. Sign it or it stays out.",
+        "Michael Gilfilian: leftover access on bench-03.whetstone.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits bench-03.whetstone.internal, WTS-TST-2023-024, and the last three working pages. Access that has to move is who can change intune-01.whetstone.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Carla Nguyen accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. WTS-4588. bench-03.whetstone.internal.",
+      "text": "# WTS-TST-2023-024 read-only first\ndate -u\naz account show --query name -o tsv\nssh bench-03.whetstone.internal 'uptime; df -h | head'\n# stop. write the last error in one sentence on WTS-4588\n# do not apply from a laptop in a freeze"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on WTS-4588 before any write.",
+        "Confirm on bench-03.whetstone.internal with the read-only commands above.",
+        "If the refuse on skip Toughbook in the sample is being reopened, stop and ping Brett Holtz.",
+        "Wake Carla Nguyen only after a one-line diagnosis.",
+        "Do not apply from a laptop in a freeze."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for WTS-TST-2023-024. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Michael Gilfilian",
+          "Brett Holtz",
+          "Carla Nguyen"
+        ],
+        [
+          "Refuse on skip Toughbook in the sample",
+          "Michael Gilfilian",
+          "Brett Holtz",
+          "Owen Briggs"
+        ],
+        [
+          "Host bench-03.whetstone.internal",
+          "Carla Nguyen",
+          "Brett Holtz",
+          "Michael Gilfilian"
+        ],
+        [
+          "Requester path",
+          "Owen Briggs",
+          "Owen Briggs",
+          "Michael Gilfilian"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Rita Cho is on that list. Object on WTS-4588. Michael Gilfilian will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to WTS-TST-2023-024"
+    },
+    {
+      "type": "p",
+      "text": "intune-01.whetstone.internal is in this file because skipping it is how the last near-miss happened. Owen Briggs owns the check. I want a count on WTS-SOP-2023-022 before anyone says the leftover is 'implied.' Implied leftovers are how skip Toughbook in the sample almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in WTS-TST-2023-024"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim skip Toughbook in the sample is impossible for a competitor. I will claim we will not buy it. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host bench-03.whetstone.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for WTS-4588"
+    },
+    {
+      "type": "p",
+      "text": "First useful is four SKUs, three checks, no laptop demo as proof, not a prettier theme or a bigger box. Owen Briggs sees that slice on bench-03.whetstone.internal. If the slice needs a second product, that is a new ticket and Brett Holtz is in the thread. I will not hide it inside WTS-TST-2023-024."
+    },
+    {
+      "type": "h2",
+      "text": "Support zip and identifiers (08)"
+    },
+    {
+      "type": "p",
+      "text": "A support zip for this work goes through redaction. Customer email, card PAN, and passwords come back. Pressure is not a reason to paste them into WTS-TST-2023-024. Michael Gilfilian will bounce the zip. Host if we have to prove a redaction: wds-01.whetstone.internal."
+    }
+  ]
+}

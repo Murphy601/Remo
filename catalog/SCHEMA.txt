@@ -1,0 +1,22 @@
+"""
+JSON spec schema for one professional document.
+
+Required top-level keys:
+  slug, doc_id, title, subtitle, doc_type, kicker, org, classification,
+  version, status, date (Month D, YYYY), author, role, team, audience,
+  owners, related, summary, form_description, field, revision_history, blocks
+
+revision_history: list of [ver, date, author, notes]
+
+blocks: list of objects with type:
+  h1, h2, h3  -> {type, text}
+  p           -> {type, text}
+  bullets     -> {type, items: [str]}
+  steps       -> {type, items: [str]}  numbered
+  table       -> {type, headers, rows, caption?}
+  callout     -> {type, label, text, kind: decision|note|warn}
+  code        -> {type, text, caption?}
+  quote       -> {type, text, attrib?}
+
+Target 3200-4500 words. Never under 2500.
+"""

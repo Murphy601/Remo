@@ -1,0 +1,336 @@
+{
+  "slug": "24-harbor-wholesale-requirements",
+  "doc_id": "HBR-REQ-2022-055",
+  "title": "Harbor & Oak wholesale v1 requirements",
+  "subtitle": "Hidden catalog, net-30 accounts, no B2B app, ticket HBR-3112",
+  "doc_type": "Requirements document",
+  "form_type": "Requirements doc",
+  "kicker": "Harbor & Oak Outfitters  \u00b7  Wholesale  \u00b7  HBR-3112",
+  "org": "Hillcrest Digital",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Signed",
+  "date": "October 13, 2022",
+  "author": "Michael Gilfilian",
+  "role": "Web Developer",
+  "team": "Hillcrest Digital, Harbor & Oak Outfitters engagement",
+  "audience": "Dana Whitlock (requester); Dana Whitlock (acceptor); Jenna Park and Michael Gilfilian (build); Nia Brooks (leftover host); Evan Cole (absentee pack)",
+  "owners": "Dana Whitlock (acceptor), Dana Whitlock (requester), Jenna Park (ops), Michael Gilfilian (this document)",
+  "related": "HBR-REQ-2022-055; HBR-3112; HBR-PRD-2021-052",
+  "summary": "Dana Whitlock asked for a written cut of Harbor & Oak wholesale v1 requirements. Current path: Email orders, 11 accounts, no catalog login. This document locks hidden catalog, 11 tags, no B2B app, net-30 by hand. Bold B2B app is out because $199/mo for 11 accounts is more than the margin on a slow month. Dana will invoice net-30 by hand.",
+  "form_description": "Requirements for Harbor & Oak wholesale v1: a hidden catalog and 11 tagged accounts, refusing a paid B2B app.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "September 19, 2022",
+      "Michael Gilfilian",
+      "Outline after HBR-REQ-2022-055 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "October 1, 2022",
+      "Michael Gilfilian",
+      "Numbers from Dana Whitlock. Bold B2B app still in the room."
+    ],
+    [
+      "0.9",
+      "October 9, 2022",
+      "Michael Gilfilian",
+      "Bold B2B app written up as a refuse. Jenna Park review."
+    ],
+    [
+      "1.0",
+      "October 13, 2022",
+      "Michael Gilfilian",
+      "Cut. Host wholesale.harbor.internal. Ticket HBR-3112."
+    ],
+    [
+      "1.1",
+      "October 13, 2022",
+      "Michael Gilfilian",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Harbor & Oak wholesale v1 requirements"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for HBR-REQ-2022-055 on October 13, 2022. Dana Whitlock asked for a written bound after the current path (Email orders, 11 accounts, no catalog login) stopped being honest. I am Michael Gilfilian, Web Developer, writing for Dana Whitlock, Jenna Park, and Nia Brooks. Primary host wholesale.harbor.internal. If you are skimming, jump the decision callout, then the refuse on Bold B2B app, then open questions. If you are implementing next week, jump the constraints, the numbers table, and the commands or contracts."
+    },
+    {
+      "type": "p",
+      "text": "Shopify wholesale channel with a hidden catalog and 11 customer tags. Net-30 is a note Mara-style, not an app. Reject Bold B2B ($199/mo). I am not restating a hallway yes. Bold B2B app is out because $199/mo for 11 accounts is more than the margin on a slow month. Dana will invoice net-30 by hand. Cost of doing nothing is already in the numbers: look at accounts=11, mo=199, skus=80, weeks=6, margin=18.2, invoices=11, login=1, app=0. Sibling tickets HBR-3112 and HBR-PRD-2021-052. I will not reopen Bold B2B app in a side thread because a vendor sent a discount. Jenna Park is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Shopify wholesale channel with a hidden catalog and 11 customer tags. Net-30 is a note Mara-style, not an app. Reject Bold B2B ($199/mo)."
+    },
+    {
+      "type": "p",
+      "text": "Background on wholesale.harbor.internal. Email orders, 11 accounts, no catalog login. That is the system Dana Whitlock lives with, not a slide. I timed or pulled the leftover on shop.harbor.internal the week before this file. Lag, stale minutes, or miss counts in this file are from that pull, not a round number I liked. Ticket HBR-REQ-2022-055 names the pull. If those numbers moved after October 13, 2022, update this file in review, do not 'correct' them in Slack."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for HBR-REQ-2022-055. Bold B2B app is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Email orders, 11 accounts, no catalog login",
+          "Numbers already in play: accounts=11, mo=199, skus=80, weeks=6, margin=18.2, invoices=11, login=1, app=0",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "Bold B2B app",
+          "$199/mo for 11 accounts is more than the margin on a slow month. Dana will invoice net-30 ",
+          "Named on HBR-PRD-2021-052",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Days, not cash",
+          "Scope returns as Slack",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "hidden catalog, 11 tags, no B2B app, net-30 by hand",
+          "Host wholesale.harbor.internal, ticket HBR-3112",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Nia Brooks owns a leftover that is easy to skip: pos.harbor.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (24): refuse on Bold B2B app, lock is hidden catalog, 11 tags, no B2B app, net-30 by hand. I will not hide a product change inside a 'quick align' on HBR-3112."
+    },
+    {
+      "type": "quote",
+      "text": "Wholesale is 11 accounts who already know me. It is not a marketplace.",
+      "attrib": "Dana Whitlock, September 29"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical user would try first on wholesale.harbor.internal: the path Dana Whitlock actually has, not a desktop demo. Metric I will argue is time-to-useful, not a vanity QPS. If we cannot show that path on shop.harbor.internal with the numbers already in this file, we do not have a cut. Michael Gilfilian will not accept a laptop screenshot as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "hidden catalog, 11 tags, no B2B app, net-30 by hand Host wholesale.harbor.internal. Ticket HBR-3112. Acceptor Dana Whitlock."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: hidden catalog, 11 tags, no B2B app, net-30 by hand. If that clock collides with a freeze, the date moves and the scope does not. Dana Whitlock hears the new date on HBR-REQ-2022-055. I will not book a change in the last 40 minutes of a freeze because it is 'just config.' Config is a change. Host if we have to prove a count: wholesale.harbor.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for HBR-REQ-2022-055. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "accounts",
+          "11",
+          "wholesale.harbor.internal",
+          "HBR-3112"
+        ],
+        [
+          "mo",
+          "199",
+          "wholesale.harbor.internal",
+          "HBR-3112"
+        ],
+        [
+          "skus",
+          "80",
+          "wholesale.harbor.internal",
+          "HBR-3112"
+        ],
+        [
+          "weeks",
+          "6",
+          "wholesale.harbor.internal",
+          "HBR-3112"
+        ],
+        [
+          "margin",
+          "18.2",
+          "wholesale.harbor.internal",
+          "HBR-3112"
+        ],
+        [
+          "invoices",
+          "11",
+          "wholesale.harbor.internal",
+          "HBR-3112"
+        ],
+        [
+          "login",
+          "1",
+          "wholesale.harbor.internal",
+          "HBR-3112"
+        ],
+        [
+          "app",
+          "0",
+          "wholesale.harbor.internal",
+          "HBR-3112"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: Bold B2B app"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "Bold B2B app is out. $199/mo for 11 accounts is more than the margin on a slow month. Dana will invoice net-30 by hand. I will not reopen it because a vendor emailed a discount."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: Bold B2B app comes back wearing a new coat. I want that named in review notes, not rediscovered by Nia Brooks on a Monday. Ticket HBR-3112. Numbers I will not 'simplify': accounts=11, mo=199, skus=80, weeks=6, margin=18.2, invoices=11, login=1, app=0. Same clock as the front. I will not mix clocks to make wholesale.harbor.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Nia Brooks: does pos.harbor.internal stay in the path? Yes, no, or a new date on HBR-PRD-2021-052.",
+        "Jenna Park: freeze collision for the first useful slice. Date moves, scope does not.",
+        "Dana Whitlock: weekend coverage is not implied. Sign it or it stays out.",
+        "Michael Gilfilian: leftover access on wholesale.harbor.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits wholesale.harbor.internal, HBR-REQ-2022-055, and the last three working pages. Access that has to move is who can change shop.harbor.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Jenna Park accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. HBR-3112. wholesale.harbor.internal.",
+      "text": "# HBR-REQ-2022-055 read-only first\ndate -u\nssh wholesale.harbor.internal 'uptime; df -h | head'\nshopify theme list | head\n# stop. write the last error in one sentence on HBR-3112\n# do not publish from a laptop on Friday afternoon"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on HBR-3112 before any write.",
+        "Confirm on wholesale.harbor.internal with the read-only commands above.",
+        "If the refuse on Bold B2B app is being reopened, stop and ping Dana Whitlock.",
+        "Wake Jenna Park only after a one-line diagnosis.",
+        "Do not apply from a laptop in a freeze."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for HBR-REQ-2022-055. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Michael Gilfilian",
+          "Dana Whitlock",
+          "Jenna Park"
+        ],
+        [
+          "Refuse on Bold B2B app",
+          "Michael Gilfilian",
+          "Dana Whitlock",
+          "Nia Brooks"
+        ],
+        [
+          "Host wholesale.harbor.internal",
+          "Jenna Park",
+          "Dana Whitlock",
+          "Michael Gilfilian"
+        ],
+        [
+          "Requester path",
+          "Nia Brooks",
+          "Dana Whitlock",
+          "Michael Gilfilian"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Evan Cole is on that list. Object on HBR-3112. Michael Gilfilian will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to HBR-REQ-2022-055"
+    },
+    {
+      "type": "p",
+      "text": "shop.harbor.internal is in this file because skipping it is how the last near-miss happened. Nia Brooks owns the check. I want a count on HBR-PRD-2021-052 before anyone says the leftover is 'implied.' Implied leftovers are how Bold B2B app almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in HBR-REQ-2022-055"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim Bold B2B app is impossible for a competitor. I will claim we will not buy it. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host wholesale.harbor.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for HBR-3112"
+    },
+    {
+      "type": "p",
+      "text": "First useful is hidden catalog, 11 tags, no B2B app, net-30 by hand, not a prettier theme or a bigger box. Dana Whitlock sees that slice on wholesale.harbor.internal. If the slice needs a second product, that is a new ticket and Dana Whitlock is in the thread. I will not hide it inside HBR-REQ-2022-055."
+    },
+    {
+      "type": "h2",
+      "text": "Support zip and identifiers (24)"
+    },
+    {
+      "type": "p",
+      "text": "A support zip for this work goes through redaction. Customer email, card PAN, and passwords come back. Pressure is not a reason to paste them into HBR-REQ-2022-055. Michael Gilfilian will bounce the zip. Host if we have to prove a redaction: pos.harbor.internal."
+    }
+  ]
+}

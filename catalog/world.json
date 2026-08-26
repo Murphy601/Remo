@@ -1,0 +1,32 @@
+{
+  "practice": {
+    "name": "Hillcrest Digital",
+    "author": "Michael Gilfilian",
+    "role": "Web Developer",
+    "host": "ops.hillcrest.internal",
+    "tickets": "HIL-"
+  },
+  "engagements": [
+    {
+      "name": "Harbor & Oak Outfitters",
+      "role": "Web Developer",
+      "host": "shop.harbor.internal",
+      "tickets": "HBR-",
+      "years": "2020-2022"
+    },
+    {
+      "name": "Lakeshore Hardware Group",
+      "role": "Web Developer",
+      "host": "ops.lakeshore.internal",
+      "tickets": "LSH-",
+      "years": "2022-2025"
+    }
+  ],
+  "internship": {
+    "name": "Whetstone Industrial",
+    "role": "IT Support Intern",
+    "host": "helpdesk.whetstone.internal",
+    "tickets": "WTS-",
+    "dates": "January 2023 - May 2023"
+  }
+}

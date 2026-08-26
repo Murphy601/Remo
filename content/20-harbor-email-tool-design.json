@@ -1,0 +1,336 @@
+{
+  "slug": "20-harbor-email-tool-design",
+  "doc_id": "HBR-TDD-2022-028",
+  "title": "Harbor & Oak abandoned-cart email design",
+  "subtitle": "Klaviyo vs a custom Node sender, ticket HBR-2806",
+  "doc_type": "Technical design document",
+  "form_type": "Technical design doc",
+  "kicker": "Harbor & Oak Outfitters  \u00b7  Email  \u00b7  HBR-2806",
+  "org": "Hillcrest Digital",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Accepted",
+  "date": "April 26, 2022",
+  "author": "Michael Gilfilian",
+  "role": "Web Developer",
+  "team": "Hillcrest Digital, Harbor & Oak Outfitters engagement",
+  "audience": "Dana Whitlock (requester); Dana Whitlock (acceptor); Jenna Park and Michael Gilfilian (build); Nia Brooks (leftover host); Evan Cole (absentee pack)",
+  "owners": "Dana Whitlock (acceptor), Dana Whitlock (requester), Jenna Park (ops), Michael Gilfilian (this document)",
+  "related": "HBR-TDD-2022-028; HBR-2806; HBR-PRD-2022-034",
+  "summary": "Dana Whitlock asked for a written cut of Harbor & Oak abandoned-cart email design. Current path: No abandoned-cart mail, Dana sending by hand after a slow day. This document locks Klaviyo, pickup suppress, 2-hour POS suppress. custom Node mailer on email.harbor.internal is out because Dana does not want to own CAN-SPAM from a VPS. Klaviyo already does unsubscribes.",
+  "form_description": "Technical design for Harbor & Oak abandoned-cart email, choosing Klaviyo with pickup and POS suppress over a custom Node sender.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "April 2, 2022",
+      "Michael Gilfilian",
+      "Outline after HBR-TDD-2022-028 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "April 14, 2022",
+      "Michael Gilfilian",
+      "Numbers from Dana Whitlock. custom Node mailer on email.harbor.internal still in the room."
+    ],
+    [
+      "0.9",
+      "April 22, 2022",
+      "Michael Gilfilian",
+      "custom Node mailer on email.harbor.internal written up as a refuse. Jenna Park review."
+    ],
+    [
+      "1.0",
+      "April 26, 2022",
+      "Michael Gilfilian",
+      "Cut. Host email.harbor.internal. Ticket HBR-2806."
+    ],
+    [
+      "1.1",
+      "April 26, 2022",
+      "Michael Gilfilian",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Harbor & Oak abandoned-cart email design"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for HBR-TDD-2022-028 on April 26, 2022. Dana Whitlock asked for a written bound after the current path (No abandoned-cart mail, Dana sending by hand after a slow day) stopped being honest. I am Michael Gilfilian, Web Developer, writing for Dana Whitlock, Jenna Park, and Nia Brooks. Primary host email.harbor.internal. If you are skimming, jump the decision callout, then the refuse on custom Node mailer on email.harbor.internal, then open questions. If you are implementing next week, jump the constraints, the numbers table, and the commands or contracts."
+    },
+    {
+      "type": "p",
+      "text": "Klaviyo for abandoned cart. Suppress if pickup_store is set or the POS sold the SKU in the last 2 hours. Reject a custom Node sender ($4.9k, Dana owns unsubscribes). I am not restating a hallway yes. custom Node mailer on email.harbor.internal is out because Dana does not want to own CAN-SPAM from a VPS. Klaviyo already does unsubscribes. Cost of doing nothing is already in the numbers: look at cost=4.9, hours=2, recover=8.4, list=1904, weeks=4, pickup=1, unsub=0.6, carts=22.1. Sibling tickets HBR-2806 and HBR-PRD-2022-034. I will not reopen custom Node mailer on email.harbor.internal in a side thread because a vendor sent a discount. Jenna Park is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Klaviyo for abandoned cart. Suppress if pickup_store is set or the POS sold the SKU in the last 2 hours. Reject a custom Node sender ($4.9k, Dana owns unsubscribes)."
+    },
+    {
+      "type": "p",
+      "text": "Background on email.harbor.internal. No abandoned-cart mail, Dana sending by hand after a slow day. That is the system Dana Whitlock lives with, not a slide. I timed or pulled the leftover on shop.harbor.internal the week before this file. Lag, stale minutes, or miss counts in this file are from that pull, not a round number I liked. Ticket HBR-TDD-2022-028 names the pull. If those numbers moved after April 26, 2022, update this file in review, do not 'correct' them in Slack."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for HBR-TDD-2022-028. custom Node mailer on email.harbor.internal is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep No abandoned-cart mail, Dana sending by hand after a slow day",
+          "Numbers already in play: cost=4.9, hours=2, recover=8.4, list=1904, weeks=4, pickup=1, unsub=0.6, carts=22.1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "custom Node mailer on email.harbor.internal",
+          "Dana does not want to own CAN-SPAM from a VPS. Klaviyo already does unsubscribes.",
+          "Named on HBR-PRD-2022-034",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Days, not cash",
+          "Scope returns as Slack",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "Klaviyo, pickup suppress, 2-hour POS suppress",
+          "Host email.harbor.internal, ticket HBR-2806",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Nia Brooks owns a leftover that is easy to skip: sync.harbor.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (20): refuse on custom Node mailer on email.harbor.internal, lock is Klaviyo, pickup suppress, 2-hour POS suppress. I will not hide a product change inside a 'quick align' on HBR-2806."
+    },
+    {
+      "type": "quote",
+      "text": "I will not let a tool email people who already picked up in the store because the cart still looks open.",
+      "attrib": "Dana Whitlock, April 12"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical user would try first on email.harbor.internal: the path Dana Whitlock actually has, not a desktop demo. Metric I will argue is time-to-useful, not a vanity QPS. If we cannot show that path on shop.harbor.internal with the numbers already in this file, we do not have a cut. Michael Gilfilian will not accept a laptop screenshot as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "Klaviyo, pickup suppress, 2-hour POS suppress Host email.harbor.internal. Ticket HBR-2806. Acceptor Dana Whitlock."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: Klaviyo, pickup suppress, 2-hour POS suppress. If that clock collides with a freeze, the date moves and the scope does not. Dana Whitlock hears the new date on HBR-TDD-2022-028. I will not book a change in the last 40 minutes of a freeze because it is 'just config.' Config is a change. Host if we have to prove a count: email.harbor.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for HBR-TDD-2022-028. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "cost",
+          "4.9",
+          "email.harbor.internal",
+          "HBR-2806"
+        ],
+        [
+          "hours",
+          "2",
+          "email.harbor.internal",
+          "HBR-2806"
+        ],
+        [
+          "recover",
+          "8.4",
+          "email.harbor.internal",
+          "HBR-2806"
+        ],
+        [
+          "list",
+          "1904",
+          "email.harbor.internal",
+          "HBR-2806"
+        ],
+        [
+          "weeks",
+          "4",
+          "email.harbor.internal",
+          "HBR-2806"
+        ],
+        [
+          "pickup",
+          "1",
+          "email.harbor.internal",
+          "HBR-2806"
+        ],
+        [
+          "unsub",
+          "0.6",
+          "email.harbor.internal",
+          "HBR-2806"
+        ],
+        [
+          "carts",
+          "22.1",
+          "email.harbor.internal",
+          "HBR-2806"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: custom Node mailer on email.harbor.internal"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "custom Node mailer on email.harbor.internal is out. Dana does not want to own CAN-SPAM from a VPS. Klaviyo already does unsubscribes. I will not reopen it because a vendor emailed a discount."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: custom Node mailer on email.harbor.internal comes back wearing a new coat. I want that named in review notes, not rediscovered by Nia Brooks on a Monday. Ticket HBR-2806. Numbers I will not 'simplify': cost=4.9, hours=2, recover=8.4, list=1904, weeks=4, pickup=1, unsub=0.6, carts=22.1. Same clock as the front. I will not mix clocks to make email.harbor.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Nia Brooks: does sync.harbor.internal stay in the path? Yes, no, or a new date on HBR-PRD-2022-034.",
+        "Jenna Park: freeze collision for the first useful slice. Date moves, scope does not.",
+        "Dana Whitlock: weekend coverage is not implied. Sign it or it stays out.",
+        "Michael Gilfilian: leftover access on email.harbor.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits email.harbor.internal, HBR-TDD-2022-028, and the last three working pages. Access that has to move is who can change shop.harbor.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Jenna Park accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. HBR-2806. email.harbor.internal.",
+      "text": "# HBR-TDD-2022-028 read-only first\ndate -u\nssh email.harbor.internal 'uptime; df -h | head'\nshopify theme list | head\n# stop. write the last error in one sentence on HBR-2806\n# do not publish from a laptop on Friday afternoon"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on HBR-2806 before any write.",
+        "Confirm on email.harbor.internal with the read-only commands above.",
+        "If the refuse on custom Node mailer on email.harbor.internal is being reopened, stop and ping Dana Whitlock.",
+        "Wake Jenna Park only after a one-line diagnosis.",
+        "Do not apply from a laptop in a freeze."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for HBR-TDD-2022-028. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Michael Gilfilian",
+          "Dana Whitlock",
+          "Jenna Park"
+        ],
+        [
+          "Refuse on custom Node mailer on email.harbor.internal",
+          "Michael Gilfilian",
+          "Dana Whitlock",
+          "Nia Brooks"
+        ],
+        [
+          "Host email.harbor.internal",
+          "Jenna Park",
+          "Dana Whitlock",
+          "Michael Gilfilian"
+        ],
+        [
+          "Requester path",
+          "Nia Brooks",
+          "Dana Whitlock",
+          "Michael Gilfilian"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Evan Cole is on that list. Object on HBR-2806. Michael Gilfilian will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to HBR-TDD-2022-028"
+    },
+    {
+      "type": "p",
+      "text": "shop.harbor.internal is in this file because skipping it is how the last near-miss happened. Nia Brooks owns the check. I want a count on HBR-PRD-2022-034 before anyone says the leftover is 'implied.' Implied leftovers are how custom Node mailer on email.harbor.internal almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in HBR-TDD-2022-028"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim custom Node mailer on email.harbor.internal is impossible for a competitor. I will claim we will not buy it. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host email.harbor.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for HBR-2806"
+    },
+    {
+      "type": "p",
+      "text": "First useful is Klaviyo, pickup suppress, 2-hour POS suppress, not a prettier theme or a bigger box. Dana Whitlock sees that slice on email.harbor.internal. If the slice needs a second product, that is a new ticket and Dana Whitlock is in the thread. I will not hide it inside HBR-TDD-2022-028."
+    },
+    {
+      "type": "h2",
+      "text": "Support zip and identifiers (20)"
+    },
+    {
+      "type": "p",
+      "text": "A support zip for this work goes through redaction. Customer email, card PAN, and passwords come back. Pressure is not a reason to paste them into HBR-TDD-2022-028. Michael Gilfilian will bounce the zip. Host if we have to prove a redaction: sync.harbor.internal."
+    }
+  ]
+}

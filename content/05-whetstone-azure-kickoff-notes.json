@@ -1,0 +1,336 @@
+{
+  "slug": "05-whetstone-azure-kickoff-notes",
+  "doc_id": "WTS-MTG-2023-007",
+  "title": "Azure mailbox and identity kickoff notes, February 9",
+  "subtitle": "Decisions, owners, and refused vendor path for WTS-4418",
+  "doc_type": "Meeting notes",
+  "form_type": "Other",
+  "kicker": "Whetstone Industrial  \u00b7  Kickoff  \u00b7  WTS-MTG-2023-007",
+  "org": "Whetstone Industrial",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Issued",
+  "date": "February 9, 2023",
+  "author": "Michael Gilfilian",
+  "role": "IT Support Intern",
+  "team": "Whetstone IT, service desk and plant support",
+  "audience": "Brett Holtz (requester); Brett Holtz (acceptor); Carla Nguyen and Michael Gilfilian (build); Owen Briggs (leftover host); Rita Cho (absentee pack)",
+  "owners": "Brett Holtz (acceptor), Brett Holtz (requester), Carla Nguyen (ops), Michael Gilfilian (this document)",
+  "related": "WTS-MTG-2023-007; WTS-4418; WTS-REQ-2023-011",
+  "summary": "Brett Holtz asked for a written cut of Azure mailbox and identity kickoff notes. Current path: On-prem identity, no tenant license count Brett will sign. This document locks requirements doc before any mailbox move, lab OU excluded. skip kickoff and enable Azure AD Connect defaults is out because Defaults would have synced the lab OU (41 stale accounts) into the tenant. Owen flagged it on the call.",
+  "form_description": "Decision-oriented kickoff notes for Whetstone Azure mailbox and identity work, written so a colleague can act without the recording.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "January 16, 2023",
+      "Michael Gilfilian",
+      "Outline after WTS-MTG-2023-007 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "January 28, 2023",
+      "Michael Gilfilian",
+      "Numbers from Brett Holtz. skip kickoff and enable Azure AD Connect defaults still in the room."
+    ],
+    [
+      "0.9",
+      "February 5, 2023",
+      "Michael Gilfilian",
+      "skip kickoff and enable Azure AD Connect defaults written up as a refuse. Carla Nguyen review."
+    ],
+    [
+      "1.0",
+      "February 9, 2023",
+      "Michael Gilfilian",
+      "Cut. Host conf-02.whetstone.internal. Ticket WTS-4418."
+    ],
+    [
+      "1.1",
+      "February 9, 2023",
+      "Michael Gilfilian",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Azure mailbox and identity kickoff notes, February 9"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for WTS-MTG-2023-007 on February 9, 2023. Brett Holtz asked for a written bound after the current path (On-prem identity, no tenant license count Brett will sign) stopped being honest. I am Michael Gilfilian, IT Support Intern, writing for Brett Holtz, Carla Nguyen, and Owen Briggs. Primary host conf-02.whetstone.internal. If you are skimming, jump the decision callout, then the refuse on skip kickoff and enable Azure AD Connect defaults, then open questions. If you are implementing next week, jump the constraints, the numbers table, and the commands or contracts."
+    },
+    {
+      "type": "p",
+      "text": "Write requirements first. Hybrid mailbox. Identity feed stays Azure AD Connect. Nimbus is out. First useful slice the week of March 20, not February 17. I am not restating a hallway yes. skip kickoff and enable Azure AD Connect defaults is out because Defaults would have synced the lab OU (41 stale accounts) into the tenant. Owen flagged it on the call. Cost of doing nothing is already in the numbers: look at lab=41, weeks=6, vendor_days=11, seats=214, shared=37, cost=18.4, room=02, hours=1.4. Sibling tickets WTS-4418 and WTS-REQ-2023-011. I will not reopen skip kickoff and enable Azure AD Connect defaults in a side thread because a vendor sent a discount. Carla Nguyen is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Write requirements first. Hybrid mailbox. Identity feed stays Azure AD Connect. Nimbus is out. First useful slice the week of March 20, not February 17."
+    },
+    {
+      "type": "p",
+      "text": "Background on conf-02.whetstone.internal. On-prem identity, no tenant license count Brett will sign. That is the system Brett Holtz lives with, not a slide. I timed or pulled the leftover on mail-01.whetstone.internal the week before this file. Lag, stale minutes, or miss counts in this file are from that pull, not a round number I liked. Ticket WTS-MTG-2023-007 names the pull. If those numbers moved after February 9, 2023, update this file in review, do not 'correct' them in Slack."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for WTS-MTG-2023-007. skip kickoff and enable Azure AD Connect defaults is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep On-prem identity, no tenant license count Brett will sign",
+          "Numbers already in play: lab=41, weeks=6, vendor_days=11, seats=214, shared=37, cost=18.4, room=02, hours=1.4",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "skip kickoff and enable Azure AD Connect defaults",
+          "Defaults would have synced the lab OU (41 stale accounts) into the tenant. Owen flagged it",
+          "Named on WTS-REQ-2023-011",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Days, not cash",
+          "Scope returns as Slack",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "requirements doc before any mailbox move, lab OU excluded",
+          "Host conf-02.whetstone.internal, ticket WTS-4418",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Owen Briggs owns a leftover that is easy to skip: aad-sync-01.whetstone.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (05): refuse on skip kickoff and enable Azure AD Connect defaults, lock is requirements doc before any mailbox move, lab OU excluded. I will not hide a product change inside a 'quick align' on WTS-4418."
+    },
+    {
+      "type": "quote",
+      "text": "We are not skipping the kickoff because Nimbus already sent a slide.",
+      "attrib": "Brett Holtz, opening the February 9 call"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical user would try first on conf-02.whetstone.internal: the path Brett Holtz actually has, not a desktop demo. Metric I will argue is time-to-useful, not a vanity QPS. If we cannot show that path on mail-01.whetstone.internal with the numbers already in this file, we do not have a cut. Michael Gilfilian will not accept a laptop screenshot as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "requirements doc before any mailbox move, lab OU excluded Host conf-02.whetstone.internal. Ticket WTS-4418. Acceptor Brett Holtz."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: requirements doc before any mailbox move, lab OU excluded. If that clock collides with a freeze, the date moves and the scope does not. Brett Holtz hears the new date on WTS-MTG-2023-007. I will not book a change in the last 40 minutes of a freeze because it is 'just config.' Config is a change. Host if we have to prove a count: conf-02.whetstone.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for WTS-MTG-2023-007. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "lab",
+          "41",
+          "conf-02.whetstone.internal",
+          "WTS-4418"
+        ],
+        [
+          "weeks",
+          "6",
+          "conf-02.whetstone.internal",
+          "WTS-4418"
+        ],
+        [
+          "vendor_days",
+          "11",
+          "conf-02.whetstone.internal",
+          "WTS-4418"
+        ],
+        [
+          "seats",
+          "214",
+          "conf-02.whetstone.internal",
+          "WTS-4418"
+        ],
+        [
+          "shared",
+          "37",
+          "conf-02.whetstone.internal",
+          "WTS-4418"
+        ],
+        [
+          "cost",
+          "18.4",
+          "conf-02.whetstone.internal",
+          "WTS-4418"
+        ],
+        [
+          "room",
+          "02",
+          "conf-02.whetstone.internal",
+          "WTS-4418"
+        ],
+        [
+          "hours",
+          "1.4",
+          "conf-02.whetstone.internal",
+          "WTS-4418"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: skip kickoff and enable Azure AD Connect defaults"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "skip kickoff and enable Azure AD Connect defaults is out. Defaults would have synced the lab OU (41 stale accounts) into the tenant. Owen flagged it on the call. I will not reopen it because a vendor emailed a discount."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: skip kickoff and enable Azure AD Connect defaults comes back wearing a new coat. I want that named in review notes, not rediscovered by Owen Briggs on a Monday. Ticket WTS-4418. Numbers I will not 'simplify': lab=41, weeks=6, vendor_days=11, seats=214, shared=37, cost=18.4, room=02, hours=1.4. Same clock as the front. I will not mix clocks to make conf-02.whetstone.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Owen Briggs: does aad-sync-01.whetstone.internal stay in the path? Yes, no, or a new date on WTS-REQ-2023-011.",
+        "Carla Nguyen: freeze collision for the first useful slice. Date moves, scope does not.",
+        "Brett Holtz: weekend coverage is not implied. Sign it or it stays out.",
+        "Michael Gilfilian: leftover access on conf-02.whetstone.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits conf-02.whetstone.internal, WTS-MTG-2023-007, and the last three working pages. Access that has to move is who can change mail-01.whetstone.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Carla Nguyen accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. WTS-4418. conf-02.whetstone.internal.",
+      "text": "# WTS-MTG-2023-007 read-only first\ndate -u\naz account show --query name -o tsv\nssh conf-02.whetstone.internal 'uptime; df -h | head'\n# stop. write the last error in one sentence on WTS-4418\n# do not apply from a laptop in a freeze"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on WTS-4418 before any write.",
+        "Confirm on conf-02.whetstone.internal with the read-only commands above.",
+        "If the refuse on skip kickoff and enable Azure AD Connect defaults is being reopened, stop and ping Brett Holtz.",
+        "Wake Carla Nguyen only after a one-line diagnosis.",
+        "Do not apply from a laptop in a freeze."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for WTS-MTG-2023-007. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Michael Gilfilian",
+          "Brett Holtz",
+          "Carla Nguyen"
+        ],
+        [
+          "Refuse on skip kickoff and enable Azure AD Connect defaults",
+          "Michael Gilfilian",
+          "Brett Holtz",
+          "Owen Briggs"
+        ],
+        [
+          "Host conf-02.whetstone.internal",
+          "Carla Nguyen",
+          "Brett Holtz",
+          "Michael Gilfilian"
+        ],
+        [
+          "Requester path",
+          "Owen Briggs",
+          "Brett Holtz",
+          "Michael Gilfilian"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Rita Cho is on that list. Object on WTS-4418. Michael Gilfilian will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to WTS-MTG-2023-007"
+    },
+    {
+      "type": "p",
+      "text": "mail-01.whetstone.internal is in this file because skipping it is how the last near-miss happened. Owen Briggs owns the check. I want a count on WTS-REQ-2023-011 before anyone says the leftover is 'implied.' Implied leftovers are how skip kickoff and enable Azure AD Connect defaults almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in WTS-MTG-2023-007"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim skip kickoff and enable Azure AD Connect defaults is impossible for a competitor. I will claim we will not buy it. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host conf-02.whetstone.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for WTS-4418"
+    },
+    {
+      "type": "p",
+      "text": "First useful is requirements doc before any mailbox move, lab OU excluded, not a prettier theme or a bigger box. Brett Holtz sees that slice on conf-02.whetstone.internal. If the slice needs a second product, that is a new ticket and Brett Holtz is in the thread. I will not hide it inside WTS-MTG-2023-007."
+    },
+    {
+      "type": "h2",
+      "text": "Support zip and identifiers (05)"
+    },
+    {
+      "type": "p",
+      "text": "A support zip for this work goes through redaction. Customer email, card PAN, and passwords come back. Pressure is not a reason to paste them into WTS-MTG-2023-007. Michael Gilfilian will bounce the zip. Host if we have to prove a redaction: aad-sync-01.whetstone.internal."
+    }
+  ]
+}

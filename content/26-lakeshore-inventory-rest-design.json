@@ -1,0 +1,336 @@
+{
+  "slug": "26-lakeshore-inventory-rest-design",
+  "doc_id": "LSH-TDD-2022-022",
+  "title": "Lakeshore inventory API REST design",
+  "subtitle": "Resources, cursors, 30s timeout, ticket LSH-4401-TDD",
+  "doc_type": "Technical design document",
+  "form_type": "Technical design doc",
+  "kicker": "Lakeshore Hardware Group  \u00b7  REST  \u00b7  LSH-4401-TDD",
+  "org": "Hillcrest Digital",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Accepted",
+  "date": "November 3, 2022",
+  "author": "Michael Gilfilian",
+  "role": "Web Developer",
+  "team": "Hillcrest Digital, Lakeshore Hardware Group engagement",
+  "audience": "Greta Holm (requester); Luis Ortega (acceptor); Cole Brennan and Michael Gilfilian (build); Mara Singh (leftover host); Theo Walsh (absentee pack)",
+  "owners": "Luis Ortega (acceptor), Greta Holm (requester), Cole Brennan (ops), Michael Gilfilian (this document)",
+  "related": "LSH-TDD-2022-022; LSH-4401; LSH-REQ-2022-014",
+  "summary": "Greta Holm asked for a written cut of Lakeshore inventory API REST design. Current path: No API, Woo admin for stock. This document locks CHAR(2), cursor, 30s, 503 on lag. integer storeId is out because POS emits 3 and 03. Integer collapse is how Fort-Wayne-shaped joins died on a sibling job. CHAR(2).",
+  "form_description": "REST design for the Lakeshore inventory API: storeId as CHAR(2), cursors, timeout, and 503 on replica lag.",
+  "field": "Software Engineering / Data Science",
+  "revision_history": [
+    [
+      "0.1",
+      "October 10, 2022",
+      "Michael Gilfilian",
+      "Outline after LSH-TDD-2022-022 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "October 22, 2022",
+      "Michael Gilfilian",
+      "Numbers from Greta Holm. integer storeId still in the room."
+    ],
+    [
+      "0.9",
+      "October 30, 2022",
+      "Michael Gilfilian",
+      "integer storeId written up as a refuse. Cole Brennan review."
+    ],
+    [
+      "1.0",
+      "November 3, 2022",
+      "Michael Gilfilian",
+      "Cut. Host inv-api.lakeshore.internal. Ticket LSH-4401."
+    ],
+    [
+      "1.1",
+      "November 3, 2022",
+      "Michael Gilfilian",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Lakeshore inventory API REST design"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for LSH-TDD-2022-022 on November 3, 2022. Greta Holm asked for a written bound after the current path (No API, Woo admin for stock) stopped being honest. I am Michael Gilfilian, Web Developer, writing for Luis Ortega, Cole Brennan, and Mara Singh. Primary host inv-api.lakeshore.internal. If you are skimming, jump the decision callout, then the refuse on integer storeId, then open questions. If you are implementing next week, jump the constraints, the numbers table, and the commands or contracts."
+    },
+    {
+      "type": "p",
+      "text": "Node on inv-api.lakeshore.internal. storeId CHAR(2). Cursor on sku. Timeout 30s. Replica lag over 180s is 503. I am not restating a hallway yes. integer storeId is out because POS emits 3 and 03. Integer collapse is how Fort-Wayne-shaped joins died on a sibling job. CHAR(2). Cost of doing nothing is already in the numbers: look at timeout=30, lag=180, stores=4, sku=18.4k, p95=0.42, weeks=6, nodes=2, char=2. Sibling tickets LSH-4401 and LSH-REQ-2022-014. I will not reopen integer storeId in a side thread because a vendor sent a discount. Cole Brennan is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Node on inv-api.lakeshore.internal. storeId CHAR(2). Cursor on sku. Timeout 30s. Replica lag over 180s is 503."
+    },
+    {
+      "type": "p",
+      "text": "Background on inv-api.lakeshore.internal. No API, Woo admin for stock. That is the system Luis Ortega lives with, not a slide. I timed or pulled the leftover on mysql-ro.lakeshore.internal the week before this file. Lag, stale minutes, or miss counts in this file are from that pull, not a round number I liked. Ticket LSH-TDD-2022-022 names the pull. If those numbers moved after November 3, 2022, update this file in review, do not 'correct' them in Slack."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for LSH-TDD-2022-022. integer storeId is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep No API, Woo admin for stock",
+          "Numbers already in play: timeout=30, lag=180, stores=4, sku=18.4k, p95=0.42, weeks=6, nodes=2, char=2",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "integer storeId",
+          "POS emits 3 and 03. Integer collapse is how Fort-Wayne-shaped joins died on a sibling job.",
+          "Named on LSH-REQ-2022-014",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Days, not cash",
+          "Scope returns as Slack",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "CHAR(2), cursor, 30s, 503 on lag",
+          "Host inv-api.lakeshore.internal, ticket LSH-4401",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Mara Singh owns a leftover that is easy to skip: stg-inv.lakeshore.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (26): refuse on integer storeId, lock is CHAR(2), cursor, 30s, 503 on lag. I will not hide a product change inside a 'quick align' on LSH-4401."
+    },
+    {
+      "type": "quote",
+      "text": "If store 03 and store 3 join as two rows, we already know the footgun.",
+      "attrib": "Greta Holm, data, October 20 review"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical user would try first on inv-api.lakeshore.internal: the path Greta Holm actually has, not a desktop demo. Metric I will argue is time-to-useful, not a vanity QPS. If we cannot show that path on mysql-ro.lakeshore.internal with the numbers already in this file, we do not have a cut. Michael Gilfilian will not accept a laptop screenshot as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "CHAR(2), cursor, 30s, 503 on lag Host inv-api.lakeshore.internal. Ticket LSH-4401. Acceptor Luis Ortega."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: CHAR(2), cursor, 30s, 503 on lag. If that clock collides with a freeze, the date moves and the scope does not. Luis Ortega hears the new date on LSH-TDD-2022-022. I will not book a change in the last 40 minutes of a freeze because it is 'just config.' Config is a change. Host if we have to prove a count: inv-api.lakeshore.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for LSH-TDD-2022-022. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "timeout",
+          "30",
+          "inv-api.lakeshore.internal",
+          "LSH-4401"
+        ],
+        [
+          "lag",
+          "180",
+          "inv-api.lakeshore.internal",
+          "LSH-4401"
+        ],
+        [
+          "stores",
+          "4",
+          "inv-api.lakeshore.internal",
+          "LSH-4401"
+        ],
+        [
+          "sku",
+          "18.4k",
+          "inv-api.lakeshore.internal",
+          "LSH-4401"
+        ],
+        [
+          "p95",
+          "0.42",
+          "inv-api.lakeshore.internal",
+          "LSH-4401"
+        ],
+        [
+          "weeks",
+          "6",
+          "inv-api.lakeshore.internal",
+          "LSH-4401"
+        ],
+        [
+          "nodes",
+          "2",
+          "inv-api.lakeshore.internal",
+          "LSH-4401"
+        ],
+        [
+          "char",
+          "2",
+          "inv-api.lakeshore.internal",
+          "LSH-4401"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: integer storeId"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "integer storeId is out. POS emits 3 and 03. Integer collapse is how Fort-Wayne-shaped joins died on a sibling job. CHAR(2). I will not reopen it because a vendor emailed a discount."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: integer storeId comes back wearing a new coat. I want that named in review notes, not rediscovered by Mara Singh on a Monday. Ticket LSH-4401. Numbers I will not 'simplify': timeout=30, lag=180, stores=4, sku=18.4k, p95=0.42, weeks=6, nodes=2, char=2. Same clock as the front. I will not mix clocks to make inv-api.lakeshore.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Mara Singh: does stg-inv.lakeshore.internal stay in the path? Yes, no, or a new date on LSH-REQ-2022-014.",
+        "Cole Brennan: freeze collision for the first useful slice. Date moves, scope does not.",
+        "Greta Holm: weekend coverage is not implied. Sign it or it stays out.",
+        "Michael Gilfilian: leftover access on inv-api.lakeshore.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits inv-api.lakeshore.internal, LSH-TDD-2022-022, and the last three working pages. Access that has to move is who can change mysql-ro.lakeshore.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Cole Brennan accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. LSH-4401. inv-api.lakeshore.internal.",
+      "text": "# LSH-TDD-2022-022 read-only first\ndate -u\nssh inv-api.lakeshore.internal 'uptime; df -h | head'\nkubectl -n lakeshore get pods -o wide | head\n# stop. write the last error in one sentence on LSH-4401\n# do not helm upgrade from a laptop in a freeze"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on LSH-4401 before any write.",
+        "Confirm on inv-api.lakeshore.internal with the read-only commands above.",
+        "If the refuse on integer storeId is being reopened, stop and ping Luis Ortega.",
+        "Wake Cole Brennan only after a one-line diagnosis.",
+        "Do not apply from a laptop in a freeze."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for LSH-TDD-2022-022. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Michael Gilfilian",
+          "Luis Ortega",
+          "Cole Brennan"
+        ],
+        [
+          "Refuse on integer storeId",
+          "Michael Gilfilian",
+          "Luis Ortega",
+          "Mara Singh"
+        ],
+        [
+          "Host inv-api.lakeshore.internal",
+          "Cole Brennan",
+          "Luis Ortega",
+          "Michael Gilfilian"
+        ],
+        [
+          "Requester path",
+          "Mara Singh",
+          "Greta Holm",
+          "Michael Gilfilian"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Theo Walsh is on that list. Object on LSH-4401. Michael Gilfilian will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to LSH-TDD-2022-022"
+    },
+    {
+      "type": "p",
+      "text": "mysql-ro.lakeshore.internal is in this file because skipping it is how the last near-miss happened. Mara Singh owns the check. I want a count on LSH-REQ-2022-014 before anyone says the leftover is 'implied.' Implied leftovers are how integer storeId almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in LSH-TDD-2022-022"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim integer storeId is impossible for a competitor. I will claim we will not buy it. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host inv-api.lakeshore.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for LSH-4401"
+    },
+    {
+      "type": "p",
+      "text": "First useful is CHAR(2), cursor, 30s, 503 on lag, not a prettier theme or a bigger box. Greta Holm sees that slice on inv-api.lakeshore.internal. If the slice needs a second product, that is a new ticket and Luis Ortega is in the thread. I will not hide it inside LSH-TDD-2022-022."
+    },
+    {
+      "type": "h2",
+      "text": "Support zip and identifiers (26)"
+    },
+    {
+      "type": "p",
+      "text": "A support zip for this work goes through redaction. Customer email, card PAN, and passwords come back. Pressure is not a reason to paste them into LSH-TDD-2022-022. Michael Gilfilian will bounce the zip. Host if we have to prove a redaction: stg-inv.lakeshore.internal."
+    }
+  ]
+}
