@@ -8,7 +8,7 @@
     "date": "March 14, 2023",
     "role": "IT Support Intern",
     "words": 12838,
-    "est_pages": 43,
+    "est_pages": 46,
     "description": "Requirements cut for moving Whetstone user mailboxes to Exchange Online so IT, HRIS, and the intern share one scope after WTS-4418 was reopened.",
     "field": "Software Engineering / Data Science",
     "form_type": "Requirements doc"
@@ -22,7 +22,7 @@
     "date": "April 4, 2023",
     "role": "IT Support Intern",
     "words": 14174,
-    "est_pages": 43,
+    "est_pages": 45,
     "description": "Technical design for a Python helpdesk triage bot at Whetstone, written so Carla Nguyen and Brett Holtz share one classifier cut before WTS-4502 is built.",
     "field": "Software Engineering / Data Science",
     "form_type": "Technical design doc"
@@ -36,7 +36,7 @@
     "date": "April 21, 2023",
     "role": "IT Support Intern",
     "words": 14626,
-    "est_pages": 43,
+    "est_pages": 45,
     "description": "On-bench SOP for imaging Whetstone shop-floor laptops from the Intune golden, written for a cold run with exact commands and refuse conditions.",
     "field": "Software Engineering / Data Science",
     "form_type": "Runbook / SOPs"
@@ -50,7 +50,7 @@
     "date": "April 18, 2023",
     "role": "IT Support Intern",
     "words": 14516,
-    "est_pages": 43,
+    "est_pages": 45,
     "description": "Incident report for duplicate Azure AD accounts after an HRIS feed retry, covering timeline, impact, and the refuse on auto-merge.",
     "field": "Software Engineering / Data Science",
     "form_type": "Incident report"
@@ -64,7 +64,7 @@
     "date": "February 9, 2023",
     "role": "IT Support Intern",
     "words": 14981,
-    "est_pages": 43,
+    "est_pages": 48,
     "description": "Decision-oriented kickoff notes for Whetstone Azure mailbox and identity work, written so a colleague can act without the recording.",
     "field": "Software Engineering / Data Science",
     "form_type": "Other"
@@ -78,7 +78,7 @@
     "date": "March 28, 2023",
     "role": "IT Support Intern",
     "words": 12271,
-    "est_pages": 43,
+    "est_pages": 47,
     "description": "Recommendation memo asking Brett Holtz to approve Azure Files for three Whetstone shares and to refuse the IaaS file-server quote.",
     "field": "Software Engineering / Data Science",
     "form_type": "Other"
@@ -92,7 +92,7 @@
     "date": "April 11, 2023",
     "role": "IT Support Intern",
     "words": 13997,
-    "est_pages": 43,
+    "est_pages": 42,
     "description": "On-call runbook for Whetstone plant VPN with MFA, written so a desk person who did not set it up can diagnose a failed login without waking Brett.",
     "field": "Software Engineering / Data Science",
     "form_type": "Runbook / SOPs"
@@ -106,7 +106,7 @@
     "date": "May 2, 2023",
     "role": "IT Support Intern",
     "words": 14203,
-    "est_pages": 43,
+    "est_pages": 48,
     "description": "Acceptance notes for the Whetstone Windows 11 golden image, written so Owen and the intern share one pass/fail list before the golden is marked current.",
     "field": "Software Engineering / Data Science",
     "form_type": "Other"
@@ -120,7 +120,7 @@
     "date": "June 18, 2020",
     "role": "Web Developer",
     "words": 14128,
-    "est_pages": 43,
+    "est_pages": 46,
     "description": "Requirements for the Harbor & Oak Shopify theme v1, written so Dana, Jenna, and the developer share one template cut after HBR-1104.",
     "field": "Software Engineering / Data Science",
     "form_type": "Requirements doc"
@@ -134,7 +134,7 @@
     "date": "August 4, 2020",
     "role": "Web Developer",
     "words": 11996,
-    "est_pages": 46,
+    "est_pages": 48,
     "description": "Technical design for the Harbor & Oak Liquid theme, covering sections, metafields, and a pickup stub that will survive a checkout change.",
     "field": "Software Engineering / Data Science",
     "form_type": "Technical design doc"
@@ -148,7 +148,7 @@
     "date": "March 12, 2021",
     "role": "Web Developer",
     "words": 11980,
-    "est_pages": 46,
+    "est_pages": 48,
     "description": "Decision notes from the Harbor & Oak 90-day SEO review, capturing the title pattern, collection index, and the refuse on city stuffing.",
     "field": "Software Engineering / Data Science",
     "form_type": "Other"
@@ -162,7 +162,7 @@
     "date": "May 11, 2021",
     "role": "Web Developer",
     "words": 14368,
-    "est_pages": 43,
+    "est_pages": 44,
     "description": "Incident report for the Harbor & Oak Mother's Day checkout stall caused by a gift-wrap app 429, including timeline and the refuse on retries.",
     "field": "Software Engineering / Data Science",
     "form_type": "Incident report"
@@ -190,7 +190,7 @@
     "date": "September 16, 2021",
     "role": "Web Developer",
     "words": 14175,
-    "est_pages": 43,
+    "est_pages": 48,
     "description": "Deploy runbook for the Harbor & Oak Shopify theme, written so a cold publish does not hide pickup and so rollback is unpublish.",
     "field": "Software Engineering / Data Science",
     "form_type": "Runbook / SOPs"
@@ -204,7 +204,7 @@
     "date": "November 9, 2021",
     "role": "Web Developer",
     "words": 14347,
-    "est_pages": 42,
+    "est_pages": 44,
     "description": "Systems design for Harbor & Oak inventory sync, choosing a 15-minute POS poll over a live vendor webhook.",
     "field": "Software Engineering / Data Science",
     "form_type": "Systems design doc"
@@ -232,7 +232,7 @@
     "date": "December 14, 2021",
     "role": "Web Developer",
     "words": 15019,
-    "est_pages": 43,
+    "est_pages": 49,
     "description": "Meeting notes locking Harbor & Oak product photo rules: size, format, alt text, and the refuse on uncompressed lifestyle galleries.",
     "field": "Software Engineering / Data Science",
     "form_type": "Other"
@@ -246,7 +246,7 @@
     "date": "February 17, 2022",
     "role": "Web Developer",
     "words": 14073,
-    "est_pages": 43,
+    "est_pages": 47,
     "description": "SOP for loading Harbor & Oak product CSVs, with a hard stop on blank SKUs and a dry-run count before any write.",
     "field": "Software Engineering / Data Science",
     "form_type": "Runbook / SOPs"
@@ -260,7 +260,7 @@
     "date": "March 8, 2022",
     "role": "Web Developer",
     "words": 12006,
-    "est_pages": 44,
+    "est_pages": 45,
     "description": "Incident report for Harbor & Oak GA4 double-counted purchases after the theme pixel and GTM both fired, with the one-pixel cut.",
     "field": "Software Engineering / Data Science",
     "form_type": "Incident report"
@@ -274,7 +274,7 @@
     "date": "April 26, 2022",
     "role": "Web Developer",
     "words": 14448,
-    "est_pages": 43,
+    "est_pages": 45,
     "description": "Technical design for Harbor & Oak abandoned-cart email, choosing Klaviyo with pickup and POS suppress over a custom Node sender.",
     "field": "Software Engineering / Data Science",
     "form_type": "Technical design doc"
@@ -302,7 +302,7 @@
     "date": "July 21, 2022",
     "role": "Web Developer",
     "words": 12916,
-    "est_pages": 43,
+    "est_pages": 46,
     "description": "Checkout test strategy for Harbor & Oak, locking block-merge cases for pickup, wrap-off, gift card, and a single GA4 purchase event.",
     "field": "Software Engineering / Data Science",
     "form_type": "Other"
@@ -316,7 +316,7 @@
     "date": "August 25, 2022",
     "role": "Web Developer",
     "words": 12822,
-    "est_pages": 43,
+    "est_pages": 46,
     "description": "Owner integration guide for Harbor & Oak: pickup shelf, product CSV, theme preview, and who to contact, written so Dana does not need a wiki.",
     "field": "Software Engineering / Data Science",
     "form_type": "Other"
@@ -330,7 +330,7 @@
     "date": "October 13, 2022",
     "role": "Web Developer",
     "words": 12707,
-    "est_pages": 43,
+    "est_pages": 47,
     "description": "Requirements for Harbor & Oak wholesale v1: a hidden catalog and 11 tagged accounts, refusing a paid B2B app.",
     "field": "Software Engineering / Data Science",
     "form_type": "Requirements doc"
@@ -344,7 +344,7 @@
     "date": "September 22, 2022",
     "role": "Web Developer",
     "words": 12710,
-    "est_pages": 43,
+    "est_pages": 44,
     "description": "Requirements for the Lakeshore inventory position API v1, written so store ops and the developer share one scope after LSH-4401.",
     "field": "Software Engineering / Data Science",
     "form_type": "Requirements doc"
@@ -358,7 +358,7 @@
     "date": "November 3, 2022",
     "role": "Web Developer",
     "words": 12722,
-    "est_pages": 43,
+    "est_pages": 44,
     "description": "REST design for the Lakeshore inventory API: storeId as CHAR(2), cursors, timeout, and 503 on replica lag.",
     "field": "Software Engineering / Data Science",
     "form_type": "Technical design doc"
@@ -372,7 +372,7 @@
     "date": "December 15, 2022",
     "role": "Web Developer",
     "words": 11955,
-    "est_pages": 45,
+    "est_pages": 47,
     "description": "Systems design for Lakeshore four-store stock: POS as source, API in the middle, Woo as a projection, no pooled bin.",
     "field": "Software Engineering / Data Science",
     "form_type": "Systems design doc"
@@ -386,7 +386,7 @@
     "date": "February 16, 2023",
     "role": "Web Developer",
     "words": 14635,
-    "est_pages": 43,
+    "est_pages": 47,
     "description": "On-call runbook for the Lakeshore nightly Woo stock projection, with checksum, zero-row paging, and a refuse on laptop reruns.",
     "field": "Software Engineering / Data Science",
     "form_type": "Runbook / SOPs"
@@ -400,7 +400,7 @@
     "date": "March 16, 2023",
     "role": "Web Developer",
     "words": 12008,
-    "est_pages": 43,
+    "est_pages": 45,
     "description": "Incident report for Lakeshore negative on-hand after overlapping stock jobs, with clamp, lock, and the refuse on auto-backorder.",
     "field": "Software Engineering / Data Science",
     "form_type": "Incident report"
@@ -414,7 +414,7 @@
     "date": "May 4, 2023",
     "role": "Web Developer",
     "words": 12504,
-    "est_pages": 43,
+    "est_pages": 45,
     "description": "PRD for Lakeshore four-store pickup: store picker, per-store quantity, 15:30 cutoff, no transfer-as-pickup.",
     "field": "Software Engineering / Data Science",
     "form_type": "Product requirements doc"
@@ -428,7 +428,7 @@
     "date": "June 22, 2023",
     "role": "Web Developer",
     "words": 12059,
-    "est_pages": 43,
+    "est_pages": 45,
     "description": "Deploy SOP for four Lakeshore WooCommerce storefronts, blocking live wp-admin plugin updates after the May 18 pickup hide.",
     "field": "Software Engineering / Data Science",
     "form_type": "Runbook / SOPs"
@@ -442,7 +442,7 @@
     "date": "August 10, 2023",
     "role": "Web Developer",
     "words": 12013,
-    "est_pages": 50,
+    "est_pages": 48,
     "description": "Recommendation memo keeping Lakeshore on-hand in MySQL and refusing a Mongo stock ledger after a contractor suggestion.",
     "field": "Software Engineering / Data Science",
     "form_type": "Other"
@@ -456,7 +456,7 @@
     "date": "September 14, 2023",
     "role": "Web Developer",
     "words": 11974,
-    "est_pages": 46,
+    "est_pages": 47,
     "description": "Store manager feedback notes for Lakeshore pickup, negative quantity, and weekend coverage, with owners and refused paths.",
     "field": "Software Engineering / Data Science",
     "form_type": "Other"
@@ -470,7 +470,7 @@
     "date": "October 26, 2023",
     "role": "Web Developer",
     "words": 11966,
-    "est_pages": 48,
+    "est_pages": 49,
     "description": "Technical design for a React stock admin at Lakeshore that reads the inventory API and never writes Woo from the browser.",
     "field": "Software Engineering / Data Science",
     "form_type": "Technical design doc"
@@ -498,7 +498,7 @@
     "date": "February 12, 2024",
     "role": "Web Developer",
     "words": 12012,
-    "est_pages": 43,
+    "est_pages": 48,
     "description": "Incident report for an expired TLS certificate on the Lakeshore pickup host, with renew windows and a refuse on an uninventoried wildcard.",
     "field": "Software Engineering / Data Science",
     "form_type": "Incident report"
@@ -512,7 +512,7 @@
     "date": "March 7, 2024",
     "role": "Web Developer",
     "words": 12095,
-    "est_pages": 43,
+    "est_pages": 46,
     "description": "Capacity memo for Lakeshore inventory-api on AWS, refusing a larger instance after a weekend graph that was Woo PHP, not the API.",
     "field": "Software Engineering / Data Science",
     "form_type": "Other"
@@ -540,7 +540,7 @@
     "date": "May 28, 2024",
     "role": "Web Developer",
     "words": 12022,
-    "est_pages": 47,
+    "est_pages": 46,
     "description": "Load test report for the Lakeshore Memorial Day sale soak at 2.4x Tuesday traffic, with fail gates and a refuse on 1x soak.",
     "field": "Software Engineering / Data Science",
     "form_type": "Other"
@@ -554,7 +554,7 @@
     "date": "July 11, 2024",
     "role": "Web Developer",
     "words": 13913,
-    "est_pages": 43,
+    "est_pages": 42,
     "description": "SOP for Lakeshore inventory MySQL schema changes using expand/contract, an 8 second lock budget, and no same-release column drop.",
     "field": "Software Engineering / Data Science",
     "form_type": "Runbook / SOPs"
@@ -568,7 +568,7 @@
     "date": "August 22, 2024",
     "role": "Web Developer",
     "words": 11965,
-    "est_pages": 48,
+    "est_pages": 45,
     "description": "On-call SOP for Lakeshore inventory-api and Woo projection, with named tells and a refuse on 'check Grafana' page bodies.",
     "field": "Software Engineering / Data Science",
     "form_type": "Runbook / SOPs"
@@ -582,7 +582,7 @@
     "date": "September 19, 2024",
     "role": "Web Developer",
     "words": 12880,
-    "est_pages": 43,
+    "est_pages": 45,
     "description": "Terraform design for Lakeshore inventory-api on AWS: four modules, stg/prod workspaces, one account, no 4k-line main.tf.",
     "field": "Software Engineering / Data Science",
     "form_type": "Technical design doc"
@@ -610,7 +610,7 @@
     "date": "February 20, 2025",
     "role": "Web Developer",
     "words": 12016,
-    "est_pages": 49,
+    "est_pages": 48,
     "description": "Evaluation rubric for Lakeshore category copy and titles, failing city stuffing and locking a product-category-store pattern.",
     "field": "Software Engineering / Data Science",
     "form_type": "Other"
@@ -624,7 +624,7 @@
     "date": "March 13, 2025",
     "role": "Web Developer",
     "words": 14770,
-    "est_pages": 42,
+    "est_pages": 43,
     "description": "Technical design for a Redis cache in front of Lakeshore on-hand reads, with a 45s TTL and fail-open to MySQL instead of stale-as-fresh.",
     "field": "Software Engineering / Data Science",
     "form_type": "Technical design doc"
@@ -638,7 +638,7 @@
     "date": "April 10, 2025",
     "role": "Web Developer",
     "words": 14266,
-    "est_pages": 43,
+    "est_pages": 45,
     "description": "Postmortem for Lakeshore weekend double-charges on prepaid pickup, covering the missing idempotency key, 11 refunds, and the refuse on laptop capture retries.",
     "field": "Software Engineering / Data Science",
     "form_type": "Incident report"
@@ -652,7 +652,7 @@
     "date": "June 13, 2024",
     "role": "Web Developer",
     "words": 12011,
-    "est_pages": 43,
+    "est_pages": 44,
     "description": "SOP for onboarding a Hillcrest Digital web client: access, staging host, ticket prefix, first deploy window, and a refuse on Slack password paste.",
     "field": "Software Engineering / Data Science",
     "form_type": "Runbook / SOPs"
@@ -666,7 +666,7 @@
     "date": "July 25, 2024",
     "role": "Web Developer",
     "words": 14871,
-    "est_pages": 43,
+    "est_pages": 48,
     "description": "SOP for Hillcrest Digital secrets and access: per-client vaults, seven-day expiry after pause, logged break-glass, no secrets in tickets.",
     "field": "Software Engineering / Data Science",
     "form_type": "Runbook / SOPs"
@@ -680,7 +680,7 @@
     "date": "February 6, 2025",
     "role": "Web Developer",
     "words": 13643,
-    "est_pages": 43,
+    "est_pages": 44,
     "description": "Technical design for per-client Hillcrest staging hosts, refusing a shared preview after a Harbor/Lakeshore leftover mix.",
     "field": "Software Engineering / Data Science",
     "form_type": "Technical design doc"
