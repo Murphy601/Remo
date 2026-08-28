@@ -1,0 +1,30 @@
+artifacts = ["/app/cdc_fabric.v"]
+
+[task]
+name = "afterquery/credit-cdc-fabric"
+
+[metadata]
+author_name = "Yasharth Singh"
+author_email = "yasharthsingh1777@gmail.com"
+difficulty_explanation = "The hard part is not wiring an async FIFO. Two producers can be valid on the same clk_a cycle, so one write port just loses a beat. On clk_b you have to stay on a VC until EOP, but between packets c_allow can sit on the other VC for a long stretch, and if you keep presenting the one that is not allowed you deadlock. Credit returns are a 2-bit count per VC (0, 1 or 2), not a pulse. A toggle on cr0_n[0] looks fine at 1:1 and drops a return of 2, and it also dies when clk_b is 7x clk_a. Only four credits in flight per VC, so a leaked token shows up."
+solution_explanation = "One FWFT dual-clock FIFO per VC (Gray write/read pointers, depth 8). An output register on clk_b holds the beat until c_ready and c_allow both accept it, stays on that VC until EOP, then picks among the VCs that have data and are allowed. Credit returns of 1 or 2 go through a second small async FIFO per VC and a counter on clk_a turns them into one p_credit pulse at a time. No combo path between the two clocks."
+verification_explanation = "A C++ Verilator harness, not a Verilog TB compiled with the DUT, drives both producers, the allow mask, and the packed credit counts, and checks each VC on its own. Stdout and stderr are thrown away. The parent gives the sim a 32-byte secret on fd 7 and only trusts a GRADE line on fd 8 whose SHA-256 matches. system/fork/exec are linker-wrapped to EPERM. The sim runs setpriv'd as uid 65534. /tests is 700 root. /logs/verifier is 700 while the DUT is running. Same ratio, phase, reset, traffic and allow sweep as the instruction."
+category = "Hardware"
+subcategory = "RTL"
+tags = ["verilog", "cdc", "credit-flow-control", "async-fifo", "virtual-channel"]
+expert_time_estimate_hours = 8
+relevant_experience = "FPGA/ASIC interconnect: dual-clock links with more than one VC, credit flow control, Gray-pointer FIFOs, and Verilator scoreboards."
+
+[verifier]
+timeout_sec = 1800.0
+environment_mode = "separate"
+
+[agent]
+timeout_sec = 14400.0
+
+[environment]
+build_timeout_sec = 600.0
+cpus = 2
+memory_mb = 4096
+storage_mb = 10240
+gpus = 0
