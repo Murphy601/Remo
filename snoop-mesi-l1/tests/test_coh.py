@@ -80,8 +80,8 @@ def sim():
     exe = os.path.join(OBJ, "coh_sim")
     if not os.path.isfile(exe):
         pytest.fail("no binary")
-    os.chmod(exe, 0o751)
-    os.chmod(OBJ, 0o711)
+    os.chmod(exe, 0o755)
+    os.chmod(OBJ, 0o755)
     return exe
 
 
@@ -131,8 +131,6 @@ def _run(exe, row):
             "--regid=%d" % GID,
             "--clear-groups",
             "--nnp",
-            "--inh-caps=-all",
-            "--bounding-set=-all",
         ] + argv
 
     key = os.urandom(32)
@@ -164,6 +162,7 @@ def _run(exe, row):
             stdin=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
+            cwd=OBJ,
             close_fds=True,
             pass_fds=(FD_KEY, FD_OUT),
             start_new_session=True,
