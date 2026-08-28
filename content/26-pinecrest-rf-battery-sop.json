@@ -1,0 +1,336 @@
+{
+  "slug": "26-pinecrest-rf-battery-sop",
+  "doc_id": "PCF-SOP-2024-141",
+  "title": "SOP: RF battery swap and end-of-shift charge",
+  "subtitle": "Cage board, 30 percent rule, ticket PCF-2402",
+  "doc_type": "Runbook / SOP",
+  "form_type": "Runbook / SOPs",
+  "kicker": "Pinecrest Fulfillment  \u00b7  Battery  \u00b7  PCF-2402",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "In force",
+  "date": "December 5, 2024",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Lila Voss (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Lila Voss (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-SOP-2024-141; PCF-2402; PCF-SOP-2024-041",
+  "summary": "Lila Voss asked for a written cut of SOP. Current path: Totes are unofficial chargers. This document locks 30 percent swap, cage charge, board serial. leave guns in totes 'for the next wave' is out because November 21: 11 dead guns in totes, 22-minute start delay. Board would have shown it.",
+  "form_description": "SOP for Pinecrest RF batteries: swap under 30 percent, cage charge at end of shift, refusing tote-as-charger.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "November 11, 2024",
+      "Jeilen Jones",
+      "Outline after PCF-SOP-2024-141 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "November 23, 2024",
+      "Jeilen Jones",
+      "Numbers from Lila Voss. leave guns in totes 'for the next wave' still in the room."
+    ],
+    [
+      "0.9",
+      "December 1, 2024",
+      "Jeilen Jones",
+      "leave guns in totes 'for the next wave' written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "December 5, 2024",
+      "Jeilen Jones",
+      "Cut. Host cage.pinecrest.internal. Ticket PCF-2402."
+    ],
+    [
+      "1.1",
+      "December 5, 2024",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "SOP: RF battery swap and end-of-shift charge"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-SOP-2024-141 on December 5, 2024. Lila Voss asked for a written bound after the current path (Totes are unofficial chargers) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host cage.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on leave guns in totes 'for the next wave', then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Swap under 30 percent. End of shift, gun on the cage charger, serial on the board. Tote is not a charger. I am not restating a hallway yes. leave guns in totes 'for the next wave' is out because November 21: 11 dead guns in totes, 22-minute start delay. Board would have shown it. Cost of doing nothing is already in the numbers: dead=11, delay=22, pct=30, guns=40, weeks=2, totes=11, board=1, start=06:12. Sibling tickets PCF-2402 and PCF-SOP-2024-041. I will not reopen leave guns in totes 'for the next wave' in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Swap under 30 percent. End of shift, gun on the cage charger, serial on the board. Tote is not a charger."
+    },
+    {
+      "type": "p",
+      "text": "Background on cage.pinecrest.internal. Totes are unofficial chargers. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on rf.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-SOP-2024-141 names the pull. If those numbers moved after December 5, 2024, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-SOP-2024-141. leave guns in totes 'for the next wave' is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Totes are unofficial chargers",
+          "Numbers already in play: dead=11, delay=22, pct=30, guns=40, weeks=2, totes=11, board=1, start=06:12",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "leave guns in totes 'for the next wave'",
+          "November 21: 11 dead guns in totes, 22-minute start delay. Board would have shown it.",
+          "Named on PCF-SOP-2024-041",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "30 percent swap, cage charge, board serial",
+          "Host cage.pinecrest.internal, ticket PCF-2402",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: huddle.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (26): refuse on leave guns in totes 'for the next wave', lock is 30 percent swap, cage charge, board serial. I will not hide a process change inside a 'quick align' on PCF-2402."
+    },
+    {
+      "type": "quote",
+      "text": "A gun left in a tote overnight is how the morning starts with 11 dead units.",
+      "attrib": "Lila Voss, November 21"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on cage.pinecrest.internal: the path Lila Voss actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on rf.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "30 percent swap, cage charge, board serial Host cage.pinecrest.internal. Ticket PCF-2402. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: 30 percent swap, cage charge, board serial. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-SOP-2024-141. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: cage.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-SOP-2024-141. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "dead",
+          "11",
+          "cage.pinecrest.internal",
+          "PCF-2402"
+        ],
+        [
+          "delay",
+          "22",
+          "cage.pinecrest.internal",
+          "PCF-2402"
+        ],
+        [
+          "pct",
+          "30",
+          "cage.pinecrest.internal",
+          "PCF-2402"
+        ],
+        [
+          "guns",
+          "40",
+          "cage.pinecrest.internal",
+          "PCF-2402"
+        ],
+        [
+          "weeks",
+          "2",
+          "cage.pinecrest.internal",
+          "PCF-2402"
+        ],
+        [
+          "totes",
+          "11",
+          "cage.pinecrest.internal",
+          "PCF-2402"
+        ],
+        [
+          "board",
+          "1",
+          "cage.pinecrest.internal",
+          "PCF-2402"
+        ],
+        [
+          "start",
+          "06:12",
+          "cage.pinecrest.internal",
+          "PCF-2402"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: leave guns in totes 'for the next wave'"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "leave guns in totes 'for the next wave' is out. November 21: 11 dead guns in totes, 22-minute start delay. Board would have shown it. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: leave guns in totes 'for the next wave' comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-2402. Numbers I will not 'simplify': dead=11, delay=22, pct=30, guns=40, weeks=2, totes=11, board=1, start=06:12. Same clock as the front. I will not mix clocks to make cage.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does huddle.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-SOP-2024-041.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Lila Voss: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on cage.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits cage.pinecrest.internal, PCF-SOP-2024-141, and the last three working pages. Access that has to move is who can change rf.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-2402. cage.pinecrest.internal.",
+      "text": "# PCF-SOP-2024-141 read-only first\ndate\necho host=cage.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-2402\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-2402 before any write.",
+        "Confirm on cage.pinecrest.internal with the read-only commands above.",
+        "If the refuse on leave guns in totes 'for the next wave' is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-SOP-2024-141. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on leave guns in totes 'for the next wave'",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host cage.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Lila Voss",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-2402. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-SOP-2024-141"
+    },
+    {
+      "type": "p",
+      "text": "rf.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-SOP-2024-041 before anyone says the leftover is 'implied.' Implied leftovers are how leave guns in totes 'for the next wave' almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-SOP-2024-141"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim leave guns in totes 'for the next wave' is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host cage.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-2402"
+    },
+    {
+      "type": "p",
+      "text": "First useful is 30 percent swap, cage charge, board serial, not a prettier board or a louder huddle. Lila Voss sees that slice on cage.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-SOP-2024-141."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (26)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-SOP-2024-141. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: huddle.pinecrest.internal."
+    }
+  ]
+}

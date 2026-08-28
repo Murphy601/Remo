@@ -1,0 +1,336 @@
+{
+  "slug": "32-pinecrest-shift-handoff-notes",
+  "doc_id": "PCF-MTG-2025-030",
+  "title": "Shift handoff notes, first to second, March 13",
+  "subtitle": "Open waves, frozen bins, jacks, ticket PCF-2700",
+  "doc_type": "Meeting notes",
+  "form_type": "Other",
+  "kicker": "Pinecrest Fulfillment  \u00b7  Handoff  \u00b7  PCF-2700",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Issued",
+  "date": "March 13, 2025",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Marcus Hale (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Marcus Hale (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-MTG-2025-030; PCF-2700; PCF-RB-2023-031",
+  "summary": "Marcus Hale asked for a written cut of Shift handoff notes. Current path: Wave at the door, 'you'll see it'. This document locks written four-line handoff, no vibe. verbal only handoff is out because March 6 verbal missed a frozen bin. Second shift picked it and undid a count.",
+  "form_description": "Shift handoff notes for Pinecrest first-to-second: open waves, frozen bins, red-tagged jacks, refusing a verbal-only pass.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "February 17, 2025",
+      "Jeilen Jones",
+      "Outline after PCF-MTG-2025-030 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "March 1, 2025",
+      "Jeilen Jones",
+      "Numbers from Marcus Hale. verbal only handoff still in the room."
+    ],
+    [
+      "0.9",
+      "March 9, 2025",
+      "Jeilen Jones",
+      "verbal only handoff written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "March 13, 2025",
+      "Jeilen Jones",
+      "Cut. Host huddle.pinecrest.internal. Ticket PCF-2700."
+    ],
+    [
+      "1.1",
+      "March 13, 2025",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Shift handoff notes, first to second, March 13"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-MTG-2025-030 on March 13, 2025. Marcus Hale asked for a written bound after the current path (Wave at the door, 'you'll see it') stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host huddle.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on verbal only handoff, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Written: open waves, frozen bins, red-tagged jacks, cooler leftover. Second shift does not inherit a vibe. I am not restating a hallway yes. verbal only handoff is out because March 6 verbal missed a frozen bin. Second shift picked it and undid a count. Cost of doing nothing is already in the numbers: lines=4, missed=1, weeks=1, jacks=18, frozen=1, waves=2, verbal=0, second=1. Sibling tickets PCF-2700 and PCF-RB-2023-031. I will not reopen verbal only handoff in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Written: open waves, frozen bins, red-tagged jacks, cooler leftover. Second shift does not inherit a vibe."
+    },
+    {
+      "type": "p",
+      "text": "Background on huddle.pinecrest.internal. Wave at the door, 'you'll see it'. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on wms.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-MTG-2025-030 names the pull. If those numbers moved after March 13, 2025, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-MTG-2025-030. verbal only handoff is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Wave at the door, 'you'll see it'",
+          "Numbers already in play: lines=4, missed=1, weeks=1, jacks=18, frozen=1, waves=2, verbal=0, second=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "verbal only handoff",
+          "March 6 verbal missed a frozen bin. Second shift picked it and undid a count.",
+          "Named on PCF-RB-2023-031",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "written four-line handoff, no vibe",
+          "Host huddle.pinecrest.internal, ticket PCF-2700",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: equip.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (32): refuse on verbal only handoff, lock is written four-line handoff, no vibe. I will not hide a process change inside a 'quick align' on PCF-2700."
+    },
+    {
+      "type": "quote",
+      "text": "A handoff that is 'we were busy' is not a handoff.",
+      "attrib": "Marcus Hale, March 13"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on huddle.pinecrest.internal: the path Marcus Hale actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on wms.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "written four-line handoff, no vibe Host huddle.pinecrest.internal. Ticket PCF-2700. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: written four-line handoff, no vibe. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-MTG-2025-030. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: huddle.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-MTG-2025-030. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "lines",
+          "4",
+          "huddle.pinecrest.internal",
+          "PCF-2700"
+        ],
+        [
+          "missed",
+          "1",
+          "huddle.pinecrest.internal",
+          "PCF-2700"
+        ],
+        [
+          "weeks",
+          "1",
+          "huddle.pinecrest.internal",
+          "PCF-2700"
+        ],
+        [
+          "jacks",
+          "18",
+          "huddle.pinecrest.internal",
+          "PCF-2700"
+        ],
+        [
+          "frozen",
+          "1",
+          "huddle.pinecrest.internal",
+          "PCF-2700"
+        ],
+        [
+          "waves",
+          "2",
+          "huddle.pinecrest.internal",
+          "PCF-2700"
+        ],
+        [
+          "verbal",
+          "0",
+          "huddle.pinecrest.internal",
+          "PCF-2700"
+        ],
+        [
+          "second",
+          "1",
+          "huddle.pinecrest.internal",
+          "PCF-2700"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: verbal only handoff"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "verbal only handoff is out. March 6 verbal missed a frozen bin. Second shift picked it and undid a count. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: verbal only handoff comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-2700. Numbers I will not 'simplify': lines=4, missed=1, weeks=1, jacks=18, frozen=1, waves=2, verbal=0, second=1. Same clock as the front. I will not mix clocks to make huddle.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does equip.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-RB-2023-031.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Marcus Hale: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on huddle.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits huddle.pinecrest.internal, PCF-MTG-2025-030, and the last three working pages. Access that has to move is who can change wms.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-2700. huddle.pinecrest.internal.",
+      "text": "# PCF-MTG-2025-030 read-only first\ndate\necho host=huddle.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-2700\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-2700 before any write.",
+        "Confirm on huddle.pinecrest.internal with the read-only commands above.",
+        "If the refuse on verbal only handoff is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-MTG-2025-030. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on verbal only handoff",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host huddle.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-2700. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-MTG-2025-030"
+    },
+    {
+      "type": "p",
+      "text": "wms.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-RB-2023-031 before anyone says the leftover is 'implied.' Implied leftovers are how verbal only handoff almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-MTG-2025-030"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim verbal only handoff is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host huddle.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-2700"
+    },
+    {
+      "type": "p",
+      "text": "First useful is written four-line handoff, no vibe, not a prettier board or a louder huddle. Marcus Hale sees that slice on huddle.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-MTG-2025-030."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (32)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-MTG-2025-030. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: equip.pinecrest.internal."
+    }
+  ]
+}

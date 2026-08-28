@@ -1,0 +1,336 @@
+{
+  "slug": "20-pinecrest-variance-incident",
+  "doc_id": "PCF-INC-2024-101",
+  "title": "Incident: forward-pick variance on SKU 7721 after ghost confirm",
+  "subtitle": "September 11, 2024, ticket PCF-INC-2024-101",
+  "doc_type": "Incident report",
+  "form_type": "Incident report",
+  "kicker": "Pinecrest Fulfillment  \u00b7  Variance  \u00b7  PCF-INC-2024-101",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Closed",
+  "date": "September 13, 2024",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Lila Voss (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Lila Voss (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-INC-2024-101; PCF-1744; PCF-SOP-2024-052",
+  "summary": "Lila Voss asked for a written cut of Incident. Current path: Adjusts from RF history, no freeze. This document locks freeze, blind recount, write-up on ghost confirm. adjust the bin to the last picker's memory is out because Memory is how 36 became a story. Lila wants a count, not a vibe.",
+  "form_description": "Incident report for a Pinecrest forward-pick ghost quantity on SKU 7721, refusing memory adjusts instead of a frozen blind count.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "August 20, 2024",
+      "Jeilen Jones",
+      "Outline after PCF-INC-2024-101 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "September 1, 2024",
+      "Jeilen Jones",
+      "Numbers from Lila Voss. adjust the bin to the last picker's memory still in the room."
+    ],
+    [
+      "0.9",
+      "September 9, 2024",
+      "Jeilen Jones",
+      "adjust the bin to the last picker's memory written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "September 13, 2024",
+      "Jeilen Jones",
+      "Cut. Host slot.pinecrest.internal. Ticket PCF-INC-2024-101."
+    ],
+    [
+      "1.1",
+      "September 13, 2024",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Incident: forward-pick variance on SKU 7721 after ghost confirm"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-INC-2024-101 on September 13, 2024. Lila Voss asked for a written bound after the current path (Adjusts from RF history, no freeze) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host slot.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on adjust the bin to the last picker's memory, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Recount frozen. Blind SOP is in force. Ghost confirm is a write-up. Do not adjust from memory. I am not restating a hallway yes. adjust the bin to the last picker's memory is out because Memory is how 36 became a story. Lila wants a count, not a vibe. Cost of doing nothing is already in the numbers: sys=36, bin=4, weeks_ghost=2, sku=7721, weeks=1, write=1, freeze=1, mem=0. Sibling tickets PCF-1744 and PCF-SOP-2024-052. I will not reopen adjust the bin to the last picker's memory in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Recount frozen. Blind SOP is in force. Ghost confirm is a write-up. Do not adjust from memory."
+    },
+    {
+      "type": "p",
+      "text": "Background on slot.pinecrest.internal. Adjusts from RF history, no freeze. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on wms.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-INC-2024-101 names the pull. If those numbers moved after September 13, 2024, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-INC-2024-101. adjust the bin to the last picker's memory is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Adjusts from RF history, no freeze",
+          "Numbers already in play: sys=36, bin=4, weeks_ghost=2, sku=7721, weeks=1, write=1, freeze=1, mem=0",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "adjust the bin to the last picker's memory",
+          "Memory is how 36 became a story. Lila wants a count, not a vibe.",
+          "Named on PCF-SOP-2024-052",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "freeze, blind recount, write-up on ghost confirm",
+          "Host slot.pinecrest.internal, ticket PCF-INC-2024-101",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: aisle-b2.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (20): refuse on adjust the bin to the last picker's memory, lock is freeze, blind recount, write-up on ghost confirm. I will not hide a process change inside a 'quick align' on PCF-1744."
+    },
+    {
+      "type": "quote",
+      "text": "WMS said 36. The bin had 4. We had been confirming a ghost for two weeks.",
+      "attrib": "Lila Voss, September 11"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on slot.pinecrest.internal: the path Lila Voss actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on wms.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "freeze, blind recount, write-up on ghost confirm Host slot.pinecrest.internal. Ticket PCF-INC-2024-101. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: freeze, blind recount, write-up on ghost confirm. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-INC-2024-101. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: slot.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-INC-2024-101. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "sys",
+          "36",
+          "slot.pinecrest.internal",
+          "PCF-INC-2024-101"
+        ],
+        [
+          "bin",
+          "4",
+          "slot.pinecrest.internal",
+          "PCF-INC-2024-101"
+        ],
+        [
+          "weeks_ghost",
+          "2",
+          "slot.pinecrest.internal",
+          "PCF-INC-2024-101"
+        ],
+        [
+          "sku",
+          "7721",
+          "slot.pinecrest.internal",
+          "PCF-INC-2024-101"
+        ],
+        [
+          "weeks",
+          "1",
+          "slot.pinecrest.internal",
+          "PCF-INC-2024-101"
+        ],
+        [
+          "write",
+          "1",
+          "slot.pinecrest.internal",
+          "PCF-INC-2024-101"
+        ],
+        [
+          "freeze",
+          "1",
+          "slot.pinecrest.internal",
+          "PCF-INC-2024-101"
+        ],
+        [
+          "mem",
+          "0",
+          "slot.pinecrest.internal",
+          "PCF-INC-2024-101"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: adjust the bin to the last picker's memory"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "adjust the bin to the last picker's memory is out. Memory is how 36 became a story. Lila wants a count, not a vibe. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: adjust the bin to the last picker's memory comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-1744. Numbers I will not 'simplify': sys=36, bin=4, weeks_ghost=2, sku=7721, weeks=1, write=1, freeze=1, mem=0. Same clock as the front. I will not mix clocks to make slot.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does aisle-b2.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-SOP-2024-052.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Lila Voss: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on slot.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits slot.pinecrest.internal, PCF-INC-2024-101, and the last three working pages. Access that has to move is who can change wms.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-INC-2024-101. slot.pinecrest.internal.",
+      "text": "# PCF-INC-2024-101 read-only first\ndate\necho host=slot.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-INC-2024-101\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-INC-2024-101 before any write.",
+        "Confirm on slot.pinecrest.internal with the read-only commands above.",
+        "If the refuse on adjust the bin to the last picker's memory is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-INC-2024-101. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on adjust the bin to the last picker's memory",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host slot.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Lila Voss",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-INC-2024-101. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-INC-2024-101"
+    },
+    {
+      "type": "p",
+      "text": "wms.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-SOP-2024-052 before anyone says the leftover is 'implied.' Implied leftovers are how adjust the bin to the last picker's memory almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-INC-2024-101"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim adjust the bin to the last picker's memory is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host slot.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-INC-2024-101"
+    },
+    {
+      "type": "p",
+      "text": "First useful is freeze, blind recount, write-up on ghost confirm, not a prettier board or a louder huddle. Lila Voss sees that slice on slot.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-INC-2024-101."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (20)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-INC-2024-101. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: aisle-b2.pinecrest.internal."
+    }
+  ]
+}

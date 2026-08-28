@@ -13,7 +13,7 @@ from datetime import date, timedelta
 
 
 TICKET_RE = re.compile(
-    r"\b(?:CLH|RVH|OAK|NS|REC|INC|TDD|PRD|SOP|RB|ADR|REQ|MEM|MTG|EVAL|TST|WTS|HBR|LSH|HIL)-[A-Z0-9-]{2,20}\b"
+    r"\b(?:CLH|RVH|OAK|NS|REC|INC|TDD|PRD|SOP|RB|ADR|REQ|MEM|MTG|EVAL|TST|WTS|HBR|LSH|HIL|PCF|RDW)-[A-Z0-9-]{2,20}\b"
 )
 HOST_RE = re.compile(r"\b[a-z0-9._-]+\.(?:internal|net|example|local)\b", re.I)
 
@@ -52,7 +52,7 @@ def extract_facts(spec: dict) -> dict:
         ),
     )
     named = list(dict.fromkeys(named))[:14]
-    author = spec.get("author") or "Michael Gilfilian"
+    author = spec.get("author") or "Jeilen Jones"
     if author not in named:
         named = [author] + named
     slug = spec.get("slug", "doc")
@@ -79,18 +79,14 @@ def extract_facts(spec: dict) -> dict:
         "title": spec.get("title", "Untitled"),
         "doc_type": spec.get("doc_type", "Internal document"),
         "date": spec.get("date", "January 1, 2023"),
-        "author": spec.get("author", "Michael Gilfilian"),
+        "author": spec.get("author", "Jeilen Jones"),
         "tickets": tickets or [spec.get("doc_id", "DOC-1")],
-        "hosts": hosts or ["ops-bastion-01.internal"],
-        "people": named or [author, "Brett Holtz"],
+        "hosts": hosts or ["wms.pinecrest.internal"],
+        "people": named or [author, "Marcus Hale"],
         "client": (
-            "Whetstone"
-            if "whetstone" in slug
-            else "Harbor"
-            if "harbor" in slug
-            else "Lakeshore"
-            if "lakeshore" in slug
-            else "Hillcrest"
+            "Ridgeway"
+            if "ridgeway" in slug
+            else "Pinecrest"
         ),
         "genre": genre,
         "rng": random.Random(seed),
@@ -121,54 +117,47 @@ def _choice(f, seq):
 
 
 def _ns(f):
-    c = f.get("client") or "Hillcrest"
+    c = f.get("client") or "Pinecrest"
     table = {
-        "Whetstone": ["helpdesk", "aad-sync", "imaging", "wts-it"],
-        "Harbor": ["shopify", "harbor-web", "seo-jobs", "pickup"],
-        "Lakeshore": ["inv-api", "woo-prod", "stock-sync", "storefront"],
-        "Hillcrest": ["client-ops", "staging", "hillcrest", "access"],
+        "Pinecrest": ["pick", "pack", "dock", "wms"],
+        "Ridgeway": ["bay", "parts", "pm", "roadtest"],
     }
-    return _choice(f, table.get(c, table["Hillcrest"]))
+    return _choice(f, table.get(c, table["Pinecrest"]))
 
 
 def _deploy(f):
-    c = f.get("client") or "Hillcrest"
+    c = f.get("client") or "Pinecrest"
     table = {
-        "Whetstone": ["mailbox-sync", "triage-bot", "intune-pkg", "fileshare-agent"],
-        "Harbor": ["theme-preview", "inventory-sync", "checkout", "ga4-proxy"],
-        "Lakeshore": ["inventory-api", "woo-app", "stock-worker", "react-admin"],
-        "Hillcrest": ["onboard-bot", "secrets-proxy", "staging-router", "pipeline"],
+        "Pinecrest": ["wave-pick", "rf-gun", "pallet-jack", "labeler"],
+        "Ridgeway": ["pm-sheet", "brake-cart", "hoist", "scan-tool"],
     }
-    return _choice(f, table.get(c, table["Hillcrest"]))
+    return _choice(f, table.get(c, table["Pinecrest"]))
 
 
 def _read_only_commands(f, host, ticket, topic, extra=""):
     ns = _ns(f)
     deploy = _deploy(f)
-    c = f.get("client") or "Hillcrest"
-    head = f"# {f['doc_id']} / {ticket} / {topic}\ndate -u\n"
+    c = f.get("client") or "Pinecrest"
+    head = f"# {f['doc_id']} / {ticket} / {topic}\ndate\n"
     if extra:
         head += extra.rstrip() + "\n"
-    if c == "Whetstone":
+    if c == "Ridgeway":
         body = (
-            f"az account show --query name -o tsv\n"
-            f"ssh {host} 'uptime; df -h | head'\n"
-            f"az ad user list --query '[].userPrincipalName' -o tsv | head\n"
-        )
-    elif c == "Harbor":
-        body = (
-            f"ssh {host} 'uptime; df -h | head'\n"
-            f"shopify theme list | head\n"
+            f"# shop floor, read-only first\n"
+            f"echo host={host} bay={ns} job={deploy}\n"
+            f"echo 'check hoist tag, PM sheet, and last torque values'\n"
+            f"echo 'do not start the engine until the tag is green'\n"
         )
     else:
         body = (
-            f"ssh {host} 'uptime; df -h | head'\n"
-            f"kubectl -n {ns} get pods -l app={deploy} -o wide | head\n"
-            f"kubectl -n {ns} logs deploy/{deploy} --tail=80 | tail\n"
+            f"# warehouse floor, read-only first\n"
+            f"echo host={host} area={ns} tool={deploy}\n"
+            f"echo 'RF login, location count, last short-pick'\n"
+            f"echo 'do not confirm a pick you cannot see'\n"
         )
     tail = (
         f"# stop. write the last error in one sentence on {ticket}\n"
-        f"# do not apply a change from a laptop in a freeze"
+        f"# do not override a safety lock because a rate looks low"
     )
     return head + body + tail
 
@@ -268,12 +257,12 @@ def _cont_notes(f):
     topics = [
         ("WIP / extra scope", "out of v1 unless the acceptor signs a new slice"),
         ("date pressure", "the earlier date is a wish; the later date is the one with owners"),
-        ("serial / special inventory", "one-store leftover, not a silent include"),
+        ("serial / special inventory", "one-tote leftover, not a silent include"),
         ("in-transit / cross-site", "needs a written rule, not a hallway yes"),
         ("tooling rewrite", "rejected if it is a second product"),
-        ("header vs URI / protocol", "the main body already picked; do not relitigate in Slack"),
+        ("RF vs paper leftover", "the main body already picked; do not relitigate in Slack"),
         ("weekend coverage", "not in the SLA unless the ops owner signs it"),
-        ("PII / identifiers in chat", "never; redact_dump or equivalent first"),
+        ("names or SSNs in chat", "never; redact the photo or dump first"),
     ]
     f["rng"].shuffle(topics)
     rows = []
@@ -374,20 +363,36 @@ def _cont_runbook(f):
             ),
         },
     ]
-    branches = [
-        ("lag vs stuck partition", "one partition not moving, others draining"),
-        ("poison payload", "same offset retries, error class repeats"),
-        ("empty success", "job green, row count 0"),
-        ("secret skew", "auth fail or silent skip"),
-        ("OOM / nested blob", "restart loop on one replica"),
-        ("truncate / trailer mismatch", "file landed, count lies"),
-        ("replica lag after a count", "reads look fine, totals lie"),
-        ("freeze / no-deploy window", "you must not apply Helm"),
-        ("rollback vs roll forward", "migrate already expanded a column"),
-        ("split brain / two primaries", "stop writes, call the DBA path"),
-        ("facility or plant isolation", "take one feed down, not the API"),
-        ("PII or identifier in a dump", "stop pasting, run redaction"),
-    ]
+    if f.get("client") == "Ridgeway":
+        branches = [
+            ("red hoist tag", "tag is red, bay still looks open"),
+            ("no-start leftover", "crank, no fire, last fuel work still open"),
+            ("air-brake leak", "pedal sinks, gauge drops on a parked tractor"),
+            ("comeback", "same complaint inside 14 days"),
+            ("parts without VIN", "counter ticket has no VIN or last-8"),
+            ("tool not returned", "scan-tool still out after shift"),
+            ("PM skip", "sticker green, sheet blank on the oil line"),
+            ("freeze / no-override window", "you must not override a safety lock"),
+            ("torque leftover", "nut was moved, value not written"),
+            ("road test without brakes", "someone wants a drive before the brake check"),
+            ("A/C electrical short", "clutch click, fuse pops"),
+            ("oil sample skip", "drain done, bottle never filled"),
+        ]
+    else:
+        branches = [
+            ("skip-scan leftover", "location not scanned, rate still looks high"),
+            ("RF login fail", "gun will not take the badge"),
+            ("short-pick vs mispick", "tote short, or the wrong SKU in the tote"),
+            ("conveyor jam", "belt stopped, carton crushed at the nose"),
+            ("cooler vs dry mix", "cold SKU in a dry tote"),
+            ("labeler jam", "print head stuck, labels doubling"),
+            ("WMS count lag", "RF says 12, slot looks empty"),
+            ("freeze / no-override window", "you must not override a safety lock"),
+            ("dock seal leftover", "trailer pulled, seal not written"),
+            ("dead battery mid-wave", "gun dies, wave still assigned"),
+            ("paper sheet leftover", "printed path fights the RF path"),
+            ("lot-code miss", "outbound needs a lot, gun did not ask"),
+        ]
     f["rng"].shuffle(branches)
     for i, (name, tell) in enumerate(branches, 1):
         blocks.append({"type": "h2", "text": f"Branch {i}: {name}"})
@@ -395,9 +400,9 @@ def _cont_runbook(f):
             {
                 "type": "p",
                 "text": (
-                    f"Tell: {tell}. Confirm on {_host(f, i)} before you touch replicas. "
+                    f"Tell: {tell}. Confirm on {_host(f, i)} before you touch the floor. "
                     f"Ticket {_ticket(f, i)} if one is not already open. "
-                    f"Precondition: you are on-call or {_person(f, 1)} knows. "
+                    f"Precondition: you are on the shift or {_person(f, 1)} knows. "
                     f"Stop if you are inside a freeze and this is not a SEV1 as defined in the front of this SOP."
                 ),
             }
@@ -414,9 +419,9 @@ def _cont_runbook(f):
                 "type": "steps",
                 "items": [
                     f"Write the symptom and the tell on {_ticket(f, i)} before any write.",
-                    f"If poison: fence the record, do not raise retries past {_n(f, 3, 8)}.",
-                    f"If lag with all partitions moving: scale only after {_person(f, 2)} would scale. Memory bump is a last resort.",
-                    f"If rollback: read the schema SOP. Expanded columns roll forward.",
+                    f"If a bad tote or a bad job: fence it, do not keep scanning past {_n(f, 3, 8)} retries.",
+                    f"If the wave is moving but one aisle is stuck: call {_person(f, 2)} before you skip the aisle.",
+                    f"If rollback: read the SOP. An expanded slot or a cut bolt rolls forward, not back.",
                     f"Wake {_person(f, 1)} only after the read-only commands and a one-line diagnosis.",
                 ],
             }
@@ -437,14 +442,14 @@ def _cont_incident(f):
         },
     ]
     changes = [
-        ("idempotency key", "filename, offset, or missing content hash"),
-        ("alert join", "freshness green while uniqueness is red"),
-        ("staging lie", "too few partitions, too little data, missed the bug"),
-        ("review hole", "cleanup PR renamed a field"),
-        ("replay without a lock", "weekend plus Monday both ran"),
-        ("on-call guess", "restarted before reading the tell"),
-        ("customer clock vs match clock", "window-closed signal fired too early"),
-        ("blast radius", "one bad file became the whole drop"),
+        ("scan key", "location, tote, or missing lot code"),
+        ("alert join", "rate board green while mispick is red"),
+        ("practice lie", "too few totes in the drill, missed the bug"),
+        ("review hole", "someone renamed a SKU on a cleanup sheet"),
+        ("replay without a lock", "weekend plus Monday both counted the same pallet"),
+        ("floor guess", "restarted the gun before reading the tell"),
+        ("customer clock vs dock clock", "window-closed signal fired too early"),
+        ("blast radius", "one bad tote became the whole wave"),
     ]
     f["rng"].shuffle(changes)
     rows = []
@@ -498,9 +503,9 @@ def _cont_incident(f):
         {
             "type": "p",
             "text": (
-                f"A rewrite of {f['title']} as therapy is out. A new observability vendor is out "
-                f"unless {_person(f, 1)} reopens that memo. Weekend auto-remediation is out. "
-                f"What is in: the change table above, a drill in staging that used to succeed "
+                f"A rewrite of {f['title']} as therapy is out. A new rate-board vendor is out "
+                f"unless {_person(f, 1)} reopens that memo. Weekend auto-fix of a jam is out. "
+                f"What is in: the change table above, a drill on the floor that used to succeed "
                 f"at being wrong, and a customer/ops sentence {_person(f, 3)} can send without "
                 f"calling me. If a date slips, the owner writes a new date on {_ticket(f, 0)}. "
                 f"I will not convert slippage into a status emoji."
@@ -511,10 +516,10 @@ def _cont_incident(f):
         {
             "type": "p",
             "text": (
-                f"Detection that should have fired is a join, not a hero. Freshness green while "
-                f"uniqueness is red is a miss. Empty success is a miss. I want the page body "
+                f"Detection that should have fired is a join, not a hero. Rate green while "
+                f"mispick is red is a miss. Empty success is a miss. I want the page body "
                 f"to name the tell. Host for the drill: {_host(f, 0)}. Owner for alert text: "
-                f"{_person(f, 2)}. I will not accept 'check Grafana' as the page."
+                f"{_person(f, 2)}. I will not accept 'check the rate board' as the page."
             ),
         }
     )
@@ -537,7 +542,7 @@ def _cont_memo(f):
             "kind": "decision",
             "label": "Ask",
             "text": (
-                f"Approve the position in the front of this memo. Fund the named engineering days. "
+                f"Approve the position in the front of this memo. Fund the named floor hours. "
                 f"Reject the cheap path we already killed. Review at day 21 with {_person(f, 1)} and {_person(f, 2)}."
             ),
         },
@@ -560,8 +565,8 @@ def _cont_memo(f):
             {
                 "type": "p",
                 "text": (
-                    f"{label}. SLA miss rate I would defend: about {miss}% of month-end windows, using the same clock as the front of the memo. "
-                    f"Engineering days {days}. Year-1 extra cash about ${cash:.1f}k on top of what we already burn. "
+                    f"{label}. Miss rate I would defend: about {miss}% of month-end windows, using the same clock as the front of the memo. "
+                    f"Floor hours {days}. Year-1 extra cash about ${cash:.1f}k on top of what we already burn. "
                     f"Ops pages: {_n(f, 1, 9)} a month if we stay, {_n(f, 1, 4)} if we switch. "
                     f"I want {_person(f, 1)} to pick a path in writing on {_ticket(f, 0)}."
                 ),
@@ -572,7 +577,7 @@ def _cont_memo(f):
         {
             "type": "table",
             "caption": "Decision table for a VP skim. Details stay in the headings.",
-            "headers": ["ID", "Path", "Month-end miss", "Eng days", "Year-1 extra", "Note"],
+            "headers": ["ID", "Path", "Month-end miss", "Floor hours", "Year-1 extra", "Note"],
             "rows": rows,
         }
     )
@@ -608,7 +613,7 @@ def _cont_memo(f):
             "text": (
                 f"Sensitivity I will actually run if asked: plus {_n(f, 15, 30)} percent volume "
                 f"on the same clock, and a poison file on day 21. If dual-run uniqueness breaks, "
-                f"we abort. Host {_host(f, 0)}. I will not average QPS to hide a close spike. "
+                f"we abort. Host {_host(f, 0)}. I will not average units-per-hour to hide a close spike. "
                 f"{f['author']} will bring the dry-run count, not a slide with a hockey stick."
             ),
         }
@@ -631,7 +636,7 @@ def _cont_prd(f):
     stories = [
         ("P0 path", "the user finishes the job they opened the tool for"),
         ("partial fill", "one source down, banner on, no fake complete"),
-        ("permission miss", "403 not 401, no stack trace"),
+        ("permission miss", "wrong badge, no stack of SKUs on the gun"),
         ("replay / retry", "idempotent, audit who hit it"),
         ("empty result", "explain empty, do not look broken"),
         ("late data", "show stale with a time, do not hide it"),
@@ -648,9 +653,9 @@ def _cont_prd(f):
                 "text": (
                     f"User: {_person(f, i + 2)} or the role they stand in for. "
                     f"Good: {good}. "
-                    f"Metric I will argue for: time-to-first-useful-screen under {_n(f, 2, 12)}.{_n(f, 0, 9)}s on campus or ops VLAN, "
-                    f"not a vanity QPS number. "
-                    f"Out of scope: {_choice(f, ['pretty formatting', 'a second write-back to the POS', 'editing payloads in the UI', 'GraphQL for v1', 'notes full-text search'])}."
+                    f"Metric I will argue for: time-to-first-useful-scan under {_n(f, 2, 12)}.{_n(f, 0, 9)}s on the floor VLAN, "
+                    f"not a vanity rate number. "
+                    f"Out of scope: {_choice(f, ['pretty formatting', 'a second write-back to the WMS', 'editing picks in the UI', 'voice pick for v1', 'notes full-text search'])}."
                 ),
             }
         )
@@ -680,10 +685,10 @@ def _cont_prd(f):
             "type": "p",
             "text": (
                 f"Pretty formatting of payloads in the UI is out. A second write-back into "
-                f"the source system is out. GraphQL for v1 is out. Full-text search on notes "
+                f"the source system is out. Voice-pick for v1 is out. Full-text search on notes "
                 f"is out. {_person(f, 1)} can add them as a new slice with a new acceptor "
                 f"signature. I will not hide them as 'polish' on {_ticket(f, 0)}. Banner, "
-                f"empty, and 403 states in the stories above are in. Happy-path screenshots "
+                f"empty, and stop states in the stories above are in. Happy-path screenshots "
                 f"that skip those states are not acceptance."
             ),
         }
@@ -694,8 +699,8 @@ def _cont_prd(f):
             "text": (
                 f"Device leftover: the actual device the user holds, not a desktop lie. "
                 f"If store staff or floor ops is the user, I will time the P0 path on that "
-                f"device on store VLAN or ops VLAN. Metric is time-to-first-useful-screen, "
-                f"not QPS. Host if we have to prove it: {_host(f, 0)}. {f['author']} will "
+                f"device on the floor VLAN. Metric is time-to-first-useful-scan, "
+                f"not units-per-hour vanity. Host if we have to prove it: {_host(f, 0)}. {f['author']} will "
                 f"not accept a laptop demo as that proof."
             ),
         }
@@ -705,7 +710,7 @@ def _cont_prd(f):
 
 def _cont_test(f):
     blocks = [
-        {"type": "h1", "text": f"Cases that must fail in CI if someone 'cleans up' a fixture ({f['doc_id']})"},
+        {"type": "h1", "text": f"Cases that must fail in the audit if someone 'cleans up' a sample ({f['doc_id']})"},
         {
             "type": "p",
             "text": (
@@ -738,7 +743,7 @@ def _cont_test(f):
                 "type": "p",
                 "text": (
                     f"Why it stays: {why}. "
-                    f"Fixture lives next to the test, not in a laptop path. No PII. "
+                    f"Fixture lives next to the test, not in a laptop path. No customer names. "
                     f"If someone deletes this test, they also delete the incident it maps to ({_ticket(f, i)}) and they do that in review, not in a drive-by. "
                     f"Host used in soak if needed: {_host(f, i)}."
                 ),
@@ -750,8 +755,8 @@ def _cont_test(f):
                 "caption": f"Name the test after the bug, not after the function.",
                 "text": (
                     f"# {f['doc_id']} case {i}\n"
-                    f"pytest -k '{name.split()[0].lower()}' -q\n"
-                    f"# fail closed if the fixture hash changes without a ticket\n"
+                    f"echo 'audit -k {name.split()[0].lower()}'\n"
+                    f"# fail closed if the sample hash changes without a ticket\n"
                     f"# { _ticket(f, i) }"
                 ),
             }
@@ -772,9 +777,9 @@ def _cont_test(f):
             "text": (
                 f"A skip is a ticket. A flake is a capture, not a shrug about the network. "
                 f"{_person(f, 2)} owns golden fixtures. {f['author']} owns this case list. "
-                f"Soak against {_host(f, 0)} is ticketed and it is not a reason to skip CI. "
-                f"If staging has one partition and prod has dozens, staging will bless a "
-                f"rebalance bug. I want that written next to the partition case, not "
+                f"Soak against {_host(f, 0)} is ticketed and it is not a reason to skip the audit. "
+                f"If the drill has one aisle and prod has dozens, the drill will bless a "
+                f"rebalance bug. I want that written next to the aisle case, not "
                 f"rediscovered on a Monday."
             ),
         }
@@ -809,12 +814,12 @@ def _cont_design(f):
         ("lock budget", f"{_n(f, 4, 12)}s exclusive, abort and retry off-peak"),
         ("idempotency", "content hash plus source seq, not filename"),
         ("partial failure", "one poison record must not stall the day"),
-        ("clocks", "settlement_date vs created_at, pick one partition key"),
-        ("cardinality", "do not put sku on a span attribute"),
-        ("residency", "us-east-1, no 'just a replica in another region'"),
-        ("PII", "not in logs, not in Slack, redact before a zip"),
-        ("versioning", "URI or it is not versioned for this client"),
-        ("backfill vs OLTP", "historical load never on the primary"),
+        ("clocks", "close date vs created date, pick one"),
+        ("cardinality", "do not put sku on a stray label"),
+        ("residency", "this building, no 'just a copy in the other site'"),
+        ("names", "not in logs, not in Slack, redact before a zip"),
+        ("versioning", "a dated SOP or it is not versioned for this client"),
+        ("backfill vs live pick", "historical load never on the live path"),
         ("cache down", "degrade, miss the SLA, do not lie"),
         ("plant/facility code type", "03 vs 3 still breaks joins"),
         ("exactly-once claims", "we will not claim EOS we do not have"),
@@ -828,7 +833,7 @@ def _cont_design(f):
                 "text": (
                     f"Rule: {rule}. "
                     f"We hit this on {_host(f, i)} or the sibling path in {_ticket(f, i)}. "
-                    f"Rejected alternative: {_choice(f, ['raise timeouts and hope', 'a stored-proc monster', 'header-only versioning', 'poll faster', 'rewrite in a new language this quarter', 'GraphQL federation', 'one 4k-line main.tf', 'auto-merge on name'])}. "
+                    f"Rejected alternative: {_choice(f, ['raise timeouts and hope', 'a paper-only path forever', 'skip the scan', 'poll faster', 'rewrite the WMS this quarter', 'one giant spreadsheet', 'auto-merge on SKU name'])}. "
                     f"Owner if this breaks in prod: on-call first, then {_person(f, 1)} if it crosses a freeze."
                 ),
             }
@@ -861,7 +866,7 @@ def _cont_design(f):
             "text": (
                 f"Poison record on one partition, freeze in effect, replica lag after a count "
                 f"that looked fine. The write path stops. We do not raise retries. We do not "
-                f"Helm-apply. We page {_person(f, 1)} after read-only commands on {_host(f, 0)}. "
+                f"WMS override. We page {_person(f, 1)} after read-only commands on {_host(f, 0)}. "
                 f"Customer/ops get a window and a user-visible effect, not a hostname. "
                 f"Exactly-once is not a claim I will make. Idempotency we actually have is "
                 f"the one in the front. I want that bad day in the review notes, not in a "
@@ -918,7 +923,7 @@ def _remainder_h1(f):
             f"What {_person(f, 1)} still has to sign",
         ],
         "test": [
-            f"Cases that stay in CI ({f['doc_id']})",
+            f"Cases that stay in the audit ({f['doc_id']})",
             f"Fixture rules the QA owner will not relitigate",
             f"Regressions we already paid for",
         ],
@@ -972,8 +977,8 @@ def _ht(f, kind, topic):
         ],
         "schema": [
             f"Expand then contract ({topic})",
-            f"Column order for {ticket}",
-            f"Do not drop readers in the same release",
+            f"Slot order for {ticket}",
+            f"Do not drop readers in the same wave",
         ],
         "meeting": [
             f"After-call note: {topic}",
@@ -1171,7 +1176,7 @@ def _frag_bag(f):
         "I will drop my leftover role the day {who} takes {ticket}",
         "abort beats a lying dual-run",
         "a vendor discount is not evidence",
-        "config, Helm, and a flag flip are all changes",
+        "config, a WMS flag, and a rate change are all changes",
         "I will not mix clocks to make {topic} look healthier",
         "the call in the front still holds and this is leftover work only",
     ]
@@ -1258,7 +1263,7 @@ def _para_deck(f):
         ),
         lambda topic: (
             f"Schema leftover for {topic}: add, backfill, then drop. Lock budget {_n(f, 4, 12)}s "
-            f"on {host(3)}. {who(2)} signs the count on {ticket(2)} before contract. Helm "
+            f"on {host(3)}. {who(2)} signs the count on {ticket(2)} before contract. A WMS "
             f"rollback after an expand is the wrong instinct."
         ),
         lambda topic: (
@@ -1294,7 +1299,7 @@ def _para_deck(f):
             f"Two FAQs is how we shipped the last wrong field name. Front matter changes in review."
         ),
         lambda topic: (
-            f"Config, Helm, and a flag flip on {host(0)} are all changes. {topic} does not "
+            f"Config, a WMS flag, and a rate change on {host(0)} are all changes. {topic} does not "
             f"get a courtesy thaw. {who(1)} argues SEV1 on {ticket(0)} with a count or waits."
         ),
         lambda topic: (
@@ -1307,7 +1312,7 @@ def _para_deck(f):
             f"in one sentence, we stop."
         ),
         lambda topic: (
-            f"{f['client']} still owns the business clock on {topic}. We own the engineering one. "
+            f"{f['client']} still owns the business clock on {topic}. We own the floor one. "
             f"If they disagree, the first sentence of the update says so. {who(3)} does not "
             f"get {host(2)} in that sentence."
         ),
@@ -1324,12 +1329,12 @@ def _para_deck(f):
             f"bad record into CPU on {host(0)}. Fence it. {who(2)} gets the fence note on {ticket(1)}."
         ),
         lambda topic: (
-            f"Field rename in place is how {topic} becomes a client mapping death. Version it "
-            f"or do not ship. {ticket(3)} is not a cleanup PR."
+            f"SKU rename in place is how {topic} becomes a mapping death. Version it "
+            f"or do not ship. {ticket(3)} is not a cleanup sheet."
         ),
         lambda topic: (
-            f"Partition count in staging has to be high enough to catch a rebalance or {topic} "
-            f"will bless a bad build. {who(1)} owns that check before we call staging green."
+            f"Tote count in the drill has to be high enough to catch a rebalance or {topic} "
+            f"will bless a bad cut. {who(1)} owns that check before we call the drill green."
         ),
         lambda topic: (
             f"I want the last error line from {host(3)} in {ticket(2)} before anyone says they "
@@ -1357,63 +1362,125 @@ def _para_deck(f):
 
 def _genre_topics(f):
     g = f["genre"]
+    if f.get("client") == "Ridgeway":
+        shared = [
+            "date pressure versus a date with owners",
+            "the freeze clock versus a 'small apply'",
+            "VINs or customer names in chat or a photo",
+            "a cleanup sheet that renames a part",
+            "a practice bay too empty to catch the bug",
+            "weekend coverage that is not in the SLA",
+            "a vendor overlay we already rejected",
+            "hoist tag lag after a count that looked fine",
+            "login skew that looks like 'no work'",
+            "a dashboard screenshot standing in for a permalink",
+            "owner as a team name instead of a person",
+            "averaging billed hours instead of testing the close",
+            "dropping a PM line in the same day as the readers",
+            "raising retries on a bad job",
+        ]
+        extra = {
+            "notes": [
+                "what we told people who were absent",
+                "a quote that is not a decision",
+                "the parking lot that must stay parked",
+                "after-call with the shop lead",
+            ],
+            "runbook": [
+                "pre-page: is this even a page",
+                "red tag versus leak versus empty-success",
+                "who to wake after the read-only commands",
+                "rollback when the PM sheet already expanded",
+            ],
+            "incident": [
+                "detection gap, not a hero narrative",
+                "customer clock versus bay clock",
+                "the change we will not pretend to finish this quarter",
+                "the drill that must fail in the practice bay",
+            ],
+            "memo": [
+                "cost of doing nothing through next month-end",
+                "cheap path we already killed",
+                "day-21 abort if the dual-run lies",
+                "what a written no from the shop lead looks like",
+            ],
+            "prd": [
+                "partial fill with the banner on",
+                "wrong badge, stop, do not invent a VIN",
+                "empty result that must not look broken",
+                "the scan tool the tech actually holds",
+            ],
+            "test": [
+                "sample hash change without a ticket",
+                "timezone on road-test close",
+                "customer names in the shop log",
+                "checklist that repeats page 1",
+            ],
+            "design": [
+                "lock budget on the primary bay",
+                "idempotency that is not a filename",
+                "residency: no 'just a copy in the other bay'",
+                "exactly-once claims we will not make",
+            ],
+        }.get(g, [])
+        return extra + shared
     shared = [
         "date pressure versus a date with owners",
         "the freeze clock versus a 'small apply'",
-        "identifiers in chat, logs, or a support zip",
-        "a cleanup PR that renames a field",
-        "staging that is too small to catch the bug",
+        "names in chat, logs, or a support zip",
+        "a cleanup sheet that renames a SKU",
+        "a drill that is too small to catch the bug",
         "weekend coverage that is not in the SLA",
         "a vendor overlay we already rejected",
-        "replica lag after a count that looked fine",
-        "secret skew that looks like 'no work'",
+        "WMS lag after a count that looked fine",
+        "RF login skew that looks like 'no work'",
         "a dashboard screenshot standing in for a permalink",
         "owner as a team name instead of a person",
-        "averaging QPS instead of testing the close",
-        "dropping a column in the same release as the readers",
-        "raising retries on a poison record",
+        "averaging UPH instead of testing the close",
+        "dropping a slot in the same wave as the readers",
+        "raising retries on a poison tote",
     ]
     extra = {
         "notes": [
             "what we told people who were absent",
             "a quote that is not a decision",
             "the parking lot that must stay parked",
-            "after-call with the EM",
+            "after-call with the shift lead",
         ],
         "runbook": [
             "pre-page: is this even a page",
-            "poison versus lag versus empty-success",
+            "poison tote versus lag versus empty-success",
             "who to wake after the read-only commands",
-            "rollback when the migrate already expanded",
+            "rollback when the slot already expanded",
         ],
         "incident": [
             "detection gap, not a hero narrative",
-            "customer clock versus match clock",
+            "customer clock versus dock clock",
             "the change we will not pretend to finish this quarter",
-            "the drill that must fail in staging",
+            "the drill that must fail on the floor",
         ],
         "memo": [
             "cost of doing nothing through next month-end",
             "cheap path we already killed",
             "day-21 abort if the dual-run lies",
-            "what a written no from the EM looks like",
+            "what a written no from the shift lead looks like",
         ],
         "prd": [
             "partial fill with the banner on",
-            "403 not 401",
+            "wrong badge, stop, do not invent a SKU",
             "empty result that must not look broken",
-            "the device the user actually holds",
+            "the RF gun the picker actually holds",
         ],
         "test": [
-            "fixture hash change without a ticket",
-            "timezone on order close or settlement_date",
-            "PII in CI logs",
-            "pagination that repeats page 1",
+            "sample hash change without a ticket",
+            "timezone on order close",
+            "names in the pack-station log",
+            "label reprint that repeats page 1",
         ],
         "design": [
-            "lock budget on the primary",
+            "lock budget on the primary aisle",
             "idempotency that is not a filename",
-            "residency: no 'just a replica elsewhere'",
+            "residency: no 'just a replica in the other building'",
             "exactly-once claims we will not make",
         ],
     }.get(g, [])
@@ -1587,7 +1654,7 @@ def _shape_handoff(f, i, topic):
                 f"{f['doc_id']}. I will not leave a Slack screenshot as the record. {who} "
                 f"is owner until they accept in writing. Date I want that written: "
                 f"{due.strftime('%B %-d, %Y')}. Access that has to move: who can ssh or "
-                f"kubectl, who can merge, who can talk to {f['client']}. If any of those is "
+                f"RF login, who can confirm a pick, who can talk to {f['client']}. If any of those is "
                 f"still me after that date, the handoff failed."
             ),
         },
@@ -1659,7 +1726,7 @@ def _shape_commands(f, i, topic):
                 f"I will not restart {host} because it is the fastest way to stop a page. "
                 f"Restart is a listed step with a listed rollback. If I am wrong, the next "
                 f"page is louder. Memory bump is a last resort and it is a ticket, not a "
-                f"one-line kubectl set. {f['author']} has already been wrong about that "
+                f"one-line WMS override. {f['author']} has already been wrong about that "
                 f"twice this year."
             ),
         },
@@ -1770,9 +1837,9 @@ def _shape_schema(f, i, topic):
         {
             "type": "p",
             "text": (
-                f"The column or field that moved is the one {topic} cares about on {host}. "
-                f"Order is expand, backfill, contract. I will not drop a column in the same "
-                f"release as a code deploy that still reads it. Owner {who}. Ticket {ticket}. "
+                f"The slot or field that moved is the one {topic} cares about on {host}. "
+                f"Order is expand, backfill, contract. I will not drop a slot in the same "
+                f"wave as a pick path that still reads it. Owner {who}. Ticket {ticket}. "
                 f"Dual-write window is measured in hours, not left open. If the backfill is "
                 f"still running at a freeze, I stop the freeze, not the backfill, unless "
                 f"legal says otherwise. I write the stop condition on {ticket} before I "
@@ -1782,17 +1849,17 @@ def _shape_schema(f, i, topic):
         {
             "type": "p",
             "text": (
-                f"Rejected: rewrite the type in place because Postgres will 'just cast it.' "
+                f"Rejected: rewrite the SKU in place because WMS will 'just recast it.' "
                 f"That is how we locked {host} for longer than the {_n(f, 4, 12)}s budget "
-                f"last time. Historical load never runs on the OLTP primary. Cost the job, "
+                f"last time. Historical load never runs on the live pick path. Cost the job, "
                 f"then run it. Number from the front I am using as the size hint: {_num(f, 2)}."
             ),
         },
         {
             "type": "steps",
             "items": [
-                f"Add the new column or field. Ship readers that tolerate both. {ticket}.",
-                f"Backfill in batches of {_n(f, 5, 40)}k. Pause on replication lag.",
+                f"Add the new slot or field. Ship readers that tolerate both. {ticket}.",
+                f"Backfill in batches of {_n(f, 5, 40)}k. Pause on WMS lag.",
                 "Flip writers. Watch error class, not CPU.",
                 f"Contract only after {who} signs the count on {ticket}.",
             ],
@@ -1800,9 +1867,9 @@ def _shape_schema(f, i, topic):
         {
             "type": "p",
             "text": (
-                f"If Helm rollback is the instinct after a bad migrate, stop. Expanded "
-                f"columns roll forward. Read the schema SOP. {f['author']} will not approve "
-                f"a rollback that leaves the database ahead of the chart."
+                f"If rolling back a slot move is the instinct after a bad count, stop. Expanded "
+                f"slots roll forward. Read the slotting SOP. {f['author']} will not approve "
+                f"a rollback that leaves WMS ahead of the chart."
             ),
         },
     ]
@@ -1856,8 +1923,8 @@ def _shape_fixture(f, i, topic):
         {
             "type": "p",
             "text": (
-                f"Fixture for {topic} lives next to the test, not in a laptop path. No PII, "
-                f"no PAN. Host if we have to soak: {host}. Assert the smallest row that still "
+                f"Fixture for {topic} lives next to the audit, not in a laptop path. No customer "
+                f"names, no card numbers. Host if we have to soak: {host}. Assert the smallest tote that still "
                 f"fails without the fix. I will not copy a sanitized production dump; it is "
                 f"too big and it hid the bug twice. Owner {who}. Ticket {ticket}. If the test "
                 f"is skipped, the skip reason is a ticket, not a comment."
@@ -1868,27 +1935,27 @@ def _shape_fixture(f, i, topic):
             "caption": f"Name the test after the bug. {ticket}.",
             "text": (
                 f"# {f['doc_id']} / {topic}\n"
-                f"pytest -k '{_choice(f, ['timezone', 'idempotent', 'empty_batch', 'pagination', 'pii_log'])}' -q\n"
-                f"# fail if the fixture hash changes without {ticket}\n"
+                f"echo 'audit -k {_choice(f, ['timezone', 'idempotent', 'empty_batch', 'reprint', 'name_in_log'])}'\n"
+                f"# fail if the sample hash changes without {ticket}\n"
                 f"# do not record against {host} from a laptop"
             ),
         },
         {
             "type": "p",
             "text": (
-                f"Setup should take under two minutes on a laptop. Teardown drops the fixture "
-                f"database. Flakes I will not blame on the network without a packet capture. "
+                f"Setup should take under two minutes on a laptop. Teardown drops the sample "
+                f"sheet. Flakes I will not blame on the network without a packet capture. "
                 f"If someone deletes this test, they also delete the incident it maps to "
-                f"({ticket}) and they do that in review. {who} owns golden fixtures. "
+                f"({ticket}) and they do that in review. {who} owns golden samples. "
                 f"{f['author']} owns the case list."
             ),
         },
         {
             "type": "p",
             "text": (
-                f"Staging partition count has to be high enough to catch a rebalance. If "
-                f"prod has dozens of partitions, a staging cluster with one will bless a "
-                f"bad build. I want that written next to {topic}, not rediscovered on a "
+                f"Drill tote count has to be high enough to catch a rebalance. If "
+                f"prod has dozens of aisles, a drill with one will bless a "
+                f"bad cut. I want that written next to {topic}, not rediscovered on a "
                 f"Monday. Number from the front I am not going to 'simplify': {_num(f, 3)}."
             ),
         },
@@ -1924,11 +1991,11 @@ def _shape_capacity(f, i, topic):
         {
             "type": "p",
             "text": (
-                f"If we need more brokers or more pods, I want the reason to be {topic}, "
+                f"If we need more RF guns or more dock doors, I want the reason to be {topic}, "
                 f"not a round number someone saw in a vendor deck. Do-nothing through next "
                 f"month-end still has a miss rate I will write down. {who} picks in writing "
-                f"on {ticket}. I will not hide a hardware buy inside a 'temporary' memory "
-                f"limit."
+                f"on {ticket}. I will not hide a hardware buy inside a 'temporary' battery "
+                f"swap."
             ),
         },
     ]
@@ -1941,9 +2008,9 @@ def _shape_access(f, i, topic):
     grant_line = _choice(
         f,
         [
-            f"IRSA or the equivalent role on {host} is the grant. A laptop copy of the kube file is not.",
-            f"The grant is the cluster role already named for {host}. A home-directory kube file is leftover access to revoke.",
-            f"Break-glass is the path with a log. A local kube file sitting on a laptop is not that path.",
+            f"WMS role on {host} is the grant. A sticky-note password is not.",
+            f"The grant is the RF role already named for {host}. A home-directory login file is leftover access to revoke.",
+            f"Break-glass is the path with a log. A written PIN sitting on a laptop is not that path.",
         ],
     )
     return [
@@ -1955,13 +2022,13 @@ def _shape_access(f, i, topic):
                 f"in a screenshot. {topic} is not a reason to paste a token into chat. Owner "
                 f"{who}. Ticket {ticket}. If I need a temporary grant, it expires. If I need "
                 f"a production query, I use the replica and I log the query id. Wrong secret "
-                f"looks healthy as 'no work.' Alert on zero rows, not on HTTP 200."
+                f"looks healthy as 'no work.' Alert on zero rows, not on a green gun."
             ),
         },
         {
             "type": "p",
             "text": (
-                f"Break-glass is a separate path. Missing role is 403, missing token is 401. "
+                f"Break-glass is a separate path. Missing role is a stop, missing badge is a stop. "
                 f"I will not collapse those because the UI looks nicer. {_person(f, 1)} "
                 f"accepted that split in the front matter. I am not reopening it here. "
                 f"{grant_line}"
@@ -2130,7 +2197,7 @@ def _shape_freeze(f, i, topic):
                 f"If the front of this file already named a freeze, {topic} does not get a "
                 f"courtesy thaw on {host}. A small apply is still an apply. SEV1 is the SOP "
                 f"definition. {who} can argue SEV1 on {ticket} with a count, not with a demo "
-                f"time. I will not Helm-apply from a laptop because the window is 'almost "
+                f"time. I will not override a lock from a laptop because the window is 'almost "
                 f"over.'"
             ),
         },

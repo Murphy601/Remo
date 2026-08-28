@@ -1,4 +1,10 @@
-# House style for Hillcrest Digital Word files
+# House style for Pinecrest / Ridgeway Word files
+
+World file: `catalog/world.json`
+Author: Jeilen Jones. Do not put a phone number or personal email in the Word files.
+Do not name Nolan, Lincoln College, or Lake Oconee Academy as employers.
+Hosts use `.internal` (`pinecrest.internal`, `ridgeway.internal`).
+
 
 World file: `catalog/world.json`
 Schema: `catalog/SCHEMA.txt`
@@ -15,20 +21,20 @@ Output: `documents/<slug>.docx`
   "subtitle": "...",
   "doc_type": "...",
   "kicker": "...",
-  "org": "Hillcrest Digital" | "Whetstone Industrial",
+  "org": "Pinecrest Fulfillment" | "Ridgeway Diesel",
   "classification": "INTERNAL",
   "version": "last revision row",
   "status": "matches the kind of document",
-  "date": "November 18, 2019",
-  "author": "Michael Gilfilian",
-  "role": "Web Developer" | "IT Support Intern",
+  "date": "November 9, 2023",
+  "author": "Jeilen Jones",
+  "role": "Order Picker" | "Shop Helper",
   "team": "...",
   "audience": "...",
   "owners": "...",
   "related": "ticket IDs and sibling docs",
   "summary": "2-4 sentences, what the doc is and who it is for.",
   "form_description": "1-2 sentences. What it is and what it was written for.",
-  "field": "Software Engineering / Data Science",
+  "field": "Operations / Logistics",
   "revision_history": [["1.0","date","name","notes"], ...],
   "blocks": [ ... ]
 }

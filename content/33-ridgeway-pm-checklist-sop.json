@@ -1,0 +1,336 @@
+{
+  "slug": "33-ridgeway-pm-checklist-sop",
+  "doc_id": "RDW-SOP-2022-011",
+  "title": "SOP: preventative maintenance checklist, bay 1-4",
+  "subtitle": "Oil, filters, belts, ticket RDW-2204",
+  "doc_type": "Runbook / SOP",
+  "form_type": "Runbook / SOPs",
+  "kicker": "Ridgeway Diesel  \u00b7  PM  \u00b7  RDW-2204",
+  "org": "Ridgeway Diesel",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "In force",
+  "date": "July 14, 2022",
+  "author": "Jeilen Jones",
+  "role": "Shop Helper",
+  "team": "Ridgeway Diesel, shop floor",
+  "audience": "Cal Dreher (requester); Cal Dreher (acceptor); Nina Soto and Jeilen Jones (build); Hank Morel (leftover host); Tess Brant (absentee pack)",
+  "owners": "Cal Dreher (acceptor), Cal Dreher (requester), Nina Soto (ops), Jeilen Jones (this document)",
+  "related": "RDW-2204; RDW-SOP-2022-011; RDW-2204-QA",
+  "summary": "Cal Dreher asked for a written cut of SOP. Current path: Verbal PM, sheets in a drawer. This document locks sheet, initials, no dash-light as PM. dash-light PM instead of the sheet is out because June 22 truck came back in 11 days with a belt Cal had not initialed. Sheet would have shown the skip.",
+  "form_description": "PM checklist SOP for Ridgeway Diesel bays 1-4, requiring initialed lines and refusing a dash-light as the PM.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "June 20, 2022",
+      "Jeilen Jones",
+      "Outline after RDW-2204 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "July 2, 2022",
+      "Jeilen Jones",
+      "Numbers from Cal Dreher. dash-light PM instead of the sheet still in the room."
+    ],
+    [
+      "0.9",
+      "July 10, 2022",
+      "Jeilen Jones",
+      "dash-light PM instead of the sheet written up as a refuse. Nina Soto review."
+    ],
+    [
+      "1.0",
+      "July 14, 2022",
+      "Jeilen Jones",
+      "Cut. Host shop.ridgeway.internal. Ticket RDW-2204."
+    ],
+    [
+      "1.1",
+      "July 14, 2022",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "SOP: preventative maintenance checklist, bay 1-4"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for RDW-2204 on July 14, 2022. Cal Dreher asked for a written bound after the current path (Verbal PM, sheets in a drawer) stopped being honest. I am Jeilen Jones, Shop Helper, writing for Cal Dreher, Nina Soto, and Hank Morel. Primary host shop.ridgeway.internal. If you are skimming, jump the decision callout, then the refuse on dash-light PM instead of the sheet, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Sheet per bay. Oil, filter, belts, leaks, lights. Initial each line. No 'looked fine' as a line. I am not restating a hallway yes. dash-light PM instead of the sheet is out because June 22 truck came back in 11 days with a belt Cal had not initialed. Sheet would have shown the skip. Cost of doing nothing is already in the numbers: bays=4, days=11, lines=18, weeks=3, belts=1, oil=15W40, skip=1, drawer=1. Sibling tickets RDW-SOP-2022-011 and RDW-2204-QA. I will not reopen dash-light PM instead of the sheet in a side thread because someone asked for a rate waiver. Nina Soto is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Sheet per bay. Oil, filter, belts, leaks, lights. Initial each line. No 'looked fine' as a line."
+    },
+    {
+      "type": "p",
+      "text": "Background on shop.ridgeway.internal. Verbal PM, sheets in a drawer. That is the system Cal Dreher lives with, not a slide. I timed or pulled the leftover on bay-01.ridgeway.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket RDW-2204 names the pull. If those numbers moved after July 14, 2022, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for RDW-SOP-2022-011. dash-light PM instead of the sheet is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Verbal PM, sheets in a drawer",
+          "Numbers already in play: bays=4, days=11, lines=18, weeks=3, belts=1, oil=15W40, skip=1, drawer=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "dash-light PM instead of the sheet",
+          "June 22 truck came back in 11 days with a belt Cal had not initialed. Sheet would have sho",
+          "Named on RDW-2204-QA",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "sheet, initials, no dash-light as PM",
+          "Host shop.ridgeway.internal, ticket RDW-2204",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Hank Morel owns a leftover that is easy to skip: parts.ridgeway.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (33): refuse on dash-light PM instead of the sheet, lock is sheet, initials, no dash-light as PM. I will not hide a process change inside a 'quick align' on RDW-SOP-2022-011."
+    },
+    {
+      "type": "quote",
+      "text": "If it is not on the sheet, it did not happen. A green light on the dash is not a PM.",
+      "attrib": "Cal Dreher, shop lead, June 30"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on shop.ridgeway.internal: the path Cal Dreher actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on bay-01.ridgeway.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "sheet, initials, no dash-light as PM Host shop.ridgeway.internal. Ticket RDW-2204. Acceptor Cal Dreher."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: sheet, initials, no dash-light as PM. If that clock collides with a safety lock, the date moves and the scope does not. Cal Dreher hears the new date on RDW-2204. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: shop.ridgeway.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for RDW-SOP-2022-011. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "bays",
+          "4",
+          "shop.ridgeway.internal",
+          "RDW-2204"
+        ],
+        [
+          "days",
+          "11",
+          "shop.ridgeway.internal",
+          "RDW-2204"
+        ],
+        [
+          "lines",
+          "18",
+          "shop.ridgeway.internal",
+          "RDW-2204"
+        ],
+        [
+          "weeks",
+          "3",
+          "shop.ridgeway.internal",
+          "RDW-2204"
+        ],
+        [
+          "belts",
+          "1",
+          "shop.ridgeway.internal",
+          "RDW-2204"
+        ],
+        [
+          "oil",
+          "15W40",
+          "shop.ridgeway.internal",
+          "RDW-2204"
+        ],
+        [
+          "skip",
+          "1",
+          "shop.ridgeway.internal",
+          "RDW-2204"
+        ],
+        [
+          "drawer",
+          "1",
+          "shop.ridgeway.internal",
+          "RDW-2204"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: dash-light PM instead of the sheet"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "dash-light PM instead of the sheet is out. June 22 truck came back in 11 days with a belt Cal had not initialed. Sheet would have shown the skip. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: dash-light PM instead of the sheet comes back wearing a new coat. I want that named in review notes, not rediscovered by Hank Morel on a Monday. Ticket RDW-SOP-2022-011. Numbers I will not 'simplify': bays=4, days=11, lines=18, weeks=3, belts=1, oil=15W40, skip=1, drawer=1. Same clock as the front. I will not mix clocks to make shop.ridgeway.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Hank Morel: does parts.ridgeway.internal stay in the path? Yes, no, or a new date on RDW-2204-QA.",
+        "Nina Soto: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Cal Dreher: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on shop.ridgeway.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits shop.ridgeway.internal, RDW-2204, and the last three working pages. Access that has to move is who can change bay-01.ridgeway.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Nina Soto accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. RDW-2204. shop.ridgeway.internal.",
+      "text": "# RDW-SOP-2022-011 read-only first\ndate\necho host=shop.ridgeway.internal bay check, hoist tag, PM sheet\necho 'do not start the engine until the tag is green'\n# stop. write the last error in one sentence on RDW-2204\n# do not override a safety lock to free a bay"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on RDW-2204 before any write.",
+        "Confirm on shop.ridgeway.internal with the read-only commands above.",
+        "If the refuse on dash-light PM instead of the sheet is being reopened, stop and ping Cal Dreher.",
+        "Wake Nina Soto only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for RDW-SOP-2022-011. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Cal Dreher",
+          "Nina Soto"
+        ],
+        [
+          "Refuse on dash-light PM instead of the sheet",
+          "Jeilen Jones",
+          "Cal Dreher",
+          "Hank Morel"
+        ],
+        [
+          "Host shop.ridgeway.internal",
+          "Nina Soto",
+          "Cal Dreher",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Hank Morel",
+          "Cal Dreher",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Tess Brant is on that list. Object on RDW-2204. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to RDW-SOP-2022-011"
+    },
+    {
+      "type": "p",
+      "text": "bay-01.ridgeway.internal is in this file because skipping it is how the last near-miss happened. Hank Morel owns the check. I want a count on RDW-2204-QA before anyone says the leftover is 'implied.' Implied leftovers are how dash-light PM instead of the sheet almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in RDW-SOP-2022-011"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim dash-light PM instead of the sheet is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host shop.ridgeway.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for RDW-2204"
+    },
+    {
+      "type": "p",
+      "text": "First useful is sheet, initials, no dash-light as PM, not a prettier board or a louder huddle. Cal Dreher sees that slice on shop.ridgeway.internal. If the slice needs a second process, that is a new ticket and Cal Dreher is in the thread. I will not hide it inside RDW-SOP-2022-011."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (33)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on RDW-2204. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: parts.ridgeway.internal."
+    }
+  ]
+}

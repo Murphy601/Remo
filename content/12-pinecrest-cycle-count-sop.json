@@ -1,0 +1,336 @@
+{
+  "slug": "12-pinecrest-cycle-count-sop",
+  "doc_id": "PCF-SOP-2024-052",
+  "title": "SOP: cycle count during first break, dry forward",
+  "subtitle": "Blind count, no pick into the location, ticket PCF-1744",
+  "doc_type": "Runbook / SOP",
+  "form_type": "Runbook / SOPs",
+  "kicker": "Pinecrest Fulfillment  \u00b7  Cycle count  \u00b7  PCF-1744",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "In force",
+  "date": "May 16, 2024",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Lila Voss (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Lila Voss (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-SOP-2024-052; PCF-1744; PCF-INC-2024-061",
+  "summary": "Lila Voss asked for a written cut of SOP. Current path: RF shows qty, people tap confirm. This document locks blind, freeze, 3-unit page. count with the system qty showing is out because April 25 'count' confirmed a ghost 40 on SKU 4418. Pick went short all morning.",
+  "form_description": "Cycle-count SOP for Pinecrest dry forward pick: blind counts, frozen bins, and a page on variance over 3 units.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "April 22, 2024",
+      "Jeilen Jones",
+      "Outline after PCF-SOP-2024-052 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "May 4, 2024",
+      "Jeilen Jones",
+      "Numbers from Lila Voss. count with the system qty showing still in the room."
+    ],
+    [
+      "0.9",
+      "May 12, 2024",
+      "Jeilen Jones",
+      "count with the system qty showing written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "May 16, 2024",
+      "Jeilen Jones",
+      "Cut. Host slot.pinecrest.internal. Ticket PCF-1744."
+    ],
+    [
+      "1.1",
+      "May 16, 2024",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "SOP: cycle count during first break, dry forward"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-SOP-2024-052 on May 16, 2024. Lila Voss asked for a written bound after the current path (RF shows qty, people tap confirm) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host slot.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on count with the system qty showing, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Blind count. Location frozen. No pick into a frozen bin. Variance over 3 units pages Lila. I am not restating a hallway yes. count with the system qty showing is out because April 25 'count' confirmed a ghost 40 on SKU 4418. Pick went short all morning. Cost of doing nothing is already in the numbers: ghost=40, sku=4418, var=3, freeze=12, weeks=2, bins=18.4, shorts=6.2, firstbreak=09:10. Sibling tickets PCF-1744 and PCF-INC-2024-061. I will not reopen count with the system qty showing in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Blind count. Location frozen. No pick into a frozen bin. Variance over 3 units pages Lila."
+    },
+    {
+      "type": "p",
+      "text": "Background on slot.pinecrest.internal. RF shows qty, people tap confirm. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on wms.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-SOP-2024-052 names the pull. If those numbers moved after May 16, 2024, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-SOP-2024-052. count with the system qty showing is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep RF shows qty, people tap confirm",
+          "Numbers already in play: ghost=40, sku=4418, var=3, freeze=12, weeks=2, bins=18.4, shorts=6.2, firstbreak=09:10",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "count with the system qty showing",
+          "April 25 'count' confirmed a ghost 40 on SKU 4418. Pick went short all morning.",
+          "Named on PCF-INC-2024-061",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "blind, freeze, 3-unit page",
+          "Host slot.pinecrest.internal, ticket PCF-1744",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: aisle-b2.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (12): refuse on count with the system qty showing, lock is blind, freeze, 3-unit page. I will not hide a process change inside a 'quick align' on PCF-1744."
+    },
+    {
+      "type": "quote",
+      "text": "If you count with the WMS number on the screen, you will confirm the lie.",
+      "attrib": "Lila Voss, May 2"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on slot.pinecrest.internal: the path Lila Voss actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on wms.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "blind, freeze, 3-unit page Host slot.pinecrest.internal. Ticket PCF-1744. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: blind, freeze, 3-unit page. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-SOP-2024-052. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: slot.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-SOP-2024-052. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "ghost",
+          "40",
+          "slot.pinecrest.internal",
+          "PCF-1744"
+        ],
+        [
+          "sku",
+          "4418",
+          "slot.pinecrest.internal",
+          "PCF-1744"
+        ],
+        [
+          "var",
+          "3",
+          "slot.pinecrest.internal",
+          "PCF-1744"
+        ],
+        [
+          "freeze",
+          "12",
+          "slot.pinecrest.internal",
+          "PCF-1744"
+        ],
+        [
+          "weeks",
+          "2",
+          "slot.pinecrest.internal",
+          "PCF-1744"
+        ],
+        [
+          "bins",
+          "18.4",
+          "slot.pinecrest.internal",
+          "PCF-1744"
+        ],
+        [
+          "shorts",
+          "6.2",
+          "slot.pinecrest.internal",
+          "PCF-1744"
+        ],
+        [
+          "firstbreak",
+          "09:10",
+          "slot.pinecrest.internal",
+          "PCF-1744"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: count with the system qty showing"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "count with the system qty showing is out. April 25 'count' confirmed a ghost 40 on SKU 4418. Pick went short all morning. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: count with the system qty showing comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-1744. Numbers I will not 'simplify': ghost=40, sku=4418, var=3, freeze=12, weeks=2, bins=18.4, shorts=6.2, firstbreak=09:10. Same clock as the front. I will not mix clocks to make slot.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does aisle-b2.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-INC-2024-061.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Lila Voss: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on slot.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits slot.pinecrest.internal, PCF-SOP-2024-052, and the last three working pages. Access that has to move is who can change wms.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-1744. slot.pinecrest.internal.",
+      "text": "# PCF-SOP-2024-052 read-only first\ndate\necho host=slot.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-1744\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-1744 before any write.",
+        "Confirm on slot.pinecrest.internal with the read-only commands above.",
+        "If the refuse on count with the system qty showing is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-SOP-2024-052. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on count with the system qty showing",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host slot.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Lila Voss",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-1744. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-SOP-2024-052"
+    },
+    {
+      "type": "p",
+      "text": "wms.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-INC-2024-061 before anyone says the leftover is 'implied.' Implied leftovers are how count with the system qty showing almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-SOP-2024-052"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim count with the system qty showing is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host slot.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-1744"
+    },
+    {
+      "type": "p",
+      "text": "First useful is blind, freeze, 3-unit page, not a prettier board or a louder huddle. Lila Voss sees that slice on slot.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-SOP-2024-052."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (12)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-SOP-2024-052. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: aisle-b2.pinecrest.internal."
+    }
+  ]
+}

@@ -1,0 +1,336 @@
+{
+  "slug": "07-pinecrest-wave-pick-design",
+  "doc_id": "PCF-TDD-2024-024",
+  "title": "Wave pick design for building 2 dry",
+  "subtitle": "Wave size, batch vs discrete, ticket PCF-1488",
+  "doc_type": "Technical design document",
+  "form_type": "Technical design doc",
+  "kicker": "Pinecrest Fulfillment  \u00b7  Wave  \u00b7  PCF-1488",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Accepted",
+  "date": "March 7, 2024",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Marcus Hale (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Marcus Hale (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-TDD-2024-024; PCF-1488; PCF-REQ-2024-018",
+  "summary": "Marcus Hale asked for a written cut of Wave pick design for building 2 dry. Current path: Mixed wave sizes, 40-90 lines, no cap. This document locks 24-line cap, discrete, case-pick exception. 90-line batch waves is out because February 16 90-line wave made 11.4 lb totes and 6 pack backups. Tasha stopped it.",
+  "form_description": "Design for Pinecrest building 2 wave picking: 24-line tote cap, discrete pick, refusing 90-line batch waves.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "February 12, 2024",
+      "Jeilen Jones",
+      "Outline after PCF-TDD-2024-024 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "February 24, 2024",
+      "Jeilen Jones",
+      "Numbers from Marcus Hale. 90-line batch waves still in the room."
+    ],
+    [
+      "0.9",
+      "March 3, 2024",
+      "Jeilen Jones",
+      "90-line batch waves written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "March 7, 2024",
+      "Jeilen Jones",
+      "Cut. Host wms.pinecrest.internal. Ticket PCF-1488."
+    ],
+    [
+      "1.1",
+      "March 7, 2024",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Wave pick design for building 2 dry"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-TDD-2024-024 on March 7, 2024. Marcus Hale asked for a written bound after the current path (Mixed wave sizes, 40-90 lines, no cap) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host wms.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on 90-line batch waves, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Discrete pick, 24-line cap per tote. Batch pick only for single-SKU case-pick. Reject 90-line waves. I am not restating a hallway yes. 90-line batch waves is out because February 16 90-line wave made 11.4 lb totes and 6 pack backups. Tasha stopped it. Cost of doing nothing is already in the numbers: cap=24, bad=90, lb=11.4, backup=6, weeks=4, totes=2.1, lines=38.6, sku=1. Sibling tickets PCF-1488 and PCF-REQ-2024-018. I will not reopen 90-line batch waves in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Discrete pick, 24-line cap per tote. Batch pick only for single-SKU case-pick. Reject 90-line waves."
+    },
+    {
+      "type": "p",
+      "text": "Background on wms.pinecrest.internal. Mixed wave sizes, 40-90 lines, no cap. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on rf.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-TDD-2024-024 names the pull. If those numbers moved after March 7, 2024, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-TDD-2024-024. 90-line batch waves is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Mixed wave sizes, 40-90 lines, no cap",
+          "Numbers already in play: cap=24, bad=90, lb=11.4, backup=6, weeks=4, totes=2.1, lines=38.6, sku=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "90-line batch waves",
+          "February 16 90-line wave made 11.4 lb totes and 6 pack backups. Tasha stopped it.",
+          "Named on PCF-REQ-2024-018",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "24-line cap, discrete, case-pick exception",
+          "Host wms.pinecrest.internal, ticket PCF-1488",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: pack.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (07): refuse on 90-line batch waves, lock is 24-line cap, discrete, case-pick exception. I will not hide a process change inside a 'quick align' on PCF-1488."
+    },
+    {
+      "type": "quote",
+      "text": "A 90-line wave is not faster. It is a heavier tote and a slower pack.",
+      "attrib": "Marcus Hale, February 22"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on wms.pinecrest.internal: the path Marcus Hale actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on rf.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "24-line cap, discrete, case-pick exception Host wms.pinecrest.internal. Ticket PCF-1488. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: 24-line cap, discrete, case-pick exception. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-TDD-2024-024. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: wms.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-TDD-2024-024. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "cap",
+          "24",
+          "wms.pinecrest.internal",
+          "PCF-1488"
+        ],
+        [
+          "bad",
+          "90",
+          "wms.pinecrest.internal",
+          "PCF-1488"
+        ],
+        [
+          "lb",
+          "11.4",
+          "wms.pinecrest.internal",
+          "PCF-1488"
+        ],
+        [
+          "backup",
+          "6",
+          "wms.pinecrest.internal",
+          "PCF-1488"
+        ],
+        [
+          "weeks",
+          "4",
+          "wms.pinecrest.internal",
+          "PCF-1488"
+        ],
+        [
+          "totes",
+          "2.1",
+          "wms.pinecrest.internal",
+          "PCF-1488"
+        ],
+        [
+          "lines",
+          "38.6",
+          "wms.pinecrest.internal",
+          "PCF-1488"
+        ],
+        [
+          "sku",
+          "1",
+          "wms.pinecrest.internal",
+          "PCF-1488"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: 90-line batch waves"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "90-line batch waves is out. February 16 90-line wave made 11.4 lb totes and 6 pack backups. Tasha stopped it. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: 90-line batch waves comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-1488. Numbers I will not 'simplify': cap=24, bad=90, lb=11.4, backup=6, weeks=4, totes=2.1, lines=38.6, sku=1. Same clock as the front. I will not mix clocks to make wms.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does pack.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-REQ-2024-018.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Marcus Hale: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on wms.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits wms.pinecrest.internal, PCF-TDD-2024-024, and the last three working pages. Access that has to move is who can change rf.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-1488. wms.pinecrest.internal.",
+      "text": "# PCF-TDD-2024-024 read-only first\ndate\necho host=wms.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-1488\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-1488 before any write.",
+        "Confirm on wms.pinecrest.internal with the read-only commands above.",
+        "If the refuse on 90-line batch waves is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-TDD-2024-024. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on 90-line batch waves",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host wms.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-1488. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-TDD-2024-024"
+    },
+    {
+      "type": "p",
+      "text": "rf.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-REQ-2024-018 before anyone says the leftover is 'implied.' Implied leftovers are how 90-line batch waves almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-TDD-2024-024"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim 90-line batch waves is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host wms.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-1488"
+    },
+    {
+      "type": "p",
+      "text": "First useful is 24-line cap, discrete, case-pick exception, not a prettier board or a louder huddle. Marcus Hale sees that slice on wms.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-TDD-2024-024."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (07)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-TDD-2024-024. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: pack.pinecrest.internal."
+    }
+  ]
+}

@@ -1,0 +1,336 @@
+{
+  "slug": "38-ridgeway-drivetrain-sop",
+  "doc_id": "RDW-SOP-2022-062",
+  "title": "SOP: heavy-duty drivetrain inspection",
+  "subtitle": "U-joints, leaks, play, ticket RDW-2477",
+  "doc_type": "Runbook / SOP",
+  "form_type": "Runbook / SOPs",
+  "kicker": "Ridgeway Diesel  \u00b7  Drivetrain  \u00b7  RDW-2477",
+  "org": "Ridgeway Diesel",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "In force",
+  "date": "November 22, 2022",
+  "author": "Jeilen Jones",
+  "role": "Shop Helper",
+  "team": "Ridgeway Diesel, shop floor",
+  "audience": "Cal Dreher (requester); Cal Dreher (acceptor); Nina Soto and Jeilen Jones (build); Hank Morel (leftover host); Tess Brant (absentee pack)",
+  "owners": "Cal Dreher (acceptor), Cal Dreher (requester), Nina Soto (ops), Jeilen Jones (this document)",
+  "related": "RDW-SOP-2022-062; RDW-2477; RDW-SOP-2023-014",
+  "summary": "Cal Dreher asked for a written cut of SOP. Current path: Road-test listen, no hoist look if time is short. This document locks hoist look, write play, clunk is not character. send a clunk as normal for the miles is out because November 3 comeback at 40 miles, U-joint on the floor. Miles are not a spec.",
+  "form_description": "Drivetrain inspection SOP for Ridgeway Diesel: hoist, pry, written play, refusing a clunk as normal for the miles.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "October 29, 2022",
+      "Jeilen Jones",
+      "Outline after RDW-SOP-2022-062 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "November 10, 2022",
+      "Jeilen Jones",
+      "Numbers from Cal Dreher. send a clunk as normal for the miles still in the room."
+    ],
+    [
+      "0.9",
+      "November 18, 2022",
+      "Jeilen Jones",
+      "send a clunk as normal for the miles written up as a refuse. Nina Soto review."
+    ],
+    [
+      "1.0",
+      "November 22, 2022",
+      "Jeilen Jones",
+      "Cut. Host bay-03.ridgeway.internal. Ticket RDW-2477."
+    ],
+    [
+      "1.1",
+      "November 22, 2022",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "SOP: heavy-duty drivetrain inspection"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for RDW-SOP-2022-062 on November 22, 2022. Cal Dreher asked for a written bound after the current path (Road-test listen, no hoist look if time is short) stopped being honest. I am Jeilen Jones, Shop Helper, writing for Cal Dreher, Nina Soto, and Hank Morel. Primary host bay-03.ridgeway.internal. If you are skimming, jump the decision callout, then the refuse on send a clunk as normal for the miles, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Hoist, chock, pry U-joints, check yoke nuts, look for leaks. Write the play. Do not send a clunk as character. I am not restating a hallway yes. send a clunk as normal for the miles is out because November 3 comeback at 40 miles, U-joint on the floor. Miles are not a spec. Cost of doing nothing is already in the numbers: miles=40, joints=2, weeks=3, pry=1, leak=1, clunk=1, hoist=1, spec=0. Sibling tickets RDW-2477 and RDW-SOP-2023-014. I will not reopen send a clunk as normal for the miles in a side thread because someone asked for a rate waiver. Nina Soto is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Hoist, chock, pry U-joints, check yoke nuts, look for leaks. Write the play. Do not send a clunk as character."
+    },
+    {
+      "type": "p",
+      "text": "Background on bay-03.ridgeway.internal. Road-test listen, no hoist look if time is short. That is the system Cal Dreher lives with, not a slide. I timed or pulled the leftover on shop.ridgeway.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket RDW-SOP-2022-062 names the pull. If those numbers moved after November 22, 2022, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for RDW-SOP-2022-062. send a clunk as normal for the miles is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Road-test listen, no hoist look if time is short",
+          "Numbers already in play: miles=40, joints=2, weeks=3, pry=1, leak=1, clunk=1, hoist=1, spec=0",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "send a clunk as normal for the miles",
+          "November 3 comeback at 40 miles, U-joint on the floor. Miles are not a spec.",
+          "Named on RDW-SOP-2023-014",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "hoist look, write play, clunk is not character",
+          "Host bay-03.ridgeway.internal, ticket RDW-2477",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Hank Morel owns a leftover that is easy to skip: hoist.ridgeway.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (38): refuse on send a clunk as normal for the miles, lock is hoist look, write play, clunk is not character. I will not hide a process change inside a 'quick align' on RDW-2477."
+    },
+    {
+      "type": "quote",
+      "text": "Play you can see with a pry bar is not 'it has always been like that.'",
+      "attrib": "Cal Dreher, November 8"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on bay-03.ridgeway.internal: the path Cal Dreher actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on shop.ridgeway.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "hoist look, write play, clunk is not character Host bay-03.ridgeway.internal. Ticket RDW-2477. Acceptor Cal Dreher."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: hoist look, write play, clunk is not character. If that clock collides with a safety lock, the date moves and the scope does not. Cal Dreher hears the new date on RDW-SOP-2022-062. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: bay-03.ridgeway.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for RDW-SOP-2022-062. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "miles",
+          "40",
+          "bay-03.ridgeway.internal",
+          "RDW-2477"
+        ],
+        [
+          "joints",
+          "2",
+          "bay-03.ridgeway.internal",
+          "RDW-2477"
+        ],
+        [
+          "weeks",
+          "3",
+          "bay-03.ridgeway.internal",
+          "RDW-2477"
+        ],
+        [
+          "pry",
+          "1",
+          "bay-03.ridgeway.internal",
+          "RDW-2477"
+        ],
+        [
+          "leak",
+          "1",
+          "bay-03.ridgeway.internal",
+          "RDW-2477"
+        ],
+        [
+          "clunk",
+          "1",
+          "bay-03.ridgeway.internal",
+          "RDW-2477"
+        ],
+        [
+          "hoist",
+          "1",
+          "bay-03.ridgeway.internal",
+          "RDW-2477"
+        ],
+        [
+          "spec",
+          "0",
+          "bay-03.ridgeway.internal",
+          "RDW-2477"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: send a clunk as normal for the miles"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "send a clunk as normal for the miles is out. November 3 comeback at 40 miles, U-joint on the floor. Miles are not a spec. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: send a clunk as normal for the miles comes back wearing a new coat. I want that named in review notes, not rediscovered by Hank Morel on a Monday. Ticket RDW-2477. Numbers I will not 'simplify': miles=40, joints=2, weeks=3, pry=1, leak=1, clunk=1, hoist=1, spec=0. Same clock as the front. I will not mix clocks to make bay-03.ridgeway.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Hank Morel: does hoist.ridgeway.internal stay in the path? Yes, no, or a new date on RDW-SOP-2023-014.",
+        "Nina Soto: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Cal Dreher: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on bay-03.ridgeway.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits bay-03.ridgeway.internal, RDW-SOP-2022-062, and the last three working pages. Access that has to move is who can change shop.ridgeway.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Nina Soto accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. RDW-2477. bay-03.ridgeway.internal.",
+      "text": "# RDW-SOP-2022-062 read-only first\ndate\necho host=bay-03.ridgeway.internal bay check, hoist tag, PM sheet\necho 'do not start the engine until the tag is green'\n# stop. write the last error in one sentence on RDW-2477\n# do not override a safety lock to free a bay"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on RDW-2477 before any write.",
+        "Confirm on bay-03.ridgeway.internal with the read-only commands above.",
+        "If the refuse on send a clunk as normal for the miles is being reopened, stop and ping Cal Dreher.",
+        "Wake Nina Soto only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for RDW-SOP-2022-062. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Cal Dreher",
+          "Nina Soto"
+        ],
+        [
+          "Refuse on send a clunk as normal for the miles",
+          "Jeilen Jones",
+          "Cal Dreher",
+          "Hank Morel"
+        ],
+        [
+          "Host bay-03.ridgeway.internal",
+          "Nina Soto",
+          "Cal Dreher",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Hank Morel",
+          "Cal Dreher",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Tess Brant is on that list. Object on RDW-2477. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to RDW-SOP-2022-062"
+    },
+    {
+      "type": "p",
+      "text": "shop.ridgeway.internal is in this file because skipping it is how the last near-miss happened. Hank Morel owns the check. I want a count on RDW-SOP-2023-014 before anyone says the leftover is 'implied.' Implied leftovers are how send a clunk as normal for the miles almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in RDW-SOP-2022-062"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim send a clunk as normal for the miles is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host bay-03.ridgeway.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for RDW-2477"
+    },
+    {
+      "type": "p",
+      "text": "First useful is hoist look, write play, clunk is not character, not a prettier board or a louder huddle. Cal Dreher sees that slice on bay-03.ridgeway.internal. If the slice needs a second process, that is a new ticket and Cal Dreher is in the thread. I will not hide it inside RDW-SOP-2022-062."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (38)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on RDW-SOP-2022-062. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: hoist.ridgeway.internal."
+    }
+  ]
+}

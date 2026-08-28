@@ -1,0 +1,336 @@
+{
+  "slug": "02-pinecrest-pack-station-sop",
+  "doc_id": "PCF-SOP-2023-022",
+  "title": "SOP: pack station 6 through 11, dry outbound",
+  "subtitle": "Scan tote, scan carton, weight check, ticket PCF-1188",
+  "doc_type": "Runbook / SOP",
+  "form_type": "Runbook / SOPs",
+  "kicker": "Pinecrest Fulfillment  \u00b7  Pack  \u00b7  PCF-1188",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "In force",
+  "date": "November 28, 2023",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Tasha Quinn (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Tasha Quinn (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-1188; PCF-SOP-2023-022; PCF-1188-QA",
+  "summary": "Tasha Quinn asked for a written cut of SOP. Current path: Packers tape when the line is loud, scale is optional on smalls. This document locks scale green before tape, \u00b10.12 lb, stations 6-11. tape first, scale later is out because November 8 taped 41 cartons then scaled. 6 were light. Two already left the dock.",
+  "form_description": "Pack-station SOP for Pinecrest dry outbound, requiring a green scale before tape and refusing tape-first packing.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "November 4, 2023",
+      "Jeilen Jones",
+      "Outline after PCF-1188 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "November 16, 2023",
+      "Jeilen Jones",
+      "Numbers from Tasha Quinn. tape first, scale later still in the room."
+    ],
+    [
+      "0.9",
+      "November 24, 2023",
+      "Jeilen Jones",
+      "tape first, scale later written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "November 28, 2023",
+      "Jeilen Jones",
+      "Cut. Host pack.pinecrest.internal. Ticket PCF-1188."
+    ],
+    [
+      "1.1",
+      "November 28, 2023",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "SOP: pack station 6 through 11, dry outbound"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-1188 on November 28, 2023. Tasha Quinn asked for a written bound after the current path (Packers tape when the line is loud, scale is optional on smalls) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host pack.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on tape first, scale later, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Scan tote, scan each unit, scan carton, scale must match \u00b10.12 lb. No tape until the scale is green. I am not restating a hallway yes. tape first, scale later is out because November 8 taped 41 cartons then scaled. 6 were light. Two already left the dock. Cost of doing nothing is already in the numbers: stations=6, tol=0.12, light=6, taped=41, dock=2, weeks=2, units=3.8, fail=1.4. Sibling tickets PCF-SOP-2023-022 and PCF-1188-QA. I will not reopen tape first, scale later in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Scan tote, scan each unit, scan carton, scale must match \u00b10.12 lb. No tape until the scale is green."
+    },
+    {
+      "type": "p",
+      "text": "Background on pack.pinecrest.internal. Packers tape when the line is loud, scale is optional on smalls. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on wms.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-1188 names the pull. If those numbers moved after November 28, 2023, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-SOP-2023-022. tape first, scale later is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Packers tape when the line is loud, scale is optional on smalls",
+          "Numbers already in play: stations=6, tol=0.12, light=6, taped=41, dock=2, weeks=2, units=3.8, fail=1.4",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "tape first, scale later",
+          "November 8 taped 41 cartons then scaled. 6 were light. Two already left the dock.",
+          "Named on PCF-1188-QA",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "scale green before tape, \u00b10.12 lb, stations 6-11",
+          "Host pack.pinecrest.internal, ticket PCF-1188",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: scale-06.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (02): refuse on tape first, scale later, lock is scale green before tape, \u00b10.12 lb, stations 6-11. I will not hide a process change inside a 'quick align' on PCF-SOP-2023-022."
+    },
+    {
+      "type": "quote",
+      "text": "A closed carton with the wrong label is not packed. It is a reship.",
+      "attrib": "Tasha Quinn, supervisor, November 14"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on pack.pinecrest.internal: the path Tasha Quinn actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on wms.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "scale green before tape, \u00b10.12 lb, stations 6-11 Host pack.pinecrest.internal. Ticket PCF-1188. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: scale green before tape, \u00b10.12 lb, stations 6-11. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-1188. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: pack.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-SOP-2023-022. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "stations",
+          "6",
+          "pack.pinecrest.internal",
+          "PCF-1188"
+        ],
+        [
+          "tol",
+          "0.12",
+          "pack.pinecrest.internal",
+          "PCF-1188"
+        ],
+        [
+          "light",
+          "6",
+          "pack.pinecrest.internal",
+          "PCF-1188"
+        ],
+        [
+          "taped",
+          "41",
+          "pack.pinecrest.internal",
+          "PCF-1188"
+        ],
+        [
+          "dock",
+          "2",
+          "pack.pinecrest.internal",
+          "PCF-1188"
+        ],
+        [
+          "weeks",
+          "2",
+          "pack.pinecrest.internal",
+          "PCF-1188"
+        ],
+        [
+          "units",
+          "3.8",
+          "pack.pinecrest.internal",
+          "PCF-1188"
+        ],
+        [
+          "fail",
+          "1.4",
+          "pack.pinecrest.internal",
+          "PCF-1188"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: tape first, scale later"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "tape first, scale later is out. November 8 taped 41 cartons then scaled. 6 were light. Two already left the dock. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: tape first, scale later comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-SOP-2023-022. Numbers I will not 'simplify': stations=6, tol=0.12, light=6, taped=41, dock=2, weeks=2, units=3.8, fail=1.4. Same clock as the front. I will not mix clocks to make pack.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does scale-06.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-1188-QA.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Tasha Quinn: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on pack.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits pack.pinecrest.internal, PCF-1188, and the last three working pages. Access that has to move is who can change wms.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-1188. pack.pinecrest.internal.",
+      "text": "# PCF-SOP-2023-022 read-only first\ndate\necho host=pack.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-1188\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-1188 before any write.",
+        "Confirm on pack.pinecrest.internal with the read-only commands above.",
+        "If the refuse on tape first, scale later is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-SOP-2023-022. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on tape first, scale later",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host pack.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Tasha Quinn",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-1188. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-SOP-2023-022"
+    },
+    {
+      "type": "p",
+      "text": "wms.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-1188-QA before anyone says the leftover is 'implied.' Implied leftovers are how tape first, scale later almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-SOP-2023-022"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim tape first, scale later is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host pack.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-1188"
+    },
+    {
+      "type": "p",
+      "text": "First useful is scale green before tape, \u00b10.12 lb, stations 6-11, not a prettier board or a louder huddle. Tasha Quinn sees that slice on pack.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-SOP-2023-022."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (02)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-1188. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: scale-06.pinecrest.internal."
+    }
+  ]
+}

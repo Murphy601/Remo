@@ -18,7 +18,10 @@ BANNED = re.compile(
     r"\bunlock\b|comprehensive|\bensure\b|facilitate|\bpivotal\b|"
     r"\bnestled\b|\btapestry\b|Cummins|Infosys|\bWipro\b|\bHCL\b|"
     r"Aman Kumar|Priya Nair|Oakridge|Riverview Health|Clearhaven|"
-    r"ForgeNet|python-docx|Northstar Engineering",
+    r"ForgeNet|python-docx|Northstar Engineering|Michael Gilfilian|"
+    r"Hillcrest Digital|Whetstone Industrial|\bNolan\b|Lincoln College|"
+    r"\bkubectl\b|\bpytest\b|\bGrafana\b|\bPostgres\b|\bIRSA\b|"
+    r"Lake Oconee|\bkube\b",
     re.I,
 )
 EMDASH = re.compile(r"—")

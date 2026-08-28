@@ -80,7 +80,7 @@ def main():
             "words": wc,
             "est_pages": est_pages,
             "description": spec.get("form_description") or spec.get("summary", "")[:400],
-            "field": spec.get("field", "Software Engineering / Data Science"),
+            "field": spec.get("field", "Operations / Logistics"),
             "form_type": spec.get("form_type", "Other"),
         }
         catalog.append(rec)

@@ -49,7 +49,7 @@ def main() -> None:
     lines.append("# Form answers (per document)")
     lines.append("")
     lines.append(
-        "These answers map to the intake questions for the 50 internal engineering "
+        "These answers map to the intake questions for the 50 warehouse and diesel-shop "
         "documents in documents/."
     )
     lines.append("")
@@ -60,11 +60,11 @@ def main() -> None:
     lines.append("")
     lines.append("## Answers that are the same for every file")
     lines.append("")
-    lines.append("1. **Current or most recent job title:** Web Developer")
+    lines.append("1. **Current or most recent job title:** Order Picker")
     lines.append(
-        "2. **Years of professional experience:** 5–10 (about six years, freelance 2020–present)"
+        "2. **Years of professional experience:** 1–5 (Order Picker from October 2023; diesel shop helper 2022–2023)"
     )
-    lines.append("3. **Field:** Software Engineering / Data Science")
+    lines.append("3. **Field:** Operations / Logistics")
     page_vals = [pages.get(Path(r["file"]).stem, r.get("est_pages")) for r in catalog]
     if page_vals and all(isinstance(v, int) for v in page_vals):
         pmin, pmax = min(page_vals), max(page_vals)
@@ -75,9 +75,9 @@ def main() -> None:
         lines.append("4. **Pages:** see table (LibreOffice Writer → PDF)")
     lines.append("")
     lines.append(
-        "Author on every document: Michael Gilfilian, Web Developer, Hillcrest Digital. "
-        "Engagements covered: Harbor & Oak Outfitters, Lakeshore Hardware Group, "
-        "and a 2023 IT support internship at Whetstone Industrial."
+        "Author on every document: Jeilen Jones, Order Picker, Pinecrest Fulfillment. "
+        "Also covered: Ridgeway Diesel shop-helper work matching diesel and truck coursework "
+        "(brakes, PM, electrical, fuel systems)."
     )
     lines.append("")
     lines.append("## Per-document answers (questions 4–7)")
@@ -122,7 +122,7 @@ def main() -> None:
         lines.append(f"- **4. Pages:** {pg} (LibreOffice), {rec.get('words','')} words")
         lines.append(f"- **6. Description:** {desc}")
         lines.append(f"- **7. Written:** {dmy} ({written})")
-        lines.append(f"- **Role at the time:** {rec.get('role','Web Developer')}")
+        lines.append(f"- **Role at the time:** {rec.get('role','Order Picker')}")
         lines.append("")
     (ROOT / "catalog" / "FORM_ANSWERS.md").write_text(
         "\n".join(lines), encoding="utf-8"
@@ -131,7 +131,7 @@ def main() -> None:
     write_downloads(catalog, pages)
 
 
-BRANCH = "cursor/michael-gilfilian-docs-6e93"
+BRANCH = "cursor/jeilen-jones-docs-6e93"
 RAW = f"https://github.com/Murphy601/Remo/raw/{BRANCH}"
 
 

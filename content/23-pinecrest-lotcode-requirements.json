@@ -1,0 +1,336 @@
+{
+  "slug": "23-pinecrest-lotcode-requirements",
+  "doc_id": "PCF-REQ-2024-121",
+  "title": "Requirements: lot-code pick on dairy and chemicals",
+  "subtitle": "FEFO, scan lot, ticket PCF-2288",
+  "doc_type": "Requirements document",
+  "form_type": "Requirements doc",
+  "kicker": "Pinecrest Fulfillment  \u00b7  Lot code  \u00b7  PCF-2288",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Signed",
+  "date": "October 24, 2024",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Lila Voss (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Lila Voss (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-REQ-2024-121; PCF-2288; PCF-MTG-2024-029",
+  "summary": "Lila Voss asked for a written cut of Requirements. Current path: Lot tribal, some people write it, most do not. This document locks FEFO, RF lot scan, WMS block, no pack paper as control. paper lot log at pack is out because Pack paper is after the fact. A recall needs the pick scan. October 3 paper missed 9 lots.",
+  "form_description": "Requirements for Pinecrest lot-code picking on dairy and chemicals: FEFO, RF scan, WMS block, refusing a pack paper log.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "September 30, 2024",
+      "Jeilen Jones",
+      "Outline after PCF-REQ-2024-121 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "October 12, 2024",
+      "Jeilen Jones",
+      "Numbers from Lila Voss. paper lot log at pack still in the room."
+    ],
+    [
+      "0.9",
+      "October 20, 2024",
+      "Jeilen Jones",
+      "paper lot log at pack written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "October 24, 2024",
+      "Jeilen Jones",
+      "Cut. Host wms.pinecrest.internal. Ticket PCF-2288."
+    ],
+    [
+      "1.1",
+      "October 24, 2024",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Requirements: lot-code pick on dairy and chemicals"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-REQ-2024-121 on October 24, 2024. Lila Voss asked for a written bound after the current path (Lot tribal, some people write it, most do not) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host wms.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on paper lot log at pack, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "FEFO. Scan lot on dairy and chemicals. WMS blocks confirm without lot. Reject a paper log at pack. I am not restating a hallway yes. paper lot log at pack is out because Pack paper is after the fact. A recall needs the pick scan. October 3 paper missed 9 lots. Cost of doing nothing is already in the numbers: missed=9, families=2, weeks=5, fefo=1, block=1, paper=0, dairy=1, chem=1. Sibling tickets PCF-2288 and PCF-MTG-2024-029. I will not reopen paper lot log at pack in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "FEFO. Scan lot on dairy and chemicals. WMS blocks confirm without lot. Reject a paper log at pack."
+    },
+    {
+      "type": "p",
+      "text": "Background on wms.pinecrest.internal. Lot tribal, some people write it, most do not. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on cooler.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-REQ-2024-121 names the pull. If those numbers moved after October 24, 2024, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-REQ-2024-121. paper lot log at pack is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Lot tribal, some people write it, most do not",
+          "Numbers already in play: missed=9, families=2, weeks=5, fefo=1, block=1, paper=0, dairy=1, chem=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "paper lot log at pack",
+          "Pack paper is after the fact. A recall needs the pick scan. October 3 paper missed 9 lots.",
+          "Named on PCF-MTG-2024-029",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "FEFO, RF lot scan, WMS block, no pack paper as control",
+          "Host wms.pinecrest.internal, ticket PCF-2288",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: rf.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (23): refuse on paper lot log at pack, lock is FEFO, RF lot scan, WMS block, no pack paper as control. I will not hide a process change inside a 'quick align' on PCF-2288."
+    },
+    {
+      "type": "quote",
+      "text": "If dairy leaves without a lot scan, we cannot recall it. That is the whole job.",
+      "attrib": "Lila Voss, October 10"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on wms.pinecrest.internal: the path Lila Voss actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on cooler.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "FEFO, RF lot scan, WMS block, no pack paper as control Host wms.pinecrest.internal. Ticket PCF-2288. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: FEFO, RF lot scan, WMS block, no pack paper as control. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-REQ-2024-121. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: wms.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-REQ-2024-121. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "missed",
+          "9",
+          "wms.pinecrest.internal",
+          "PCF-2288"
+        ],
+        [
+          "families",
+          "2",
+          "wms.pinecrest.internal",
+          "PCF-2288"
+        ],
+        [
+          "weeks",
+          "5",
+          "wms.pinecrest.internal",
+          "PCF-2288"
+        ],
+        [
+          "fefo",
+          "1",
+          "wms.pinecrest.internal",
+          "PCF-2288"
+        ],
+        [
+          "block",
+          "1",
+          "wms.pinecrest.internal",
+          "PCF-2288"
+        ],
+        [
+          "paper",
+          "0",
+          "wms.pinecrest.internal",
+          "PCF-2288"
+        ],
+        [
+          "dairy",
+          "1",
+          "wms.pinecrest.internal",
+          "PCF-2288"
+        ],
+        [
+          "chem",
+          "1",
+          "wms.pinecrest.internal",
+          "PCF-2288"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: paper lot log at pack"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "paper lot log at pack is out. Pack paper is after the fact. A recall needs the pick scan. October 3 paper missed 9 lots. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: paper lot log at pack comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-2288. Numbers I will not 'simplify': missed=9, families=2, weeks=5, fefo=1, block=1, paper=0, dairy=1, chem=1. Same clock as the front. I will not mix clocks to make wms.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does rf.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-MTG-2024-029.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Lila Voss: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on wms.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits wms.pinecrest.internal, PCF-REQ-2024-121, and the last three working pages. Access that has to move is who can change cooler.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-2288. wms.pinecrest.internal.",
+      "text": "# PCF-REQ-2024-121 read-only first\ndate\necho host=wms.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-2288\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-2288 before any write.",
+        "Confirm on wms.pinecrest.internal with the read-only commands above.",
+        "If the refuse on paper lot log at pack is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-REQ-2024-121. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on paper lot log at pack",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host wms.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Lila Voss",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-2288. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-REQ-2024-121"
+    },
+    {
+      "type": "p",
+      "text": "cooler.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-MTG-2024-029 before anyone says the leftover is 'implied.' Implied leftovers are how paper lot log at pack almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-REQ-2024-121"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim paper lot log at pack is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host wms.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-2288"
+    },
+    {
+      "type": "p",
+      "text": "First useful is FEFO, RF lot scan, WMS block, no pack paper as control, not a prettier board or a louder huddle. Lila Voss sees that slice on wms.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-REQ-2024-121."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (23)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-REQ-2024-121. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: rf.pinecrest.internal."
+    }
+  ]
+}

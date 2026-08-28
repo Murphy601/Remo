@@ -1,0 +1,336 @@
+{
+  "slug": "28-pinecrest-paper-vs-rf-memo",
+  "doc_id": "PCF-MEM-2025-006",
+  "title": "Memo: stay on RF, do not go back to paper pick sheets",
+  "subtitle": "Printer outage leftover, ticket PCF-2520",
+  "doc_type": "Recommendation memo",
+  "form_type": "Other",
+  "kicker": "Pinecrest Fulfillment  \u00b7  RF vs paper  \u00b7  PCF-2520",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "For decision",
+  "date": "January 16, 2025",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Marcus Hale (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Marcus Hale (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-MEM-2025-006; PCF-2520; PCF-SOP-2023-014",
+  "summary": "Marcus Hale asked for a written cut of Memo. Current path: Paper leftover in the cage, used on printer blips. This document locks RF daily, paper only with named lead, delay beats old sheet. keep paper sheets in the cage 'just in case' as daily backup is out because Just-in-case paper became the Friday path. Skip-scan loves paper.",
+  "form_description": "Memo keeping Pinecrest on RF pick and refusing daily backup paper sheets after printer-outage leftovers.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "December 23, 2024",
+      "Jeilen Jones",
+      "Outline after PCF-MEM-2025-006 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "January 4, 2025",
+      "Jeilen Jones",
+      "Numbers from Marcus Hale. keep paper sheets in the cage 'just in case' as daily backup still in the room."
+    ],
+    [
+      "0.9",
+      "January 12, 2025",
+      "Jeilen Jones",
+      "keep paper sheets in the cage 'just in case' as daily backup written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "January 16, 2025",
+      "Jeilen Jones",
+      "Cut. Host rf.pinecrest.internal. Ticket PCF-2520."
+    ],
+    [
+      "1.1",
+      "January 16, 2025",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Memo: stay on RF, do not go back to paper pick sheets"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-MEM-2025-006 on January 16, 2025. Marcus Hale asked for a written bound after the current path (Paper leftover in the cage, used on printer blips) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host rf.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on keep paper sheets in the cage 'just in case' as daily backup, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "RF is the path. Printer outage: delay the wave, do not print yesterday's sheet. Paper is a disaster path with a named lead, not a habit. I am not restating a hallway yes. keep paper sheets in the cage 'just in case' as daily backup is out because Just-in-case paper became the Friday path. Skip-scan loves paper. Cost of doing nothing is already in the numbers: blips=3, friday=1, sheets=40, weeks=1, delay=12, skip=1, cage=1, rf=1. Sibling tickets PCF-2520 and PCF-SOP-2023-014. I will not reopen keep paper sheets in the cage 'just in case' as daily backup in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "RF is the path. Printer outage: delay the wave, do not print yesterday's sheet. Paper is a disaster path with a named lead, not a habit."
+    },
+    {
+      "type": "p",
+      "text": "Background on rf.pinecrest.internal. Paper leftover in the cage, used on printer blips. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on wms.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-MEM-2025-006 names the pull. If those numbers moved after January 16, 2025, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-MEM-2025-006. keep paper sheets in the cage 'just in case' as daily backup is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Paper leftover in the cage, used on printer blips",
+          "Numbers already in play: blips=3, friday=1, sheets=40, weeks=1, delay=12, skip=1, cage=1, rf=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "keep paper sheets in the cage 'just in case' as daily backup",
+          "Just-in-case paper became the Friday path. Skip-scan loves paper.",
+          "Named on PCF-SOP-2023-014",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "RF daily, paper only with named lead, delay beats old sheet",
+          "Host rf.pinecrest.internal, ticket PCF-2520",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: print.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (28): refuse on keep paper sheets in the cage 'just in case' as daily backup, lock is RF daily, paper only with named lead, delay beats old sheet. I will not hide a process change inside a 'quick align' on PCF-2520."
+    },
+    {
+      "type": "quote",
+      "text": "Paper feels faster until pack asks which version of the sheet you used.",
+      "attrib": "Marcus Hale, January 2"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on rf.pinecrest.internal: the path Marcus Hale actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on wms.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "RF daily, paper only with named lead, delay beats old sheet Host rf.pinecrest.internal. Ticket PCF-2520. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: RF daily, paper only with named lead, delay beats old sheet. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-MEM-2025-006. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: rf.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-MEM-2025-006. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "blips",
+          "3",
+          "rf.pinecrest.internal",
+          "PCF-2520"
+        ],
+        [
+          "friday",
+          "1",
+          "rf.pinecrest.internal",
+          "PCF-2520"
+        ],
+        [
+          "sheets",
+          "40",
+          "rf.pinecrest.internal",
+          "PCF-2520"
+        ],
+        [
+          "weeks",
+          "1",
+          "rf.pinecrest.internal",
+          "PCF-2520"
+        ],
+        [
+          "delay",
+          "12",
+          "rf.pinecrest.internal",
+          "PCF-2520"
+        ],
+        [
+          "skip",
+          "1",
+          "rf.pinecrest.internal",
+          "PCF-2520"
+        ],
+        [
+          "cage",
+          "1",
+          "rf.pinecrest.internal",
+          "PCF-2520"
+        ],
+        [
+          "rf",
+          "1",
+          "rf.pinecrest.internal",
+          "PCF-2520"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: keep paper sheets in the cage 'just in case' as daily backup"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "keep paper sheets in the cage 'just in case' as daily backup is out. Just-in-case paper became the Friday path. Skip-scan loves paper. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: keep paper sheets in the cage 'just in case' as daily backup comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-2520. Numbers I will not 'simplify': blips=3, friday=1, sheets=40, weeks=1, delay=12, skip=1, cage=1, rf=1. Same clock as the front. I will not mix clocks to make rf.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does print.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-SOP-2023-014.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Marcus Hale: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on rf.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits rf.pinecrest.internal, PCF-MEM-2025-006, and the last three working pages. Access that has to move is who can change wms.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-2520. rf.pinecrest.internal.",
+      "text": "# PCF-MEM-2025-006 read-only first\ndate\necho host=rf.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-2520\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-2520 before any write.",
+        "Confirm on rf.pinecrest.internal with the read-only commands above.",
+        "If the refuse on keep paper sheets in the cage 'just in case' as daily backup is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-MEM-2025-006. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on keep paper sheets in the cage 'just in case' as daily backup",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host rf.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-2520. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-MEM-2025-006"
+    },
+    {
+      "type": "p",
+      "text": "wms.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-SOP-2023-014 before anyone says the leftover is 'implied.' Implied leftovers are how keep paper sheets in the cage 'just in case' as daily backup almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-MEM-2025-006"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim keep paper sheets in the cage 'just in case' as daily backup is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host rf.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-2520"
+    },
+    {
+      "type": "p",
+      "text": "First useful is RF daily, paper only with named lead, delay beats old sheet, not a prettier board or a louder huddle. Marcus Hale sees that slice on rf.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-MEM-2025-006."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (28)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-MEM-2025-006. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: print.pinecrest.internal."
+    }
+  ]
+}

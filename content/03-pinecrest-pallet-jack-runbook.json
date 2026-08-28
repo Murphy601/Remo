@@ -1,0 +1,336 @@
+{
+  "slug": "03-pinecrest-pallet-jack-runbook",
+  "doc_id": "PCF-RB-2023-031",
+  "title": "Runbook: electric pallet jack on dock and pick aisles",
+  "subtitle": "Pre-op, horn, no riders, ticket PCF-1240",
+  "doc_type": "Runbook / SOP",
+  "form_type": "Runbook / SOPs",
+  "kicker": "Pinecrest Fulfillment  \u00b7  Pallet jack  \u00b7  PCF-1240",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "In force",
+  "date": "December 12, 2023",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Ben Crowe (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Ben Crowe (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-1240; PCF-RB-2023-031; PCF-1240-SAF",
+  "summary": "Ben Crowe asked for a written cut of Runbook. Current path: Verbal pre-op, cards missing, horn tape leftover. This document locks pre-op card, no riders, red-tag dead horn. run a jack with a dead horn to finish a wave is out because November 30 near-miss at cross-aisle 4. Horn was taped. Marcus stopped the jack in writing.",
+  "form_description": "Runbook for Pinecrest electric pallet jacks: pre-op card, no riders, and a refuse on running a dead horn to finish a wave.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "November 18, 2023",
+      "Jeilen Jones",
+      "Outline after PCF-1240 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "November 30, 2023",
+      "Jeilen Jones",
+      "Numbers from Ben Crowe. run a jack with a dead horn to finish a wave still in the room."
+    ],
+    [
+      "0.9",
+      "December 8, 2023",
+      "Jeilen Jones",
+      "run a jack with a dead horn to finish a wave written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "December 12, 2023",
+      "Jeilen Jones",
+      "Cut. Host dock.pinecrest.internal. Ticket PCF-1240."
+    ],
+    [
+      "1.1",
+      "December 12, 2023",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Runbook: electric pallet jack on dock and pick aisles"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-1240 on December 12, 2023. Ben Crowe asked for a written bound after the current path (Verbal pre-op, cards missing, horn tape leftover) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host dock.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on run a jack with a dead horn to finish a wave, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Pre-op card on the cage board. Horn, brake, forks, battery. No riders. Red-tag a dead horn; do not 'just this trip.' I am not restating a hallway yes. run a jack with a dead horn to finish a wave is out because November 30 near-miss at cross-aisle 4. Horn was taped. Marcus stopped the jack in writing. Cost of doing nothing is already in the numbers: jacks=18, miss=1, aisle=4, cards=18, weeks=2, riders=0, battery=22.4, trips=1. Sibling tickets PCF-RB-2023-031 and PCF-1240-SAF. I will not reopen run a jack with a dead horn to finish a wave in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Pre-op card on the cage board. Horn, brake, forks, battery. No riders. Red-tag a dead horn; do not 'just this trip.'"
+    },
+    {
+      "type": "p",
+      "text": "Background on dock.pinecrest.internal. Verbal pre-op, cards missing, horn tape leftover. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on equip.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-1240 names the pull. If those numbers moved after December 12, 2023, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-RB-2023-031. run a jack with a dead horn to finish a wave is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Verbal pre-op, cards missing, horn tape leftover",
+          "Numbers already in play: jacks=18, miss=1, aisle=4, cards=18, weeks=2, riders=0, battery=22.4, trips=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "run a jack with a dead horn to finish a wave",
+          "November 30 near-miss at cross-aisle 4. Horn was taped. Marcus stopped the jack in writing",
+          "Named on PCF-1240-SAF",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "pre-op card, no riders, red-tag dead horn",
+          "Host dock.pinecrest.internal, ticket PCF-1240",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: aisle-b2.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (03): refuse on run a jack with a dead horn to finish a wave, lock is pre-op card, no riders, red-tag dead horn. I will not hide a process change inside a 'quick align' on PCF-RB-2023-031."
+    },
+    {
+      "type": "quote",
+      "text": "If the horn is dead I do not take the jack. I take a walk to the cage.",
+      "attrib": "Ben Crowe, dock, December 1"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on dock.pinecrest.internal: the path Ben Crowe actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on equip.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "pre-op card, no riders, red-tag dead horn Host dock.pinecrest.internal. Ticket PCF-1240. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: pre-op card, no riders, red-tag dead horn. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-1240. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: dock.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-RB-2023-031. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "jacks",
+          "18",
+          "dock.pinecrest.internal",
+          "PCF-1240"
+        ],
+        [
+          "miss",
+          "1",
+          "dock.pinecrest.internal",
+          "PCF-1240"
+        ],
+        [
+          "aisle",
+          "4",
+          "dock.pinecrest.internal",
+          "PCF-1240"
+        ],
+        [
+          "cards",
+          "18",
+          "dock.pinecrest.internal",
+          "PCF-1240"
+        ],
+        [
+          "weeks",
+          "2",
+          "dock.pinecrest.internal",
+          "PCF-1240"
+        ],
+        [
+          "riders",
+          "0",
+          "dock.pinecrest.internal",
+          "PCF-1240"
+        ],
+        [
+          "battery",
+          "22.4",
+          "dock.pinecrest.internal",
+          "PCF-1240"
+        ],
+        [
+          "trips",
+          "1",
+          "dock.pinecrest.internal",
+          "PCF-1240"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: run a jack with a dead horn to finish a wave"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "run a jack with a dead horn to finish a wave is out. November 30 near-miss at cross-aisle 4. Horn was taped. Marcus stopped the jack in writing. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: run a jack with a dead horn to finish a wave comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-RB-2023-031. Numbers I will not 'simplify': jacks=18, miss=1, aisle=4, cards=18, weeks=2, riders=0, battery=22.4, trips=1. Same clock as the front. I will not mix clocks to make dock.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does aisle-b2.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-1240-SAF.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Ben Crowe: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on dock.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits dock.pinecrest.internal, PCF-1240, and the last three working pages. Access that has to move is who can change equip.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-1240. dock.pinecrest.internal.",
+      "text": "# PCF-RB-2023-031 read-only first\ndate\necho host=dock.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-1240\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-1240 before any write.",
+        "Confirm on dock.pinecrest.internal with the read-only commands above.",
+        "If the refuse on run a jack with a dead horn to finish a wave is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-RB-2023-031. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on run a jack with a dead horn to finish a wave",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host dock.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Ben Crowe",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-1240. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-RB-2023-031"
+    },
+    {
+      "type": "p",
+      "text": "equip.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-1240-SAF before anyone says the leftover is 'implied.' Implied leftovers are how run a jack with a dead horn to finish a wave almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-RB-2023-031"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim run a jack with a dead horn to finish a wave is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host dock.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-1240"
+    },
+    {
+      "type": "p",
+      "text": "First useful is pre-op card, no riders, red-tag dead horn, not a prettier board or a louder huddle. Ben Crowe sees that slice on dock.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-RB-2023-031."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (03)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-1240. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: aisle-b2.pinecrest.internal."
+    }
+  ]
+}

@@ -1,0 +1,336 @@
+{
+  "slug": "48-ridgeway-oil-sample-memo",
+  "doc_id": "RDW-MEM-2023-091",
+  "title": "Memo: oil sample on fleet PM, not only on a noise",
+  "subtitle": "Sample kit, ticket RDW-3088",
+  "doc_type": "Recommendation memo",
+  "form_type": "Other",
+  "kicker": "Ridgeway Diesel  \u00b7  Oil sample  \u00b7  RDW-3088",
+  "org": "Ridgeway Diesel",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "For decision",
+  "date": "July 6, 2023",
+  "author": "Jeilen Jones",
+  "role": "Shop Helper",
+  "team": "Ridgeway Diesel, shop floor",
+  "audience": "Hank Morel (requester); Cal Dreher (acceptor); Nina Soto and Jeilen Jones (build); Hank Morel (leftover host); Tess Brant (absentee pack)",
+  "owners": "Cal Dreher (acceptor), Hank Morel (requester), Nina Soto (ops), Jeilen Jones (this document)",
+  "related": "RDW-MEM-2023-091; RDW-3088; RDW-SOP-2022-011",
+  "summary": "Hank Morel asked for a written cut of Memo. Current path: Sample kit in a drawer for 'serious' jobs. This document locks every other fleet PM, kit on RO, loud is late. sample only when it is already loud is out because June 8 loud sample showed fuel dilution we could have caught two PMs ago. $0.0 extra on the kit vs a late engine.",
+  "form_description": "Memo putting Ridgeway fleet PMs on an every-other oil sample, refusing samples only after an engine is already loud.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "June 12, 2023",
+      "Jeilen Jones",
+      "Outline after RDW-MEM-2023-091 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "June 24, 2023",
+      "Jeilen Jones",
+      "Numbers from Hank Morel. sample only when it is already loud still in the room."
+    ],
+    [
+      "0.9",
+      "July 2, 2023",
+      "Jeilen Jones",
+      "sample only when it is already loud written up as a refuse. Nina Soto review."
+    ],
+    [
+      "1.0",
+      "July 6, 2023",
+      "Jeilen Jones",
+      "Cut. Host parts.ridgeway.internal. Ticket RDW-3088."
+    ],
+    [
+      "1.1",
+      "July 6, 2023",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Memo: oil sample on fleet PM, not only on a noise"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for RDW-MEM-2023-091 on July 6, 2023. Hank Morel asked for a written bound after the current path (Sample kit in a drawer for 'serious' jobs) stopped being honest. I am Jeilen Jones, Shop Helper, writing for Cal Dreher, Nina Soto, and Hank Morel. Primary host parts.ridgeway.internal. If you are skimming, jump the decision callout, then the refuse on sample only when it is already loud, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Fleet PM gets a sample every other oil change. Knocking engine still gets one, but that is late. Cost is on the RO. I am not restating a hallway yes. sample only when it is already loud is out because June 8 loud sample showed fuel dilution we could have caught two PMs ago. $0.0 extra on the kit vs a late engine. Cost of doing nothing is already in the numbers: every=2, kit=0.0, weeks=2, loud=1, dilution=1, drawer=1, fleet=1, late=1. Sibling tickets RDW-3088 and RDW-SOP-2022-011. I will not reopen sample only when it is already loud in a side thread because someone asked for a rate waiver. Nina Soto is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Fleet PM gets a sample every other oil change. Knocking engine still gets one, but that is late. Cost is on the RO."
+    },
+    {
+      "type": "p",
+      "text": "Background on parts.ridgeway.internal. Sample kit in a drawer for 'serious' jobs. That is the system Cal Dreher lives with, not a slide. I timed or pulled the leftover on shop.ridgeway.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket RDW-MEM-2023-091 names the pull. If those numbers moved after July 6, 2023, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for RDW-MEM-2023-091. sample only when it is already loud is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Sample kit in a drawer for 'serious' jobs",
+          "Numbers already in play: every=2, kit=0.0, weeks=2, loud=1, dilution=1, drawer=1, fleet=1, late=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "sample only when it is already loud",
+          "June 8 loud sample showed fuel dilution we could have caught two PMs ago. $0.0 extra on th",
+          "Named on RDW-SOP-2022-011",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "every other fleet PM, kit on RO, loud is late",
+          "Host parts.ridgeway.internal, ticket RDW-3088",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Hank Morel owns a leftover that is easy to skip: bay-01.ridgeway.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (48): refuse on sample only when it is already loud, lock is every other fleet PM, kit on RO, loud is late. I will not hide a process change inside a 'quick align' on RDW-3088."
+    },
+    {
+      "type": "quote",
+      "text": "A sample after the engine is knocking is a postmortem, not PM.",
+      "attrib": "Hank Morel, June 22"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on parts.ridgeway.internal: the path Hank Morel actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on shop.ridgeway.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "every other fleet PM, kit on RO, loud is late Host parts.ridgeway.internal. Ticket RDW-3088. Acceptor Cal Dreher."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: every other fleet PM, kit on RO, loud is late. If that clock collides with a safety lock, the date moves and the scope does not. Cal Dreher hears the new date on RDW-MEM-2023-091. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: parts.ridgeway.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for RDW-MEM-2023-091. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "every",
+          "2",
+          "parts.ridgeway.internal",
+          "RDW-3088"
+        ],
+        [
+          "kit",
+          "0.0",
+          "parts.ridgeway.internal",
+          "RDW-3088"
+        ],
+        [
+          "weeks",
+          "2",
+          "parts.ridgeway.internal",
+          "RDW-3088"
+        ],
+        [
+          "loud",
+          "1",
+          "parts.ridgeway.internal",
+          "RDW-3088"
+        ],
+        [
+          "dilution",
+          "1",
+          "parts.ridgeway.internal",
+          "RDW-3088"
+        ],
+        [
+          "drawer",
+          "1",
+          "parts.ridgeway.internal",
+          "RDW-3088"
+        ],
+        [
+          "fleet",
+          "1",
+          "parts.ridgeway.internal",
+          "RDW-3088"
+        ],
+        [
+          "late",
+          "1",
+          "parts.ridgeway.internal",
+          "RDW-3088"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: sample only when it is already loud"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "sample only when it is already loud is out. June 8 loud sample showed fuel dilution we could have caught two PMs ago. $0.0 extra on the kit vs a late engine. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: sample only when it is already loud comes back wearing a new coat. I want that named in review notes, not rediscovered by Hank Morel on a Monday. Ticket RDW-3088. Numbers I will not 'simplify': every=2, kit=0.0, weeks=2, loud=1, dilution=1, drawer=1, fleet=1, late=1. Same clock as the front. I will not mix clocks to make parts.ridgeway.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Hank Morel: does bay-01.ridgeway.internal stay in the path? Yes, no, or a new date on RDW-SOP-2022-011.",
+        "Nina Soto: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Hank Morel: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on parts.ridgeway.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits parts.ridgeway.internal, RDW-MEM-2023-091, and the last three working pages. Access that has to move is who can change shop.ridgeway.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Nina Soto accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. RDW-3088. parts.ridgeway.internal.",
+      "text": "# RDW-MEM-2023-091 read-only first\ndate\necho host=parts.ridgeway.internal bay check, hoist tag, PM sheet\necho 'do not start the engine until the tag is green'\n# stop. write the last error in one sentence on RDW-3088\n# do not override a safety lock to free a bay"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on RDW-3088 before any write.",
+        "Confirm on parts.ridgeway.internal with the read-only commands above.",
+        "If the refuse on sample only when it is already loud is being reopened, stop and ping Cal Dreher.",
+        "Wake Nina Soto only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for RDW-MEM-2023-091. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Cal Dreher",
+          "Nina Soto"
+        ],
+        [
+          "Refuse on sample only when it is already loud",
+          "Jeilen Jones",
+          "Cal Dreher",
+          "Hank Morel"
+        ],
+        [
+          "Host parts.ridgeway.internal",
+          "Nina Soto",
+          "Cal Dreher",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Hank Morel",
+          "Hank Morel",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Tess Brant is on that list. Object on RDW-3088. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to RDW-MEM-2023-091"
+    },
+    {
+      "type": "p",
+      "text": "shop.ridgeway.internal is in this file because skipping it is how the last near-miss happened. Hank Morel owns the check. I want a count on RDW-SOP-2022-011 before anyone says the leftover is 'implied.' Implied leftovers are how sample only when it is already loud almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in RDW-MEM-2023-091"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim sample only when it is already loud is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host parts.ridgeway.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for RDW-3088"
+    },
+    {
+      "type": "p",
+      "text": "First useful is every other fleet PM, kit on RO, loud is late, not a prettier board or a louder huddle. Hank Morel sees that slice on parts.ridgeway.internal. If the slice needs a second process, that is a new ticket and Cal Dreher is in the thread. I will not hide it inside RDW-MEM-2023-091."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (48)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on RDW-MEM-2023-091. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: bay-01.ridgeway.internal."
+    }
+  ]
+}

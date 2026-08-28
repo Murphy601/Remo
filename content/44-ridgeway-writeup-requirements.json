@@ -1,0 +1,336 @@
+{
+  "slug": "44-ridgeway-writeup-requirements",
+  "doc_id": "RDW-REQ-2023-044",
+  "title": "Requirements: customer write-up that a tech can work",
+  "subtitle": "Complaint, cause, correction, ticket RDW-2888",
+  "doc_type": "Requirements document",
+  "form_type": "Requirements doc",
+  "kicker": "Ridgeway Diesel  \u00b7  Write-up  \u00b7  RDW-2888",
+  "org": "Ridgeway Diesel",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Signed",
+  "date": "April 13, 2023",
+  "author": "Jeilen Jones",
+  "role": "Shop Helper",
+  "team": "Ridgeway Diesel, shop floor",
+  "audience": "Nina Soto (requester); Cal Dreher (acceptor); Nina Soto and Jeilen Jones (build); Hank Morel (leftover host); Tess Brant (absentee pack)",
+  "owners": "Cal Dreher (acceptor), Nina Soto (requester), Nina Soto (ops), Jeilen Jones (this document)",
+  "related": "RDW-REQ-2023-044; RDW-2888; RDW-INC-2023-070",
+  "summary": "Nina Soto asked for a written cut of Requirements. Current path: Sticky notes on the visor. This document locks complaint, when, speed, change, then cause/correction. three-word write-ups is out because March 16 'check engine' ate 1.8 hours before anyone asked when it started. It started after a fill-up.",
+  "form_description": "Requirements for Ridgeway customer write-ups a tech can actually work: complaint, when, speed, last change, refusing three-word tickets.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "March 20, 2023",
+      "Jeilen Jones",
+      "Outline after RDW-REQ-2023-044 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "April 1, 2023",
+      "Jeilen Jones",
+      "Numbers from Nina Soto. three-word write-ups still in the room."
+    ],
+    [
+      "0.9",
+      "April 9, 2023",
+      "Jeilen Jones",
+      "three-word write-ups written up as a refuse. Nina Soto review."
+    ],
+    [
+      "1.0",
+      "April 13, 2023",
+      "Jeilen Jones",
+      "Cut. Host writeup.ridgeway.internal. Ticket RDW-2888."
+    ],
+    [
+      "1.1",
+      "April 13, 2023",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Requirements: customer write-up that a tech can work"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for RDW-REQ-2023-044 on April 13, 2023. Nina Soto asked for a written bound after the current path (Sticky notes on the visor) stopped being honest. I am Jeilen Jones, Shop Helper, writing for Cal Dreher, Nina Soto, and Hank Morel. Primary host writeup.ridgeway.internal. If you are skimming, jump the decision callout, then the refuse on three-word write-ups, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Complaint, when, speed, last change. Cause and correction after the bay. No 'check engine' as the whole story. I am not restating a hallway yes. three-word write-ups is out because March 16 'check engine' ate 1.8 hours before anyone asked when it started. It started after a fill-up. Cost of doing nothing is already in the numbers: hours=1.8, words=3, weeks=4, visor=1, fill=1, speed=1, sticky=1, story=0. Sibling tickets RDW-2888 and RDW-INC-2023-070. I will not reopen three-word write-ups in a side thread because someone asked for a rate waiver. Nina Soto is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Complaint, when, speed, last change. Cause and correction after the bay. No 'check engine' as the whole story."
+    },
+    {
+      "type": "p",
+      "text": "Background on writeup.ridgeway.internal. Sticky notes on the visor. That is the system Cal Dreher lives with, not a slide. I timed or pulled the leftover on shop.ridgeway.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket RDW-REQ-2023-044 names the pull. If those numbers moved after April 13, 2023, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for RDW-REQ-2023-044. three-word write-ups is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Sticky notes on the visor",
+          "Numbers already in play: hours=1.8, words=3, weeks=4, visor=1, fill=1, speed=1, sticky=1, story=0",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "three-word write-ups",
+          "March 16 'check engine' ate 1.8 hours before anyone asked when it started. It started afte",
+          "Named on RDW-INC-2023-070",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "complaint, when, speed, change, then cause/correction",
+          "Host writeup.ridgeway.internal, ticket RDW-2888",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Hank Morel owns a leftover that is easy to skip: bay-02.ridgeway.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (44): refuse on three-word write-ups, lock is complaint, when, speed, change, then cause/correction. I will not hide a process change inside a 'quick align' on RDW-2888."
+    },
+    {
+      "type": "quote",
+      "text": "Makes a noise is not a write-up. When, how fast, and whether it changed yesterday is a write-up.",
+      "attrib": "Nina Soto, March 30"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on writeup.ridgeway.internal: the path Nina Soto actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on shop.ridgeway.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "complaint, when, speed, change, then cause/correction Host writeup.ridgeway.internal. Ticket RDW-2888. Acceptor Cal Dreher."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: complaint, when, speed, change, then cause/correction. If that clock collides with a safety lock, the date moves and the scope does not. Cal Dreher hears the new date on RDW-REQ-2023-044. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: writeup.ridgeway.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for RDW-REQ-2023-044. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "hours",
+          "1.8",
+          "writeup.ridgeway.internal",
+          "RDW-2888"
+        ],
+        [
+          "words",
+          "3",
+          "writeup.ridgeway.internal",
+          "RDW-2888"
+        ],
+        [
+          "weeks",
+          "4",
+          "writeup.ridgeway.internal",
+          "RDW-2888"
+        ],
+        [
+          "visor",
+          "1",
+          "writeup.ridgeway.internal",
+          "RDW-2888"
+        ],
+        [
+          "fill",
+          "1",
+          "writeup.ridgeway.internal",
+          "RDW-2888"
+        ],
+        [
+          "speed",
+          "1",
+          "writeup.ridgeway.internal",
+          "RDW-2888"
+        ],
+        [
+          "sticky",
+          "1",
+          "writeup.ridgeway.internal",
+          "RDW-2888"
+        ],
+        [
+          "story",
+          "0",
+          "writeup.ridgeway.internal",
+          "RDW-2888"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: three-word write-ups"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "three-word write-ups is out. March 16 'check engine' ate 1.8 hours before anyone asked when it started. It started after a fill-up. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: three-word write-ups comes back wearing a new coat. I want that named in review notes, not rediscovered by Hank Morel on a Monday. Ticket RDW-2888. Numbers I will not 'simplify': hours=1.8, words=3, weeks=4, visor=1, fill=1, speed=1, sticky=1, story=0. Same clock as the front. I will not mix clocks to make writeup.ridgeway.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Hank Morel: does bay-02.ridgeway.internal stay in the path? Yes, no, or a new date on RDW-INC-2023-070.",
+        "Nina Soto: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Nina Soto: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on writeup.ridgeway.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits writeup.ridgeway.internal, RDW-REQ-2023-044, and the last three working pages. Access that has to move is who can change shop.ridgeway.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Nina Soto accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. RDW-2888. writeup.ridgeway.internal.",
+      "text": "# RDW-REQ-2023-044 read-only first\ndate\necho host=writeup.ridgeway.internal bay check, hoist tag, PM sheet\necho 'do not start the engine until the tag is green'\n# stop. write the last error in one sentence on RDW-2888\n# do not override a safety lock to free a bay"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on RDW-2888 before any write.",
+        "Confirm on writeup.ridgeway.internal with the read-only commands above.",
+        "If the refuse on three-word write-ups is being reopened, stop and ping Cal Dreher.",
+        "Wake Nina Soto only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for RDW-REQ-2023-044. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Cal Dreher",
+          "Nina Soto"
+        ],
+        [
+          "Refuse on three-word write-ups",
+          "Jeilen Jones",
+          "Cal Dreher",
+          "Hank Morel"
+        ],
+        [
+          "Host writeup.ridgeway.internal",
+          "Nina Soto",
+          "Cal Dreher",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Hank Morel",
+          "Nina Soto",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Tess Brant is on that list. Object on RDW-2888. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to RDW-REQ-2023-044"
+    },
+    {
+      "type": "p",
+      "text": "shop.ridgeway.internal is in this file because skipping it is how the last near-miss happened. Hank Morel owns the check. I want a count on RDW-INC-2023-070 before anyone says the leftover is 'implied.' Implied leftovers are how three-word write-ups almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in RDW-REQ-2023-044"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim three-word write-ups is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host writeup.ridgeway.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for RDW-2888"
+    },
+    {
+      "type": "p",
+      "text": "First useful is complaint, when, speed, change, then cause/correction, not a prettier board or a louder huddle. Nina Soto sees that slice on writeup.ridgeway.internal. If the slice needs a second process, that is a new ticket and Cal Dreher is in the thread. I will not hide it inside RDW-REQ-2023-044."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (44)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on RDW-REQ-2023-044. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: bay-02.ridgeway.internal."
+    }
+  ]
+}

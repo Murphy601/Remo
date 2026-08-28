@@ -1,0 +1,336 @@
+{
+  "slug": "15-pinecrest-safety-huddle-notes",
+  "doc_id": "PCF-MTG-2024-070",
+  "title": "Safety huddle notes, June 27",
+  "subtitle": "Jack horn, plate spotter, cooler coat, ticket PCF-1920",
+  "doc_type": "Meeting notes",
+  "form_type": "Other",
+  "kicker": "Pinecrest Fulfillment  \u00b7  Safety  \u00b7  PCF-1920",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Issued",
+  "date": "June 27, 2024",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Drew Phelps (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Drew Phelps (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-MTG-2024-070; PCF-1920; PCF-RB-2023-031",
+  "summary": "Drew Phelps asked for a written cut of Safety huddle notes. Current path: Huddle is 40 seconds of UPH. This document locks three tells, board for near-miss, not chat. replace safety huddle with a rate shout is out because Rate shout is how the dead-horn jack ran in November. Drew will not go back.",
+  "form_description": "Safety huddle notes for Pinecrest: horn, plate spotter, cooler coat, with near-misses on a board instead of a rate-only shout.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "June 3, 2024",
+      "Jeilen Jones",
+      "Outline after PCF-MTG-2024-070 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "June 15, 2024",
+      "Jeilen Jones",
+      "Numbers from Drew Phelps. replace safety huddle with a rate shout still in the room."
+    ],
+    [
+      "0.9",
+      "June 23, 2024",
+      "Jeilen Jones",
+      "replace safety huddle with a rate shout written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "June 27, 2024",
+      "Jeilen Jones",
+      "Cut. Host huddle.pinecrest.internal. Ticket PCF-1920."
+    ],
+    [
+      "1.1",
+      "June 27, 2024",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Safety huddle notes, June 27"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-MTG-2024-070 on June 27, 2024. Drew Phelps asked for a written bound after the current path (Huddle is 40 seconds of UPH) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host huddle.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on replace safety huddle with a rate shout, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Three tells every morning: horn, plate spotter, cooler coat. Near-misses go on the board, not in a group chat. I am not restating a hallway yes. replace safety huddle with a rate shout is out because Rate shout is how the dead-horn jack ran in November. Drew will not go back. Cost of doing nothing is already in the numbers: tells=3, seconds=40, miss=1, weeks=1, coats=12, horns=18, board=1, chat=0. Sibling tickets PCF-1920 and PCF-RB-2023-031. I will not reopen replace safety huddle with a rate shout in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Three tells every morning: horn, plate spotter, cooler coat. Near-misses go on the board, not in a group chat."
+    },
+    {
+      "type": "p",
+      "text": "Background on huddle.pinecrest.internal. Huddle is 40 seconds of UPH. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on dock.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-MTG-2024-070 names the pull. If those numbers moved after June 27, 2024, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-MTG-2024-070. replace safety huddle with a rate shout is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Huddle is 40 seconds of UPH",
+          "Numbers already in play: tells=3, seconds=40, miss=1, weeks=1, coats=12, horns=18, board=1, chat=0",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "replace safety huddle with a rate shout",
+          "Rate shout is how the dead-horn jack ran in November. Drew will not go back.",
+          "Named on PCF-RB-2023-031",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "three tells, board for near-miss, not chat",
+          "Host huddle.pinecrest.internal, ticket PCF-1920",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: cooler.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (15): refuse on replace safety huddle with a rate shout, lock is three tells, board for near-miss, not chat. I will not hide a process change inside a 'quick align' on PCF-1920."
+    },
+    {
+      "type": "quote",
+      "text": "A huddle that is only a rate number is not a huddle.",
+      "attrib": "Drew Phelps, June 27"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on huddle.pinecrest.internal: the path Drew Phelps actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on dock.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "three tells, board for near-miss, not chat Host huddle.pinecrest.internal. Ticket PCF-1920. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: three tells, board for near-miss, not chat. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-MTG-2024-070. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: huddle.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-MTG-2024-070. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "tells",
+          "3",
+          "huddle.pinecrest.internal",
+          "PCF-1920"
+        ],
+        [
+          "seconds",
+          "40",
+          "huddle.pinecrest.internal",
+          "PCF-1920"
+        ],
+        [
+          "miss",
+          "1",
+          "huddle.pinecrest.internal",
+          "PCF-1920"
+        ],
+        [
+          "weeks",
+          "1",
+          "huddle.pinecrest.internal",
+          "PCF-1920"
+        ],
+        [
+          "coats",
+          "12",
+          "huddle.pinecrest.internal",
+          "PCF-1920"
+        ],
+        [
+          "horns",
+          "18",
+          "huddle.pinecrest.internal",
+          "PCF-1920"
+        ],
+        [
+          "board",
+          "1",
+          "huddle.pinecrest.internal",
+          "PCF-1920"
+        ],
+        [
+          "chat",
+          "0",
+          "huddle.pinecrest.internal",
+          "PCF-1920"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: replace safety huddle with a rate shout"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "replace safety huddle with a rate shout is out. Rate shout is how the dead-horn jack ran in November. Drew will not go back. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: replace safety huddle with a rate shout comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-1920. Numbers I will not 'simplify': tells=3, seconds=40, miss=1, weeks=1, coats=12, horns=18, board=1, chat=0. Same clock as the front. I will not mix clocks to make huddle.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does cooler.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-RB-2023-031.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Drew Phelps: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on huddle.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits huddle.pinecrest.internal, PCF-MTG-2024-070, and the last three working pages. Access that has to move is who can change dock.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-1920. huddle.pinecrest.internal.",
+      "text": "# PCF-MTG-2024-070 read-only first\ndate\necho host=huddle.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-1920\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-1920 before any write.",
+        "Confirm on huddle.pinecrest.internal with the read-only commands above.",
+        "If the refuse on replace safety huddle with a rate shout is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-MTG-2024-070. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on replace safety huddle with a rate shout",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host huddle.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Drew Phelps",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-1920. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-MTG-2024-070"
+    },
+    {
+      "type": "p",
+      "text": "dock.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-RB-2023-031 before anyone says the leftover is 'implied.' Implied leftovers are how replace safety huddle with a rate shout almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-MTG-2024-070"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim replace safety huddle with a rate shout is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host huddle.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-1920"
+    },
+    {
+      "type": "p",
+      "text": "First useful is three tells, board for near-miss, not chat, not a prettier board or a louder huddle. Drew Phelps sees that slice on huddle.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-MTG-2024-070."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (15)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-MTG-2024-070. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: cooler.pinecrest.internal."
+    }
+  ]
+}

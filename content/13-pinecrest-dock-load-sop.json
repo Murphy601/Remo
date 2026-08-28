@@ -1,0 +1,336 @@
+{
+  "slug": "13-pinecrest-dock-load-sop",
+  "doc_id": "PCF-SOP-2024-058",
+  "title": "SOP: outbound load at doors 1-4",
+  "subtitle": "Seal, BOL, lean, ticket PCF-1802",
+  "doc_type": "Runbook / SOP",
+  "form_type": "Runbook / SOPs",
+  "kicker": "Pinecrest Fulfillment  \u00b7  Dock load  \u00b7  PCF-1802",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "In force",
+  "date": "May 30, 2024",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Ben Crowe (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Ben Crowe (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-SOP-2024-058; PCF-1802; PCF-SOP-2024-064",
+  "summary": "Ben Crowe asked for a written cut of SOP. Current path: Seals in a drawer, photos skipped when the line is long. This document locks seal photo at door, BOL, chocks, spotter on plate. seal later from the office is out because May 9 office seal did not match the trailer. Carrier disputed 4 pallets.",
+  "form_description": "Outbound load SOP for Pinecrest doors 1-4: seal photo, BOL, chocks, and a refuse on sealing later from the office.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "May 6, 2024",
+      "Jeilen Jones",
+      "Outline after PCF-SOP-2024-058 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "May 18, 2024",
+      "Jeilen Jones",
+      "Numbers from Ben Crowe. seal later from the office still in the room."
+    ],
+    [
+      "0.9",
+      "May 26, 2024",
+      "Jeilen Jones",
+      "seal later from the office written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "May 30, 2024",
+      "Jeilen Jones",
+      "Cut. Host dock.pinecrest.internal. Ticket PCF-1802."
+    ],
+    [
+      "1.1",
+      "May 30, 2024",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "SOP: outbound load at doors 1-4"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-SOP-2024-058 on May 30, 2024. Ben Crowe asked for a written bound after the current path (Seals in a drawer, photos skipped when the line is long) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host dock.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on seal later from the office, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "BOL, seal photo, lean check. Chocks in. No live load without a spotter if a jack is on the plate. I am not restating a hallway yes. seal later from the office is out because May 9 office seal did not match the trailer. Carrier disputed 4 pallets. Cost of doing nothing is already in the numbers: doors=4, pallets=4, photos=1, weeks=2, chocks=1, dispute=1, seal=1.2, line=14. Sibling tickets PCF-1802 and PCF-SOP-2024-064. I will not reopen seal later from the office in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "BOL, seal photo, lean check. Chocks in. No live load without a spotter if a jack is on the plate."
+    },
+    {
+      "type": "p",
+      "text": "Background on dock.pinecrest.internal. Seals in a drawer, photos skipped when the line is long. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on door-01.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-SOP-2024-058 names the pull. If those numbers moved after May 30, 2024, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-SOP-2024-058. seal later from the office is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Seals in a drawer, photos skipped when the line is long",
+          "Numbers already in play: doors=4, pallets=4, photos=1, weeks=2, chocks=1, dispute=1, seal=1.2, line=14",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "seal later from the office",
+          "May 9 office seal did not match the trailer. Carrier disputed 4 pallets.",
+          "Named on PCF-SOP-2024-064",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "seal photo at door, BOL, chocks, spotter on plate",
+          "Host dock.pinecrest.internal, ticket PCF-1802",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: wms.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (13): refuse on seal later from the office, lock is seal photo at door, BOL, chocks, spotter on plate. I will not hide a process change inside a 'quick align' on PCF-1802."
+    },
+    {
+      "type": "quote",
+      "text": "A trailer that leaves without a seal number is not loaded. It is a story.",
+      "attrib": "Ben Crowe, May 16"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on dock.pinecrest.internal: the path Ben Crowe actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on door-01.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "seal photo at door, BOL, chocks, spotter on plate Host dock.pinecrest.internal. Ticket PCF-1802. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: seal photo at door, BOL, chocks, spotter on plate. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-SOP-2024-058. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: dock.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-SOP-2024-058. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "doors",
+          "4",
+          "dock.pinecrest.internal",
+          "PCF-1802"
+        ],
+        [
+          "pallets",
+          "4",
+          "dock.pinecrest.internal",
+          "PCF-1802"
+        ],
+        [
+          "photos",
+          "1",
+          "dock.pinecrest.internal",
+          "PCF-1802"
+        ],
+        [
+          "weeks",
+          "2",
+          "dock.pinecrest.internal",
+          "PCF-1802"
+        ],
+        [
+          "chocks",
+          "1",
+          "dock.pinecrest.internal",
+          "PCF-1802"
+        ],
+        [
+          "dispute",
+          "1",
+          "dock.pinecrest.internal",
+          "PCF-1802"
+        ],
+        [
+          "seal",
+          "1.2",
+          "dock.pinecrest.internal",
+          "PCF-1802"
+        ],
+        [
+          "line",
+          "14",
+          "dock.pinecrest.internal",
+          "PCF-1802"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: seal later from the office"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "seal later from the office is out. May 9 office seal did not match the trailer. Carrier disputed 4 pallets. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: seal later from the office comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-1802. Numbers I will not 'simplify': doors=4, pallets=4, photos=1, weeks=2, chocks=1, dispute=1, seal=1.2, line=14. Same clock as the front. I will not mix clocks to make dock.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does wms.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-SOP-2024-064.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Ben Crowe: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on dock.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits dock.pinecrest.internal, PCF-SOP-2024-058, and the last three working pages. Access that has to move is who can change door-01.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-1802. dock.pinecrest.internal.",
+      "text": "# PCF-SOP-2024-058 read-only first\ndate\necho host=dock.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-1802\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-1802 before any write.",
+        "Confirm on dock.pinecrest.internal with the read-only commands above.",
+        "If the refuse on seal later from the office is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-SOP-2024-058. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on seal later from the office",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host dock.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Ben Crowe",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-1802. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-SOP-2024-058"
+    },
+    {
+      "type": "p",
+      "text": "door-01.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-SOP-2024-064 before anyone says the leftover is 'implied.' Implied leftovers are how seal later from the office almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-SOP-2024-058"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim seal later from the office is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host dock.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-1802"
+    },
+    {
+      "type": "p",
+      "text": "First useful is seal photo at door, BOL, chocks, spotter on plate, not a prettier board or a louder huddle. Ben Crowe sees that slice on dock.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-SOP-2024-058."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (13)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-SOP-2024-058. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: wms.pinecrest.internal."
+    }
+  ]
+}

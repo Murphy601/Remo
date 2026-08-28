@@ -1,0 +1,336 @@
+{
+  "slug": "31-pinecrest-staging-lane-design",
+  "doc_id": "PCF-TDD-2025-024",
+  "title": "Staging lane design for doors 1-4",
+  "subtitle": "Lane per door, no mix, ticket PCF-2644",
+  "doc_type": "Technical design document",
+  "form_type": "Technical design doc",
+  "kicker": "Pinecrest Fulfillment  \u00b7  Staging  \u00b7  PCF-2644",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Accepted",
+  "date": "February 27, 2025",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Ben Crowe (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Ben Crowe (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-TDD-2025-024; PCF-2644; PCF-SOP-2024-058",
+  "summary": "Ben Crowe asked for a written cut of Staging lane design for doors 1-4. Current path: Paint faded, people stage wherever is empty. This document locks one lane per door, label out, no flex mix. shared flex lane for overflow is out because Flex lane mixed door 2 and door 3 on February 6. 4 pallets rode the wrong trailer 18 miles.",
+  "form_description": "Design for Pinecrest staging lanes: one lane per door, labels out, refusing a shared flex overflow lane.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "February 3, 2025",
+      "Jeilen Jones",
+      "Outline after PCF-TDD-2025-024 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "February 15, 2025",
+      "Jeilen Jones",
+      "Numbers from Ben Crowe. shared flex lane for overflow still in the room."
+    ],
+    [
+      "0.9",
+      "February 23, 2025",
+      "Jeilen Jones",
+      "shared flex lane for overflow written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "February 27, 2025",
+      "Jeilen Jones",
+      "Cut. Host dock.pinecrest.internal. Ticket PCF-2644."
+    ],
+    [
+      "1.1",
+      "February 27, 2025",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Staging lane design for doors 1-4"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-TDD-2025-024 on February 27, 2025. Ben Crowe asked for a written bound after the current path (Paint faded, people stage wherever is empty) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host dock.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on shared flex lane for overflow, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "One lane per door. Pallet label faces the aisle. Mix is a rebuild. Reject a shared 'flex' lane. I am not restating a hallway yes. shared flex lane for overflow is out because Flex lane mixed door 2 and door 3 on February 6. 4 pallets rode the wrong trailer 18 miles. Cost of doing nothing is already in the numbers: doors=4, wrong=4, miles=18, weeks=4, flex=1, pallets=6.4, paint=0, mix=1. Sibling tickets PCF-2644 and PCF-SOP-2024-058. I will not reopen shared flex lane for overflow in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "One lane per door. Pallet label faces the aisle. Mix is a rebuild. Reject a shared 'flex' lane."
+    },
+    {
+      "type": "p",
+      "text": "Background on dock.pinecrest.internal. Paint faded, people stage wherever is empty. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on stage.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-TDD-2025-024 names the pull. If those numbers moved after February 27, 2025, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-TDD-2025-024. shared flex lane for overflow is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Paint faded, people stage wherever is empty",
+          "Numbers already in play: doors=4, wrong=4, miles=18, weeks=4, flex=1, pallets=6.4, paint=0, mix=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "shared flex lane for overflow",
+          "Flex lane mixed door 2 and door 3 on February 6. 4 pallets rode the wrong trailer 18 miles",
+          "Named on PCF-SOP-2024-058",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "one lane per door, label out, no flex mix",
+          "Host dock.pinecrest.internal, ticket PCF-2644",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: wms.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (31): refuse on shared flex lane for overflow, lock is one lane per door, label out, no flex mix. I will not hide a process change inside a 'quick align' on PCF-2644."
+    },
+    {
+      "type": "quote",
+      "text": "If two trailers share a lane, we will load the wrong one at 18:10.",
+      "attrib": "Ben Crowe, February 13"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on dock.pinecrest.internal: the path Ben Crowe actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on stage.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "one lane per door, label out, no flex mix Host dock.pinecrest.internal. Ticket PCF-2644. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: one lane per door, label out, no flex mix. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-TDD-2025-024. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: dock.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-TDD-2025-024. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "doors",
+          "4",
+          "dock.pinecrest.internal",
+          "PCF-2644"
+        ],
+        [
+          "wrong",
+          "4",
+          "dock.pinecrest.internal",
+          "PCF-2644"
+        ],
+        [
+          "miles",
+          "18",
+          "dock.pinecrest.internal",
+          "PCF-2644"
+        ],
+        [
+          "weeks",
+          "4",
+          "dock.pinecrest.internal",
+          "PCF-2644"
+        ],
+        [
+          "flex",
+          "1",
+          "dock.pinecrest.internal",
+          "PCF-2644"
+        ],
+        [
+          "pallets",
+          "6.4",
+          "dock.pinecrest.internal",
+          "PCF-2644"
+        ],
+        [
+          "paint",
+          "0",
+          "dock.pinecrest.internal",
+          "PCF-2644"
+        ],
+        [
+          "mix",
+          "1",
+          "dock.pinecrest.internal",
+          "PCF-2644"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: shared flex lane for overflow"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "shared flex lane for overflow is out. Flex lane mixed door 2 and door 3 on February 6. 4 pallets rode the wrong trailer 18 miles. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: shared flex lane for overflow comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-2644. Numbers I will not 'simplify': doors=4, wrong=4, miles=18, weeks=4, flex=1, pallets=6.4, paint=0, mix=1. Same clock as the front. I will not mix clocks to make dock.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does wms.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-SOP-2024-058.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Ben Crowe: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on dock.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits dock.pinecrest.internal, PCF-TDD-2025-024, and the last three working pages. Access that has to move is who can change stage.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-2644. dock.pinecrest.internal.",
+      "text": "# PCF-TDD-2025-024 read-only first\ndate\necho host=dock.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-2644\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-2644 before any write.",
+        "Confirm on dock.pinecrest.internal with the read-only commands above.",
+        "If the refuse on shared flex lane for overflow is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-TDD-2025-024. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on shared flex lane for overflow",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host dock.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Ben Crowe",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-2644. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-TDD-2025-024"
+    },
+    {
+      "type": "p",
+      "text": "stage.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-SOP-2024-058 before anyone says the leftover is 'implied.' Implied leftovers are how shared flex lane for overflow almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-TDD-2025-024"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim shared flex lane for overflow is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host dock.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-2644"
+    },
+    {
+      "type": "p",
+      "text": "First useful is one lane per door, label out, no flex mix, not a prettier board or a louder huddle. Ben Crowe sees that slice on dock.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-TDD-2025-024."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (31)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-TDD-2025-024. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: wms.pinecrest.internal."
+    }
+  ]
+}

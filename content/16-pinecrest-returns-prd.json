@@ -1,0 +1,336 @@
+{
+  "slug": "16-pinecrest-returns-prd",
+  "doc_id": "PCF-PRD-2024-077",
+  "title": "PRD: returns lane, not back into forward pick",
+  "subtitle": "Quarantine cage, ticket PCF-1988",
+  "doc_type": "Product requirements document",
+  "form_type": "Product requirements doc",
+  "kicker": "Pinecrest Fulfillment  \u00b7  Returns  \u00b7  PCF-1988",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Signed",
+  "date": "July 18, 2024",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Lila Voss (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Lila Voss (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-PRD-2024-077; PCF-1988; PCF-INC-2024-047",
+  "summary": "Lila Voss asked for a written cut of PRD. Current path: Returns drop at aisle end, pickers restock ad hoc. This document locks cage, inspect, then restock, no direct-to-forward. dump returns on the pick face to save a walk is out because June 20 opened lotion in a pick bin. Customer photo came back the same week.",
+  "form_description": "PRD for a Pinecrest returns lane into a quarantine cage, refusing dump-back onto the forward pick face.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "June 24, 2024",
+      "Jeilen Jones",
+      "Outline after PCF-PRD-2024-077 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "July 6, 2024",
+      "Jeilen Jones",
+      "Numbers from Lila Voss. dump returns on the pick face to save a walk still in the room."
+    ],
+    [
+      "0.9",
+      "July 14, 2024",
+      "Jeilen Jones",
+      "dump returns on the pick face to save a walk written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "July 18, 2024",
+      "Jeilen Jones",
+      "Cut. Host returns.pinecrest.internal. Ticket PCF-1988."
+    ],
+    [
+      "1.1",
+      "July 18, 2024",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "PRD: returns lane, not back into forward pick"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-PRD-2024-077 on July 18, 2024. Lila Voss asked for a written bound after the current path (Returns drop at aisle end, pickers restock ad hoc) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host returns.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on dump returns on the pick face to save a walk, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Returns to cage. Inspect. Then restock or damage. No direct-to-forward. I am not restating a hallway yes. dump returns on the pick face to save a walk is out because June 20 opened lotion in a pick bin. Customer photo came back the same week. Cost of doing nothing is already in the numbers: opened=1, walks=2.4, weeks=4, cage=1, photo=1, bins=1, inspect=6.5, dump=1. Sibling tickets PCF-1988 and PCF-INC-2024-047. I will not reopen dump returns on the pick face to save a walk in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Returns to cage. Inspect. Then restock or damage. No direct-to-forward."
+    },
+    {
+      "type": "p",
+      "text": "Background on returns.pinecrest.internal. Returns drop at aisle end, pickers restock ad hoc. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on wms.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-PRD-2024-077 names the pull. If those numbers moved after July 18, 2024, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-PRD-2024-077. dump returns on the pick face to save a walk is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Returns drop at aisle end, pickers restock ad hoc",
+          "Numbers already in play: opened=1, walks=2.4, weeks=4, cage=1, photo=1, bins=1, inspect=6.5, dump=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "dump returns on the pick face to save a walk",
+          "June 20 opened lotion in a pick bin. Customer photo came back the same week.",
+          "Named on PCF-INC-2024-047",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "cage, inspect, then restock, no direct-to-forward",
+          "Host returns.pinecrest.internal, ticket PCF-1988",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: cage.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (16): refuse on dump returns on the pick face to save a walk, lock is cage, inspect, then restock, no direct-to-forward. I will not hide a process change inside a 'quick align' on PCF-1988."
+    },
+    {
+      "type": "quote",
+      "text": "A return that goes straight back to the pick face is how we pick opened bottles.",
+      "attrib": "Lila Voss, July 3"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on returns.pinecrest.internal: the path Lila Voss actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on wms.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "cage, inspect, then restock, no direct-to-forward Host returns.pinecrest.internal. Ticket PCF-1988. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: cage, inspect, then restock, no direct-to-forward. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-PRD-2024-077. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: returns.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-PRD-2024-077. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "opened",
+          "1",
+          "returns.pinecrest.internal",
+          "PCF-1988"
+        ],
+        [
+          "walks",
+          "2.4",
+          "returns.pinecrest.internal",
+          "PCF-1988"
+        ],
+        [
+          "weeks",
+          "4",
+          "returns.pinecrest.internal",
+          "PCF-1988"
+        ],
+        [
+          "cage",
+          "1",
+          "returns.pinecrest.internal",
+          "PCF-1988"
+        ],
+        [
+          "photo",
+          "1",
+          "returns.pinecrest.internal",
+          "PCF-1988"
+        ],
+        [
+          "bins",
+          "1",
+          "returns.pinecrest.internal",
+          "PCF-1988"
+        ],
+        [
+          "inspect",
+          "6.5",
+          "returns.pinecrest.internal",
+          "PCF-1988"
+        ],
+        [
+          "dump",
+          "1",
+          "returns.pinecrest.internal",
+          "PCF-1988"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: dump returns on the pick face to save a walk"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "dump returns on the pick face to save a walk is out. June 20 opened lotion in a pick bin. Customer photo came back the same week. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: dump returns on the pick face to save a walk comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-1988. Numbers I will not 'simplify': opened=1, walks=2.4, weeks=4, cage=1, photo=1, bins=1, inspect=6.5, dump=1. Same clock as the front. I will not mix clocks to make returns.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does cage.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-INC-2024-047.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Lila Voss: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on returns.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits returns.pinecrest.internal, PCF-PRD-2024-077, and the last three working pages. Access that has to move is who can change wms.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-1988. returns.pinecrest.internal.",
+      "text": "# PCF-PRD-2024-077 read-only first\ndate\necho host=returns.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-1988\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-1988 before any write.",
+        "Confirm on returns.pinecrest.internal with the read-only commands above.",
+        "If the refuse on dump returns on the pick face to save a walk is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-PRD-2024-077. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on dump returns on the pick face to save a walk",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host returns.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Lila Voss",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-1988. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-PRD-2024-077"
+    },
+    {
+      "type": "p",
+      "text": "wms.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-INC-2024-047 before anyone says the leftover is 'implied.' Implied leftovers are how dump returns on the pick face to save a walk almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-PRD-2024-077"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim dump returns on the pick face to save a walk is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host returns.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-1988"
+    },
+    {
+      "type": "p",
+      "text": "First useful is cage, inspect, then restock, no direct-to-forward, not a prettier board or a louder huddle. Lila Voss sees that slice on returns.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-PRD-2024-077."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (16)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-PRD-2024-077. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: cage.pinecrest.internal."
+    }
+  ]
+}

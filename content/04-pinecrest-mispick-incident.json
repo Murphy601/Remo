@@ -1,0 +1,336 @@
+{
+  "slug": "04-pinecrest-mispick-incident",
+  "doc_id": "PCF-INC-2024-008",
+  "title": "Incident: 14 mispicks on wave 2-14 after skip-scan Friday",
+  "subtitle": "January 12, 2024, pack caught it, ticket PCF-INC-2024-008",
+  "doc_type": "Incident report",
+  "form_type": "Incident report",
+  "kicker": "Pinecrest Fulfillment  \u00b7  Mispick  \u00b7  PCF-INC-2024-008",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Closed",
+  "date": "January 16, 2024",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Tasha Quinn (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Tasha Quinn (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-INC-2024-008; PCF-1104; PCF-INC-2024-008-QA",
+  "summary": "Tasha Quinn asked for a written cut of Incident. Current path: Skip-scan still happening on Friday overtime. This document locks write-up on skip-scan, pack is not the control. let pack catch mispicks as the control is out because Pack is downstream. 14 wrong totes already cost 2.7 hours and one customer reship.",
+  "form_description": "Incident report for 14 Pinecrest mispicks after a Friday skip-scan wave, refusing pack-as-quality-wall as the fix.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "December 23, 2023",
+      "Jeilen Jones",
+      "Outline after PCF-INC-2024-008 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "January 4, 2024",
+      "Jeilen Jones",
+      "Numbers from Tasha Quinn. let pack catch mispicks as the control still in the room."
+    ],
+    [
+      "0.9",
+      "January 12, 2024",
+      "Jeilen Jones",
+      "let pack catch mispicks as the control written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "January 16, 2024",
+      "Jeilen Jones",
+      "Cut. Host wms.pinecrest.internal. Ticket PCF-INC-2024-008."
+    ],
+    [
+      "1.1",
+      "January 16, 2024",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Incident: 14 mispicks on wave 2-14 after skip-scan Friday"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-INC-2024-008 on January 16, 2024. Tasha Quinn asked for a written bound after the current path (Skip-scan still happening on Friday overtime) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host wms.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on let pack catch mispicks as the control, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Retrain skip-scan as a write-up. Replay wave 2-14. Do not 'fix it at pack' as policy. I am not restating a hallway yes. let pack catch mispicks as the control is out because Pack is downstream. 14 wrong totes already cost 2.7 hours and one customer reship. Cost of doing nothing is already in the numbers: mispicks=14, wave=2-14, hours=2.7, reship=1, start=09:40, caught=14:20, weeks=1, ot=1. Sibling tickets PCF-1104 and PCF-INC-2024-008-QA. I will not reopen let pack catch mispicks as the control in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Retrain skip-scan as a write-up. Replay wave 2-14. Do not 'fix it at pack' as policy."
+    },
+    {
+      "type": "p",
+      "text": "Background on wms.pinecrest.internal. Skip-scan still happening on Friday overtime. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on pack.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-INC-2024-008 names the pull. If those numbers moved after January 16, 2024, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-INC-2024-008. let pack catch mispicks as the control is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Skip-scan still happening on Friday overtime",
+          "Numbers already in play: mispicks=14, wave=2-14, hours=2.7, reship=1, start=09:40, caught=14:20, weeks=1, ot=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "let pack catch mispicks as the control",
+          "Pack is downstream. 14 wrong totes already cost 2.7 hours and one customer reship.",
+          "Named on PCF-INC-2024-008-QA",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "write-up on skip-scan, pack is not the control",
+          "Host wms.pinecrest.internal, ticket PCF-INC-2024-008",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: rf.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (04): refuse on let pack catch mispicks as the control, lock is write-up on skip-scan, pack is not the control. I will not hide a process change inside a 'quick align' on PCF-1104."
+    },
+    {
+      "type": "quote",
+      "text": "Pack should not be our quality wall. The pick should be right.",
+      "attrib": "Tasha Quinn, January 12 14:20"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on wms.pinecrest.internal: the path Tasha Quinn actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on pack.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "write-up on skip-scan, pack is not the control Host wms.pinecrest.internal. Ticket PCF-INC-2024-008. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: write-up on skip-scan, pack is not the control. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-INC-2024-008. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: wms.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-INC-2024-008. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "mispicks",
+          "14",
+          "wms.pinecrest.internal",
+          "PCF-INC-2024-008"
+        ],
+        [
+          "wave",
+          "2-14",
+          "wms.pinecrest.internal",
+          "PCF-INC-2024-008"
+        ],
+        [
+          "hours",
+          "2.7",
+          "wms.pinecrest.internal",
+          "PCF-INC-2024-008"
+        ],
+        [
+          "reship",
+          "1",
+          "wms.pinecrest.internal",
+          "PCF-INC-2024-008"
+        ],
+        [
+          "start",
+          "09:40",
+          "wms.pinecrest.internal",
+          "PCF-INC-2024-008"
+        ],
+        [
+          "caught",
+          "14:20",
+          "wms.pinecrest.internal",
+          "PCF-INC-2024-008"
+        ],
+        [
+          "weeks",
+          "1",
+          "wms.pinecrest.internal",
+          "PCF-INC-2024-008"
+        ],
+        [
+          "ot",
+          "1",
+          "wms.pinecrest.internal",
+          "PCF-INC-2024-008"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: let pack catch mispicks as the control"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "let pack catch mispicks as the control is out. Pack is downstream. 14 wrong totes already cost 2.7 hours and one customer reship. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: let pack catch mispicks as the control comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-1104. Numbers I will not 'simplify': mispicks=14, wave=2-14, hours=2.7, reship=1, start=09:40, caught=14:20, weeks=1, ot=1. Same clock as the front. I will not mix clocks to make wms.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does rf.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-INC-2024-008-QA.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Tasha Quinn: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on wms.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits wms.pinecrest.internal, PCF-INC-2024-008, and the last three working pages. Access that has to move is who can change pack.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-INC-2024-008. wms.pinecrest.internal.",
+      "text": "# PCF-INC-2024-008 read-only first\ndate\necho host=wms.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-INC-2024-008\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-INC-2024-008 before any write.",
+        "Confirm on wms.pinecrest.internal with the read-only commands above.",
+        "If the refuse on let pack catch mispicks as the control is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-INC-2024-008. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on let pack catch mispicks as the control",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host wms.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Tasha Quinn",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-INC-2024-008. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-INC-2024-008"
+    },
+    {
+      "type": "p",
+      "text": "pack.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-INC-2024-008-QA before anyone says the leftover is 'implied.' Implied leftovers are how let pack catch mispicks as the control almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-INC-2024-008"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim let pack catch mispicks as the control is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host wms.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-INC-2024-008"
+    },
+    {
+      "type": "p",
+      "text": "First useful is write-up on skip-scan, pack is not the control, not a prettier board or a louder huddle. Tasha Quinn sees that slice on wms.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-INC-2024-008."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (04)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-INC-2024-008. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: rf.pinecrest.internal."
+    }
+  ]
+}

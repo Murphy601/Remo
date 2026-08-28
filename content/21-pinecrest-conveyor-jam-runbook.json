@@ -1,0 +1,336 @@
+{
+  "slug": "21-pinecrest-conveyor-jam-runbook",
+  "doc_id": "PCF-RB-2024-108",
+  "title": "Runbook: pack conveyor jam between stations 8 and 9",
+  "subtitle": "E-stop, no reach-in, ticket PCF-2166",
+  "doc_type": "Runbook / SOP",
+  "form_type": "Runbook / SOPs",
+  "kicker": "Pinecrest Fulfillment  \u00b7  Conveyor  \u00b7  PCF-2166",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "In force",
+  "date": "September 26, 2024",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Drew Phelps (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Drew Phelps (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-RB-2024-108; PCF-2166; PCF-MTG-2024-070",
+  "summary": "Drew Phelps asked for a written cut of Runbook. Current path: People tap jams while running to save the rate. This document locks e-stop, lockout, named restart, no reach-in. pull the box while it is moving is out because September 5 near-miss: sleeve in the belt. Drew stopped the line 14 minutes. Sleeve won.",
+  "form_description": "Runbook for a Pinecrest pack conveyor jam: e-stop and lockout before clearing, refusing a reach-in to save rate.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "September 2, 2024",
+      "Jeilen Jones",
+      "Outline after PCF-RB-2024-108 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "September 14, 2024",
+      "Jeilen Jones",
+      "Numbers from Drew Phelps. pull the box while it is moving still in the room."
+    ],
+    [
+      "0.9",
+      "September 22, 2024",
+      "Jeilen Jones",
+      "pull the box while it is moving written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "September 26, 2024",
+      "Jeilen Jones",
+      "Cut. Host pack.pinecrest.internal. Ticket PCF-2166."
+    ],
+    [
+      "1.1",
+      "September 26, 2024",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Runbook: pack conveyor jam between stations 8 and 9"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-RB-2024-108 on September 26, 2024. Drew Phelps asked for a written bound after the current path (People tap jams while running to save the rate) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host pack.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on pull the box while it is moving, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "E-stop. Lockout. Then clear. Restart only after Drew or a named backup looks. No reach-in. I am not restating a hallway yes. pull the box while it is moving is out because September 5 near-miss: sleeve in the belt. Drew stopped the line 14 minutes. Sleeve won. Cost of doing nothing is already in the numbers: stations=8-9, minutes=14, miss=1, weeks=2, estop=1, rate=0, sleeve=1, backup=1. Sibling tickets PCF-2166 and PCF-MTG-2024-070. I will not reopen pull the box while it is moving in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "E-stop. Lockout. Then clear. Restart only after Drew or a named backup looks. No reach-in."
+    },
+    {
+      "type": "p",
+      "text": "Background on pack.pinecrest.internal. People tap jams while running to save the rate. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on conv-08.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-RB-2024-108 names the pull. If those numbers moved after September 26, 2024, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-RB-2024-108. pull the box while it is moving is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep People tap jams while running to save the rate",
+          "Numbers already in play: stations=8-9, minutes=14, miss=1, weeks=2, estop=1, rate=0, sleeve=1, backup=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "pull the box while it is moving",
+          "September 5 near-miss: sleeve in the belt. Drew stopped the line 14 minutes. Sleeve won.",
+          "Named on PCF-MTG-2024-070",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "e-stop, lockout, named restart, no reach-in",
+          "Host pack.pinecrest.internal, ticket PCF-2166",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: estop.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (21): refuse on pull the box while it is moving, lock is e-stop, lockout, named restart, no reach-in. I will not hide a process change inside a 'quick align' on PCF-2166."
+    },
+    {
+      "type": "quote",
+      "text": "Hands do not go in a moving belt. I do not care how small the jam looks.",
+      "attrib": "Drew Phelps, September 12"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on pack.pinecrest.internal: the path Drew Phelps actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on conv-08.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "e-stop, lockout, named restart, no reach-in Host pack.pinecrest.internal. Ticket PCF-2166. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: e-stop, lockout, named restart, no reach-in. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-RB-2024-108. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: pack.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-RB-2024-108. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "stations",
+          "8-9",
+          "pack.pinecrest.internal",
+          "PCF-2166"
+        ],
+        [
+          "minutes",
+          "14",
+          "pack.pinecrest.internal",
+          "PCF-2166"
+        ],
+        [
+          "miss",
+          "1",
+          "pack.pinecrest.internal",
+          "PCF-2166"
+        ],
+        [
+          "weeks",
+          "2",
+          "pack.pinecrest.internal",
+          "PCF-2166"
+        ],
+        [
+          "estop",
+          "1",
+          "pack.pinecrest.internal",
+          "PCF-2166"
+        ],
+        [
+          "rate",
+          "0",
+          "pack.pinecrest.internal",
+          "PCF-2166"
+        ],
+        [
+          "sleeve",
+          "1",
+          "pack.pinecrest.internal",
+          "PCF-2166"
+        ],
+        [
+          "backup",
+          "1",
+          "pack.pinecrest.internal",
+          "PCF-2166"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: pull the box while it is moving"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "pull the box while it is moving is out. September 5 near-miss: sleeve in the belt. Drew stopped the line 14 minutes. Sleeve won. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: pull the box while it is moving comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-2166. Numbers I will not 'simplify': stations=8-9, minutes=14, miss=1, weeks=2, estop=1, rate=0, sleeve=1, backup=1. Same clock as the front. I will not mix clocks to make pack.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does estop.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-MTG-2024-070.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Drew Phelps: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on pack.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits pack.pinecrest.internal, PCF-RB-2024-108, and the last three working pages. Access that has to move is who can change conv-08.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-2166. pack.pinecrest.internal.",
+      "text": "# PCF-RB-2024-108 read-only first\ndate\necho host=pack.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-2166\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-2166 before any write.",
+        "Confirm on pack.pinecrest.internal with the read-only commands above.",
+        "If the refuse on pull the box while it is moving is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-RB-2024-108. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on pull the box while it is moving",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host pack.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Drew Phelps",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-2166. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-RB-2024-108"
+    },
+    {
+      "type": "p",
+      "text": "conv-08.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-MTG-2024-070 before anyone says the leftover is 'implied.' Implied leftovers are how pull the box while it is moving almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-RB-2024-108"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim pull the box while it is moving is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host pack.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-2166"
+    },
+    {
+      "type": "p",
+      "text": "First useful is e-stop, lockout, named restart, no reach-in, not a prettier board or a louder huddle. Drew Phelps sees that slice on pack.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-RB-2024-108."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (21)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-RB-2024-108. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: estop.pinecrest.internal."
+    }
+  ]
+}

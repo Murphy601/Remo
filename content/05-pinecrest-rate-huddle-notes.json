@@ -1,0 +1,336 @@
+{
+  "slug": "05-pinecrest-rate-huddle-notes",
+  "doc_id": "PCF-MTG-2024-011",
+  "title": "Production rate huddle notes, January 25",
+  "subtitle": "Units per hour, quality gate, overtime, ticket PCF-1302",
+  "doc_type": "Meeting notes",
+  "form_type": "Other",
+  "kicker": "Pinecrest Fulfillment  \u00b7  Rate  \u00b7  PCF-1302",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Issued",
+  "date": "January 25, 2024",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Marcus Hale (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Marcus Hale (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-MTG-2024-011; PCF-1302; PCF-SOP-2023-014",
+  "summary": "Marcus Hale asked for a written cut of Production rate huddle notes. Current path: Posted 280, tribal 400 on OT. This document locks 310 UPH posted, quality gate, OT is not skip-scan. raise posted rate to 400 without a quality gate is out because 400 is the Friday number that produced PCF-INC-2024-008.",
+  "form_description": "Huddle notes locking Pinecrest dry pick rate at 310 UPH with a quality gate, refusing a 400 UPH post without that gate.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "January 1, 2024",
+      "Jeilen Jones",
+      "Outline after PCF-MTG-2024-011 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "January 13, 2024",
+      "Jeilen Jones",
+      "Numbers from Marcus Hale. raise posted rate to 400 without a quality gate still in the room."
+    ],
+    [
+      "0.9",
+      "January 21, 2024",
+      "Jeilen Jones",
+      "raise posted rate to 400 without a quality gate written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "January 25, 2024",
+      "Jeilen Jones",
+      "Cut. Host huddle.pinecrest.internal. Ticket PCF-1302."
+    ],
+    [
+      "1.1",
+      "January 25, 2024",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Production rate huddle notes, January 25"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-MTG-2024-011 on January 25, 2024. Marcus Hale asked for a written bound after the current path (Posted 280, tribal 400 on OT) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host huddle.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on raise posted rate to 400 without a quality gate, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Posted rate is 310 UPH on dry with a clean tote. Quality gate stays. Overtime is not a skip-scan license. I am not restating a hallway yes. raise posted rate to 400 without a quality gate is out because 400 is the Friday number that produced PCF-INC-2024-008. Cost of doing nothing is already in the numbers: posted=310, tribal=400, old=280, mispicks=14, weeks=1, zones=2, ot=1.5, huddle=06:40. Sibling tickets PCF-1302 and PCF-SOP-2023-014. I will not reopen raise posted rate to 400 without a quality gate in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Posted rate is 310 UPH on dry with a clean tote. Quality gate stays. Overtime is not a skip-scan license."
+    },
+    {
+      "type": "p",
+      "text": "Background on huddle.pinecrest.internal. Posted 280, tribal 400 on OT. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on wms.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-MTG-2024-011 names the pull. If those numbers moved after January 25, 2024, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-MTG-2024-011. raise posted rate to 400 without a quality gate is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Posted 280, tribal 400 on OT",
+          "Numbers already in play: posted=310, tribal=400, old=280, mispicks=14, weeks=1, zones=2, ot=1.5, huddle=06:40",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "raise posted rate to 400 without a quality gate",
+          "400 is the Friday number that produced PCF-INC-2024-008.",
+          "Named on PCF-SOP-2023-014",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "310 UPH posted, quality gate, OT is not skip-scan",
+          "Host huddle.pinecrest.internal, ticket PCF-1302",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: pack.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (05): refuse on raise posted rate to 400 without a quality gate, lock is 310 UPH posted, quality gate, OT is not skip-scan. I will not hide a process change inside a 'quick align' on PCF-1302."
+    },
+    {
+      "type": "quote",
+      "text": "I will not clap for 400 UPH that ships the wrong shampoo.",
+      "attrib": "Marcus Hale, January 25"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on huddle.pinecrest.internal: the path Marcus Hale actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on wms.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "310 UPH posted, quality gate, OT is not skip-scan Host huddle.pinecrest.internal. Ticket PCF-1302. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: 310 UPH posted, quality gate, OT is not skip-scan. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-MTG-2024-011. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: huddle.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-MTG-2024-011. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "posted",
+          "310",
+          "huddle.pinecrest.internal",
+          "PCF-1302"
+        ],
+        [
+          "tribal",
+          "400",
+          "huddle.pinecrest.internal",
+          "PCF-1302"
+        ],
+        [
+          "old",
+          "280",
+          "huddle.pinecrest.internal",
+          "PCF-1302"
+        ],
+        [
+          "mispicks",
+          "14",
+          "huddle.pinecrest.internal",
+          "PCF-1302"
+        ],
+        [
+          "weeks",
+          "1",
+          "huddle.pinecrest.internal",
+          "PCF-1302"
+        ],
+        [
+          "zones",
+          "2",
+          "huddle.pinecrest.internal",
+          "PCF-1302"
+        ],
+        [
+          "ot",
+          "1.5",
+          "huddle.pinecrest.internal",
+          "PCF-1302"
+        ],
+        [
+          "huddle",
+          "06:40",
+          "huddle.pinecrest.internal",
+          "PCF-1302"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: raise posted rate to 400 without a quality gate"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "raise posted rate to 400 without a quality gate is out. 400 is the Friday number that produced PCF-INC-2024-008. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: raise posted rate to 400 without a quality gate comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-1302. Numbers I will not 'simplify': posted=310, tribal=400, old=280, mispicks=14, weeks=1, zones=2, ot=1.5, huddle=06:40. Same clock as the front. I will not mix clocks to make huddle.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does pack.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-SOP-2023-014.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Marcus Hale: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on huddle.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits huddle.pinecrest.internal, PCF-MTG-2024-011, and the last three working pages. Access that has to move is who can change wms.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-1302. huddle.pinecrest.internal.",
+      "text": "# PCF-MTG-2024-011 read-only first\ndate\necho host=huddle.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-1302\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-1302 before any write.",
+        "Confirm on huddle.pinecrest.internal with the read-only commands above.",
+        "If the refuse on raise posted rate to 400 without a quality gate is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-MTG-2024-011. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on raise posted rate to 400 without a quality gate",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host huddle.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-1302. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-MTG-2024-011"
+    },
+    {
+      "type": "p",
+      "text": "wms.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-SOP-2023-014 before anyone says the leftover is 'implied.' Implied leftovers are how raise posted rate to 400 without a quality gate almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-MTG-2024-011"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim raise posted rate to 400 without a quality gate is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host huddle.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-1302"
+    },
+    {
+      "type": "p",
+      "text": "First useful is 310 UPH posted, quality gate, OT is not skip-scan, not a prettier board or a louder huddle. Marcus Hale sees that slice on huddle.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-MTG-2024-011."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (05)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-MTG-2024-011. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: pack.pinecrest.internal."
+    }
+  ]
+}

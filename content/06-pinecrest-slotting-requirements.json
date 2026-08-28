@@ -1,0 +1,336 @@
+{
+  "slug": "06-pinecrest-slotting-requirements",
+  "doc_id": "PCF-REQ-2024-018",
+  "title": "Requirements: forward-pick slotting for top 80 SKUs",
+  "subtitle": "Golden zone, no floor stacks in pick path, ticket PCF-1410",
+  "doc_type": "Requirements document",
+  "form_type": "Requirements doc",
+  "kicker": "Pinecrest Fulfillment  \u00b7  Slotting  \u00b7  PCF-1410",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Signed",
+  "date": "February 15, 2024",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Lila Voss (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Lila Voss (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-1410; PCF-REQ-2024-018; PCF-SYS-2024-024",
+  "summary": "Lila Voss asked for a written cut of Requirements. Current path: Velocity ignored, top seller on beam 5, floor stacks in aisle B. This document locks 80 SKUs golden zone, no floor stacks in path. vendor slotting overlay is out because Quote did not walk building 2. They wanted a file, not the beams we actually have.",
+  "form_description": "Requirements for Pinecrest forward-pick slotting of the top 80 SKUs into the golden zone, refusing a vendor overlay that never walked the aisle.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "January 22, 2024",
+      "Jeilen Jones",
+      "Outline after PCF-1410 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "February 3, 2024",
+      "Jeilen Jones",
+      "Numbers from Lila Voss. vendor slotting overlay still in the room."
+    ],
+    [
+      "0.9",
+      "February 11, 2024",
+      "Jeilen Jones",
+      "vendor slotting overlay written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "February 15, 2024",
+      "Jeilen Jones",
+      "Cut. Host slot.pinecrest.internal. Ticket PCF-1410."
+    ],
+    [
+      "1.1",
+      "February 15, 2024",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Requirements: forward-pick slotting for top 80 SKUs"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-1410 on February 15, 2024. Lila Voss asked for a written bound after the current path (Velocity ignored, top seller on beam 5, floor stacks in aisle B) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host slot.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on vendor slotting overlay, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Top 80 SKUs in golden zone waist-to-shoulder. No floor stacks in the pick aisle. Reject a vendor slotting overlay ($9.4k, no aisle walk). I am not restating a hallway yes. vendor slotting overlay is out because Quote did not walk building 2. They wanted a file, not the beams we actually have. Cost of doing nothing is already in the numbers: skus=80, beam=5, cost=9.4, climbs=22.6, weeks=6, aisles=14, floor=3, walk=1.8. Sibling tickets PCF-REQ-2024-018 and PCF-SYS-2024-024. I will not reopen vendor slotting overlay in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Top 80 SKUs in golden zone waist-to-shoulder. No floor stacks in the pick aisle. Reject a vendor slotting overlay ($9.4k, no aisle walk)."
+    },
+    {
+      "type": "p",
+      "text": "Background on slot.pinecrest.internal. Velocity ignored, top seller on beam 5, floor stacks in aisle B. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on wms.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-1410 names the pull. If those numbers moved after February 15, 2024, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-REQ-2024-018. vendor slotting overlay is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Velocity ignored, top seller on beam 5, floor stacks in aisle B",
+          "Numbers already in play: skus=80, beam=5, cost=9.4, climbs=22.6, weeks=6, aisles=14, floor=3, walk=1.8",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "vendor slotting overlay",
+          "Quote did not walk building 2. They wanted a file, not the beams we actually have.",
+          "Named on PCF-SYS-2024-024",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "80 SKUs golden zone, no floor stacks in path",
+          "Host slot.pinecrest.internal, ticket PCF-1410",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: aisle-b2.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (06): refuse on vendor slotting overlay, lock is 80 SKUs golden zone, no floor stacks in path. I will not hide a process change inside a 'quick align' on PCF-REQ-2024-018."
+    },
+    {
+      "type": "quote",
+      "text": "If the top seller is on the top beam, we climb. Climbing is not picking.",
+      "attrib": "Lila Voss, inventory, February 1"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on slot.pinecrest.internal: the path Lila Voss actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on wms.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "80 SKUs golden zone, no floor stacks in path Host slot.pinecrest.internal. Ticket PCF-1410. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: 80 SKUs golden zone, no floor stacks in path. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-1410. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: slot.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-REQ-2024-018. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "skus",
+          "80",
+          "slot.pinecrest.internal",
+          "PCF-1410"
+        ],
+        [
+          "beam",
+          "5",
+          "slot.pinecrest.internal",
+          "PCF-1410"
+        ],
+        [
+          "cost",
+          "9.4",
+          "slot.pinecrest.internal",
+          "PCF-1410"
+        ],
+        [
+          "climbs",
+          "22.6",
+          "slot.pinecrest.internal",
+          "PCF-1410"
+        ],
+        [
+          "weeks",
+          "6",
+          "slot.pinecrest.internal",
+          "PCF-1410"
+        ],
+        [
+          "aisles",
+          "14",
+          "slot.pinecrest.internal",
+          "PCF-1410"
+        ],
+        [
+          "floor",
+          "3",
+          "slot.pinecrest.internal",
+          "PCF-1410"
+        ],
+        [
+          "walk",
+          "1.8",
+          "slot.pinecrest.internal",
+          "PCF-1410"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: vendor slotting overlay"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "vendor slotting overlay is out. Quote did not walk building 2. They wanted a file, not the beams we actually have. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: vendor slotting overlay comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-REQ-2024-018. Numbers I will not 'simplify': skus=80, beam=5, cost=9.4, climbs=22.6, weeks=6, aisles=14, floor=3, walk=1.8. Same clock as the front. I will not mix clocks to make slot.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does aisle-b2.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-SYS-2024-024.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Lila Voss: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on slot.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits slot.pinecrest.internal, PCF-1410, and the last three working pages. Access that has to move is who can change wms.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-1410. slot.pinecrest.internal.",
+      "text": "# PCF-REQ-2024-018 read-only first\ndate\necho host=slot.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-1410\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-1410 before any write.",
+        "Confirm on slot.pinecrest.internal with the read-only commands above.",
+        "If the refuse on vendor slotting overlay is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-REQ-2024-018. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on vendor slotting overlay",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host slot.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Lila Voss",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-1410. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-REQ-2024-018"
+    },
+    {
+      "type": "p",
+      "text": "wms.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-SYS-2024-024 before anyone says the leftover is 'implied.' Implied leftovers are how vendor slotting overlay almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-REQ-2024-018"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim vendor slotting overlay is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host slot.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-1410"
+    },
+    {
+      "type": "p",
+      "text": "First useful is 80 SKUs golden zone, no floor stacks in path, not a prettier board or a louder huddle. Lila Voss sees that slice on slot.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-REQ-2024-018."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (06)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-1410. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: aisle-b2.pinecrest.internal."
+    }
+  ]
+}
