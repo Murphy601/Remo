@@ -28,14 +28,14 @@ WRAP_LDFLAGS = (
 )
 
 CONFIGS = [
-    dict(id="equal_burst", pa=10, pb=10, phase=0, npkt=50000, traffic=0, seed=1, rst=0, crdly=0),
-    dict(id="ratio_3_2_burst", pa=20, pb=30, phase=3, npkt=50000, traffic=0, seed=11, rst=0, crdly=0),
-    dict(id="a_fast_burst", pa=10, pb=50, phase=0, npkt=50000, traffic=0, seed=21, rst=0, crdly=0),
-    dict(id="b_fast_burst", pa=70, pb=10, phase=7, npkt=50000, traffic=0, seed=31, rst=0, crdly=0),
-    dict(id="b_fast_trickle", pa=70, pb=10, phase=3, npkt=8000, traffic=1, seed=41, rst=0, crdly=0),
-    dict(id="a_fast_trickle", pa=10, pb=50, phase=7, npkt=8000, traffic=1, seed=51, rst=0, crdly=0),
-    dict(id="ratio_3_2_late_credit", pa=20, pb=30, phase=0, npkt=8000, traffic=1, seed=61, rst=0, crdly=1),
-    dict(id="equal_rst_b_first", pa=10, pb=10, phase=7, npkt=20000, traffic=0, seed=71, rst=2, crdly=0),
+    dict(id="equal_burst", pa=10, pb=10, phase=0, npkt=20000, traffic=0, seed=1, rst=0, crdly=0),
+    dict(id="ratio_3_2_burst", pa=20, pb=30, phase=3, npkt=20000, traffic=0, seed=11, rst=0, crdly=0),
+    dict(id="a_fast_burst", pa=10, pb=50, phase=0, npkt=20000, traffic=0, seed=21, rst=0, crdly=0),
+    dict(id="b_fast_burst", pa=70, pb=10, phase=7, npkt=20000, traffic=0, seed=31, rst=0, crdly=0),
+    dict(id="b_fast_trickle", pa=70, pb=10, phase=3, npkt=6000, traffic=1, seed=41, rst=0, crdly=0),
+    dict(id="allow_starve", pa=10, pb=10, phase=0, npkt=6000, traffic=2, seed=51, rst=0, crdly=0),
+    dict(id="ratio_3_2_late_pack", pa=20, pb=30, phase=0, npkt=6000, traffic=1, seed=61, rst=0, crdly=2),
+    dict(id="equal_rst_b_first", pa=10, pb=10, phase=7, npkt=10000, traffic=0, seed=71, rst=2, crdly=0),
 ]
 
 
@@ -251,5 +251,5 @@ def test_clock_ratio(sim, cfg):
     assert sent == recv
     assert sent == pcred
     assert pcred == crret
-    assert sent >= cfg["npkt"]
-    assert sent <= cfg["npkt"] * 16
+    assert sent >= cfg["npkt"] * 2
+    assert sent <= cfg["npkt"] * 16 * 2

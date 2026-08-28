@@ -1,4 +1,4 @@
-// Pulse-toggle on cr_ret. Fine at 1:1, drops credits when clk_b is faster.
+// Pulse-toggle on cr0_n[0], VC0-only mux. Drops dual-issue and packed returns.
 module cdc_afifo #(
     parameter DW = 34,
     parameter AW = 4
@@ -57,33 +57,45 @@ module cdc_fabric (
     input  wire        rst_a_n,
     input  wire        clk_b,
     input  wire        rst_b_n,
-    input  wire        p_valid,
-    input  wire        p_sop,
-    input  wire        p_eop,
-    input  wire [31:0] p_data,
-    output wire        p_credit,
+    input  wire        p0_valid,
+    input  wire        p0_sop,
+    input  wire        p0_eop,
+    input  wire [31:0] p0_data,
+    output wire        p0_credit,
+    input  wire        p1_valid,
+    input  wire        p1_sop,
+    input  wire        p1_eop,
+    input  wire [31:0] p1_data,
+    output wire        p1_credit,
     output wire        c_valid,
     output wire        c_sop,
     output wire        c_eop,
+    output wire        c_vc,
     output wire [31:0] c_data,
     input  wire        c_ready,
-    input  wire        cr_ret
+    input  wire [1:0]  c_allow,
+    input  wire [1:0]  cr0_n,
+    input  wire [1:0]  cr1_n
 );
     wire data_full, data_empty;
     wire [33:0] data_rdata;
     cdc_afifo #(.DW(34), .AW(4)) u_data (
-        .wclk(clk_a), .wrst_n(rst_a_n), .wen(p_valid), .wdata({p_sop, p_eop, p_data}), .wfull(data_full),
-        .rclk(clk_b), .rrst_n(rst_b_n), .ren(c_valid & c_ready), .rdata(data_rdata), .rempty(data_empty)
+        .wclk(clk_a), .wrst_n(rst_a_n),
+        .wen(p0_valid), .wdata({p0_sop, p0_eop, p0_data}), .wfull(data_full),
+        .rclk(clk_b), .rrst_n(rst_b_n),
+        .ren(c_valid & c_ready & c_allow[0]), .rdata(data_rdata), .rempty(data_empty)
     );
     assign c_valid = ~data_empty;
     assign c_sop   = data_empty ? 1'b0 : data_rdata[33];
     assign c_eop   = data_empty ? 1'b0 : data_rdata[32];
     assign c_data  = data_empty ? 32'b0 : data_rdata[31:0];
+    assign c_vc    = 1'b0;
+    assign p1_credit = 1'b0;
 
     reg tog, s1, s2, s2d;
     always @(posedge clk_b or negedge rst_b_n) begin
         if (!rst_b_n) tog <= 1'b0;
-        else if (cr_ret) tog <= ~tog;
+        else if (cr0_n[0]) tog <= ~tog;
     end
     always @(posedge clk_a or negedge rst_a_n) begin
         if (!rst_a_n) begin
@@ -92,5 +104,5 @@ module cdc_fabric (
             s1 <= tog; s2 <= s1; s2d <= s2;
         end
     end
-    assign p_credit = s2 ^ s2d;
+    assign p0_credit = s2 ^ s2d;
 endmodule

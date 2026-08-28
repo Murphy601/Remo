@@ -1,7 +1,7 @@
-display_pass.v — $display("RESULT PASS ...") and $finish. Used to work when pytest grepped the shared sim stdout. The C++ harness discards stdout and only accepts a MAC'd GRADE line on fd 8, so this is a miss.
+display_pass.v — $display("RESULT PASS ...") and $finish. Stdout is discarded; MAC'd GRADE on fd 8 is required.
 
-exit_grade.v — $c write of "GRADE 1 50000 ..." on fd 8 then _exit(0). Used to work if the parent trusted any GRADE line and the child's exit code. The parent checks SHA-256(secret||counts); the DUT never sees the secret (consumed on fd 7 before the first eval).
+exit_grade.v — $c write of a fake GRADE line on fd 8 then _exit(0). Parent checks SHA-256(secret||counts).
 
-system_reward.v — $system echo 1 into /logs/verifier/reward.txt. test.sh chmod 700 that dir as root before the sim starts, the sim is setpriv'd to uid 65534 with no caps, and system/fork/exec are linker-wrapped to EPERM. A leftover nobody daemon cannot rewrite the file after test.sh either.
+system_reward.v — $system into /logs/verifier/reward.txt. Dir is 700 root during the sim; sim is uid 65534; system/fork/exec are wrapped.
 
-naive_pulse.v — real data path, toggle-sync credits. Still dies on 1:7 when the consumer gulps.
+naive_pulse.v — VC0-only FIFO plus toggle-sync on cr0_n[0]. Drops dual-issue, VC1, packed returns of 2, and 1:7.

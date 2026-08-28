@@ -1,9 +1,9 @@
-// Dual-clock beat FIFO + token FIFO for cr_ret -> p_credit.
-// Depth 16; protocol only allows 8 in flight. Headroom covers pointer sync.
+// Two VC data FIFOs + wormhole output arbiter.
+// Credit returns (0/1/2 per cycle) go through a token FIFO and serialize to pulses.
 
 module cdc_afifo #(
     parameter DW = 34,
-    parameter AW = 4
+    parameter AW = 3
 ) (
     input  wire            wclk,
     input  wire            wrst_n,
@@ -19,7 +19,6 @@ module cdc_afifo #(
     localparam DP = (1 << AW);
 
     reg [DW-1:0] mem [0:DP-1];
-
     reg [AW:0] wbin, wgray;
     reg [AW:0] rbin, rgray;
     reg [AW:0] wq1_rgray, wq2_rgray;
@@ -90,54 +89,120 @@ module cdc_fabric (
     input  wire        rst_a_n,
     input  wire        clk_b,
     input  wire        rst_b_n,
-    input  wire        p_valid,
-    input  wire        p_sop,
-    input  wire        p_eop,
-    input  wire [31:0] p_data,
-    output wire        p_credit,
+    input  wire        p0_valid,
+    input  wire        p0_sop,
+    input  wire        p0_eop,
+    input  wire [31:0] p0_data,
+    output wire        p0_credit,
+    input  wire        p1_valid,
+    input  wire        p1_sop,
+    input  wire        p1_eop,
+    input  wire [31:0] p1_data,
+    output wire        p1_credit,
     output wire        c_valid,
     output wire        c_sop,
     output wire        c_eop,
+    output wire        c_vc,
     output wire [31:0] c_data,
     input  wire        c_ready,
-    input  wire        cr_ret
+    input  wire [1:0]  c_allow,
+    input  wire [1:0]  cr0_n,
+    input  wire [1:0]  cr1_n
 );
-    wire        data_full, data_empty;
-    wire [33:0] data_rdata;
+    wire        e0, e1;
+    wire [33:0] d0, d1;
+    wire        f0, f1;
 
-    cdc_afifo #(.DW(34), .AW(4)) u_data (
-        .wclk   (clk_a),
-        .wrst_n (rst_a_n),
-        .wen    (p_valid),
-        .wdata  ({p_sop, p_eop, p_data}),
-        .wfull  (data_full),
-        .rclk   (clk_b),
-        .rrst_n (rst_b_n),
-        .ren    (c_valid & c_ready),
-        .rdata  (data_rdata),
-        .rempty (data_empty)
+    reg valid_q, vc_q, sop_q, eop_q;
+    reg [31:0] data_q;
+    reg locked, lvc, rr;
+
+    wire acc = valid_q & c_ready & c_allow[vc_q];
+    wire hold_vc = (valid_q & ~eop_q) | (~valid_q & locked);
+    wire hv = valid_q ? vc_q : lvc;
+    wire start0 = ~e0 & c_allow[0];
+    wire start1 = ~e1 & c_allow[1];
+    wire cand1 = hold_vc ? (hv & ~e1) : (start1 & (~start0 | rr));
+    wire cand0 = hold_vc ? (~hv & ~e0) : (start0 & ~cand1);
+    wire has = cand0 | cand1;
+    wire load = (~valid_q | acc) & has;
+    wire nvc = cand1;
+
+    assign c_valid = valid_q;
+    assign c_vc    = vc_q;
+    assign c_sop   = valid_q ? sop_q : 1'b0;
+    assign c_eop   = valid_q ? eop_q : 1'b0;
+    assign c_data  = valid_q ? data_q : 32'b0;
+
+    cdc_afifo #(.DW(34), .AW(3)) u_d0 (
+        .wclk(clk_a), .wrst_n(rst_a_n), .wen(p0_valid), .wdata({p0_sop, p0_eop, p0_data}), .wfull(f0),
+        .rclk(clk_b), .rrst_n(rst_b_n), .ren(load & ~nvc), .rdata(d0), .rempty(e0)
+    );
+    cdc_afifo #(.DW(34), .AW(3)) u_d1 (
+        .wclk(clk_a), .wrst_n(rst_a_n), .wen(p1_valid), .wdata({p1_sop, p1_eop, p1_data}), .wfull(f1),
+        .rclk(clk_b), .rrst_n(rst_b_n), .ren(load & nvc), .rdata(d1), .rempty(e1)
     );
 
-    assign c_valid = ~data_empty;
-    assign c_sop   = data_empty ? 1'b0 : data_rdata[33];
-    assign c_eop   = data_empty ? 1'b0 : data_rdata[32];
-    assign c_data  = data_empty ? 32'b0 : data_rdata[31:0];
+    always @(posedge clk_b or negedge rst_b_n) begin
+        if (!rst_b_n) begin
+            valid_q <= 1'b0;
+            vc_q    <= 1'b0;
+            sop_q   <= 1'b0;
+            eop_q   <= 1'b0;
+            data_q  <= 32'b0;
+            locked  <= 1'b0;
+            lvc     <= 1'b0;
+            rr      <= 1'b0;
+        end else begin
+            if (load) begin
+                valid_q <= 1'b1;
+                vc_q    <= nvc;
+                sop_q   <= nvc ? d1[33] : d0[33];
+                eop_q   <= nvc ? d1[32] : d0[32];
+                data_q  <= nvc ? d1[31:0] : d0[31:0];
+            end else if (acc) begin
+                valid_q <= 1'b0;
+            end
+            if (acc) begin
+                if (eop_q) begin
+                    locked <= 1'b0;
+                    rr     <= ~vc_q;
+                end else begin
+                    locked <= 1'b1;
+                    lvc    <= vc_q;
+                end
+            end
+        end
+    end
 
-    wire cred_full, cred_empty;
-    wire cred_bit;
-
-    cdc_afifo #(.DW(1), .AW(4)) u_cred (
-        .wclk   (clk_b),
-        .wrst_n (rst_b_n),
-        .wen    (cr_ret),
-        .wdata  (1'b1),
-        .wfull  (cred_full),
-        .rclk   (clk_a),
-        .rrst_n (rst_a_n),
-        .ren    (~cred_empty),
-        .rdata  (cred_bit),
-        .rempty (cred_empty)
+    wire        ce0, ce1;
+    wire [1:0]  cv0, cv1;
+    wire        cf0, cf1;
+    cdc_afifo #(.DW(2), .AW(3)) u_c0 (
+        .wclk(clk_b), .wrst_n(rst_b_n), .wen(|cr0_n), .wdata(cr0_n), .wfull(cf0),
+        .rclk(clk_a), .rrst_n(rst_a_n), .ren(~ce0), .rdata(cv0), .rempty(ce0)
+    );
+    cdc_afifo #(.DW(2), .AW(3)) u_c1 (
+        .wclk(clk_b), .wrst_n(rst_b_n), .wen(|cr1_n), .wdata(cr1_n), .wfull(cf1),
+        .rclk(clk_a), .rrst_n(rst_a_n), .ren(~ce1), .rdata(cv1), .rempty(ce1)
     );
 
-    assign p_credit = ~cred_empty;
+    reg [4:0] pend0, pend1;
+    wire [4:0] add0 = ce0 ? 5'd0 : {3'b0, cv0};
+    wire [4:0] add1 = ce1 ? 5'd0 : {3'b0, cv1};
+    wire iss0 = (pend0 != 5'd0);
+    wire iss1 = (pend1 != 5'd0);
+
+    always @(posedge clk_a or negedge rst_a_n) begin
+        if (!rst_a_n) begin
+            pend0 <= 5'd0;
+            pend1 <= 5'd0;
+        end else begin
+            pend0 <= pend0 + add0 - {4'b0, iss0};
+            pend1 <= pend1 + add1 - {4'b0, iss1};
+        end
+    end
+
+    assign p0_credit = rst_a_n & iss0;
+    assign p1_credit = rst_a_n & iss1;
 endmodule

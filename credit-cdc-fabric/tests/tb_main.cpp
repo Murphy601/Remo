@@ -17,7 +17,7 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 
-static const int kCredits = 8;
+static const int kCredits = 4;
 static const int kGradeFd = 8;
 static const int kSecretFd = 7;
 
@@ -187,7 +187,6 @@ static void deny_spawn() {
 static uint32_t step32(uint32_t s) {
     return (s << 1) | (((s >> 31) ^ (s >> 21) ^ (s >> 1) ^ (s >> 0)) & 1u);
 }
-
 struct Cfg {
     int pa = 10;
     int pb = 10;
@@ -222,6 +221,32 @@ static void parse_cfg(int argc, char** argv, Cfg* c) {
     }
 }
 
+struct VcProd {
+    int credits = 0;
+    int beat_id = 0;
+    int pkt_left = 0;
+    int beat_ix = 0;
+    int pkt_len = 1;
+    int idle_gap = 0;
+    int done_send = 0;
+    long sent = 0;
+    uint8_t valid = 0, sop = 0, eop = 0;
+    uint32_t data = 0;
+    uint32_t rnd = 1;
+};
+
+struct VcCons {
+    int pk_state = 0;
+    int exp_len = 0;
+    int exp_ix = 0;
+    int next_id = 0;
+    long recv = 0;
+    long pcred = 0;
+    long crsum = 0;
+    int owed = 0;
+    int cr_wait = 0;
+};
+
 struct Sim {
     Cfg cfg;
     Vcdc_fabric* dut;
@@ -232,49 +257,35 @@ struct Sim {
     int64_t next_b = 0;
     int pos_a = 0;
     int pos_b = 0;
-
-    int credits = 0;
-    int beat_id = 0;
-    int pkt_left = 0;
-    int beat_ix = 0;
-    int pkt_len = 1;
-    int idle_gap = 0;
-    long sent_beats = 0;
-    long recv_beats = 0;
-    long pcred_cnt = 0;
-    long crret_cnt = 0;
-    int done_send = 0;
-    int pk_state = 0;
-    int exp_len = 0;
-    int exp_ix = 0;
-    int next_id = 0;
-    int owed_cr = 0;
-    int cr_wait = 0;
-    int pause = 0;
-    uint32_t rnd_a = 1;
-    uint32_t rnd_b = 1;
     int started = 0;
     int stall_a = 0;
     int last_recv = 0;
     int fail = 0;
     const char* why = "";
-
-    uint8_t p_valid = 0, p_sop = 0, p_eop = 0;
-    uint32_t p_data = 0;
-    uint8_t c_ready = 0, cr_ret = 0;
+    int pause = 0;
+    int allow_hold = 0;
+    int allow_sel = 1;
+    uint32_t rnd_b = 1;
     uint8_t rst_a_n = 0, rst_b_n = 0;
-
-    int p_credit_s = 0;
-    int c_valid_s = 0;
-    int c_sop_s = 0;
-    int c_eop_s = 0;
+    uint8_t c_ready = 0;
+    uint8_t c_allow = 3;
+    uint8_t cr0_n = 0, cr1_n = 0;
+    int p0c_s = 0, p1c_s = 0;
+    int c_valid_s = 0, c_sop_s = 0, c_eop_s = 0, c_vc_s = 0;
     uint32_t c_data_s = 0;
+    int held = 0;
+    int held_vc = 0, held_sop = 0, held_eop = 0;
+    uint32_t held_data = 0;
+    VcProd p[2];
+    VcCons c[2];
 
     void sample() {
-        p_credit_s = dut->p_credit;
+        p0c_s = dut->p0_credit;
+        p1c_s = dut->p1_credit;
         c_valid_s = dut->c_valid;
         c_sop_s = dut->c_sop;
         c_eop_s = dut->c_eop;
+        c_vc_s = dut->c_vc & 1;
         c_data_s = dut->c_data;
     }
 
@@ -290,76 +301,84 @@ struct Sim {
         dut->clk_b = clk_b;
         dut->rst_a_n = rst_a_n;
         dut->rst_b_n = rst_b_n;
-        dut->p_valid = p_valid;
-        dut->p_sop = p_sop;
-        dut->p_eop = p_eop;
-        dut->p_data = p_data;
+        dut->p0_valid = p[0].valid;
+        dut->p0_sop = p[0].sop;
+        dut->p0_eop = p[0].eop;
+        dut->p0_data = p[0].data;
+        dut->p1_valid = p[1].valid;
+        dut->p1_sop = p[1].sop;
+        dut->p1_eop = p[1].eop;
+        dut->p1_data = p[1].data;
         dut->c_ready = c_ready;
-        dut->cr_ret = cr_ret;
+        dut->c_allow = c_allow;
+        dut->cr0_n = cr0_n;
+        dut->cr1_n = cr1_n;
         dut->eval();
+    }
+
+    void step_prod(int v, int credit_s) {
+        VcProd& pr = p[v];
+        if (credit_s) {
+            c[v].pcred++;
+            pr.credits++;
+        }
+        int want = 0;
+        if (!pr.done_send && (pr.pkt_left > 0 || pr.beat_ix != 0)) {
+            if (pr.idle_gap > 0)
+                pr.idle_gap--;
+            else
+                want = 1;
+        }
+        if (want && pr.credits > 0) {
+            if (pr.beat_ix == 0) {
+                pr.rnd = step32(pr.rnd);
+                pr.pkt_len = (int)(pr.rnd & 15u) + 1;
+            }
+            pr.valid = 1;
+            pr.sop = (pr.beat_ix == 0);
+            pr.eop = (pr.beat_ix == pr.pkt_len - 1);
+            pr.data = ((pr.beat_id & 0xffff) << 16) | ((pr.beat_ix & 0xff) << 8) | (pr.pkt_len & 0xff);
+            pr.credits--;
+            pr.sent++;
+            pr.beat_id++;
+            pr.beat_ix++;
+            if (pr.beat_ix == pr.pkt_len) {
+                pr.beat_ix = 0;
+                pr.pkt_left--;
+                if (pr.pkt_left == 0)
+                    pr.done_send = 1;
+            }
+            if (cfg.traffic == 1) {
+                pr.rnd = step32(pr.rnd);
+                pr.idle_gap = (int)(pr.rnd & 31u) % 21;
+            }
+        } else {
+            pr.valid = 0;
+            pr.sop = 0;
+            pr.eop = 0;
+        }
+        if (pr.credits > kCredits || pr.credits < 0)
+            fail_at(v ? "credit_range1" : "credit_range0");
     }
 
     void posedge_a() {
         pos_a++;
         if (!rst_a_n) {
-            p_valid = 0;
-            p_sop = 0;
-            p_eop = 0;
-            p_data = 0;
+            p[0].valid = p[0].sop = p[0].eop = 0;
+            p[1].valid = p[1].sop = p[1].eop = 0;
             return;
         }
         if (!started)
             return;
-
-        if (p_credit_s) {
-            pcred_cnt++;
-            credits++;
-        }
-
-        int want = 0;
-        if (!done_send && (pkt_left > 0 || beat_ix != 0)) {
-            if (idle_gap > 0)
-                idle_gap--;
-            else
-                want = 1;
-        }
-
-        if (want && credits > 0) {
-            if (beat_ix == 0) {
-                rnd_a = step32(rnd_a);
-                pkt_len = (rnd_a & 15u) + 1;
-            }
-            p_valid = 1;
-            p_sop = (beat_ix == 0);
-            p_eop = (beat_ix == pkt_len - 1);
-            p_data = ((beat_id & 0xffff) << 16) | ((beat_ix & 0xff) << 8) | (pkt_len & 0xff);
-            credits--;
-            sent_beats++;
-            beat_id++;
-            beat_ix++;
-            if (beat_ix == pkt_len) {
-                beat_ix = 0;
-                pkt_left--;
-                if (pkt_left == 0)
-                    done_send = 1;
-            }
-            if (cfg.traffic) {
-                rnd_a = step32(rnd_a);
-                idle_gap = (rnd_a & 31u) % 21;
-            }
-        } else {
-            p_valid = 0;
-            p_sop = 0;
-            p_eop = 0;
-        }
-
-        if (credits > kCredits || credits < 0)
-            fail_at("credit_range");
-
-        if (done_send && recv_beats == sent_beats) {
+        step_prod(0, p0c_s);
+        step_prod(1, p1c_s);
+        long recv = c[0].recv + c[1].recv;
+        long sent = p[0].sent + p[1].sent;
+        int both_done = p[0].done_send && p[1].done_send;
+        if (both_done && recv == sent) {
             stall_a = 0;
-        } else if (recv_beats != last_recv) {
-            last_recv = static_cast<int>(recv_beats);
+        } else if (recv != last_recv) {
+            last_recv = (int)recv;
             stall_a = 0;
         } else {
             stall_a++;
@@ -372,10 +391,13 @@ struct Sim {
         pos_b++;
         if (!rst_b_n) {
             c_ready = 0;
-            cr_ret = 0;
-            owed_cr = 0;
-            cr_wait = 0;
+            c_allow = 0;
+            cr0_n = 0;
+            cr1_n = 0;
             pause = 0;
+            allow_hold = 0;
+            allow_sel = 1;
+            held = 0;
             return;
         }
         if (!started)
@@ -383,93 +405,157 @@ struct Sim {
 
         rnd_b = step32(rnd_b);
 
-        /* DUT already sampled this cycle's c_ready. Score against that value,
-           then NBA the next-cycle pin state — same as the Verilog TB. */
-        int accept = c_valid_s && c_ready;
+        int allow_now = c_allow;
+        int ready_now = c_ready;
+        int acc = c_valid_s && ready_now && ((allow_now >> c_vc_s) & 1);
+        int mid = (c_vc_s == 0 || c_vc_s == 1) ? (c[c_vc_s].pk_state != 0) : 0;
+        int must_hold = c_valid_s && !acc && (!ready_now || mid);
+
+        if (held) {
+            if (!c_valid_s || c_vc_s != held_vc || c_sop_s != held_sop ||
+                c_eop_s != held_eop || c_data_s != held_data)
+                fail_at("hold");
+        }
+        if (must_hold) {
+            held = 1;
+            held_vc = c_vc_s;
+            held_sop = c_sop_s;
+            held_eop = c_eop_s;
+            held_data = c_data_s;
+        } else {
+            held = 0;
+        }
+
         int next_ready;
         int next_pause = pause;
+        int next_allow;
+        int next_hold = allow_hold;
+        int next_sel = allow_sel;
         if (pause > 0) {
             next_pause = pause - 1;
             next_ready = 0;
         } else if ((rnd_b & 1023) == 0) {
             next_pause = 96;
             next_ready = 0;
-        } else if (cfg.traffic == 0) {
+        } else if (cfg.traffic == 0 || cfg.traffic == 2) {
             next_ready = 1;
         } else {
             next_ready = ((rnd_b & 7u) != 0);
         }
 
-        int next_cr = 0;
-        int next_owed = owed_cr;
-        int next_wait = cr_wait;
+        if (cfg.traffic == 2) {
+            if (allow_hold > 0) {
+                next_hold = allow_hold - 1;
+                next_allow = allow_sel;
+            } else {
+                next_sel = (allow_sel == 1) ? 2 : 1;
+                next_hold = 80 + (int)(rnd_b & 31u);
+                next_allow = next_sel;
+            }
+        } else if (cfg.traffic == 1) {
+            int bits = (int)((rnd_b >> 10) & 3u);
+            next_allow = bits == 0 ? 3 : bits;
+        } else {
+            next_allow = 3;
+        }
 
-        if (accept) {
+        int next_cr0 = 0;
+        int next_cr1 = 0;
+
+        if (acc) {
+            int v = c_vc_s;
+            if (v != 0 && v != 1)
+                fail_at("bad_vc");
+            VcCons& co = c[v];
+            int oth = v ^ 1;
+            if (c[oth].pk_state != 0)
+                fail_at("interleave");
             int id = (c_data_s >> 16) & 0xffff;
             int idx = (c_data_s >> 8) & 0xff;
             int len = c_data_s & 0xff;
-            if (id != (next_id & 0xffff))
-                fail_at("id_mismatch");
-            if (pk_state == 0) {
+            if (id != (co.next_id & 0xffff))
+                fail_at(v ? "id_mismatch1" : "id_mismatch0");
+            if (co.pk_state == 0) {
                 if (!c_sop_s)
                     fail_at("missing_sop");
-                exp_len = len;
-                exp_ix = 0;
-                if (exp_len < 1 || exp_len > 16)
+                co.exp_len = len;
+                co.exp_ix = 0;
+                if (co.exp_len < 1 || co.exp_len > 16)
                     fail_at("bad_len");
             } else {
                 if (c_sop_s)
                     fail_at("mid_sop");
             }
-            if (idx != (exp_ix & 0xff))
+            if (idx != (co.exp_ix & 0xff))
                 fail_at("idx_mismatch");
-            if (len != (exp_len & 0xff))
+            if (len != (co.exp_len & 0xff))
                 fail_at("len_mismatch");
-            if (exp_ix == exp_len - 1) {
+            if (co.exp_ix == co.exp_len - 1) {
                 if (!c_eop_s)
                     fail_at("missing_eop");
-                pk_state = 0;
+                co.pk_state = 0;
             } else {
                 if (c_eop_s)
                     fail_at("early_eop");
-                pk_state = 1;
+                co.pk_state = 1;
             }
-            next_id++;
-            recv_beats++;
-            exp_ix++;
+            co.next_id++;
+            co.recv++;
+            co.exp_ix++;
 
             if (cfg.crdly == 0) {
-                next_cr = 1;
-                crret_cnt++;
+                if (v)
+                    next_cr1 = 1;
+                else
+                    next_cr0 = 1;
+                co.crsum += 1;
             } else {
-                next_owed = owed_cr + 1;
-                if (cr_wait == 0) {
+                co.owed += 1;
+                if (co.cr_wait == 0) {
                     rnd_b = step32(rnd_b);
-                    next_wait = (int)((rnd_b & 15u) % 12) + 1;
+                    co.cr_wait = (int)((rnd_b & 15u) % 12) + 1;
                 }
             }
         }
 
-        if (cfg.crdly != 0) {
-            if (next_wait > 0)
-                next_wait = next_wait - 1;
-            if (next_wait == 0 && next_owed > 0 && !accept) {
-                next_cr = 1;
-                crret_cnt++;
-                next_owed = next_owed - 1;
-                if (next_owed > 0) {
+        auto retire = [&](int v, int* ncr) {
+            VcCons& co = c[v];
+            if (cfg.crdly == 0)
+                return;
+            if (co.cr_wait > 0)
+                co.cr_wait--;
+            if (co.cr_wait == 0 && co.owed > 0 && !acc) {
+                int n = 1;
+                if (cfg.crdly == 2 && co.owed >= 2)
+                    n = 2;
+                *ncr = n;
+                co.crsum += n;
+                co.owed -= n;
+                if (co.owed > 0) {
                     rnd_b = step32(rnd_b);
-                    next_wait = (int)((rnd_b & 15u) % 12) + 1;
+                    co.cr_wait = (int)((rnd_b & 15u) % 12) + 1;
                 }
             }
-        }
+        };
+        retire(0, &next_cr0);
+        retire(1, &next_cr1);
 
         c_ready = next_ready;
-        cr_ret = next_cr;
+        c_allow = (uint8_t)next_allow;
         pause = next_pause;
-        owed_cr = next_owed;
-        cr_wait = next_wait;
+        allow_hold = next_hold;
+        allow_sel = next_sel;
+        cr0_n = (uint8_t)next_cr0;
+        cr1_n = (uint8_t)next_cr1;
     }
+
+    long sent() const { return p[0].sent + p[1].sent; }
+    long recv() const { return c[0].recv + c[1].recv; }
+    long pcred() const { return c[0].pcred + c[1].pcred; }
+    long crsum() const { return c[0].crsum + c[1].crsum; }
+    int done_all() const { return p[0].done_send && p[1].done_send; }
+    int pk_clear() const { return c[0].pk_state == 0 && c[1].pk_state == 0; }
+    int owed_clear() const { return c[0].owed == 0 && c[1].owed == 0; }
 };
 
 static void grade_write(int ok, long sent, long recv, long pcred, long crret, const char* why) {
@@ -505,7 +591,6 @@ static void grade_write(int ok, long sent, long recv, long pcred, long crret, co
 }
 
 int main(int argc, char** argv) {
-    /* Consume the per-run secret before any DUT eval (Verilog initial / $c). */
     load_secret();
     prctl(PR_SET_PDEATHSIG, SIGKILL);
     prctl(PR_SET_DUMPABLE, 0);
@@ -519,8 +604,10 @@ int main(int argc, char** argv) {
     Sim s;
     s.cfg = cfg;
     s.dut = &dut;
-    s.pkt_left = cfg.npkt;
-    s.rnd_a = cfg.seed ^ 0xA5A51234u;
+    s.p[0].pkt_left = cfg.npkt;
+    s.p[1].pkt_left = cfg.npkt;
+    s.p[0].rnd = cfg.seed ^ 0xA5A51234u;
+    s.p[1].rnd = cfg.seed ^ 0x3C6EF372u;
     s.rnd_b = cfg.seed ^ 0x5A5A9BDFu;
     s.next_a = cfg.pa / 2;
     s.next_b = cfg.phase + cfg.pb / 2;
@@ -586,14 +673,15 @@ int main(int argc, char** argv) {
     else
         wait_pos_b(16);
 
-    s.credits = kCredits;
+    s.p[0].credits = kCredits;
+    s.p[1].credits = kCredits;
     s.stall_a = 0;
     s.last_recv = 0;
     s.started = 1;
 
     const int64_t wall = 2000000000LL;
     while (!s.fail && !Verilated::gotFinish() && s.t < wall) {
-        if (s.done_send && s.recv_beats == s.sent_beats && s.owed_cr == 0 && s.pk_state == 0)
+        if (s.done_all() && s.recv() == s.sent() && s.owed_clear() && s.pk_clear())
             break;
         tick_to(s.t + 1);
     }
@@ -606,25 +694,32 @@ int main(int argc, char** argv) {
         while ((s.pos_a < base_a + extra_a || s.pos_b < base_b + extra_b) && !s.fail &&
                !Verilated::gotFinish() && s.t < wall)
             tick_to(s.t + 1);
-        if (s.recv_beats != s.sent_beats)
-            s.fail_at("count");
-        else if (s.pcred_cnt != s.crret_cnt)
-            s.fail_at("credit_count");
-        else if (s.sent_beats == 0)
-            s.fail_at("nothing_sent");
-        else if (s.pk_state != 0)
+        if (s.c[0].recv != s.p[0].sent)
+            s.fail_at("count0");
+        else if (s.c[1].recv != s.p[1].sent)
+            s.fail_at("count1");
+        else if (s.c[0].pcred != s.c[0].crsum)
+            s.fail_at("credit_count0");
+        else if (s.c[1].pcred != s.c[1].crsum)
+            s.fail_at("credit_count1");
+        else if (s.p[0].sent == 0)
+            s.fail_at("nothing_sent0");
+        else if (s.p[1].sent == 0)
+            s.fail_at("nothing_sent1");
+        else if (!s.pk_clear())
             s.fail_at("truncated");
     }
     if (Verilated::gotFinish() && !s.fail)
         s.fail_at("dut_finish");
-    if (s.t >= wall && !s.done_send)
+    if (s.t >= wall && !s.done_all())
         s.fail_at("wall_timeout");
 
-    int ok = (!s.fail && s.sent_beats == s.recv_beats && s.sent_beats > 0 &&
-              s.pcred_cnt == s.crret_cnt && s.pk_state == 0)
+    int ok = (!s.fail && s.sent() == s.recv() && s.sent() > 0 && s.pcred() == s.crsum() &&
+              s.pk_clear() && s.p[0].sent > 0 && s.p[1].sent > 0 &&
+              s.c[0].pcred == s.c[0].crsum && s.c[1].pcred == s.c[1].crsum)
                  ? 1
                  : 0;
-    grade_write(ok, s.sent_beats, s.recv_beats, s.pcred_cnt, s.crret_cnt, s.why);
+    grade_write(ok, s.sent(), s.recv(), s.pcred(), s.crsum(), s.why);
     dut.final();
     return ok ? 0 : 1;
 }

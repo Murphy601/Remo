@@ -1,10 +1,10 @@
 # clkA/clkB credit fabric
 
-Two blocks on this chip are already taped out at the pin level. One produces variable-length packets on `clk_a`. The other consumes them on `clk_b`. Your job is the fabric in the middle: `/app/cdc_fabric.v`, module name `cdc_fabric`.
+Two producer blocks and one consumer are already taped out. Your job is the fabric in the middle: `/app/cdc_fabric.v`, module name `cdc_fabric`.
 
-There is no ready/valid backpressure on the producer pin. Credits are the only throttle. Do not rename pins. Do not add ports. Do not require the two clocks to be related.
+There are two virtual channels. Each producer has its own pin, its own credit pool, and may fire on the same `clk_a` cycle as the other. The consumer is one valid/ready stream with a VC tag. Do not rename pins. Do not add ports. Do not require the two clocks to be related.
 
-A smoke TB is in `/app/tb_smoke.v`. It is a 1:1, 40-packet sanity check, nothing more. The grader uses a sealed scoreboard with other ratios, phase offsets, reset orders, and traffic. If you only pass smoke you will fail.
+A smoke TB is in `/app/tb_smoke.v`. It is 1:1, VC0 only, 24 packets. It never dual-issues, never starves a VC, never returns two credits in one cycle. If you only pass smoke you will fail.
 
 ## Pins
 
@@ -15,106 +15,116 @@ module cdc_fabric (
     input  wire        clk_b,
     input  wire        rst_b_n,
 
-    // producer, clk_a domain
-    input  wire        p_valid,
-    input  wire        p_sop,
-    input  wire        p_eop,
-    input  wire [31:0] p_data,
-    output wire        p_credit,
+    // VC0 producer, clk_a
+    input  wire        p0_valid,
+    input  wire        p0_sop,
+    input  wire        p0_eop,
+    input  wire [31:0] p0_data,
+    output wire        p0_credit,
 
-    // consumer, clk_b domain
+    // VC1 producer, clk_a
+    input  wire        p1_valid,
+    input  wire        p1_sop,
+    input  wire        p1_eop,
+    input  wire [31:0] p1_data,
+    output wire        p1_credit,
+
+    // consumer, clk_b
     output wire        c_valid,
     output wire        c_sop,
     output wire        c_eop,
+    output wire        c_vc,
     output wire [31:0] c_data,
     input  wire        c_ready,
-    input  wire        cr_ret
+    input  wire [1:0]  c_allow,
+    input  wire [1:0]  cr0_n,
+    input  wire [1:0]  cr1_n
 );
 ```
 
-`rst_a_n` / `rst_b_n` are async assert, active low. Each stays low for at least 8 of its own clocks. They do not deassert on the same cycle; some runs release A first, some B first. After the later release, traffic starts 16 cycles of the slower clock later. While a domain is in reset its outputs from you must be 0 (`p_credit` on A, `c_valid/c_sop/c_eop/c_data` on B). No X/Z on those after that domain leaves reset.
+`rst_a_n` / `rst_b_n` are async assert, active low. Each stays low for at least 8 of its own clocks. They do not deassert on the same cycle. After the later release, traffic starts 16 cycles of the slower clock later. While a domain is in reset its outputs from you must be 0. No X/Z on those after that domain leaves reset.
+
+## Two producers, same clock
+
+`p0_*` and `p1_*` are independent. Both `p*_valid` may be 1 on the same `clk_a` cycle. There is no `p_ready`. If a valid is 1, you take that beat that cycle. Dropping one because you only have a single write port is a fail.
+
+Each producer may stall mid-packet waiting for its own credits. Do not merge packets, do not move a beat to the other VC, do not insert beats.
 
 ## Credits
 
-`CREDITS = 8`.
+`CREDITS = 4` per VC. The two pools do not share.
 
-The producer model (not you) starts at 8 after both resets are high. You do not mint those 8.
+Each producer model starts at 4 after both resets are high. You do not mint those 4.
 
-- Producer may assert `p_valid` only when its local count is > 0. One beat consumes one credit the same `clk_a` cycle.
-- A 1-cycle `p_credit` pulse on `clk_a` gives one credit back. Pulse it high for exactly one `clk_a` cycle per returned credit. Do not pulse while `rst_a_n` is low.
-- `p_valid` is a fire-and-forget beat. There is no `p_ready`. If `p_valid` is 1, you take that beat this cycle. The producer will never have more than 8 beats that have been sent and not yet matched by a `p_credit`.
-- `cr_ret` is a 1-cycle pulse on `clk_b`. The consumer pulses it once per beat it has already accepted (`c_valid && c_ready`), either on that accept cycle or later. It never pulses more `cr_ret` than accepted beats. It is allowed to pulse `cr_ret` on back-to-back `clk_b` cycles.
-- Every `cr_ret` must become exactly one `p_credit`. If `clk_b` is faster than `clk_a`, several `cr_ret` pulses can land inside one `clk_a` period — you still owe that many `p_credit` pulses, serialized on `clk_a`. Dropping them deadlocks the producer.
-
-In-flight (producer's view) = beats sent minus `p_credit` seen. That number stays in 0..8.
+- A producer asserts `p*_valid` only when its local count is > 0. One beat consumes one credit the same `clk_a` cycle.
+- `p0_credit` / `p1_credit` are 1-cycle pulses on `clk_a`. One pulse returns one credit to that VC. Never pulse while that domain is in reset. Never pulse the other VC's pin for a credit that belongs here.
+- In-flight per VC (producer's view) stays in 0..4.
+- `cr0_n` / `cr1_n` are counts on `clk_b`, 0, 1, or 2. They are the number of credits returned for that VC this cycle, for beats the consumer has already accepted. They can both be nonzero the same cycle. They never over-return.
+- Every credit in `cr0_n` must become exactly one `p0_credit` pulse (same for VC1). If `clk_b` is faster, several counts can land inside one `clk_a` period — serialize the pulses on `clk_a`. A return of 2 is two pulses, not one. Mixing VC0 returns into `p1_credit` deadlocks VC0.
 
 ## Packets
 
-Beats, not whole packets, are what credits count.
+Credits count beats, not whole packets. Length 1..16. SOP on the first beat, EOP on the last, both on a 1-beat packet. `p*_data` is opaque 32-bit. Same bits, same order, same sop/eop, same VC, out the other side.
 
-- Length 1..16 beats.
-- First beat: `p_sop=1`. Last beat: `p_eop=1`. A 1-beat packet has both set.
-- Middle beats: sop=0, eop=0.
-- No empty packets. No sop in the middle. No back-to-back sop without an eop in between.
-- `p_data` is opaque 32-bit. Same bits, same order, same sop/eop, out the other side.
-- A packet may stall mid-packet waiting for credits. Do not merge packets or insert beats.
+Per-VC order is preserved. Global order between VCs is not.
 
-Consumer side is ordinary valid/ready:
+## Consumer: wormhole + allow mask
 
-- `c_valid` means the current `c_data/c_sop/c_eop` are stable and can be taken.
-- Transfer when `c_valid && c_ready`.
+Ordinary valid/ready, plus:
+
+- `c_vc` is 0 or 1 for the beat on `c_data`.
+- Transfer when `c_valid && c_ready && c_allow[c_vc]`.
 - If `c_valid && !c_ready`, hold the same beat.
+- If `c_valid && c_ready && !c_allow[c_vc]`, that is also a hold. Do not pop.
 
-`c_valid` stays 0 until you actually have a beat.
+Wormhole: once the consumer has accepted a SOP of a packet that is not also EOP, the next beat you present must be the rest of that packet. You may not switch VCs until that EOP is accepted. Mid-packet, `c_allow` for the locked VC may drop; hold.
 
-The consumer drops `c_ready`, including pauses long enough that several beats sit in the fabric and then drain on back-to-back `clk_b` cycles. Same-cycle `cr_ret` on a gulp is allowed.
+Between packets (idle, or after EOP accepted): you may only *start* a VC if `c_allow` for that VC is 1. If only VC1 is allowed and only VC0 has data, sit with `c_valid` 0 until the mask or the occupancy changes. A locked mid-packet VC is the exception; that one you keep presenting.
 
-## Clocks, as the grader models them
+`c_allow` is one-hot, both, or neither. It changes every cycle. Long stretches of `2'b01` then `2'b10` happen. If you always present VC0 when idle, VC1 never drains.
 
-This is discrete-event RTL sim. No analogue metastability, no random sampling inside a synchronizer. Two independent clocks, both 50% duty.
+`c_valid` stays 0 until you actually have a beat you are presenting.
 
-Ratio `Fa:Fb` means:
+## Clocks
 
-- `clk_a` period = `Fb * 10 ns`
-- `clk_b` period = `Fa * 10 ns`
+Discrete-event RTL sim. No analogue metastability. Two independent clocks, 50% duty.
 
-So `5:1` is `clk_a` at 10 ns and `clk_b` at 50 ns. `1:7` is `clk_a` at 70 ns and `clk_b` at 10 ns.
-
-Phase offset: first rising edge of `clk_b` is delayed `PHASE` ns from the first rising edge of `clk_a`. PHASE is one of 0, 3, 7.
+Ratio `Fa:Fb` means `clk_a` period = `Fb * 10 ns`, `clk_b` period = `Fa * 10 ns`. PHASE is 0, 3, or 7 ns from the first rising `clk_a` to the first rising `clk_b`.
 
 You will be run on at least:
 
-| name | ratio | PHASE ns | traffic | packets |
+| name | ratio | PHASE ns | traffic | packets per VC |
 |---|---|---|---|---|
-| equal burst | 1:1 | 0 | burst | 50000 |
-| 3/2 burst | 3:2 | 3 | burst | 50000 |
-| A-fast burst | 5:1 | 0 | burst | 50000 |
-| B-fast burst | 1:7 | 7 | burst | 50000 |
-| B-fast trickle | 1:7 | 3 | trickle | 8000 |
-| A-fast trickle | 5:1 | 7 | trickle | 8000 |
-| 3/2 trickle, late credits | 3:2 | 0 | trickle + delayed `cr_ret` | 8000 |
-| equal, rst_b first | 1:1 | 7 | burst | 20000 |
+| equal burst | 1:1 | 0 | both burst, allow=11 | 20000 |
+| 3/2 burst | 3:2 | 3 | both burst, allow=11 | 20000 |
+| A-fast burst | 5:1 | 0 | both burst, allow=11 | 20000 |
+| B-fast burst | 1:7 | 7 | both burst, allow=11 | 20000 |
+| B-fast trickle | 1:7 | 3 | trickle + random allow | 6000 |
+| allow starve | 1:1 | 0 | burst, long 01/10 allow stretches | 6000 |
+| 3/2 packed late credits | 3:2 | 0 | trickle, delayed `cr*_n` of 1 or 2 | 6000 |
+| equal, rst_b first | 1:1 | 7 | both burst, allow=11 | 10000 |
 
-Burst: producer sends on any cycle it has a credit. Trickle: producer also inserts 0..20 idle `clk_a` cycles between beats, and the consumer drops `c_ready` in stretches. Delayed `cr_ret`: accept and credit-return are not the same cycle; return is 1..12 `clk_b` cycles later, still one per accepted beat.
+Burst: each producer sends on any cycle it has a credit. Both will dual-issue often. Trickle: 0..20 idle `clk_a` cycles between beats on each producer, and the consumer drops `c_ready` in stretches. Packed late credits: accept and credit-return are not the same cycle; a VC may later return 2 in one `clk_b` cycle.
 
-Seeds are fixed inside the grader. Functional pass/fail only.
+Seeds are fixed. Functional pass/fail only.
 
 ## What pass means
 
-On every config above, after the last packet is sent and the pipeline drains:
+On every config, after both producers finish and the fabric drains:
 
-- beat count in == beat count out
-- every beat matches (sop, eop, data) in order
-- packet boundaries intact (no truncated packet at the end)
-- number of `p_credit` pulses == number of `cr_ret` pulses
-- no overflow, no underflow, no leftover occupancy that never returns a credit
-- no watchdog timeout (the TB trips if nothing is sent and nothing is received for 20000 cycles of the faster clock while work remains)
+- per-VC beat count in == beat count out
+- every beat matches (vc, sop, eop, data) in per-VC order
+- no VC interleave mid-packet
+- packet boundaries intact
+- `p0_credit` pulses == sum of `cr0_n` (same for VC1)
+- no overflow, no underflow, no leftover occupancy
+- no watchdog timeout
 
-A design that only works at 1:1 will not pass. A pulse-toggle on `cr_ret` will not pass `1:7`. Tying the two clocks together is not available to you; the TB drives them.
+A single async FIFO that muxes the two valids will drop a dual-issue beat. A pulse-toggle on `cr0_n[0]` will drop a return of 2 and will die on `1:7`. Tying the clocks together is not available; the TB drives them.
 
 Synthesizable Verilog is enough. Verilog-2001 is fine. One file, `/app/cdc_fabric.v`.
 
-Smoke, if you want it:
+Smoke, if you want it (VC0 only):
 
 ```
 cd /app

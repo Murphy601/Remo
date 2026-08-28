@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-// 1:1, 40 packets. Not the grader.
+// 1:1, VC0 only, 24 packets. Not the grader.
 module tb_smoke;
     reg clk_a = 1'b0;
     reg clk_b = 1'b0;
@@ -13,18 +13,22 @@ module tb_smoke;
     reg rst_a_n = 1'b0;
     reg rst_b_n = 1'b0;
 
-    reg        p_valid = 1'b0;
-    reg        p_sop   = 1'b0;
-    reg        p_eop   = 1'b0;
-    reg [31:0] p_data  = 32'b0;
-    wire       p_credit;
+    reg        p0_valid = 1'b0;
+    reg        p0_sop   = 1'b0;
+    reg        p0_eop   = 1'b0;
+    reg [31:0] p0_data  = 32'b0;
+    wire       p0_credit;
+    wire       p1_credit;
 
     wire        c_valid;
     wire        c_sop;
     wire        c_eop;
+    wire        c_vc;
     wire [31:0] c_data;
     reg         c_ready = 1'b1;
-    reg         cr_ret  = 1'b0;
+    reg [1:0]   c_allow = 2'b11;
+    reg [1:0]   cr0_n   = 2'b00;
+    reg [1:0]   cr1_n   = 2'b00;
 
     integer credits;
     integer beat_id;
@@ -44,17 +48,19 @@ module tb_smoke;
     cdc_fabric dut (
         .clk_a(clk_a), .rst_a_n(rst_a_n),
         .clk_b(clk_b), .rst_b_n(rst_b_n),
-        .p_valid(p_valid), .p_sop(p_sop), .p_eop(p_eop), .p_data(p_data),
-        .p_credit(p_credit),
-        .c_valid(c_valid), .c_sop(c_sop), .c_eop(c_eop), .c_data(c_data),
-        .c_ready(c_ready), .cr_ret(cr_ret)
+        .p0_valid(p0_valid), .p0_sop(p0_sop), .p0_eop(p0_eop), .p0_data(p0_data),
+        .p0_credit(p0_credit),
+        .p1_valid(1'b0), .p1_sop(1'b0), .p1_eop(1'b0), .p1_data(32'b0),
+        .p1_credit(p1_credit),
+        .c_valid(c_valid), .c_sop(c_sop), .c_eop(c_eop), .c_vc(c_vc), .c_data(c_data),
+        .c_ready(c_ready), .c_allow(c_allow), .cr0_n(cr0_n), .cr1_n(cr1_n)
     );
 
     initial begin
         fail = 0;
         credits = 0;
         beat_id = 0;
-        pkt_left = 40;
+        pkt_left = 24;
         beat_ix = 0;
         pkt_len = 1;
         sent_beats = 0;
@@ -69,21 +75,21 @@ module tb_smoke;
         rst_a_n = 1'b1;
         rst_b_n = 1'b1;
         repeat (16) @(posedge clk_a);
-        credits = 8;
+        credits = 4;
         started = 1;
     end
 
     always @(posedge clk_a) begin
         if (started && rst_a_n) begin
-            if (p_credit)
+            if (p0_credit)
                 credits = credits + 1;
             if (!done_send && (pkt_left > 0 || beat_ix != 0) && credits > 0) begin
                 if (beat_ix == 0)
                     pkt_len = (beat_id % 7) + 1;
-                p_valid <= 1'b1;
-                p_sop   <= (beat_ix == 0);
-                p_eop   <= (beat_ix == pkt_len - 1);
-                p_data  <= {beat_id[15:0], beat_ix[7:0], pkt_len[7:0]};
+                p0_valid <= 1'b1;
+                p0_sop   <= (beat_ix == 0);
+                p0_eop   <= (beat_ix == pkt_len - 1);
+                p0_data  <= {beat_id[15:0], beat_ix[7:0], pkt_len[7:0]};
                 credits    = credits - 1;
                 sent_beats = sent_beats + 1;
                 beat_id    = beat_id + 1;
@@ -95,17 +101,21 @@ module tb_smoke;
                         done_send = 1;
                 end
             end else begin
-                p_valid <= 1'b0;
-                p_sop   <= 1'b0;
-                p_eop   <= 1'b0;
+                p0_valid <= 1'b0;
+                p0_sop   <= 1'b0;
+                p0_eop   <= 1'b0;
             end
         end
     end
 
     always @(posedge clk_b) begin
-        cr_ret <= 1'b0;
+        cr0_n <= 2'b00;
+        cr1_n <= 2'b00;
         c_ready <= 1'b1;
-        if (started && rst_b_n && c_valid && c_ready) begin
+        c_allow <= 2'b11;
+        if (started && rst_b_n && c_valid && c_ready && c_allow[c_vc]) begin
+            if (c_vc !== 1'b0)
+                fail = 1;
             if (c_data[31:16] !== next_id[15:0])
                 fail = 1;
             if (pk_state == 0) begin
@@ -125,7 +135,7 @@ module tb_smoke;
             next_id    = next_id + 1;
             recv_beats = recv_beats + 1;
             exp_ix     = exp_ix + 1;
-            cr_ret     <= 1'b1;
+            cr0_n      <= 2'b01;
         end
     end
 
