@@ -1,0 +1,30 @@
+artifacts = ["/app/sdram_sched.v"]
+
+[task]
+name = "afterquery/sdram-cmd-sched"
+
+[metadata]
+author_name = "Yasharth Singh"
+author_email = "yasharthsingh1777@gmail.com"
+difficulty_explanation = "The hard part is not a single-bank ACT-RD-PRE loop. Four banks have to overlap while tRRD, tFAW (4 ACT in 10 clocks), tWTR, and the DQ bus all bite, and a refresh every 96 clocks has to PREA without dropping a request or missing tRFC. Two ports share that command bus; per-port read order is required but the ports are not ordered with each other. A legal one-bank serializer misses the cycle bound, so you actually have to keep more than one bank busy."
+solution_explanation = "Init FSM (PREA, two REF, MRS), then per-bank idle/acted/need-pre with timestamps for tRCD/tRAS/tRP/tRC. A 4-deep queue per port, RR on ACT, CAS preferred when the DQ bus is free, PRE when tRTP/tWR and tRAS are met. tFAW is the oldest of the last four ACT times. Refresh starts precharging ~12 clocks before tREFI, then PREA+REF. Read data is a CL+BL shift register back onto p*_rvalid."
+verification_explanation = "A C++ Verilator harness, not a Verilog TB compiled with the DUT, drives both ports and a cycle-accurate DRAM scoreboard (command legality, tFAW window, DQ occupancy, per-port order, data, tREFI, cycle bound). Stdout and stderr are thrown away. The parent gives the sim a 32-byte secret on fd 7 and only trusts a GRADE line on fd 8 whose SHA-256 matches. system/fork/exec are linker-wrapped to EPERM. The sim runs setpriv'd as uid 65534. /tests is 700 root. /logs/verifier is 700 while the DUT is running."
+category = "Hardware"
+subcategory = "RTL"
+tags = ["verilog", "sdram", "memory-controller", "dram-timing", "verilator"]
+expert_time_estimate_hours = 8
+relevant_experience = "FPGA/ASIC memory controllers: SDR/DDR command scheduling, bank state machines, JEDEC timing (tFAW/tRRD/tRFC), and Verilator scoreboards."
+
+[verifier]
+timeout_sec = 600.0
+environment_mode = "separate"
+
+[agent]
+timeout_sec = 14400.0
+
+[environment]
+build_timeout_sec = 600.0
+cpus = 2
+memory_mb = 4096
+storage_mb = 10240
+gpus = 0
