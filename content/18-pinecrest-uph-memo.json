@@ -1,0 +1,336 @@
+{
+  "slug": "18-pinecrest-uph-memo",
+  "doc_id": "PCF-MEM-2024-088",
+  "title": "Memo: units per hour is a team number, not a hunt",
+  "subtitle": "Individual UPH boards vs quality, ticket PCF-2044",
+  "doc_type": "Recommendation memo",
+  "form_type": "Other",
+  "kicker": "Pinecrest Fulfillment  \u00b7  UPH  \u00b7  PCF-2044",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "For decision",
+  "date": "August 15, 2024",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Marcus Hale (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Marcus Hale (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-MEM-2024-088; PCF-2044; PCF-MTG-2024-011",
+  "summary": "Marcus Hale asked for a written cut of Memo. Current path: Whiteboard ranks 1-12 by UPH only. This document locks team UPH plus mispick, no public rank. public individual UPH rank is out because The July board lasted 9 days. Skip-scan returned on 4 people chasing the top line.",
+  "form_description": "Memo asking Marcus Hale to replace the public individual UPH rank board with team rate plus mispick, after skip-scan returned.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "July 22, 2024",
+      "Jeilen Jones",
+      "Outline after PCF-MEM-2024-088 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "August 3, 2024",
+      "Jeilen Jones",
+      "Numbers from Marcus Hale. public individual UPH rank still in the room."
+    ],
+    [
+      "0.9",
+      "August 11, 2024",
+      "Jeilen Jones",
+      "public individual UPH rank written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "August 15, 2024",
+      "Jeilen Jones",
+      "Cut. Host huddle.pinecrest.internal. Ticket PCF-2044."
+    ],
+    [
+      "1.1",
+      "August 15, 2024",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Memo: units per hour is a team number, not a hunt"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-MEM-2024-088 on August 15, 2024. Marcus Hale asked for a written bound after the current path (Whiteboard ranks 1-12 by UPH only) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host huddle.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on public individual UPH rank, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Post team UPH and team mispick rate. Take down the individual rank board. Coaching stays private. I am not restating a hallway yes. public individual UPH rank is out because The July board lasted 9 days. Skip-scan returned on 4 people chasing the top line. Cost of doing nothing is already in the numbers: days=9, people=4, ranks=12, uph=310, miss=1.4, weeks=2, board=1, private=1. Sibling tickets PCF-2044 and PCF-MTG-2024-011. I will not reopen public individual UPH rank in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Post team UPH and team mispick rate. Take down the individual rank board. Coaching stays private."
+    },
+    {
+      "type": "p",
+      "text": "Background on huddle.pinecrest.internal. Whiteboard ranks 1-12 by UPH only. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on wms.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-MEM-2024-088 names the pull. If those numbers moved after August 15, 2024, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-MEM-2024-088. public individual UPH rank is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Whiteboard ranks 1-12 by UPH only",
+          "Numbers already in play: days=9, people=4, ranks=12, uph=310, miss=1.4, weeks=2, board=1, private=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "public individual UPH rank",
+          "The July board lasted 9 days. Skip-scan returned on 4 people chasing the top line.",
+          "Named on PCF-MTG-2024-011",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "team UPH plus mispick, no public rank",
+          "Host huddle.pinecrest.internal, ticket PCF-2044",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: rf.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (18): refuse on public individual UPH rank, lock is team UPH plus mispick, no public rank. I will not hide a process change inside a 'quick align' on PCF-2044."
+    },
+    {
+      "type": "quote",
+      "text": "A board that ranks people by UPH is how skip-scan came back.",
+      "attrib": "Marcus Hale, August 1"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on huddle.pinecrest.internal: the path Marcus Hale actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on wms.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "team UPH plus mispick, no public rank Host huddle.pinecrest.internal. Ticket PCF-2044. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: team UPH plus mispick, no public rank. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-MEM-2024-088. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: huddle.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-MEM-2024-088. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "days",
+          "9",
+          "huddle.pinecrest.internal",
+          "PCF-2044"
+        ],
+        [
+          "people",
+          "4",
+          "huddle.pinecrest.internal",
+          "PCF-2044"
+        ],
+        [
+          "ranks",
+          "12",
+          "huddle.pinecrest.internal",
+          "PCF-2044"
+        ],
+        [
+          "uph",
+          "310",
+          "huddle.pinecrest.internal",
+          "PCF-2044"
+        ],
+        [
+          "miss",
+          "1.4",
+          "huddle.pinecrest.internal",
+          "PCF-2044"
+        ],
+        [
+          "weeks",
+          "2",
+          "huddle.pinecrest.internal",
+          "PCF-2044"
+        ],
+        [
+          "board",
+          "1",
+          "huddle.pinecrest.internal",
+          "PCF-2044"
+        ],
+        [
+          "private",
+          "1",
+          "huddle.pinecrest.internal",
+          "PCF-2044"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: public individual UPH rank"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "public individual UPH rank is out. The July board lasted 9 days. Skip-scan returned on 4 people chasing the top line. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: public individual UPH rank comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-2044. Numbers I will not 'simplify': days=9, people=4, ranks=12, uph=310, miss=1.4, weeks=2, board=1, private=1. Same clock as the front. I will not mix clocks to make huddle.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does rf.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-MTG-2024-011.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Marcus Hale: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on huddle.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits huddle.pinecrest.internal, PCF-MEM-2024-088, and the last three working pages. Access that has to move is who can change wms.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-2044. huddle.pinecrest.internal.",
+      "text": "# PCF-MEM-2024-088 read-only first\ndate\necho host=huddle.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-2044\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-2044 before any write.",
+        "Confirm on huddle.pinecrest.internal with the read-only commands above.",
+        "If the refuse on public individual UPH rank is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-MEM-2024-088. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on public individual UPH rank",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host huddle.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-2044. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-MEM-2024-088"
+    },
+    {
+      "type": "p",
+      "text": "wms.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-MTG-2024-011 before anyone says the leftover is 'implied.' Implied leftovers are how public individual UPH rank almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-MEM-2024-088"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim public individual UPH rank is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host huddle.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-2044"
+    },
+    {
+      "type": "p",
+      "text": "First useful is team UPH plus mispick, no public rank, not a prettier board or a louder huddle. Marcus Hale sees that slice on huddle.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-MEM-2024-088."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (18)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-MEM-2024-088. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: rf.pinecrest.internal."
+    }
+  ]
+}

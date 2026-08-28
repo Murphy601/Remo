@@ -1,0 +1,336 @@
+{
+  "slug": "10-pinecrest-rf-scanner-sop",
+  "doc_id": "PCF-SOP-2024-041",
+  "title": "SOP: RF gun login, battery, and location confirm",
+  "subtitle": "Serial checkout, dead gun swap, ticket PCF-1680",
+  "doc_type": "Runbook / SOP",
+  "form_type": "Runbook / SOPs",
+  "kicker": "Pinecrest Fulfillment  \u00b7  RF  \u00b7  PCF-1680",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "In force",
+  "date": "April 18, 2024",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Lila Voss (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Lila Voss (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-SOP-2024-041; PCF-1680; PCF-SOP-2024-088",
+  "summary": "Lila Voss asked for a written cut of SOP. Current path: Guns in a pile, logins leftover, 20 percent start common. This document locks serial checkout, own login, swap under 30 percent. share logins when a gun is dead is out because March 29 shared login put 9 shorts on Marcus's ID. He was on lunch.",
+  "form_description": "SOP for Pinecrest RF guns: serial checkout, personal login, and battery swap before 30 percent, refusing shared logins.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "March 25, 2024",
+      "Jeilen Jones",
+      "Outline after PCF-SOP-2024-041 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "April 6, 2024",
+      "Jeilen Jones",
+      "Numbers from Lila Voss. share logins when a gun is dead still in the room."
+    ],
+    [
+      "0.9",
+      "April 14, 2024",
+      "Jeilen Jones",
+      "share logins when a gun is dead written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "April 18, 2024",
+      "Jeilen Jones",
+      "Cut. Host rf.pinecrest.internal. Ticket PCF-1680."
+    ],
+    [
+      "1.1",
+      "April 18, 2024",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "SOP: RF gun login, battery, and location confirm"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-SOP-2024-041 on April 18, 2024. Lila Voss asked for a written bound after the current path (Guns in a pile, logins leftover, 20 percent start common) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host rf.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on share logins when a gun is dead, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Checkout by serial. Login is yours. Dead battery swap at the cage, do not pull a gun off a charger at 20 percent and start a wave. I am not restating a hallway yes. share logins when a gun is dead is out because March 29 shared login put 9 shorts on Marcus's ID. He was on lunch. Cost of doing nothing is already in the numbers: guns=40, shorts=9, pct=30, leftover=1, weeks=2, serial=1, lunch=1, pile=1. Sibling tickets PCF-1680 and PCF-SOP-2024-088. I will not reopen share logins when a gun is dead in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Checkout by serial. Login is yours. Dead battery swap at the cage, do not pull a gun off a charger at 20 percent and start a wave."
+    },
+    {
+      "type": "p",
+      "text": "Background on rf.pinecrest.internal. Guns in a pile, logins leftover, 20 percent start common. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on wms.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-SOP-2024-041 names the pull. If those numbers moved after April 18, 2024, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-SOP-2024-041. share logins when a gun is dead is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Guns in a pile, logins leftover, 20 percent start common",
+          "Numbers already in play: guns=40, shorts=9, pct=30, leftover=1, weeks=2, serial=1, lunch=1, pile=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "share logins when a gun is dead",
+          "March 29 shared login put 9 shorts on Marcus's ID. He was on lunch.",
+          "Named on PCF-SOP-2024-088",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "serial checkout, own login, swap under 30 percent",
+          "Host rf.pinecrest.internal, ticket PCF-1680",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: cage.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (10): refuse on share logins when a gun is dead, lock is serial checkout, own login, swap under 30 percent. I will not hide a process change inside a 'quick align' on PCF-1680."
+    },
+    {
+      "type": "quote",
+      "text": "A gun with someone else's login will pick onto their rate and their errors.",
+      "attrib": "Lila Voss, April 4"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on rf.pinecrest.internal: the path Lila Voss actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on wms.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "serial checkout, own login, swap under 30 percent Host rf.pinecrest.internal. Ticket PCF-1680. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: serial checkout, own login, swap under 30 percent. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-SOP-2024-041. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: rf.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-SOP-2024-041. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "guns",
+          "40",
+          "rf.pinecrest.internal",
+          "PCF-1680"
+        ],
+        [
+          "shorts",
+          "9",
+          "rf.pinecrest.internal",
+          "PCF-1680"
+        ],
+        [
+          "pct",
+          "30",
+          "rf.pinecrest.internal",
+          "PCF-1680"
+        ],
+        [
+          "leftover",
+          "1",
+          "rf.pinecrest.internal",
+          "PCF-1680"
+        ],
+        [
+          "weeks",
+          "2",
+          "rf.pinecrest.internal",
+          "PCF-1680"
+        ],
+        [
+          "serial",
+          "1",
+          "rf.pinecrest.internal",
+          "PCF-1680"
+        ],
+        [
+          "lunch",
+          "1",
+          "rf.pinecrest.internal",
+          "PCF-1680"
+        ],
+        [
+          "pile",
+          "1",
+          "rf.pinecrest.internal",
+          "PCF-1680"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: share logins when a gun is dead"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "share logins when a gun is dead is out. March 29 shared login put 9 shorts on Marcus's ID. He was on lunch. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: share logins when a gun is dead comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-1680. Numbers I will not 'simplify': guns=40, shorts=9, pct=30, leftover=1, weeks=2, serial=1, lunch=1, pile=1. Same clock as the front. I will not mix clocks to make rf.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does cage.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-SOP-2024-088.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Lila Voss: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on rf.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits rf.pinecrest.internal, PCF-SOP-2024-041, and the last three working pages. Access that has to move is who can change wms.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-1680. rf.pinecrest.internal.",
+      "text": "# PCF-SOP-2024-041 read-only first\ndate\necho host=rf.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-1680\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-1680 before any write.",
+        "Confirm on rf.pinecrest.internal with the read-only commands above.",
+        "If the refuse on share logins when a gun is dead is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-SOP-2024-041. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on share logins when a gun is dead",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host rf.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Lila Voss",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-1680. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-SOP-2024-041"
+    },
+    {
+      "type": "p",
+      "text": "wms.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-SOP-2024-088 before anyone says the leftover is 'implied.' Implied leftovers are how share logins when a gun is dead almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-SOP-2024-041"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim share logins when a gun is dead is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host rf.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-1680"
+    },
+    {
+      "type": "p",
+      "text": "First useful is serial checkout, own login, swap under 30 percent, not a prettier board or a louder huddle. Lila Voss sees that slice on rf.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-SOP-2024-041."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (10)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-SOP-2024-041. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: cage.pinecrest.internal."
+    }
+  ]
+}

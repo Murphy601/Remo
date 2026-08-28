@@ -1,0 +1,336 @@
+{
+  "slug": "46-ridgeway-hoist-safety-runbook",
+  "doc_id": "RDW-RB-2023-077",
+  "title": "Runbook: hoist and jack-stand safety",
+  "subtitle": "Locks, stands, ticket RDW-2955",
+  "doc_type": "Runbook / SOP",
+  "form_type": "Runbook / SOPs",
+  "kicker": "Ridgeway Diesel  \u00b7  Hoist  \u00b7  RDW-2955",
+  "org": "Ridgeway Diesel",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "In force",
+  "date": "May 25, 2023",
+  "author": "Jeilen Jones",
+  "role": "Shop Helper",
+  "team": "Ridgeway Diesel, shop floor",
+  "audience": "Cal Dreher (requester); Cal Dreher (acceptor); Nina Soto and Jeilen Jones (build); Hank Morel (leftover host); Tess Brant (absentee pack)",
+  "owners": "Cal Dreher (acceptor), Cal Dreher (requester), Nina Soto (ops), Jeilen Jones (this document)",
+  "related": "RDW-RB-2023-077; RDW-2955; RDW-SOP-2022-062",
+  "summary": "Cal Dreher asked for a written cut of Runbook. Current path: Floor jack for 'just a minute' looks. This document locks stands, locks, no jack-only under, red-tag spongy. quick look under a truck on a floor jack is out because May 8 quick look is how a jack rolled on a slope in the lot. Nobody was under it. Next time they might be.",
+  "form_description": "Hoist and jack-stand runbook for Ridgeway Diesel, refusing a quick look under a truck on a floor jack only.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "May 1, 2023",
+      "Jeilen Jones",
+      "Outline after RDW-RB-2023-077 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "May 13, 2023",
+      "Jeilen Jones",
+      "Numbers from Cal Dreher. quick look under a truck on a floor jack still in the room."
+    ],
+    [
+      "0.9",
+      "May 21, 2023",
+      "Jeilen Jones",
+      "quick look under a truck on a floor jack written up as a refuse. Nina Soto review."
+    ],
+    [
+      "1.0",
+      "May 25, 2023",
+      "Jeilen Jones",
+      "Cut. Host hoist.ridgeway.internal. Ticket RDW-2955."
+    ],
+    [
+      "1.1",
+      "May 25, 2023",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Runbook: hoist and jack-stand safety"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for RDW-RB-2023-077 on May 25, 2023. Cal Dreher asked for a written bound after the current path (Floor jack for 'just a minute' looks) stopped being honest. I am Jeilen Jones, Shop Helper, writing for Cal Dreher, Nina Soto, and Hank Morel. Primary host hoist.ridgeway.internal. If you are skimming, jump the decision callout, then the refuse on quick look under a truck on a floor jack, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Locks engaged. Stands at rated points. No walking under a truck on a jack only. Red-tag a hoist with a spongy pedal. I am not restating a hallway yes. quick look under a truck on a floor jack is out because May 8 quick look is how a jack rolled on a slope in the lot. Nobody was under it. Next time they might be. Cost of doing nothing is already in the numbers: stands=2, slope=1, weeks=2, pedal=1, minute=1, lot=1, under=0, tag=1. Sibling tickets RDW-2955 and RDW-SOP-2022-062. I will not reopen quick look under a truck on a floor jack in a side thread because someone asked for a rate waiver. Nina Soto is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Locks engaged. Stands at rated points. No walking under a truck on a jack only. Red-tag a hoist with a spongy pedal."
+    },
+    {
+      "type": "p",
+      "text": "Background on hoist.ridgeway.internal. Floor jack for 'just a minute' looks. That is the system Cal Dreher lives with, not a slide. I timed or pulled the leftover on bay-03.ridgeway.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket RDW-RB-2023-077 names the pull. If those numbers moved after May 25, 2023, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for RDW-RB-2023-077. quick look under a truck on a floor jack is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Floor jack for 'just a minute' looks",
+          "Numbers already in play: stands=2, slope=1, weeks=2, pedal=1, minute=1, lot=1, under=0, tag=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "quick look under a truck on a floor jack",
+          "May 8 quick look is how a jack rolled on a slope in the lot. Nobody was under it. Next tim",
+          "Named on RDW-SOP-2022-062",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "stands, locks, no jack-only under, red-tag spongy",
+          "Host hoist.ridgeway.internal, ticket RDW-2955",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Hank Morel owns a leftover that is easy to skip: shop.ridgeway.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (46): refuse on quick look under a truck on a floor jack, lock is stands, locks, no jack-only under, red-tag spongy. I will not hide a process change inside a 'quick align' on RDW-2955."
+    },
+    {
+      "type": "quote",
+      "text": "A hoist is not a jack stand. If I am under it, stands are in.",
+      "attrib": "Cal Dreher, May 11"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on hoist.ridgeway.internal: the path Cal Dreher actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on bay-03.ridgeway.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "stands, locks, no jack-only under, red-tag spongy Host hoist.ridgeway.internal. Ticket RDW-2955. Acceptor Cal Dreher."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: stands, locks, no jack-only under, red-tag spongy. If that clock collides with a safety lock, the date moves and the scope does not. Cal Dreher hears the new date on RDW-RB-2023-077. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: hoist.ridgeway.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for RDW-RB-2023-077. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "stands",
+          "2",
+          "hoist.ridgeway.internal",
+          "RDW-2955"
+        ],
+        [
+          "slope",
+          "1",
+          "hoist.ridgeway.internal",
+          "RDW-2955"
+        ],
+        [
+          "weeks",
+          "2",
+          "hoist.ridgeway.internal",
+          "RDW-2955"
+        ],
+        [
+          "pedal",
+          "1",
+          "hoist.ridgeway.internal",
+          "RDW-2955"
+        ],
+        [
+          "minute",
+          "1",
+          "hoist.ridgeway.internal",
+          "RDW-2955"
+        ],
+        [
+          "lot",
+          "1",
+          "hoist.ridgeway.internal",
+          "RDW-2955"
+        ],
+        [
+          "under",
+          "0",
+          "hoist.ridgeway.internal",
+          "RDW-2955"
+        ],
+        [
+          "tag",
+          "1",
+          "hoist.ridgeway.internal",
+          "RDW-2955"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: quick look under a truck on a floor jack"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "quick look under a truck on a floor jack is out. May 8 quick look is how a jack rolled on a slope in the lot. Nobody was under it. Next time they might be. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: quick look under a truck on a floor jack comes back wearing a new coat. I want that named in review notes, not rediscovered by Hank Morel on a Monday. Ticket RDW-2955. Numbers I will not 'simplify': stands=2, slope=1, weeks=2, pedal=1, minute=1, lot=1, under=0, tag=1. Same clock as the front. I will not mix clocks to make hoist.ridgeway.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Hank Morel: does shop.ridgeway.internal stay in the path? Yes, no, or a new date on RDW-SOP-2022-062.",
+        "Nina Soto: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Cal Dreher: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on hoist.ridgeway.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits hoist.ridgeway.internal, RDW-RB-2023-077, and the last three working pages. Access that has to move is who can change bay-03.ridgeway.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Nina Soto accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. RDW-2955. hoist.ridgeway.internal.",
+      "text": "# RDW-RB-2023-077 read-only first\ndate\necho host=hoist.ridgeway.internal bay check, hoist tag, PM sheet\necho 'do not start the engine until the tag is green'\n# stop. write the last error in one sentence on RDW-2955\n# do not override a safety lock to free a bay"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on RDW-2955 before any write.",
+        "Confirm on hoist.ridgeway.internal with the read-only commands above.",
+        "If the refuse on quick look under a truck on a floor jack is being reopened, stop and ping Cal Dreher.",
+        "Wake Nina Soto only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for RDW-RB-2023-077. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Cal Dreher",
+          "Nina Soto"
+        ],
+        [
+          "Refuse on quick look under a truck on a floor jack",
+          "Jeilen Jones",
+          "Cal Dreher",
+          "Hank Morel"
+        ],
+        [
+          "Host hoist.ridgeway.internal",
+          "Nina Soto",
+          "Cal Dreher",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Hank Morel",
+          "Cal Dreher",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Tess Brant is on that list. Object on RDW-2955. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to RDW-RB-2023-077"
+    },
+    {
+      "type": "p",
+      "text": "bay-03.ridgeway.internal is in this file because skipping it is how the last near-miss happened. Hank Morel owns the check. I want a count on RDW-SOP-2022-062 before anyone says the leftover is 'implied.' Implied leftovers are how quick look under a truck on a floor jack almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in RDW-RB-2023-077"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim quick look under a truck on a floor jack is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host hoist.ridgeway.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for RDW-2955"
+    },
+    {
+      "type": "p",
+      "text": "First useful is stands, locks, no jack-only under, red-tag spongy, not a prettier board or a louder huddle. Cal Dreher sees that slice on hoist.ridgeway.internal. If the slice needs a second process, that is a new ticket and Cal Dreher is in the thread. I will not hide it inside RDW-RB-2023-077."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (46)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on RDW-RB-2023-077. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: shop.ridgeway.internal."
+    }
+  ]
+}

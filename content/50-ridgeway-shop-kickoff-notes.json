@@ -1,0 +1,336 @@
+{
+  "slug": "50-ridgeway-shop-kickoff-notes",
+  "doc_id": "RDW-MTG-2023-110",
+  "title": "Shop kickoff notes, August 24",
+  "subtitle": "Sheets, boards, write-ups, ticket RDW-3220",
+  "doc_type": "Meeting notes",
+  "form_type": "Other",
+  "kicker": "Ridgeway Diesel  \u00b7  Kickoff  \u00b7  RDW-3220",
+  "org": "Ridgeway Diesel",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Issued",
+  "date": "August 24, 2023",
+  "author": "Jeilen Jones",
+  "role": "Shop Helper",
+  "team": "Ridgeway Diesel, shop floor",
+  "audience": "Nina Soto (requester); Cal Dreher (acceptor); Nina Soto and Jeilen Jones (build); Hank Morel (leftover host); Tess Brant (absentee pack)",
+  "owners": "Cal Dreher (acceptor), Nina Soto (requester), Nina Soto (ops), Jeilen Jones (this document)",
+  "related": "RDW-MTG-2023-110; RDW-3220; RDW-SOP-2022-011",
+  "summary": "Nina Soto asked for a written cut of Shop kickoff notes. Current path: Busy lot, tribal habits, sheets in a drawer. This document locks sheets, board, write-ups, stands, no skip for a full lot. skip kickoff because the lot is full is out because A full lot is how unsigned PMs happen. Cal will not wait for a quiet Tuesday.",
+  "form_description": "Kickoff notes for Ridgeway Diesel shop standards: PM sheets, tool board, write-ups, hoist stands, refusing a skip because the lot is full.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "July 31, 2023",
+      "Jeilen Jones",
+      "Outline after RDW-MTG-2023-110 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "August 12, 2023",
+      "Jeilen Jones",
+      "Numbers from Nina Soto. skip kickoff because the lot is full still in the room."
+    ],
+    [
+      "0.9",
+      "August 20, 2023",
+      "Jeilen Jones",
+      "skip kickoff because the lot is full written up as a refuse. Nina Soto review."
+    ],
+    [
+      "1.0",
+      "August 24, 2023",
+      "Jeilen Jones",
+      "Cut. Host shop.ridgeway.internal. Ticket RDW-3220."
+    ],
+    [
+      "1.1",
+      "August 24, 2023",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Shop kickoff notes, August 24"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for RDW-MTG-2023-110 on August 24, 2023. Nina Soto asked for a written bound after the current path (Busy lot, tribal habits, sheets in a drawer) stopped being honest. I am Jeilen Jones, Shop Helper, writing for Cal Dreher, Nina Soto, and Hank Morel. Primary host shop.ridgeway.internal. If you are skimming, jump the decision callout, then the refuse on skip kickoff because the lot is full, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "PM sheets, tool board, write-up standard, hoist stands. First useful week is the week the blank belt line cannot happen again. I am not restating a hallway yes. skip kickoff because the lot is full is out because A full lot is how unsigned PMs happen. Cal will not wait for a quiet Tuesday. Cost of doing nothing is already in the numbers: weeks=1, bays=4, sheets=4, board=1, lot=1, blank=1, tuesday=0, door=1. Sibling tickets RDW-3220 and RDW-SOP-2022-011. I will not reopen skip kickoff because the lot is full in a side thread because someone asked for a rate waiver. Nina Soto is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "PM sheets, tool board, write-up standard, hoist stands. First useful week is the week the blank belt line cannot happen again."
+    },
+    {
+      "type": "p",
+      "text": "Background on shop.ridgeway.internal. Busy lot, tribal habits, sheets in a drawer. That is the system Cal Dreher lives with, not a slide. I timed or pulled the leftover on writeup.ridgeway.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket RDW-MTG-2023-110 names the pull. If those numbers moved after August 24, 2023, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for RDW-MTG-2023-110. skip kickoff because the lot is full is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Busy lot, tribal habits, sheets in a drawer",
+          "Numbers already in play: weeks=1, bays=4, sheets=4, board=1, lot=1, blank=1, tuesday=0, door=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "skip kickoff because the lot is full",
+          "A full lot is how unsigned PMs happen. Cal will not wait for a quiet Tuesday.",
+          "Named on RDW-SOP-2022-011",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "sheets, board, write-ups, stands, no skip for a full lot",
+          "Host shop.ridgeway.internal, ticket RDW-3220",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Hank Morel owns a leftover that is easy to skip: tools.ridgeway.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (50): refuse on skip kickoff because the lot is full, lock is sheets, board, write-ups, stands, no skip for a full lot. I will not hide a process change inside a 'quick align' on RDW-3220."
+    },
+    {
+      "type": "quote",
+      "text": "We are not skipping the sheets because a truck is blocking the door. The door is why the sheets exist.",
+      "attrib": "Nina Soto, August 24"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on shop.ridgeway.internal: the path Nina Soto actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on writeup.ridgeway.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "sheets, board, write-ups, stands, no skip for a full lot Host shop.ridgeway.internal. Ticket RDW-3220. Acceptor Cal Dreher."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: sheets, board, write-ups, stands, no skip for a full lot. If that clock collides with a safety lock, the date moves and the scope does not. Cal Dreher hears the new date on RDW-MTG-2023-110. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: shop.ridgeway.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for RDW-MTG-2023-110. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "weeks",
+          "1",
+          "shop.ridgeway.internal",
+          "RDW-3220"
+        ],
+        [
+          "bays",
+          "4",
+          "shop.ridgeway.internal",
+          "RDW-3220"
+        ],
+        [
+          "sheets",
+          "4",
+          "shop.ridgeway.internal",
+          "RDW-3220"
+        ],
+        [
+          "board",
+          "1",
+          "shop.ridgeway.internal",
+          "RDW-3220"
+        ],
+        [
+          "lot",
+          "1",
+          "shop.ridgeway.internal",
+          "RDW-3220"
+        ],
+        [
+          "blank",
+          "1",
+          "shop.ridgeway.internal",
+          "RDW-3220"
+        ],
+        [
+          "tuesday",
+          "0",
+          "shop.ridgeway.internal",
+          "RDW-3220"
+        ],
+        [
+          "door",
+          "1",
+          "shop.ridgeway.internal",
+          "RDW-3220"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: skip kickoff because the lot is full"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "skip kickoff because the lot is full is out. A full lot is how unsigned PMs happen. Cal will not wait for a quiet Tuesday. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: skip kickoff because the lot is full comes back wearing a new coat. I want that named in review notes, not rediscovered by Hank Morel on a Monday. Ticket RDW-3220. Numbers I will not 'simplify': weeks=1, bays=4, sheets=4, board=1, lot=1, blank=1, tuesday=0, door=1. Same clock as the front. I will not mix clocks to make shop.ridgeway.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Hank Morel: does tools.ridgeway.internal stay in the path? Yes, no, or a new date on RDW-SOP-2022-011.",
+        "Nina Soto: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Nina Soto: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on shop.ridgeway.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits shop.ridgeway.internal, RDW-MTG-2023-110, and the last three working pages. Access that has to move is who can change writeup.ridgeway.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Nina Soto accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. RDW-3220. shop.ridgeway.internal.",
+      "text": "# RDW-MTG-2023-110 read-only first\ndate\necho host=shop.ridgeway.internal bay check, hoist tag, PM sheet\necho 'do not start the engine until the tag is green'\n# stop. write the last error in one sentence on RDW-3220\n# do not override a safety lock to free a bay"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on RDW-3220 before any write.",
+        "Confirm on shop.ridgeway.internal with the read-only commands above.",
+        "If the refuse on skip kickoff because the lot is full is being reopened, stop and ping Cal Dreher.",
+        "Wake Nina Soto only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for RDW-MTG-2023-110. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Cal Dreher",
+          "Nina Soto"
+        ],
+        [
+          "Refuse on skip kickoff because the lot is full",
+          "Jeilen Jones",
+          "Cal Dreher",
+          "Hank Morel"
+        ],
+        [
+          "Host shop.ridgeway.internal",
+          "Nina Soto",
+          "Cal Dreher",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Hank Morel",
+          "Nina Soto",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Tess Brant is on that list. Object on RDW-3220. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to RDW-MTG-2023-110"
+    },
+    {
+      "type": "p",
+      "text": "writeup.ridgeway.internal is in this file because skipping it is how the last near-miss happened. Hank Morel owns the check. I want a count on RDW-SOP-2022-011 before anyone says the leftover is 'implied.' Implied leftovers are how skip kickoff because the lot is full almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in RDW-MTG-2023-110"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim skip kickoff because the lot is full is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host shop.ridgeway.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for RDW-3220"
+    },
+    {
+      "type": "p",
+      "text": "First useful is sheets, board, write-ups, stands, no skip for a full lot, not a prettier board or a louder huddle. Nina Soto sees that slice on shop.ridgeway.internal. If the slice needs a second process, that is a new ticket and Cal Dreher is in the thread. I will not hide it inside RDW-MTG-2023-110."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (50)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on RDW-MTG-2023-110. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: tools.ridgeway.internal."
+    }
+  ]
+}

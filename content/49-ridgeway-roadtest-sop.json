@@ -1,0 +1,336 @@
+{
+  "slug": "49-ridgeway-roadtest-sop",
+  "doc_id": "RDW-SOP-2023-102",
+  "title": "SOP: road test after brake, steer, or drivetrain work",
+  "subtitle": "Route, speed, ticket RDW-3155",
+  "doc_type": "Runbook / SOP",
+  "form_type": "Runbook / SOPs",
+  "kicker": "Ridgeway Diesel  \u00b7  Road test  \u00b7  RDW-3155",
+  "org": "Ridgeway Diesel",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "In force",
+  "date": "August 3, 2023",
+  "author": "Jeilen Jones",
+  "role": "Shop Helper",
+  "team": "Ridgeway Diesel, shop floor",
+  "audience": "Cal Dreher (requester); Cal Dreher (acceptor); Nina Soto and Jeilen Jones (build); Hank Morel (leftover host); Tess Brant (absentee pack)",
+  "owners": "Cal Dreher (acceptor), Cal Dreher (requester), Nina Soto (ops), Jeilen Jones (this document)",
+  "related": "RDW-SOP-2023-102; RDW-3155; RDW-SOP-2023-008",
+  "summary": "Cal Dreher asked for a written cut of SOP. Current path: Around the building, back in the bay. This document locks marked route, 35, stop, write the change. lot loop as the road test is out because July 13 lot loop missed a pull at 35. Customer felt it on the highway. Nina ate the second visit.",
+  "form_description": "Road-test SOP for Ridgeway after brake, steer, or drivetrain work: marked route at 35, refusing a lot loop as the test.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "July 10, 2023",
+      "Jeilen Jones",
+      "Outline after RDW-SOP-2023-102 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "July 22, 2023",
+      "Jeilen Jones",
+      "Numbers from Cal Dreher. lot loop as the road test still in the room."
+    ],
+    [
+      "0.9",
+      "July 30, 2023",
+      "Jeilen Jones",
+      "lot loop as the road test written up as a refuse. Nina Soto review."
+    ],
+    [
+      "1.0",
+      "August 3, 2023",
+      "Jeilen Jones",
+      "Cut. Host road.ridgeway.internal. Ticket RDW-3155."
+    ],
+    [
+      "1.1",
+      "August 3, 2023",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "SOP: road test after brake, steer, or drivetrain work"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for RDW-SOP-2023-102 on August 3, 2023. Cal Dreher asked for a written bound after the current path (Around the building, back in the bay) stopped being honest. I am Jeilen Jones, Shop Helper, writing for Cal Dreher, Nina Soto, and Hank Morel. Primary host road.ridgeway.internal. If you are skimming, jump the decision callout, then the refuse on lot loop as the road test, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Marked route, 35 and a stop. Second person if brakes were opened. Write what changed. Lot loops are not the test. I am not restating a hallway yes. lot loop as the road test is out because July 13 lot loop missed a pull at 35. Customer felt it on the highway. Nina ate the second visit. Cost of doing nothing is already in the numbers: speed=35, visits=2, weeks=2, lot=1, stop=1, highway=1, second=1, write=1. Sibling tickets RDW-3155 and RDW-SOP-2023-008. I will not reopen lot loop as the road test in a side thread because someone asked for a rate waiver. Nina Soto is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Marked route, 35 and a stop. Second person if brakes were opened. Write what changed. Lot loops are not the test."
+    },
+    {
+      "type": "p",
+      "text": "Background on road.ridgeway.internal. Around the building, back in the bay. That is the system Cal Dreher lives with, not a slide. I timed or pulled the leftover on shop.ridgeway.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket RDW-SOP-2023-102 names the pull. If those numbers moved after August 3, 2023, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for RDW-SOP-2023-102. lot loop as the road test is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Around the building, back in the bay",
+          "Numbers already in play: speed=35, visits=2, weeks=2, lot=1, stop=1, highway=1, second=1, write=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "lot loop as the road test",
+          "July 13 lot loop missed a pull at 35. Customer felt it on the highway. Nina ate the second",
+          "Named on RDW-SOP-2023-008",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "marked route, 35, stop, write the change",
+          "Host road.ridgeway.internal, ticket RDW-3155",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Hank Morel owns a leftover that is easy to skip: bay-02.ridgeway.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (49): refuse on lot loop as the road test, lock is marked route, 35, stop, write the change. I will not hide a process change inside a 'quick align' on RDW-3155."
+    },
+    {
+      "type": "quote",
+      "text": "Around the lot is not a road test. The wander shows up at 35.",
+      "attrib": "Cal Dreher, July 20"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on road.ridgeway.internal: the path Cal Dreher actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on shop.ridgeway.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "marked route, 35, stop, write the change Host road.ridgeway.internal. Ticket RDW-3155. Acceptor Cal Dreher."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: marked route, 35, stop, write the change. If that clock collides with a safety lock, the date moves and the scope does not. Cal Dreher hears the new date on RDW-SOP-2023-102. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: road.ridgeway.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for RDW-SOP-2023-102. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "speed",
+          "35",
+          "road.ridgeway.internal",
+          "RDW-3155"
+        ],
+        [
+          "visits",
+          "2",
+          "road.ridgeway.internal",
+          "RDW-3155"
+        ],
+        [
+          "weeks",
+          "2",
+          "road.ridgeway.internal",
+          "RDW-3155"
+        ],
+        [
+          "lot",
+          "1",
+          "road.ridgeway.internal",
+          "RDW-3155"
+        ],
+        [
+          "stop",
+          "1",
+          "road.ridgeway.internal",
+          "RDW-3155"
+        ],
+        [
+          "highway",
+          "1",
+          "road.ridgeway.internal",
+          "RDW-3155"
+        ],
+        [
+          "second",
+          "1",
+          "road.ridgeway.internal",
+          "RDW-3155"
+        ],
+        [
+          "write",
+          "1",
+          "road.ridgeway.internal",
+          "RDW-3155"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: lot loop as the road test"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "lot loop as the road test is out. July 13 lot loop missed a pull at 35. Customer felt it on the highway. Nina ate the second visit. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: lot loop as the road test comes back wearing a new coat. I want that named in review notes, not rediscovered by Hank Morel on a Monday. Ticket RDW-3155. Numbers I will not 'simplify': speed=35, visits=2, weeks=2, lot=1, stop=1, highway=1, second=1, write=1. Same clock as the front. I will not mix clocks to make road.ridgeway.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Hank Morel: does bay-02.ridgeway.internal stay in the path? Yes, no, or a new date on RDW-SOP-2023-008.",
+        "Nina Soto: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Cal Dreher: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on road.ridgeway.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits road.ridgeway.internal, RDW-SOP-2023-102, and the last three working pages. Access that has to move is who can change shop.ridgeway.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Nina Soto accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. RDW-3155. road.ridgeway.internal.",
+      "text": "# RDW-SOP-2023-102 read-only first\ndate\necho host=road.ridgeway.internal bay check, hoist tag, PM sheet\necho 'do not start the engine until the tag is green'\n# stop. write the last error in one sentence on RDW-3155\n# do not override a safety lock to free a bay"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on RDW-3155 before any write.",
+        "Confirm on road.ridgeway.internal with the read-only commands above.",
+        "If the refuse on lot loop as the road test is being reopened, stop and ping Cal Dreher.",
+        "Wake Nina Soto only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for RDW-SOP-2023-102. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Cal Dreher",
+          "Nina Soto"
+        ],
+        [
+          "Refuse on lot loop as the road test",
+          "Jeilen Jones",
+          "Cal Dreher",
+          "Hank Morel"
+        ],
+        [
+          "Host road.ridgeway.internal",
+          "Nina Soto",
+          "Cal Dreher",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Hank Morel",
+          "Cal Dreher",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Tess Brant is on that list. Object on RDW-3155. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to RDW-SOP-2023-102"
+    },
+    {
+      "type": "p",
+      "text": "shop.ridgeway.internal is in this file because skipping it is how the last near-miss happened. Hank Morel owns the check. I want a count on RDW-SOP-2023-008 before anyone says the leftover is 'implied.' Implied leftovers are how lot loop as the road test almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in RDW-SOP-2023-102"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim lot loop as the road test is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host road.ridgeway.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for RDW-3155"
+    },
+    {
+      "type": "p",
+      "text": "First useful is marked route, 35, stop, write the change, not a prettier board or a louder huddle. Cal Dreher sees that slice on road.ridgeway.internal. If the slice needs a second process, that is a new ticket and Cal Dreher is in the thread. I will not hide it inside RDW-SOP-2023-102."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (49)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on RDW-SOP-2023-102. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: bay-02.ridgeway.internal."
+    }
+  ]
+}

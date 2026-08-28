@@ -1,0 +1,336 @@
+{
+  "slug": "08-pinecrest-cooler-pick-notes",
+  "doc_id": "PCF-MTG-2024-029",
+  "title": "Cooler versus dry pick notes, March 21",
+  "subtitle": "Coat, time in cooler, RF fog, ticket PCF-1555",
+  "doc_type": "Meeting notes",
+  "form_type": "Other",
+  "kicker": "Pinecrest Fulfillment  \u00b7  Cooler  \u00b7  PCF-1555",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Issued",
+  "date": "March 21, 2024",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Drew Phelps (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Drew Phelps (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-MTG-2024-029; PCF-1555; PCF-SOP-2023-014",
+  "summary": "Drew Phelps asked for a written cut of Cooler versus dry pick notes. Current path: No coat rule written, people stay a full shift in the cooler. This document locks coat, 45/10, wipe RF, no skip. skip cooler scans when the RF fogs is out because March 8 four dairy mispicks after fogged screens. Drew timed the wipe at 8 seconds.",
+  "form_description": "Notes locking Pinecrest cooler pick rules: coat, 45-minute max, RF wipe, and a refuse on skip-scan when the screen fogs.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "February 26, 2024",
+      "Jeilen Jones",
+      "Outline after PCF-MTG-2024-029 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "March 9, 2024",
+      "Jeilen Jones",
+      "Numbers from Drew Phelps. skip cooler scans when the RF fogs still in the room."
+    ],
+    [
+      "0.9",
+      "March 17, 2024",
+      "Jeilen Jones",
+      "skip cooler scans when the RF fogs written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "March 21, 2024",
+      "Jeilen Jones",
+      "Cut. Host cooler.pinecrest.internal. Ticket PCF-1555."
+    ],
+    [
+      "1.1",
+      "March 21, 2024",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Cooler versus dry pick notes, March 21"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-MTG-2024-029 on March 21, 2024. Drew Phelps asked for a written bound after the current path (No coat rule written, people stay a full shift in the cooler) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host cooler.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on skip cooler scans when the RF fogs, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Coat required. 45-minute max in cooler then a 10-minute out. Wipe RF. Do not skip scans because the screen fogged. I am not restating a hallway yes. skip cooler scans when the RF fogs is out because March 8 four dairy mispicks after fogged screens. Drew timed the wipe at 8 seconds. Cost of doing nothing is already in the numbers: maxmin=45, out=10, wipe=8, miss=4, temp=36.2, weeks=2, coats=12, dairy=4. Sibling tickets PCF-1555 and PCF-SOP-2023-014. I will not reopen skip cooler scans when the RF fogs in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Coat required. 45-minute max in cooler then a 10-minute out. Wipe RF. Do not skip scans because the screen fogged."
+    },
+    {
+      "type": "p",
+      "text": "Background on cooler.pinecrest.internal. No coat rule written, people stay a full shift in the cooler. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on wms.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-MTG-2024-029 names the pull. If those numbers moved after March 21, 2024, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-MTG-2024-029. skip cooler scans when the RF fogs is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep No coat rule written, people stay a full shift in the cooler",
+          "Numbers already in play: maxmin=45, out=10, wipe=8, miss=4, temp=36.2, weeks=2, coats=12, dairy=4",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "skip cooler scans when the RF fogs",
+          "March 8 four dairy mispicks after fogged screens. Drew timed the wipe at 8 seconds.",
+          "Named on PCF-SOP-2023-014",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "coat, 45/10, wipe RF, no skip",
+          "Host cooler.pinecrest.internal, ticket PCF-1555",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: rf.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (08): refuse on skip cooler scans when the RF fogs, lock is coat, 45/10, wipe RF, no skip. I will not hide a process change inside a 'quick align' on PCF-1555."
+    },
+    {
+      "type": "quote",
+      "text": "A fogged RF in the cooler is not a reason to skip the scan. It is a reason to wipe it.",
+      "attrib": "Drew Phelps, March 21"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on cooler.pinecrest.internal: the path Drew Phelps actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on wms.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "coat, 45/10, wipe RF, no skip Host cooler.pinecrest.internal. Ticket PCF-1555. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: coat, 45/10, wipe RF, no skip. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-MTG-2024-029. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: cooler.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-MTG-2024-029. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "maxmin",
+          "45",
+          "cooler.pinecrest.internal",
+          "PCF-1555"
+        ],
+        [
+          "out",
+          "10",
+          "cooler.pinecrest.internal",
+          "PCF-1555"
+        ],
+        [
+          "wipe",
+          "8",
+          "cooler.pinecrest.internal",
+          "PCF-1555"
+        ],
+        [
+          "miss",
+          "4",
+          "cooler.pinecrest.internal",
+          "PCF-1555"
+        ],
+        [
+          "temp",
+          "36.2",
+          "cooler.pinecrest.internal",
+          "PCF-1555"
+        ],
+        [
+          "weeks",
+          "2",
+          "cooler.pinecrest.internal",
+          "PCF-1555"
+        ],
+        [
+          "coats",
+          "12",
+          "cooler.pinecrest.internal",
+          "PCF-1555"
+        ],
+        [
+          "dairy",
+          "4",
+          "cooler.pinecrest.internal",
+          "PCF-1555"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: skip cooler scans when the RF fogs"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "skip cooler scans when the RF fogs is out. March 8 four dairy mispicks after fogged screens. Drew timed the wipe at 8 seconds. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: skip cooler scans when the RF fogs comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-1555. Numbers I will not 'simplify': maxmin=45, out=10, wipe=8, miss=4, temp=36.2, weeks=2, coats=12, dairy=4. Same clock as the front. I will not mix clocks to make cooler.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does rf.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-SOP-2023-014.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Drew Phelps: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on cooler.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits cooler.pinecrest.internal, PCF-MTG-2024-029, and the last three working pages. Access that has to move is who can change wms.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-1555. cooler.pinecrest.internal.",
+      "text": "# PCF-MTG-2024-029 read-only first\ndate\necho host=cooler.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-1555\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-1555 before any write.",
+        "Confirm on cooler.pinecrest.internal with the read-only commands above.",
+        "If the refuse on skip cooler scans when the RF fogs is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-MTG-2024-029. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on skip cooler scans when the RF fogs",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host cooler.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Drew Phelps",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-1555. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-MTG-2024-029"
+    },
+    {
+      "type": "p",
+      "text": "wms.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-SOP-2023-014 before anyone says the leftover is 'implied.' Implied leftovers are how skip cooler scans when the RF fogs almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-MTG-2024-029"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim skip cooler scans when the RF fogs is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host cooler.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-1555"
+    },
+    {
+      "type": "p",
+      "text": "First useful is coat, 45/10, wipe RF, no skip, not a prettier board or a louder huddle. Drew Phelps sees that slice on cooler.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-MTG-2024-029."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (08)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-MTG-2024-029. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: rf.pinecrest.internal."
+    }
+  ]
+}

@@ -1,0 +1,336 @@
+{
+  "slug": "43-ridgeway-parts-purchasing-sop",
+  "doc_id": "RDW-SOP-2023-031",
+  "title": "SOP: parts purchasing and receiving",
+  "subtitle": "PO, match, ticket RDW-2810",
+  "doc_type": "Runbook / SOP",
+  "form_type": "Runbook / SOPs",
+  "kicker": "Ridgeway Diesel  \u00b7  Parts  \u00b7  RDW-2810",
+  "org": "Ridgeway Diesel",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "In force",
+  "date": "March 23, 2023",
+  "author": "Jeilen Jones",
+  "role": "Shop Helper",
+  "team": "Ridgeway Diesel, shop floor",
+  "audience": "Hank Morel (requester); Cal Dreher (acceptor); Nina Soto and Jeilen Jones (build); Hank Morel (leftover host); Tess Brant (absentee pack)",
+  "owners": "Cal Dreher (acceptor), Hank Morel (requester), Nina Soto (ops), Jeilen Jones (this document)",
+  "related": "RDW-SOP-2023-031; RDW-2810; RDW-REQ-2023-044",
+  "summary": "Hank Morel asked for a written cut of SOP. Current path: Counter-to-bay with a wave, paper at close. This document locks PO match, core tag, no unmatched install. install first, paper later when the truck is blocking the door is out because March 2 unmatched filter was the wrong micron. Comeback at 9 miles. Bay was free. Customer was not.",
+  "form_description": "Parts purchasing SOP for Ridgeway Diesel: PO match and core tags, refusing install-first when a truck is blocking a bay.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "February 27, 2023",
+      "Jeilen Jones",
+      "Outline after RDW-SOP-2023-031 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "March 11, 2023",
+      "Jeilen Jones",
+      "Numbers from Hank Morel. install first, paper later when the truck is blocking the door still in the room."
+    ],
+    [
+      "0.9",
+      "March 19, 2023",
+      "Jeilen Jones",
+      "install first, paper later when the truck is blocking the door written up as a refuse. Nina Soto review."
+    ],
+    [
+      "1.0",
+      "March 23, 2023",
+      "Jeilen Jones",
+      "Cut. Host parts.ridgeway.internal. Ticket RDW-2810."
+    ],
+    [
+      "1.1",
+      "March 23, 2023",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "SOP: parts purchasing and receiving"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for RDW-SOP-2023-031 on March 23, 2023. Hank Morel asked for a written bound after the current path (Counter-to-bay with a wave, paper at close) stopped being honest. I am Jeilen Jones, Shop Helper, writing for Cal Dreher, Nina Soto, and Hank Morel. Primary host parts.ridgeway.internal. If you are skimming, jump the decision callout, then the refuse on install first, paper later when the truck is blocking the door, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "PO first. Match part number. Core tagged. No install of an unmatched box 'to save the bay.' I am not restating a hallway yes. install first, paper later when the truck is blocking the door is out because March 2 unmatched filter was the wrong micron. Comeback at 9 miles. Bay was free. Customer was not. Cost of doing nothing is already in the numbers: miles=9, po=1, wrong=1500, weeks=3, core=1, door=1, micron=1, wave=1. Sibling tickets RDW-2810 and RDW-REQ-2023-044. I will not reopen install first, paper later when the truck is blocking the door in a side thread because someone asked for a rate waiver. Nina Soto is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "PO first. Match part number. Core tagged. No install of an unmatched box 'to save the bay.'"
+    },
+    {
+      "type": "p",
+      "text": "Background on parts.ridgeway.internal. Counter-to-bay with a wave, paper at close. That is the system Cal Dreher lives with, not a slide. I timed or pulled the leftover on shop.ridgeway.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket RDW-SOP-2023-031 names the pull. If those numbers moved after March 23, 2023, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for RDW-SOP-2023-031. install first, paper later when the truck is blocking the door is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Counter-to-bay with a wave, paper at close",
+          "Numbers already in play: miles=9, po=1, wrong=1500, weeks=3, core=1, door=1, micron=1, wave=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "install first, paper later when the truck is blocking the door",
+          "March 2 unmatched filter was the wrong micron. Comeback at 9 miles. Bay was free. Customer",
+          "Named on RDW-REQ-2023-044",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "PO match, core tag, no unmatched install",
+          "Host parts.ridgeway.internal, ticket RDW-2810",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Hank Morel owns a leftover that is easy to skip: bay-01.ridgeway.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (43): refuse on install first, paper later when the truck is blocking the door, lock is PO match, core tag, no unmatched install. I will not hide a process change inside a 'quick align' on RDW-2810."
+    },
+    {
+      "type": "quote",
+      "text": "If the box says 1500 and the PO says 2500, the box does not go on the truck.",
+      "attrib": "Hank Morel, March 9"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on parts.ridgeway.internal: the path Hank Morel actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on shop.ridgeway.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "PO match, core tag, no unmatched install Host parts.ridgeway.internal. Ticket RDW-2810. Acceptor Cal Dreher."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: PO match, core tag, no unmatched install. If that clock collides with a safety lock, the date moves and the scope does not. Cal Dreher hears the new date on RDW-SOP-2023-031. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: parts.ridgeway.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for RDW-SOP-2023-031. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "miles",
+          "9",
+          "parts.ridgeway.internal",
+          "RDW-2810"
+        ],
+        [
+          "po",
+          "1",
+          "parts.ridgeway.internal",
+          "RDW-2810"
+        ],
+        [
+          "wrong",
+          "1500",
+          "parts.ridgeway.internal",
+          "RDW-2810"
+        ],
+        [
+          "weeks",
+          "3",
+          "parts.ridgeway.internal",
+          "RDW-2810"
+        ],
+        [
+          "core",
+          "1",
+          "parts.ridgeway.internal",
+          "RDW-2810"
+        ],
+        [
+          "door",
+          "1",
+          "parts.ridgeway.internal",
+          "RDW-2810"
+        ],
+        [
+          "micron",
+          "1",
+          "parts.ridgeway.internal",
+          "RDW-2810"
+        ],
+        [
+          "wave",
+          "1",
+          "parts.ridgeway.internal",
+          "RDW-2810"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: install first, paper later when the truck is blocking the door"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "install first, paper later when the truck is blocking the door is out. March 2 unmatched filter was the wrong micron. Comeback at 9 miles. Bay was free. Customer was not. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: install first, paper later when the truck is blocking the door comes back wearing a new coat. I want that named in review notes, not rediscovered by Hank Morel on a Monday. Ticket RDW-2810. Numbers I will not 'simplify': miles=9, po=1, wrong=1500, weeks=3, core=1, door=1, micron=1, wave=1. Same clock as the front. I will not mix clocks to make parts.ridgeway.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Hank Morel: does bay-01.ridgeway.internal stay in the path? Yes, no, or a new date on RDW-REQ-2023-044.",
+        "Nina Soto: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Hank Morel: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on parts.ridgeway.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits parts.ridgeway.internal, RDW-SOP-2023-031, and the last three working pages. Access that has to move is who can change shop.ridgeway.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Nina Soto accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. RDW-2810. parts.ridgeway.internal.",
+      "text": "# RDW-SOP-2023-031 read-only first\ndate\necho host=parts.ridgeway.internal bay check, hoist tag, PM sheet\necho 'do not start the engine until the tag is green'\n# stop. write the last error in one sentence on RDW-2810\n# do not override a safety lock to free a bay"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on RDW-2810 before any write.",
+        "Confirm on parts.ridgeway.internal with the read-only commands above.",
+        "If the refuse on install first, paper later when the truck is blocking the door is being reopened, stop and ping Cal Dreher.",
+        "Wake Nina Soto only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for RDW-SOP-2023-031. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Cal Dreher",
+          "Nina Soto"
+        ],
+        [
+          "Refuse on install first, paper later when the truck is blocking the door",
+          "Jeilen Jones",
+          "Cal Dreher",
+          "Hank Morel"
+        ],
+        [
+          "Host parts.ridgeway.internal",
+          "Nina Soto",
+          "Cal Dreher",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Hank Morel",
+          "Hank Morel",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Tess Brant is on that list. Object on RDW-2810. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to RDW-SOP-2023-031"
+    },
+    {
+      "type": "p",
+      "text": "shop.ridgeway.internal is in this file because skipping it is how the last near-miss happened. Hank Morel owns the check. I want a count on RDW-REQ-2023-044 before anyone says the leftover is 'implied.' Implied leftovers are how install first, paper later when the truck is blocking the door almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in RDW-SOP-2023-031"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim install first, paper later when the truck is blocking the door is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host parts.ridgeway.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for RDW-2810"
+    },
+    {
+      "type": "p",
+      "text": "First useful is PO match, core tag, no unmatched install, not a prettier board or a louder huddle. Hank Morel sees that slice on parts.ridgeway.internal. If the slice needs a second process, that is a new ticket and Cal Dreher is in the thread. I will not hide it inside RDW-SOP-2023-031."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (43)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on RDW-SOP-2023-031. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: bay-01.ridgeway.internal."
+    }
+  ]
+}

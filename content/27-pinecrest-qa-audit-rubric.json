@@ -1,0 +1,336 @@
+{
+  "slug": "27-pinecrest-qa-audit-rubric",
+  "doc_id": "PCF-EVAL-2024-148",
+  "title": "Eval rubric: pick-tote audit at pack",
+  "subtitle": "Pass/fail on SKU, qty, lot, ticket PCF-2466",
+  "doc_type": "Evaluation rubric",
+  "form_type": "Other",
+  "kicker": "Pinecrest Fulfillment  \u00b7  QA rubric  \u00b7  PCF-2466",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "In use",
+  "date": "December 19, 2024",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Tasha Quinn (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Tasha Quinn (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-EVAL-2024-148; PCF-2466; PCF-SOP-2023-022",
+  "summary": "Tasha Quinn asked for a written cut of Eval rubric. Current path: Lead glances, no sheet. This document locks 1 in 20, SKU/qty/lot, sheet, neatness out. neatness as the QA score is out because Neat wrong totes still ship wrong. December 2 neat tote had 2 extra lotion.",
+  "form_description": "QA rubric for Pinecrest pick totes at pack: 1 in 20 audits on SKU, quantity, and lot, refusing neatness as the score.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "November 25, 2024",
+      "Jeilen Jones",
+      "Outline after PCF-EVAL-2024-148 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "December 7, 2024",
+      "Jeilen Jones",
+      "Numbers from Tasha Quinn. neatness as the QA score still in the room."
+    ],
+    [
+      "0.9",
+      "December 15, 2024",
+      "Jeilen Jones",
+      "neatness as the QA score written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "December 19, 2024",
+      "Jeilen Jones",
+      "Cut. Host pack.pinecrest.internal. Ticket PCF-2466."
+    ],
+    [
+      "1.1",
+      "December 19, 2024",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Eval rubric: pick-tote audit at pack"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-EVAL-2024-148 on December 19, 2024. Tasha Quinn asked for a written bound after the current path (Lead glances, no sheet) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host pack.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on neatness as the QA score, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Audit 1 in 20 totes. Fail on wrong SKU, wrong qty, missing lot on dairy/chem. Pass is not 'looks neat.' I am not restating a hallway yes. neatness as the QA score is out because Neat wrong totes still ship wrong. December 2 neat tote had 2 extra lotion. Cost of doing nothing is already in the numbers: rate=1/20, extra=2, fail=3, weeks=2, dairy=1, chem=1, glance=0, sheet=1. Sibling tickets PCF-2466 and PCF-SOP-2023-022. I will not reopen neatness as the QA score in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Audit 1 in 20 totes. Fail on wrong SKU, wrong qty, missing lot on dairy/chem. Pass is not 'looks neat.'"
+    },
+    {
+      "type": "p",
+      "text": "Background on pack.pinecrest.internal. Lead glances, no sheet. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on wms.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-EVAL-2024-148 names the pull. If those numbers moved after December 19, 2024, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-EVAL-2024-148. neatness as the QA score is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Lead glances, no sheet",
+          "Numbers already in play: rate=1/20, extra=2, fail=3, weeks=2, dairy=1, chem=1, glance=0, sheet=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "neatness as the QA score",
+          "Neat wrong totes still ship wrong. December 2 neat tote had 2 extra lotion.",
+          "Named on PCF-SOP-2023-022",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "1 in 20, SKU/qty/lot, sheet, neatness out",
+          "Host pack.pinecrest.internal, ticket PCF-2466",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: rf.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (27): refuse on neatness as the QA score, lock is 1 in 20, SKU/qty/lot, sheet, neatness out. I will not hide a process change inside a 'quick align' on PCF-2466."
+    },
+    {
+      "type": "quote",
+      "text": "If QA is a vibe, we will pass pretty totes and fail ugly right ones.",
+      "attrib": "Tasha Quinn, December 5"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on pack.pinecrest.internal: the path Tasha Quinn actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on wms.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "1 in 20, SKU/qty/lot, sheet, neatness out Host pack.pinecrest.internal. Ticket PCF-2466. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: 1 in 20, SKU/qty/lot, sheet, neatness out. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-EVAL-2024-148. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: pack.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-EVAL-2024-148. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "rate",
+          "1/20",
+          "pack.pinecrest.internal",
+          "PCF-2466"
+        ],
+        [
+          "extra",
+          "2",
+          "pack.pinecrest.internal",
+          "PCF-2466"
+        ],
+        [
+          "fail",
+          "3",
+          "pack.pinecrest.internal",
+          "PCF-2466"
+        ],
+        [
+          "weeks",
+          "2",
+          "pack.pinecrest.internal",
+          "PCF-2466"
+        ],
+        [
+          "dairy",
+          "1",
+          "pack.pinecrest.internal",
+          "PCF-2466"
+        ],
+        [
+          "chem",
+          "1",
+          "pack.pinecrest.internal",
+          "PCF-2466"
+        ],
+        [
+          "glance",
+          "0",
+          "pack.pinecrest.internal",
+          "PCF-2466"
+        ],
+        [
+          "sheet",
+          "1",
+          "pack.pinecrest.internal",
+          "PCF-2466"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: neatness as the QA score"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "neatness as the QA score is out. Neat wrong totes still ship wrong. December 2 neat tote had 2 extra lotion. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: neatness as the QA score comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-2466. Numbers I will not 'simplify': rate=1/20, extra=2, fail=3, weeks=2, dairy=1, chem=1, glance=0, sheet=1. Same clock as the front. I will not mix clocks to make pack.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does rf.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-SOP-2023-022.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Tasha Quinn: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on pack.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits pack.pinecrest.internal, PCF-EVAL-2024-148, and the last three working pages. Access that has to move is who can change wms.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-2466. pack.pinecrest.internal.",
+      "text": "# PCF-EVAL-2024-148 read-only first\ndate\necho host=pack.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-2466\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-2466 before any write.",
+        "Confirm on pack.pinecrest.internal with the read-only commands above.",
+        "If the refuse on neatness as the QA score is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-EVAL-2024-148. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on neatness as the QA score",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host pack.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Tasha Quinn",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-2466. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-EVAL-2024-148"
+    },
+    {
+      "type": "p",
+      "text": "wms.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-SOP-2023-022 before anyone says the leftover is 'implied.' Implied leftovers are how neatness as the QA score almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-EVAL-2024-148"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim neatness as the QA score is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host pack.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-2466"
+    },
+    {
+      "type": "p",
+      "text": "First useful is 1 in 20, SKU/qty/lot, sheet, neatness out, not a prettier board or a louder huddle. Tasha Quinn sees that slice on pack.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-EVAL-2024-148."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (27)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-EVAL-2024-148. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: rf.pinecrest.internal."
+    }
+  ]
+}

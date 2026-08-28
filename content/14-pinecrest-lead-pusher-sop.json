@@ -1,0 +1,336 @@
+{
+  "slug": "14-pinecrest-lead-pusher-sop",
+  "doc_id": "PCF-SOP-2024-064",
+  "title": "SOP: load pallets to the lead pusher",
+  "subtitle": "Square stack, wrap, ticket PCF-1866",
+  "doc_type": "Runbook / SOP",
+  "form_type": "Runbook / SOPs",
+  "kicker": "Pinecrest Fulfillment  \u00b7  Lead pusher  \u00b7  PCF-1866",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "In force",
+  "date": "June 13, 2024",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Marcus Hale (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Marcus Hale (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-SOP-2024-064; PCF-1866; PCF-SOP-2024-058",
+  "summary": "Marcus Hale asked for a written cut of SOP. Current path: Wrap once, push anyway, lean tribal. This document locks square, wrap to shoe, rebuild lean, no riders. push a leaning pallet to save wrap time is out because June 4 lean dumped 18 cases at the plate. 11 minutes of cleanup, one jammed door.",
+  "form_description": "SOP for loading pallets onto the Pinecrest lead pusher: square stacks, wrap to the shoe, rebuild leans, no riders.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "May 20, 2024",
+      "Jeilen Jones",
+      "Outline after PCF-SOP-2024-064 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "June 1, 2024",
+      "Jeilen Jones",
+      "Numbers from Marcus Hale. push a leaning pallet to save wrap time still in the room."
+    ],
+    [
+      "0.9",
+      "June 9, 2024",
+      "Jeilen Jones",
+      "push a leaning pallet to save wrap time written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "June 13, 2024",
+      "Jeilen Jones",
+      "Cut. Host dock.pinecrest.internal. Ticket PCF-1866."
+    ],
+    [
+      "1.1",
+      "June 13, 2024",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "SOP: load pallets to the lead pusher"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-SOP-2024-064 on June 13, 2024. Marcus Hale asked for a written bound after the current path (Wrap once, push anyway, lean tribal) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host dock.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on push a leaning pallet to save wrap time, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Square to the pallet. Wrap to the shoe. Lean over a hand-width is a rebuild. No riding the pusher. I am not restating a hallway yes. push a leaning pallet to save wrap time is out because June 4 lean dumped 18 cases at the plate. 11 minutes of cleanup, one jammed door. Cost of doing nothing is already in the numbers: cases=18, minutes=11, width=1, weeks=2, wrap=1, door=1, pallets=6.4, dump=1. Sibling tickets PCF-1866 and PCF-SOP-2024-058. I will not reopen push a leaning pallet to save wrap time in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Square to the pallet. Wrap to the shoe. Lean over a hand-width is a rebuild. No riding the pusher."
+    },
+    {
+      "type": "p",
+      "text": "Background on dock.pinecrest.internal. Wrap once, push anyway, lean tribal. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on wrap.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-SOP-2024-064 names the pull. If those numbers moved after June 13, 2024, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-SOP-2024-064. push a leaning pallet to save wrap time is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Wrap once, push anyway, lean tribal",
+          "Numbers already in play: cases=18, minutes=11, width=1, weeks=2, wrap=1, door=1, pallets=6.4, dump=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "push a leaning pallet to save wrap time",
+          "June 4 lean dumped 18 cases at the plate. 11 minutes of cleanup, one jammed door.",
+          "Named on PCF-SOP-2024-058",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "square, wrap to shoe, rebuild lean, no riders",
+          "Host dock.pinecrest.internal, ticket PCF-1866",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: wms.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (14): refuse on push a leaning pallet to save wrap time, lock is square, wrap to shoe, rebuild lean, no riders. I will not hide a process change inside a 'quick align' on PCF-1866."
+    },
+    {
+      "type": "quote",
+      "text": "If it leans, I will not push it. I will rebuild it.",
+      "attrib": "Marcus Hale, May 30"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on dock.pinecrest.internal: the path Marcus Hale actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on wrap.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "square, wrap to shoe, rebuild lean, no riders Host dock.pinecrest.internal. Ticket PCF-1866. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: square, wrap to shoe, rebuild lean, no riders. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-SOP-2024-064. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: dock.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-SOP-2024-064. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "cases",
+          "18",
+          "dock.pinecrest.internal",
+          "PCF-1866"
+        ],
+        [
+          "minutes",
+          "11",
+          "dock.pinecrest.internal",
+          "PCF-1866"
+        ],
+        [
+          "width",
+          "1",
+          "dock.pinecrest.internal",
+          "PCF-1866"
+        ],
+        [
+          "weeks",
+          "2",
+          "dock.pinecrest.internal",
+          "PCF-1866"
+        ],
+        [
+          "wrap",
+          "1",
+          "dock.pinecrest.internal",
+          "PCF-1866"
+        ],
+        [
+          "door",
+          "1",
+          "dock.pinecrest.internal",
+          "PCF-1866"
+        ],
+        [
+          "pallets",
+          "6.4",
+          "dock.pinecrest.internal",
+          "PCF-1866"
+        ],
+        [
+          "dump",
+          "1",
+          "dock.pinecrest.internal",
+          "PCF-1866"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: push a leaning pallet to save wrap time"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "push a leaning pallet to save wrap time is out. June 4 lean dumped 18 cases at the plate. 11 minutes of cleanup, one jammed door. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: push a leaning pallet to save wrap time comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-1866. Numbers I will not 'simplify': cases=18, minutes=11, width=1, weeks=2, wrap=1, door=1, pallets=6.4, dump=1. Same clock as the front. I will not mix clocks to make dock.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does wms.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-SOP-2024-058.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Marcus Hale: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on dock.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits dock.pinecrest.internal, PCF-SOP-2024-064, and the last three working pages. Access that has to move is who can change wrap.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-1866. dock.pinecrest.internal.",
+      "text": "# PCF-SOP-2024-064 read-only first\ndate\necho host=dock.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-1866\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-1866 before any write.",
+        "Confirm on dock.pinecrest.internal with the read-only commands above.",
+        "If the refuse on push a leaning pallet to save wrap time is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-SOP-2024-064. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on push a leaning pallet to save wrap time",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host dock.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-1866. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-SOP-2024-064"
+    },
+    {
+      "type": "p",
+      "text": "wrap.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-SOP-2024-058 before anyone says the leftover is 'implied.' Implied leftovers are how push a leaning pallet to save wrap time almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-SOP-2024-064"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim push a leaning pallet to save wrap time is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host dock.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-1866"
+    },
+    {
+      "type": "p",
+      "text": "First useful is square, wrap to shoe, rebuild lean, no riders, not a prettier board or a louder huddle. Marcus Hale sees that slice on dock.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-SOP-2024-064."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (14)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-SOP-2024-064. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: wms.pinecrest.internal."
+    }
+  ]
+}

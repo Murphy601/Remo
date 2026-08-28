@@ -1,0 +1,336 @@
+{
+  "slug": "01-pinecrest-pick-path-sop",
+  "doc_id": "PCF-SOP-2023-014",
+  "title": "SOP: zone pick path for building 2 dry",
+  "subtitle": "Aisle walk, RF confirm, no skip-scan, ticket PCF-1104",
+  "doc_type": "Runbook / SOP",
+  "form_type": "Runbook / SOPs",
+  "kicker": "Pinecrest Fulfillment  \u00b7  Pick path  \u00b7  PCF-1104",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "In force",
+  "date": "November 9, 2023",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Marcus Hale (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Marcus Hale (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-1104; PCF-SOP-2023-014; PCF-1104-QA",
+  "summary": "Marcus Hale asked for a written cut of SOP. Current path: Paper pick sheets leftover plus RF, mixed, skip-scan tolerated on slow SKUs. This document locks RF path, every location scan, skip-scan out. skip-scan to hit units per hour is out because October 19 skip-scan hit 412 UPH and packed 7 wrong SKUs. Tasha pulled the wave.",
+  "form_description": "SOP for the Pinecrest building 2 dry pick path, locking RF location scans and refusing skip-scan to hit rate.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "October 16, 2023",
+      "Jeilen Jones",
+      "Outline after PCF-1104 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "October 28, 2023",
+      "Jeilen Jones",
+      "Numbers from Marcus Hale. skip-scan to hit units per hour still in the room."
+    ],
+    [
+      "0.9",
+      "November 5, 2023",
+      "Jeilen Jones",
+      "skip-scan to hit units per hour written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "November 9, 2023",
+      "Jeilen Jones",
+      "Cut. Host wms.pinecrest.internal. Ticket PCF-1104."
+    ],
+    [
+      "1.1",
+      "November 9, 2023",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "SOP: zone pick path for building 2 dry"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-1104 on November 9, 2023. Marcus Hale asked for a written bound after the current path (Paper pick sheets leftover plus RF, mixed, skip-scan tolerated on slow SKUs) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host wms.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on skip-scan to hit units per hour, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Walk the WMS path. Scan every location. Skip-scan is out. Rate is secondary to a clean tote. I am not restating a hallway yes. skip-scan to hit units per hour is out because October 19 skip-scan hit 412 UPH and packed 7 wrong SKUs. Tasha pulled the wave. Cost of doing nothing is already in the numbers: uph=412, wrong=7, aisles=14, totes=2.1, seconds=8.4, weeks=3, zones=2, skip=1. Sibling tickets PCF-SOP-2023-014 and PCF-1104-QA. I will not reopen skip-scan to hit units per hour in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Walk the WMS path. Scan every location. Skip-scan is out. Rate is secondary to a clean tote."
+    },
+    {
+      "type": "p",
+      "text": "Background on wms.pinecrest.internal. Paper pick sheets leftover plus RF, mixed, skip-scan tolerated on slow SKUs. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on rf.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-1104 names the pull. If those numbers moved after November 9, 2023, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-SOP-2023-014. skip-scan to hit units per hour is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Paper pick sheets leftover plus RF, mixed, skip-scan tolerated on slow SKUs",
+          "Numbers already in play: uph=412, wrong=7, aisles=14, totes=2.1, seconds=8.4, weeks=3, zones=2, skip=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "skip-scan to hit units per hour",
+          "October 19 skip-scan hit 412 UPH and packed 7 wrong SKUs. Tasha pulled the wave.",
+          "Named on PCF-1104-QA",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "RF path, every location scan, skip-scan out",
+          "Host wms.pinecrest.internal, ticket PCF-1104",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: aisle-b2.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (01): refuse on skip-scan to hit units per hour, lock is RF path, every location scan, skip-scan out. I will not hide a process change inside a 'quick align' on PCF-SOP-2023-014."
+    },
+    {
+      "type": "quote",
+      "text": "If you skip a scan because the tote is 'obvious,' we eat the mispick at pack.",
+      "attrib": "Marcus Hale, lead, October 26 huddle"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on wms.pinecrest.internal: the path Marcus Hale actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on rf.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "RF path, every location scan, skip-scan out Host wms.pinecrest.internal. Ticket PCF-1104. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: RF path, every location scan, skip-scan out. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-1104. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: wms.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-SOP-2023-014. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "uph",
+          "412",
+          "wms.pinecrest.internal",
+          "PCF-1104"
+        ],
+        [
+          "wrong",
+          "7",
+          "wms.pinecrest.internal",
+          "PCF-1104"
+        ],
+        [
+          "aisles",
+          "14",
+          "wms.pinecrest.internal",
+          "PCF-1104"
+        ],
+        [
+          "totes",
+          "2.1",
+          "wms.pinecrest.internal",
+          "PCF-1104"
+        ],
+        [
+          "seconds",
+          "8.4",
+          "wms.pinecrest.internal",
+          "PCF-1104"
+        ],
+        [
+          "weeks",
+          "3",
+          "wms.pinecrest.internal",
+          "PCF-1104"
+        ],
+        [
+          "zones",
+          "2",
+          "wms.pinecrest.internal",
+          "PCF-1104"
+        ],
+        [
+          "skip",
+          "1",
+          "wms.pinecrest.internal",
+          "PCF-1104"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: skip-scan to hit units per hour"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "skip-scan to hit units per hour is out. October 19 skip-scan hit 412 UPH and packed 7 wrong SKUs. Tasha pulled the wave. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: skip-scan to hit units per hour comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-SOP-2023-014. Numbers I will not 'simplify': uph=412, wrong=7, aisles=14, totes=2.1, seconds=8.4, weeks=3, zones=2, skip=1. Same clock as the front. I will not mix clocks to make wms.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does aisle-b2.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-1104-QA.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Marcus Hale: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on wms.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits wms.pinecrest.internal, PCF-1104, and the last three working pages. Access that has to move is who can change rf.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-1104. wms.pinecrest.internal.",
+      "text": "# PCF-SOP-2023-014 read-only first\ndate\necho host=wms.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-1104\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-1104 before any write.",
+        "Confirm on wms.pinecrest.internal with the read-only commands above.",
+        "If the refuse on skip-scan to hit units per hour is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-SOP-2023-014. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on skip-scan to hit units per hour",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host wms.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-1104. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-SOP-2023-014"
+    },
+    {
+      "type": "p",
+      "text": "rf.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-1104-QA before anyone says the leftover is 'implied.' Implied leftovers are how skip-scan to hit units per hour almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-SOP-2023-014"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim skip-scan to hit units per hour is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host wms.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-1104"
+    },
+    {
+      "type": "p",
+      "text": "First useful is RF path, every location scan, skip-scan out, not a prettier board or a louder huddle. Marcus Hale sees that slice on wms.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-SOP-2023-014."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (01)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-1104. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: aisle-b2.pinecrest.internal."
+    }
+  ]
+}

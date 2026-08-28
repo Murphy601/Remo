@@ -1,0 +1,336 @@
+{
+  "slug": "42-ridgeway-tool-checkout-sop",
+  "doc_id": "RDW-SOP-2023-022",
+  "title": "SOP: shop tool checkout and end-of-day board",
+  "subtitle": "Scan tool, torque wrenches, ticket RDW-2744",
+  "doc_type": "Runbook / SOP",
+  "form_type": "Runbook / SOPs",
+  "kicker": "Ridgeway Diesel  \u00b7  Tools  \u00b7  RDW-2744",
+  "org": "Ridgeway Diesel",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "In force",
+  "date": "March 2, 2023",
+  "author": "Jeilen Jones",
+  "role": "Shop Helper",
+  "team": "Ridgeway Diesel, shop floor",
+  "audience": "Owen Pike (requester); Cal Dreher (acceptor); Nina Soto and Jeilen Jones (build); Hank Morel (leftover host); Tess Brant (absentee pack)",
+  "owners": "Cal Dreher (acceptor), Owen Pike (requester), Nina Soto (ops), Jeilen Jones (this document)",
+  "related": "RDW-SOP-2023-022; RDW-2744; RDW-SOP-2022-011",
+  "summary": "Owen Pike asked for a written cut of SOP. Current path: Tools land where the job ends. This document locks board, name, empty hooks, no cab overnight. leave specialty tools in the cab overnight is out because February 9 scan tool rode home in a customer truck. 2.4 hours to get it back. Nina made the call.",
+  "form_description": "Tool checkout SOP for Ridgeway Diesel scan tools and torque wrenches, refusing overnight leftovers in a customer cab.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "February 6, 2023",
+      "Jeilen Jones",
+      "Outline after RDW-SOP-2023-022 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "February 18, 2023",
+      "Jeilen Jones",
+      "Numbers from Owen Pike. leave specialty tools in the cab overnight still in the room."
+    ],
+    [
+      "0.9",
+      "February 26, 2023",
+      "Jeilen Jones",
+      "leave specialty tools in the cab overnight written up as a refuse. Nina Soto review."
+    ],
+    [
+      "1.0",
+      "March 2, 2023",
+      "Jeilen Jones",
+      "Cut. Host tools.ridgeway.internal. Ticket RDW-2744."
+    ],
+    [
+      "1.1",
+      "March 2, 2023",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "SOP: shop tool checkout and end-of-day board"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for RDW-SOP-2023-022 on March 2, 2023. Owen Pike asked for a written bound after the current path (Tools land where the job ends) stopped being honest. I am Jeilen Jones, Shop Helper, writing for Cal Dreher, Nina Soto, and Hank Morel. Primary host tools.ridgeway.internal. If you are skimming, jump the decision callout, then the refuse on leave specialty tools in the cab overnight, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Board for scan tool and torque wrenches. Name, bay, time. End of day empty hooks or a written leftover. I am not restating a hallway yes. leave specialty tools in the cab overnight is out because February 9 scan tool rode home in a customer truck. 2.4 hours to get it back. Nina made the call. Cost of doing nothing is already in the numbers: hours=2.4, tools=2, weeks=2, cab=1, board=1, hooks=1, call=1, pocket=1. Sibling tickets RDW-2744 and RDW-SOP-2022-011. I will not reopen leave specialty tools in the cab overnight in a side thread because someone asked for a rate waiver. Nina Soto is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Board for scan tool and torque wrenches. Name, bay, time. End of day empty hooks or a written leftover."
+    },
+    {
+      "type": "p",
+      "text": "Background on tools.ridgeway.internal. Tools land where the job ends. That is the system Cal Dreher lives with, not a slide. I timed or pulled the leftover on shop.ridgeway.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket RDW-SOP-2023-022 names the pull. If those numbers moved after March 2, 2023, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for RDW-SOP-2023-022. leave specialty tools in the cab overnight is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Tools land where the job ends",
+          "Numbers already in play: hours=2.4, tools=2, weeks=2, cab=1, board=1, hooks=1, call=1, pocket=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "leave specialty tools in the cab overnight",
+          "February 9 scan tool rode home in a customer truck. 2.4 hours to get it back. Nina made th",
+          "Named on RDW-SOP-2022-011",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "board, name, empty hooks, no cab overnight",
+          "Host tools.ridgeway.internal, ticket RDW-2744",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Hank Morel owns a leftover that is easy to skip: bay-02.ridgeway.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (42): refuse on leave specialty tools in the cab overnight, lock is board, name, empty hooks, no cab overnight. I will not hide a process change inside a 'quick align' on RDW-2744."
+    },
+    {
+      "type": "quote",
+      "text": "A torque wrench in a door pocket is how it gets thrown in a customer's driveway.",
+      "attrib": "Owen Pike, February 16"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on tools.ridgeway.internal: the path Owen Pike actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on shop.ridgeway.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "board, name, empty hooks, no cab overnight Host tools.ridgeway.internal. Ticket RDW-2744. Acceptor Cal Dreher."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: board, name, empty hooks, no cab overnight. If that clock collides with a safety lock, the date moves and the scope does not. Cal Dreher hears the new date on RDW-SOP-2023-022. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: tools.ridgeway.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for RDW-SOP-2023-022. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "hours",
+          "2.4",
+          "tools.ridgeway.internal",
+          "RDW-2744"
+        ],
+        [
+          "tools",
+          "2",
+          "tools.ridgeway.internal",
+          "RDW-2744"
+        ],
+        [
+          "weeks",
+          "2",
+          "tools.ridgeway.internal",
+          "RDW-2744"
+        ],
+        [
+          "cab",
+          "1",
+          "tools.ridgeway.internal",
+          "RDW-2744"
+        ],
+        [
+          "board",
+          "1",
+          "tools.ridgeway.internal",
+          "RDW-2744"
+        ],
+        [
+          "hooks",
+          "1",
+          "tools.ridgeway.internal",
+          "RDW-2744"
+        ],
+        [
+          "call",
+          "1",
+          "tools.ridgeway.internal",
+          "RDW-2744"
+        ],
+        [
+          "pocket",
+          "1",
+          "tools.ridgeway.internal",
+          "RDW-2744"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: leave specialty tools in the cab overnight"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "leave specialty tools in the cab overnight is out. February 9 scan tool rode home in a customer truck. 2.4 hours to get it back. Nina made the call. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: leave specialty tools in the cab overnight comes back wearing a new coat. I want that named in review notes, not rediscovered by Hank Morel on a Monday. Ticket RDW-2744. Numbers I will not 'simplify': hours=2.4, tools=2, weeks=2, cab=1, board=1, hooks=1, call=1, pocket=1. Same clock as the front. I will not mix clocks to make tools.ridgeway.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Hank Morel: does bay-02.ridgeway.internal stay in the path? Yes, no, or a new date on RDW-SOP-2022-011.",
+        "Nina Soto: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Owen Pike: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on tools.ridgeway.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits tools.ridgeway.internal, RDW-SOP-2023-022, and the last three working pages. Access that has to move is who can change shop.ridgeway.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Nina Soto accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. RDW-2744. tools.ridgeway.internal.",
+      "text": "# RDW-SOP-2023-022 read-only first\ndate\necho host=tools.ridgeway.internal bay check, hoist tag, PM sheet\necho 'do not start the engine until the tag is green'\n# stop. write the last error in one sentence on RDW-2744\n# do not override a safety lock to free a bay"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on RDW-2744 before any write.",
+        "Confirm on tools.ridgeway.internal with the read-only commands above.",
+        "If the refuse on leave specialty tools in the cab overnight is being reopened, stop and ping Cal Dreher.",
+        "Wake Nina Soto only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for RDW-SOP-2023-022. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Cal Dreher",
+          "Nina Soto"
+        ],
+        [
+          "Refuse on leave specialty tools in the cab overnight",
+          "Jeilen Jones",
+          "Cal Dreher",
+          "Hank Morel"
+        ],
+        [
+          "Host tools.ridgeway.internal",
+          "Nina Soto",
+          "Cal Dreher",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Hank Morel",
+          "Owen Pike",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Tess Brant is on that list. Object on RDW-2744. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to RDW-SOP-2023-022"
+    },
+    {
+      "type": "p",
+      "text": "shop.ridgeway.internal is in this file because skipping it is how the last near-miss happened. Hank Morel owns the check. I want a count on RDW-SOP-2022-011 before anyone says the leftover is 'implied.' Implied leftovers are how leave specialty tools in the cab overnight almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in RDW-SOP-2023-022"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim leave specialty tools in the cab overnight is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host tools.ridgeway.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for RDW-2744"
+    },
+    {
+      "type": "p",
+      "text": "First useful is board, name, empty hooks, no cab overnight, not a prettier board or a louder huddle. Owen Pike sees that slice on tools.ridgeway.internal. If the slice needs a second process, that is a new ticket and Cal Dreher is in the thread. I will not hide it inside RDW-SOP-2023-022."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (42)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on RDW-SOP-2023-022. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: bay-02.ridgeway.internal."
+    }
+  ]
+}

@@ -1,0 +1,336 @@
+{
+  "slug": "36-ridgeway-nostart-incident",
+  "doc_id": "RDW-INC-2022-041",
+  "title": "Incident: no-start after a battery jump with loose ground",
+  "subtitle": "October 6, 2022, bay 4, ticket RDW-INC-2022-041",
+  "doc_type": "Incident report",
+  "form_type": "Incident report",
+  "kicker": "Ridgeway Diesel  \u00b7  No-start  \u00b7  RDW-INC-2022-041",
+  "org": "Ridgeway Diesel",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Closed",
+  "date": "October 11, 2022",
+  "author": "Jeilen Jones",
+  "role": "Shop Helper",
+  "team": "Ridgeway Diesel, shop floor",
+  "audience": "Nina Soto (requester); Cal Dreher (acceptor); Nina Soto and Jeilen Jones (build); Hank Morel (leftover host); Tess Brant (absentee pack)",
+  "owners": "Cal Dreher (acceptor), Nina Soto (requester), Nina Soto (ops), Jeilen Jones (this document)",
+  "related": "RDW-INC-2022-041; RDW-2280; RDW-SOP-2022-055",
+  "summary": "Nina Soto asked for a written cut of Incident. Current path: Jumper pack is the first tool. This document locks cables first, then jump, torque the ground. jump first, look later is out because Two jumps cooked a cable. Truck still clicked. Ground was the job. 1.6 hours wasted.",
+  "form_description": "Incident report for a Ridgeway no-start after jumping a truck with a corroded ground, refusing jump-first diagnosis.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "September 17, 2022",
+      "Jeilen Jones",
+      "Outline after RDW-INC-2022-041 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "September 29, 2022",
+      "Jeilen Jones",
+      "Numbers from Nina Soto. jump first, look later still in the room."
+    ],
+    [
+      "0.9",
+      "October 7, 2022",
+      "Jeilen Jones",
+      "jump first, look later written up as a refuse. Nina Soto review."
+    ],
+    [
+      "1.0",
+      "October 11, 2022",
+      "Jeilen Jones",
+      "Cut. Host bay-04.ridgeway.internal. Ticket RDW-INC-2022-041."
+    ],
+    [
+      "1.1",
+      "October 11, 2022",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Incident: no-start after a battery jump with loose ground"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for RDW-INC-2022-041 on October 11, 2022. Nina Soto asked for a written bound after the current path (Jumper pack is the first tool) stopped being honest. I am Jeilen Jones, Shop Helper, writing for Cal Dreher, Nina Soto, and Hank Morel. Primary host bay-04.ridgeway.internal. If you are skimming, jump the decision callout, then the refuse on jump first, look later, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Inspect ground and cables before a jump. Clean, torque, then test. Do not jump a green ground twice. I am not restating a hallway yes. jump first, look later is out because Two jumps cooked a cable. Truck still clicked. Ground was the job. 1.6 hours wasted. Cost of doing nothing is already in the numbers: jumps=2, hours=1.6, bay=4, weeks=1, click=1, green=1, torque=12, pack=1. Sibling tickets RDW-2280 and RDW-SOP-2022-055. I will not reopen jump first, look later in a side thread because someone asked for a rate waiver. Nina Soto is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Inspect ground and cables before a jump. Clean, torque, then test. Do not jump a green ground twice."
+    },
+    {
+      "type": "p",
+      "text": "Background on bay-04.ridgeway.internal. Jumper pack is the first tool. That is the system Cal Dreher lives with, not a slide. I timed or pulled the leftover on shop.ridgeway.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket RDW-INC-2022-041 names the pull. If those numbers moved after October 11, 2022, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for RDW-INC-2022-041. jump first, look later is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Jumper pack is the first tool",
+          "Numbers already in play: jumps=2, hours=1.6, bay=4, weeks=1, click=1, green=1, torque=12, pack=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "jump first, look later",
+          "Two jumps cooked a cable. Truck still clicked. Ground was the job. 1.6 hours wasted.",
+          "Named on RDW-SOP-2022-055",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "cables first, then jump, torque the ground",
+          "Host bay-04.ridgeway.internal, ticket RDW-INC-2022-041",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Hank Morel owns a leftover that is easy to skip: parts.ridgeway.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (36): refuse on jump first, look later, lock is cables first, then jump, torque the ground. I will not hide a process change inside a 'quick align' on RDW-2280."
+    },
+    {
+      "type": "quote",
+      "text": "The customer heard a click. We heard a story about a battery. The ground was green.",
+      "attrib": "Nina Soto, service writer, October 6"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on bay-04.ridgeway.internal: the path Nina Soto actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on shop.ridgeway.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "cables first, then jump, torque the ground Host bay-04.ridgeway.internal. Ticket RDW-INC-2022-041. Acceptor Cal Dreher."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: cables first, then jump, torque the ground. If that clock collides with a safety lock, the date moves and the scope does not. Cal Dreher hears the new date on RDW-INC-2022-041. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: bay-04.ridgeway.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for RDW-INC-2022-041. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "jumps",
+          "2",
+          "bay-04.ridgeway.internal",
+          "RDW-INC-2022-041"
+        ],
+        [
+          "hours",
+          "1.6",
+          "bay-04.ridgeway.internal",
+          "RDW-INC-2022-041"
+        ],
+        [
+          "bay",
+          "4",
+          "bay-04.ridgeway.internal",
+          "RDW-INC-2022-041"
+        ],
+        [
+          "weeks",
+          "1",
+          "bay-04.ridgeway.internal",
+          "RDW-INC-2022-041"
+        ],
+        [
+          "click",
+          "1",
+          "bay-04.ridgeway.internal",
+          "RDW-INC-2022-041"
+        ],
+        [
+          "green",
+          "1",
+          "bay-04.ridgeway.internal",
+          "RDW-INC-2022-041"
+        ],
+        [
+          "torque",
+          "12",
+          "bay-04.ridgeway.internal",
+          "RDW-INC-2022-041"
+        ],
+        [
+          "pack",
+          "1",
+          "bay-04.ridgeway.internal",
+          "RDW-INC-2022-041"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: jump first, look later"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "jump first, look later is out. Two jumps cooked a cable. Truck still clicked. Ground was the job. 1.6 hours wasted. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: jump first, look later comes back wearing a new coat. I want that named in review notes, not rediscovered by Hank Morel on a Monday. Ticket RDW-2280. Numbers I will not 'simplify': jumps=2, hours=1.6, bay=4, weeks=1, click=1, green=1, torque=12, pack=1. Same clock as the front. I will not mix clocks to make bay-04.ridgeway.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Hank Morel: does parts.ridgeway.internal stay in the path? Yes, no, or a new date on RDW-SOP-2022-055.",
+        "Nina Soto: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Nina Soto: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on bay-04.ridgeway.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits bay-04.ridgeway.internal, RDW-INC-2022-041, and the last three working pages. Access that has to move is who can change shop.ridgeway.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Nina Soto accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. RDW-INC-2022-041. bay-04.ridgeway.internal.",
+      "text": "# RDW-INC-2022-041 read-only first\ndate\necho host=bay-04.ridgeway.internal bay check, hoist tag, PM sheet\necho 'do not start the engine until the tag is green'\n# stop. write the last error in one sentence on RDW-INC-2022-041\n# do not override a safety lock to free a bay"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on RDW-INC-2022-041 before any write.",
+        "Confirm on bay-04.ridgeway.internal with the read-only commands above.",
+        "If the refuse on jump first, look later is being reopened, stop and ping Cal Dreher.",
+        "Wake Nina Soto only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for RDW-INC-2022-041. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Cal Dreher",
+          "Nina Soto"
+        ],
+        [
+          "Refuse on jump first, look later",
+          "Jeilen Jones",
+          "Cal Dreher",
+          "Hank Morel"
+        ],
+        [
+          "Host bay-04.ridgeway.internal",
+          "Nina Soto",
+          "Cal Dreher",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Hank Morel",
+          "Nina Soto",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Tess Brant is on that list. Object on RDW-INC-2022-041. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to RDW-INC-2022-041"
+    },
+    {
+      "type": "p",
+      "text": "shop.ridgeway.internal is in this file because skipping it is how the last near-miss happened. Hank Morel owns the check. I want a count on RDW-SOP-2022-055 before anyone says the leftover is 'implied.' Implied leftovers are how jump first, look later almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in RDW-INC-2022-041"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim jump first, look later is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host bay-04.ridgeway.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for RDW-INC-2022-041"
+    },
+    {
+      "type": "p",
+      "text": "First useful is cables first, then jump, torque the ground, not a prettier board or a louder huddle. Nina Soto sees that slice on bay-04.ridgeway.internal. If the slice needs a second process, that is a new ticket and Cal Dreher is in the thread. I will not hide it inside RDW-INC-2022-041."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (36)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on RDW-INC-2022-041. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: parts.ridgeway.internal."
+    }
+  ]
+}

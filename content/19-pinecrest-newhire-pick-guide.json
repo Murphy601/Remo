@@ -1,0 +1,336 @@
+{
+  "slug": "19-pinecrest-newhire-pick-guide",
+  "doc_id": "PCF-DOC-2024-094",
+  "title": "New-hire pick integration guide, building 2",
+  "subtitle": "Buddy week, RF, jack, ticket PCF-2100",
+  "doc_type": "Integration guide",
+  "form_type": "Other",
+  "kicker": "Pinecrest Fulfillment  \u00b7  New hire  \u00b7  PCF-2100",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Accepted",
+  "date": "August 29, 2024",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Tasha Quinn (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Tasha Quinn (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-DOC-2024-094; PCF-2100; PCF-SOP-2023-014",
+  "summary": "Tasha Quinn asked for a written cut of New-hire pick integration guide. Current path: Shadow 2 hours then a full wave. This document locks 5-day buddy, audit, then solo. solo wave on day one because we are short is out because August 6 day-one solo put 8 mispicks into pack before lunch.",
+  "form_description": "New-hire pick guide for Pinecrest building 2: five-day buddy, SOP list, and a refuse on day-one solo waves.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "August 5, 2024",
+      "Jeilen Jones",
+      "Outline after PCF-DOC-2024-094 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "August 17, 2024",
+      "Jeilen Jones",
+      "Numbers from Tasha Quinn. solo wave on day one because we are short still in the room."
+    ],
+    [
+      "0.9",
+      "August 25, 2024",
+      "Jeilen Jones",
+      "solo wave on day one because we are short written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "August 29, 2024",
+      "Jeilen Jones",
+      "Cut. Host huddle.pinecrest.internal. Ticket PCF-2100."
+    ],
+    [
+      "1.1",
+      "August 29, 2024",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "New-hire pick integration guide, building 2"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-DOC-2024-094 on August 29, 2024. Tasha Quinn asked for a written bound after the current path (Shadow 2 hours then a full wave) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host huddle.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on solo wave on day one because we are short, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Five-day buddy. RF SOP, pick path SOP, jack pre-op. Solo wave only after a clean tote audit. I am not restating a hallway yes. solo wave on day one because we are short is out because August 6 day-one solo put 8 mispicks into pack before lunch. Cost of doing nothing is already in the numbers: days=5, miss=8, hours=2, weeks=2, sops=3, audit=1, lunch=1, solo=0. Sibling tickets PCF-2100 and PCF-SOP-2023-014. I will not reopen solo wave on day one because we are short in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Five-day buddy. RF SOP, pick path SOP, jack pre-op. Solo wave only after a clean tote audit."
+    },
+    {
+      "type": "p",
+      "text": "Background on huddle.pinecrest.internal. Shadow 2 hours then a full wave. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on rf.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-DOC-2024-094 names the pull. If those numbers moved after August 29, 2024, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-DOC-2024-094. solo wave on day one because we are short is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Shadow 2 hours then a full wave",
+          "Numbers already in play: days=5, miss=8, hours=2, weeks=2, sops=3, audit=1, lunch=1, solo=0",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "solo wave on day one because we are short",
+          "August 6 day-one solo put 8 mispicks into pack before lunch.",
+          "Named on PCF-SOP-2023-014",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "5-day buddy, audit, then solo",
+          "Host huddle.pinecrest.internal, ticket PCF-2100",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: aisle-b2.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (19): refuse on solo wave on day one because we are short, lock is 5-day buddy, audit, then solo. I will not hide a process change inside a 'quick align' on PCF-2100."
+    },
+    {
+      "type": "quote",
+      "text": "Day one is not a wave alone. Day one is a buddy and a short list.",
+      "attrib": "Tasha Quinn, August 15"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on huddle.pinecrest.internal: the path Tasha Quinn actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on rf.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "5-day buddy, audit, then solo Host huddle.pinecrest.internal. Ticket PCF-2100. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: 5-day buddy, audit, then solo. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-DOC-2024-094. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: huddle.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-DOC-2024-094. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "days",
+          "5",
+          "huddle.pinecrest.internal",
+          "PCF-2100"
+        ],
+        [
+          "miss",
+          "8",
+          "huddle.pinecrest.internal",
+          "PCF-2100"
+        ],
+        [
+          "hours",
+          "2",
+          "huddle.pinecrest.internal",
+          "PCF-2100"
+        ],
+        [
+          "weeks",
+          "2",
+          "huddle.pinecrest.internal",
+          "PCF-2100"
+        ],
+        [
+          "sops",
+          "3",
+          "huddle.pinecrest.internal",
+          "PCF-2100"
+        ],
+        [
+          "audit",
+          "1",
+          "huddle.pinecrest.internal",
+          "PCF-2100"
+        ],
+        [
+          "lunch",
+          "1",
+          "huddle.pinecrest.internal",
+          "PCF-2100"
+        ],
+        [
+          "solo",
+          "0",
+          "huddle.pinecrest.internal",
+          "PCF-2100"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: solo wave on day one because we are short"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "solo wave on day one because we are short is out. August 6 day-one solo put 8 mispicks into pack before lunch. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: solo wave on day one because we are short comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-2100. Numbers I will not 'simplify': days=5, miss=8, hours=2, weeks=2, sops=3, audit=1, lunch=1, solo=0. Same clock as the front. I will not mix clocks to make huddle.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does aisle-b2.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-SOP-2023-014.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Tasha Quinn: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on huddle.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits huddle.pinecrest.internal, PCF-DOC-2024-094, and the last three working pages. Access that has to move is who can change rf.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-2100. huddle.pinecrest.internal.",
+      "text": "# PCF-DOC-2024-094 read-only first\ndate\necho host=huddle.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-2100\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-2100 before any write.",
+        "Confirm on huddle.pinecrest.internal with the read-only commands above.",
+        "If the refuse on solo wave on day one because we are short is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-DOC-2024-094. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on solo wave on day one because we are short",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host huddle.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Tasha Quinn",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-2100. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-DOC-2024-094"
+    },
+    {
+      "type": "p",
+      "text": "rf.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-SOP-2023-014 before anyone says the leftover is 'implied.' Implied leftovers are how solo wave on day one because we are short almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-DOC-2024-094"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim solo wave on day one because we are short is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host huddle.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-2100"
+    },
+    {
+      "type": "p",
+      "text": "First useful is 5-day buddy, audit, then solo, not a prettier board or a louder huddle. Tasha Quinn sees that slice on huddle.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-DOC-2024-094."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (19)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-DOC-2024-094. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: aisle-b2.pinecrest.internal."
+    }
+  ]
+}

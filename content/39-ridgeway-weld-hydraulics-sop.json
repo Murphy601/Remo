@@ -1,0 +1,336 @@
+{
+  "slug": "39-ridgeway-weld-hydraulics-sop",
+  "doc_id": "RDW-SOP-2022-070",
+  "title": "SOP: welding and hydraulics in the shop",
+  "subtitle": "Screens, fire watch, ticket RDW-2540",
+  "doc_type": "Runbook / SOP",
+  "form_type": "Runbook / SOPs",
+  "kicker": "Ridgeway Diesel  \u00b7  Weld / hydraulics  \u00b7  RDW-2540",
+  "org": "Ridgeway Diesel",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "In force",
+  "date": "December 15, 2022",
+  "author": "Jeilen Jones",
+  "role": "Shop Helper",
+  "team": "Ridgeway Diesel, shop floor",
+  "audience": "Owen Pike (requester); Cal Dreher (acceptor); Nina Soto and Jeilen Jones (build); Hank Morel (leftover host); Tess Brant (absentee pack)",
+  "owners": "Cal Dreher (acceptor), Owen Pike (requester), Nina Soto (ops), Jeilen Jones (this document)",
+  "related": "RDW-SOP-2022-070; RDW-2540; RDW-SOP-2023-088",
+  "summary": "Owen Pike asked for a written cut of SOP. Current path: Screens optional, fire watch tribal. This document locks screen, 30-minute watch, caps, no wet tack. tack a fitting while oil is still weeping is out because November 29 tack on a wet line smoked the bay. 18 minutes of fans. Owen will not do it again.",
+  "form_description": "SOP for welding and hydraulics at Ridgeway Diesel: screens, fire watch, capped lines, refusing a tack on a wet fitting.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "November 21, 2022",
+      "Jeilen Jones",
+      "Outline after RDW-SOP-2022-070 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "December 3, 2022",
+      "Jeilen Jones",
+      "Numbers from Owen Pike. tack a fitting while oil is still weeping still in the room."
+    ],
+    [
+      "0.9",
+      "December 11, 2022",
+      "Jeilen Jones",
+      "tack a fitting while oil is still weeping written up as a refuse. Nina Soto review."
+    ],
+    [
+      "1.0",
+      "December 15, 2022",
+      "Jeilen Jones",
+      "Cut. Host bay-04.ridgeway.internal. Ticket RDW-2540."
+    ],
+    [
+      "1.1",
+      "December 15, 2022",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "SOP: welding and hydraulics in the shop"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for RDW-SOP-2022-070 on December 15, 2022. Owen Pike asked for a written bound after the current path (Screens optional, fire watch tribal) stopped being honest. I am Jeilen Jones, Shop Helper, writing for Cal Dreher, Nina Soto, and Hank Morel. Primary host bay-04.ridgeway.internal. If you are skimming, jump the decision callout, then the refuse on tack a fitting while oil is still weeping, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Screen up. Fire watch 30 minutes. Hydraulic lines capped. No weld on a wet fitting. I am not restating a hallway yes. tack a fitting while oil is still weeping is out because November 29 tack on a wet line smoked the bay. 18 minutes of fans. Owen will not do it again. Cost of doing nothing is already in the numbers: watch=30, minutes=18, weeks=3, rags=1, smoke=1, cap=1, wet=1, screen=1. Sibling tickets RDW-2540 and RDW-SOP-2023-088. I will not reopen tack a fitting while oil is still weeping in a side thread because someone asked for a rate waiver. Nina Soto is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Screen up. Fire watch 30 minutes. Hydraulic lines capped. No weld on a wet fitting."
+    },
+    {
+      "type": "p",
+      "text": "Background on bay-04.ridgeway.internal. Screens optional, fire watch tribal. That is the system Cal Dreher lives with, not a slide. I timed or pulled the leftover on shop.ridgeway.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket RDW-SOP-2022-070 names the pull. If those numbers moved after December 15, 2022, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for RDW-SOP-2022-070. tack a fitting while oil is still weeping is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Screens optional, fire watch tribal",
+          "Numbers already in play: watch=30, minutes=18, weeks=3, rags=1, smoke=1, cap=1, wet=1, screen=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "tack a fitting while oil is still weeping",
+          "November 29 tack on a wet line smoked the bay. 18 minutes of fans. Owen will not do it aga",
+          "Named on RDW-SOP-2023-088",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "screen, 30-minute watch, caps, no wet tack",
+          "Host bay-04.ridgeway.internal, ticket RDW-2540",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Hank Morel owns a leftover that is easy to skip: weld.ridgeway.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (39): refuse on tack a fitting while oil is still weeping, lock is screen, 30-minute watch, caps, no wet tack. I will not hide a process change inside a 'quick align' on RDW-2540."
+    },
+    {
+      "type": "quote",
+      "text": "If the screen is down and the next bay is full of rags, we are not welding.",
+      "attrib": "Owen Pike, December 1"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on bay-04.ridgeway.internal: the path Owen Pike actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on shop.ridgeway.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "screen, 30-minute watch, caps, no wet tack Host bay-04.ridgeway.internal. Ticket RDW-2540. Acceptor Cal Dreher."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: screen, 30-minute watch, caps, no wet tack. If that clock collides with a safety lock, the date moves and the scope does not. Cal Dreher hears the new date on RDW-SOP-2022-070. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: bay-04.ridgeway.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for RDW-SOP-2022-070. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "watch",
+          "30",
+          "bay-04.ridgeway.internal",
+          "RDW-2540"
+        ],
+        [
+          "minutes",
+          "18",
+          "bay-04.ridgeway.internal",
+          "RDW-2540"
+        ],
+        [
+          "weeks",
+          "3",
+          "bay-04.ridgeway.internal",
+          "RDW-2540"
+        ],
+        [
+          "rags",
+          "1",
+          "bay-04.ridgeway.internal",
+          "RDW-2540"
+        ],
+        [
+          "smoke",
+          "1",
+          "bay-04.ridgeway.internal",
+          "RDW-2540"
+        ],
+        [
+          "cap",
+          "1",
+          "bay-04.ridgeway.internal",
+          "RDW-2540"
+        ],
+        [
+          "wet",
+          "1",
+          "bay-04.ridgeway.internal",
+          "RDW-2540"
+        ],
+        [
+          "screen",
+          "1",
+          "bay-04.ridgeway.internal",
+          "RDW-2540"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: tack a fitting while oil is still weeping"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "tack a fitting while oil is still weeping is out. November 29 tack on a wet line smoked the bay. 18 minutes of fans. Owen will not do it again. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: tack a fitting while oil is still weeping comes back wearing a new coat. I want that named in review notes, not rediscovered by Hank Morel on a Monday. Ticket RDW-2540. Numbers I will not 'simplify': watch=30, minutes=18, weeks=3, rags=1, smoke=1, cap=1, wet=1, screen=1. Same clock as the front. I will not mix clocks to make bay-04.ridgeway.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Hank Morel: does weld.ridgeway.internal stay in the path? Yes, no, or a new date on RDW-SOP-2023-088.",
+        "Nina Soto: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Owen Pike: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on bay-04.ridgeway.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits bay-04.ridgeway.internal, RDW-SOP-2022-070, and the last three working pages. Access that has to move is who can change shop.ridgeway.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Nina Soto accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. RDW-2540. bay-04.ridgeway.internal.",
+      "text": "# RDW-SOP-2022-070 read-only first\ndate\necho host=bay-04.ridgeway.internal bay check, hoist tag, PM sheet\necho 'do not start the engine until the tag is green'\n# stop. write the last error in one sentence on RDW-2540\n# do not override a safety lock to free a bay"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on RDW-2540 before any write.",
+        "Confirm on bay-04.ridgeway.internal with the read-only commands above.",
+        "If the refuse on tack a fitting while oil is still weeping is being reopened, stop and ping Cal Dreher.",
+        "Wake Nina Soto only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for RDW-SOP-2022-070. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Cal Dreher",
+          "Nina Soto"
+        ],
+        [
+          "Refuse on tack a fitting while oil is still weeping",
+          "Jeilen Jones",
+          "Cal Dreher",
+          "Hank Morel"
+        ],
+        [
+          "Host bay-04.ridgeway.internal",
+          "Nina Soto",
+          "Cal Dreher",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Hank Morel",
+          "Owen Pike",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Tess Brant is on that list. Object on RDW-2540. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to RDW-SOP-2022-070"
+    },
+    {
+      "type": "p",
+      "text": "shop.ridgeway.internal is in this file because skipping it is how the last near-miss happened. Hank Morel owns the check. I want a count on RDW-SOP-2023-088 before anyone says the leftover is 'implied.' Implied leftovers are how tack a fitting while oil is still weeping almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in RDW-SOP-2022-070"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim tack a fitting while oil is still weeping is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host bay-04.ridgeway.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for RDW-2540"
+    },
+    {
+      "type": "p",
+      "text": "First useful is screen, 30-minute watch, caps, no wet tack, not a prettier board or a louder huddle. Owen Pike sees that slice on bay-04.ridgeway.internal. If the slice needs a second process, that is a new ticket and Cal Dreher is in the thread. I will not hide it inside RDW-SOP-2022-070."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (39)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on RDW-SOP-2022-070. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: weld.ridgeway.internal."
+    }
+  ]
+}

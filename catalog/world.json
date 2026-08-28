@@ -1,0 +1,19 @@
+{
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "warehouse": {
+    "name": "Pinecrest Fulfillment",
+    "role": "Order Picker",
+    "host": "wms.pinecrest.internal",
+    "tickets": "PCF-",
+    "dates": "October 2023 - present",
+    "place": "Commerce, GA area"
+  },
+  "shop": {
+    "name": "Ridgeway Diesel",
+    "role": "Shop Helper",
+    "host": "shop.ridgeway.internal",
+    "tickets": "RDW-",
+    "dates": "June 2022 - September 2023"
+  }
+}

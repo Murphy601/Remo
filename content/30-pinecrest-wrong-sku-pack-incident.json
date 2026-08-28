@@ -1,0 +1,336 @@
+{
+  "slug": "30-pinecrest-wrong-sku-pack-incident",
+  "doc_id": "PCF-INC-2025-018",
+  "title": "Incident: wrong SKU packed after look-alike bottles",
+  "subtitle": "February 11, 2025, 9 cartons, ticket PCF-INC-2025-018",
+  "doc_type": "Incident report",
+  "form_type": "Incident report",
+  "kicker": "Pinecrest Fulfillment  \u00b7  Look-alike  \u00b7  PCF-INC-2025-018",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Closed",
+  "date": "February 13, 2025",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Tasha Quinn (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Tasha Quinn (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-INC-2025-018; PCF-1188; PCF-REQ-2024-018",
+  "summary": "Tasha Quinn asked for a written cut of Incident. Current path: Shampoo and body wash side by side, same blue cap. This document locks separate slots, scan every unit, color out as confirm. slot look-alikes together because they 'sell as a set' is out because They do not sell as a set in the WMS. 9 cartons went out. Two came back.",
+  "form_description": "Incident report for Pinecrest look-alike bottles packed wrong, requiring separate slots and a refuse on color as a confirm.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "January 20, 2025",
+      "Jeilen Jones",
+      "Outline after PCF-INC-2025-018 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "February 1, 2025",
+      "Jeilen Jones",
+      "Numbers from Tasha Quinn. slot look-alikes together because they 'sell as a set' still in the room."
+    ],
+    [
+      "0.9",
+      "February 9, 2025",
+      "Jeilen Jones",
+      "slot look-alikes together because they 'sell as a set' written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "February 13, 2025",
+      "Jeilen Jones",
+      "Cut. Host pack.pinecrest.internal. Ticket PCF-INC-2025-018."
+    ],
+    [
+      "1.1",
+      "February 13, 2025",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Incident: wrong SKU packed after look-alike bottles"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-INC-2025-018 on February 13, 2025. Tasha Quinn asked for a written bound after the current path (Shampoo and body wash side by side, same blue cap) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host pack.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on slot look-alikes together because they 'sell as a set', then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Look-alike SKUs cannot slot side by side. Scan every unit. Color is not a confirm. I am not restating a hallway yes. slot look-alikes together because they 'sell as a set' is out because They do not sell as a set in the WMS. 9 cartons went out. Two came back. Cost of doing nothing is already in the numbers: cartons=9, back=2, cap=blue, weeks=1, scan=1, slot=2, look=1, set=0. Sibling tickets PCF-1188 and PCF-REQ-2024-018. I will not reopen slot look-alikes together because they 'sell as a set' in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Look-alike SKUs cannot slot side by side. Scan every unit. Color is not a confirm."
+    },
+    {
+      "type": "p",
+      "text": "Background on pack.pinecrest.internal. Shampoo and body wash side by side, same blue cap. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on wms.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-INC-2025-018 names the pull. If those numbers moved after February 13, 2025, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-INC-2025-018. slot look-alikes together because they 'sell as a set' is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Shampoo and body wash side by side, same blue cap",
+          "Numbers already in play: cartons=9, back=2, cap=blue, weeks=1, scan=1, slot=2, look=1, set=0",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "slot look-alikes together because they 'sell as a set'",
+          "They do not sell as a set in the WMS. 9 cartons went out. Two came back.",
+          "Named on PCF-REQ-2024-018",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "separate slots, scan every unit, color out as confirm",
+          "Host pack.pinecrest.internal, ticket PCF-INC-2025-018",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: aisle-b2.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (30): refuse on slot look-alikes together because they 'sell as a set', lock is separate slots, scan every unit, color out as confirm. I will not hide a process change inside a 'quick align' on PCF-1188."
+    },
+    {
+      "type": "quote",
+      "text": "Blue cap next to blue cap is not a color-code. Scan the barcode.",
+      "attrib": "Tasha Quinn, February 11 13:40"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on pack.pinecrest.internal: the path Tasha Quinn actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on wms.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "separate slots, scan every unit, color out as confirm Host pack.pinecrest.internal. Ticket PCF-INC-2025-018. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: separate slots, scan every unit, color out as confirm. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-INC-2025-018. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: pack.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-INC-2025-018. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "cartons",
+          "9",
+          "pack.pinecrest.internal",
+          "PCF-INC-2025-018"
+        ],
+        [
+          "back",
+          "2",
+          "pack.pinecrest.internal",
+          "PCF-INC-2025-018"
+        ],
+        [
+          "cap",
+          "blue",
+          "pack.pinecrest.internal",
+          "PCF-INC-2025-018"
+        ],
+        [
+          "weeks",
+          "1",
+          "pack.pinecrest.internal",
+          "PCF-INC-2025-018"
+        ],
+        [
+          "scan",
+          "1",
+          "pack.pinecrest.internal",
+          "PCF-INC-2025-018"
+        ],
+        [
+          "slot",
+          "2",
+          "pack.pinecrest.internal",
+          "PCF-INC-2025-018"
+        ],
+        [
+          "look",
+          "1",
+          "pack.pinecrest.internal",
+          "PCF-INC-2025-018"
+        ],
+        [
+          "set",
+          "0",
+          "pack.pinecrest.internal",
+          "PCF-INC-2025-018"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: slot look-alikes together because they 'sell as a set'"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "slot look-alikes together because they 'sell as a set' is out. They do not sell as a set in the WMS. 9 cartons went out. Two came back. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: slot look-alikes together because they 'sell as a set' comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-1188. Numbers I will not 'simplify': cartons=9, back=2, cap=blue, weeks=1, scan=1, slot=2, look=1, set=0. Same clock as the front. I will not mix clocks to make pack.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does aisle-b2.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-REQ-2024-018.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Tasha Quinn: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on pack.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits pack.pinecrest.internal, PCF-INC-2025-018, and the last three working pages. Access that has to move is who can change wms.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-INC-2025-018. pack.pinecrest.internal.",
+      "text": "# PCF-INC-2025-018 read-only first\ndate\necho host=pack.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-INC-2025-018\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-INC-2025-018 before any write.",
+        "Confirm on pack.pinecrest.internal with the read-only commands above.",
+        "If the refuse on slot look-alikes together because they 'sell as a set' is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-INC-2025-018. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on slot look-alikes together because they 'sell as a set'",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host pack.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Tasha Quinn",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-INC-2025-018. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-INC-2025-018"
+    },
+    {
+      "type": "p",
+      "text": "wms.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-REQ-2024-018 before anyone says the leftover is 'implied.' Implied leftovers are how slot look-alikes together because they 'sell as a set' almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-INC-2025-018"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim slot look-alikes together because they 'sell as a set' is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host pack.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-INC-2025-018"
+    },
+    {
+      "type": "p",
+      "text": "First useful is separate slots, scan every unit, color out as confirm, not a prettier board or a louder huddle. Tasha Quinn sees that slice on pack.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-INC-2025-018."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (30)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-INC-2025-018. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: aisle-b2.pinecrest.internal."
+    }
+  ]
+}

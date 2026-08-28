@@ -1,0 +1,336 @@
+{
+  "slug": "22-pinecrest-weekend-surge-notes",
+  "doc_id": "PCF-MTG-2024-114",
+  "title": "Weekend surge notes, October 5",
+  "subtitle": "Staffing, cooler, OT, ticket PCF-2220",
+  "doc_type": "Meeting notes",
+  "form_type": "Other",
+  "kicker": "Pinecrest Fulfillment  \u00b7  Weekend  \u00b7  PCF-2220",
+  "org": "Pinecrest Fulfillment",
+  "classification": "INTERNAL",
+  "version": "1.1",
+  "status": "Issued",
+  "date": "October 5, 2024",
+  "author": "Jeilen Jones",
+  "role": "Order Picker",
+  "team": "Pinecrest Fulfillment, building 2 operations",
+  "audience": "Tasha Quinn (requester); Marcus Hale (acceptor); Tasha Quinn and Jeilen Jones (build); Ben Crowe (leftover host); Lila Voss (absentee pack)",
+  "owners": "Marcus Hale (acceptor), Tasha Quinn (requester), Tasha Quinn (ops), Jeilen Jones (this document)",
+  "related": "PCF-MTG-2024-114; PCF-2220; PCF-MEM-2024-033",
+  "summary": "Tasha Quinn asked for a written cut of Weekend surge notes. Current path: Friday vibe becomes Saturday plan. This document locks signed roster, 45/10, cut volume not quality. assume Saturday staff from a Friday hallway yes is out because September 28 hallway yes left pack with 2 people and 6 pickers. Cartons sat 3.4 hours.",
+  "form_description": "Weekend surge notes for Pinecrest: signed Saturday roster, cooler limits, and a refuse on hallway staffing.",
+  "field": "Operations / Logistics",
+  "revision_history": [
+    [
+      "0.1",
+      "September 11, 2024",
+      "Jeilen Jones",
+      "Outline after PCF-MTG-2024-114 sat down. Scope still fuzzy."
+    ],
+    [
+      "0.4",
+      "September 23, 2024",
+      "Jeilen Jones",
+      "Numbers from Tasha Quinn. assume Saturday staff from a Friday hallway yes still in the room."
+    ],
+    [
+      "0.9",
+      "October 1, 2024",
+      "Jeilen Jones",
+      "assume Saturday staff from a Friday hallway yes written up as a refuse. Tasha Quinn review."
+    ],
+    [
+      "1.0",
+      "October 5, 2024",
+      "Jeilen Jones",
+      "Cut. Host huddle.pinecrest.internal. Ticket PCF-2220."
+    ],
+    [
+      "1.1",
+      "October 5, 2024",
+      "Jeilen Jones",
+      "Acceptance lines numbered. Open questions with owners."
+    ]
+  ],
+  "blocks": [
+    {
+      "type": "h1",
+      "text": "Weekend surge notes, October 5"
+    },
+    {
+      "type": "p",
+      "text": "This is the working cut for PCF-MTG-2024-114 on October 5, 2024. Tasha Quinn asked for a written bound after the current path (Friday vibe becomes Saturday plan) stopped being honest. I am Jeilen Jones, Order Picker, writing for Marcus Hale, Tasha Quinn, and Ben Crowe. Primary host huddle.pinecrest.internal. If you are skimming, jump the decision callout, then the refuse on assume Saturday staff from a Friday hallway yes, then open questions. If you are on the floor next shift, jump the constraints, the numbers table, and the steps."
+    },
+    {
+      "type": "p",
+      "text": "Saturday is a signed roster. Cooler still 45/10. OT is not skip-scan. If the roster is empty, volume is cut, not quality. I am not restating a hallway yes. assume Saturday staff from a Friday hallway yes is out because September 28 hallway yes left pack with 2 people and 6 pickers. Cartons sat 3.4 hours. Cost of doing nothing is already in the numbers: pack=2, pick=6, hours=3.4, weeks=1, sat=1, cooler=45, ot=1.5, vibe=1. Sibling tickets PCF-2220 and PCF-MEM-2024-033. I will not reopen assume Saturday staff from a Friday hallway yes in a side thread because someone asked for a rate waiver. Tasha Quinn is the acceptor unless the owners line says otherwise."
+    },
+    {
+      "type": "h2",
+      "text": "Decision for leadership"
+    },
+    {
+      "type": "callout",
+      "kind": "decision",
+      "label": "Decision",
+      "text": "Saturday is a signed roster. Cooler still 45/10. OT is not skip-scan. If the roster is empty, volume is cut, not quality."
+    },
+    {
+      "type": "p",
+      "text": "Background on huddle.pinecrest.internal. Friday vibe becomes Saturday plan. That is the system Marcus Hale lives with, not a slide. I timed or pulled the leftover on wms.pinecrest.internal the week before this file. Miss counts, minutes, and weights in this file are from that pull, not a round number I liked. Ticket PCF-MTG-2024-114 names the pull. If those numbers moved after October 5, 2024, update this file in review, do not 'correct' them in a group chat."
+    },
+    {
+      "type": "table",
+      "caption": "Options reviewed for PCF-MTG-2024-114. assume Saturday staff from a Friday hallway yes is the named refuse.",
+      "headers": [
+        "Option",
+        "Effort / cash",
+        "Risk",
+        "Verdict"
+      ],
+      "rows": [
+        [
+          "Do nothing (keep current path)",
+          "$0 cash, keep Friday vibe becomes Saturday plan",
+          "Numbers already in play: pack=2, pick=6, hours=3.4, weeks=1, sat=1, cooler=45, ot=1.5, vibe=1",
+          "Reject. This is the status the requester is living with."
+        ],
+        [
+          "assume Saturday staff from a Friday hallway yes",
+          "September 28 hallway yes left pack with 2 people and 6 pickers. Cartons sat 3.4 hours.",
+          "Named on PCF-MEM-2024-033",
+          "Reject. See refuse callout."
+        ],
+        [
+          "Cheap shortcut (hallway yes, skip the written cut)",
+          "Hours, not cash",
+          "Scope returns as a group chat",
+          "Reject. This file exists because that failed."
+        ],
+        [
+          "This document's lock",
+          "signed roster, 45/10, cut volume not quality",
+          "Host huddle.pinecrest.internal, ticket PCF-2220",
+          "Accept. Written cut. Named owners."
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Background. Why the current path is the wrong tool"
+    },
+    {
+      "type": "p",
+      "text": "Ben Crowe owns a leftover that is easy to skip: cooler.pinecrest.internal. I will ping once. After that the owner is late, not blocked. Unique to this file (22): refuse on assume Saturday staff from a Friday hallway yes, lock is signed roster, 45/10, cut volume not quality. I will not hide a process change inside a 'quick align' on PCF-2220."
+    },
+    {
+      "type": "quote",
+      "text": "Weekend coverage is not implied because Friday was busy. Someone has to pack.",
+      "attrib": "Tasha Quinn, October 5"
+    },
+    {
+      "type": "p",
+      "text": "What a skeptical lead would try first on huddle.pinecrest.internal: the path Tasha Quinn actually has, not an empty-tote photo. Metric I will argue is a clean confirm, not a vanity units-per-hour. If we cannot show that path on wms.pinecrest.internal with the numbers already in this file, we do not have a cut. Jeilen Jones will not accept a hallway yes as that proof."
+    },
+    {
+      "type": "h2",
+      "text": "Constraints and the lock"
+    },
+    {
+      "type": "callout",
+      "kind": "note",
+      "label": "Lock",
+      "text": "signed roster, 45/10, cut volume not quality Host huddle.pinecrest.internal. Ticket PCF-2220. Acceptor Marcus Hale."
+    },
+    {
+      "type": "p",
+      "text": "Open clock: signed roster, 45/10, cut volume not quality. If that clock collides with a safety lock, the date moves and the scope does not. Marcus Hale hears the new date on PCF-MTG-2024-114. I will not book a change in the last 40 minutes of a lock because it is 'just a rate.' A rate change is a change. Host if we have to prove a count: huddle.pinecrest.internal."
+    },
+    {
+      "type": "table",
+      "caption": "Numbers I will defend for PCF-MTG-2024-114. Same clock as the front.",
+      "headers": [
+        "Name",
+        "Value",
+        "Host if measured",
+        "Ticket"
+      ],
+      "rows": [
+        [
+          "pack",
+          "2",
+          "huddle.pinecrest.internal",
+          "PCF-2220"
+        ],
+        [
+          "pick",
+          "6",
+          "huddle.pinecrest.internal",
+          "PCF-2220"
+        ],
+        [
+          "hours",
+          "3.4",
+          "huddle.pinecrest.internal",
+          "PCF-2220"
+        ],
+        [
+          "weeks",
+          "1",
+          "huddle.pinecrest.internal",
+          "PCF-2220"
+        ],
+        [
+          "sat",
+          "1",
+          "huddle.pinecrest.internal",
+          "PCF-2220"
+        ],
+        [
+          "cooler",
+          "45",
+          "huddle.pinecrest.internal",
+          "PCF-2220"
+        ],
+        [
+          "ot",
+          "1.5",
+          "huddle.pinecrest.internal",
+          "PCF-2220"
+        ],
+        [
+          "vibe",
+          "1",
+          "huddle.pinecrest.internal",
+          "PCF-2220"
+        ]
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Refuse: assume Saturday staff from a Friday hallway yes"
+    },
+    {
+      "type": "callout",
+      "kind": "warn",
+      "label": "Refuse",
+      "text": "assume Saturday staff from a Friday hallway yes is out. September 28 hallway yes left pack with 2 people and 6 pickers. Cartons sat 3.4 hours. I will not reopen it because someone asked for a rate waiver."
+    },
+    {
+      "type": "p",
+      "text": "Failure mode if we ignore the refuse: assume Saturday staff from a Friday hallway yes comes back wearing a new coat. I want that named in review notes, not rediscovered by Ben Crowe on a Monday. Ticket PCF-2220. Numbers I will not 'simplify': pack=2, pick=6, hours=3.4, weeks=1, sat=1, cooler=45, ot=1.5, vibe=1. Same clock as the front. I will not mix clocks to make huddle.pinecrest.internal look healthier."
+    },
+    {
+      "type": "h2",
+      "text": "Open questions with owners"
+    },
+    {
+      "type": "bullets",
+      "items": [
+        "Ben Crowe: does cooler.pinecrest.internal stay in the path? Yes, no, or a new date on PCF-MEM-2024-033.",
+        "Tasha Quinn: safety-lock collision for the first useful slice. Date moves, scope does not.",
+        "Tasha Quinn: weekend coverage is not implied. Sign it or it stays out.",
+        "Jeilen Jones: leftover access on huddle.pinecrest.internal expires or the handoff failed."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Working notes a colleague can execute"
+    },
+    {
+      "type": "p",
+      "text": "Handoff leftover for this file: next owner inherits huddle.pinecrest.internal, PCF-MTG-2024-114, and the last three working pages. Access that has to move is who can change wms.pinecrest.internal and who can talk to the requester. If that is still me six weeks after pause, onboard failed. Tasha Quinn accepts in writing."
+    },
+    {
+      "type": "code",
+      "caption": "Read-only. PCF-2220. huddle.pinecrest.internal.",
+      "text": "# PCF-MTG-2024-114 read-only first\ndate\necho host=huddle.pinecrest.internal RF login, location count, last short-pick\necho 'do not confirm a pick you cannot see'\n# stop. write the last error in one sentence on PCF-2220\n# do not override a safety lock because a rate looks low"
+    },
+    {
+      "type": "steps",
+      "items": [
+        "Write the symptom on PCF-2220 before any write.",
+        "Confirm on huddle.pinecrest.internal with the read-only commands above.",
+        "If the refuse on assume Saturday staff from a Friday hallway yes is being reopened, stop and ping Marcus Hale.",
+        "Wake Tasha Quinn only after a one-line diagnosis.",
+        "Do not override a safety lock because a rate looks low."
+      ]
+    },
+    {
+      "type": "h2",
+      "text": "Ownership"
+    },
+    {
+      "type": "table",
+      "caption": "RACI for PCF-MTG-2024-114. A team name is not a person.",
+      "headers": [
+        "Work",
+        "Responsible",
+        "Accountable",
+        "Consulted"
+      ],
+      "rows": [
+        [
+          "Written cut",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Tasha Quinn"
+        ],
+        [
+          "Refuse on assume Saturday staff from a Friday hallway yes",
+          "Jeilen Jones",
+          "Marcus Hale",
+          "Ben Crowe"
+        ],
+        [
+          "Host huddle.pinecrest.internal",
+          "Tasha Quinn",
+          "Marcus Hale",
+          "Jeilen Jones"
+        ],
+        [
+          "Requester path",
+          "Ben Crowe",
+          "Tasha Quinn",
+          "Jeilen Jones"
+        ]
+      ]
+    },
+    {
+      "type": "p",
+      "text": "People who missed the room get the decision, the refuse, and the date, not a reconstruction of tone. Lila Voss is on that list. Object on PCF-2220. Jeilen Jones will reject a comment that is only 'as discussed.'"
+    },
+    {
+      "type": "h2",
+      "text": "Named leftover unique to PCF-MTG-2024-114"
+    },
+    {
+      "type": "p",
+      "text": "wms.pinecrest.internal is in this file because skipping it is how the last near-miss happened. Ben Crowe owns the check. I want a count on PCF-MEM-2024-033 before anyone says the leftover is 'implied.' Implied leftovers are how assume Saturday staff from a Friday hallway yes almost returned."
+    },
+    {
+      "type": "h2",
+      "text": "What I will not claim in PCF-MTG-2024-114"
+    },
+    {
+      "type": "p",
+      "text": "I will not claim assume Saturday staff from a Friday hallway yes is impossible at another shop. I will claim we will not do it here. I will not claim zero incidents after this cut. I will claim the next one dies at the gate named in the lock. Host huddle.pinecrest.internal."
+    },
+    {
+      "type": "h2",
+      "text": "First useful slice for PCF-2220"
+    },
+    {
+      "type": "p",
+      "text": "First useful is signed roster, 45/10, cut volume not quality, not a prettier board or a louder huddle. Tasha Quinn sees that slice on huddle.pinecrest.internal. If the slice needs a second process, that is a new ticket and Marcus Hale is in the thread. I will not hide it inside PCF-MTG-2024-114."
+    },
+    {
+      "type": "h2",
+      "text": "Photos, labels, and identifiers (22)"
+    },
+    {
+      "type": "p",
+      "text": "A photo for this work is a bin or a seal, not a customer's face. Tote IDs stay on PCF-MTG-2024-114. Pressure is not a reason to paste a phone number into the ticket. Jeilen Jones will bounce it. Host if we have to prove a redaction: cooler.pinecrest.internal."
+    }
+  ]
+}
