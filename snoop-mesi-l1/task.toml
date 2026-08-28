@@ -1,0 +1,30 @@
+artifacts = ["/app/mesi_pair.v"]
+
+[task]
+name = "afterquery/snoop-mesi-l1"
+
+[metadata]
+author_name = "Yasharth Singh"
+author_email = "yasharthsingh1777@gmail.com"
+difficulty_explanation = "Two direct-mapped 4-line L1s share one 8-cycle memory. Hits are easy. The work is MESI: BusRd of a Modified line needs a writeback or a cache-to-cache copy and both go Shared; a store to Shared needs an invalidate of the sibling; evicting dirty data is four word writes or you lose it. A core that treats memory as a dual-port RAM gets the data right and still blows the cycle cap. False sharing (same line, different words) and ping-pong stores catch silent drops of snoop."
+solution_explanation = "Per-core tag/state/data arrays (I/S/E/M). A core answers a hit in one cycle when the state allows the op. Misses take a single shared bus FSM: writeback a Modified victim or sibling, copy from the sibling when it has the line, otherwise issue four mem reads. Stores that hit S upgrade by invalidating the other cache. Round-robin if both cores miss. Responses sit on c*_rvalid until rready."
+verification_explanation = "C++ Verilator scoreboard (tb_coh.cpp) is the 8-cycle memory and both CPU masters. It checks per-core order, a global last-write-wins memory image, and a cycle deadline. Stdout is dropped. The sim reads a 32-byte nonce from fd 9 before the DUT runs and writes a SCORE line on fd 10 whose SHA-256 covers that nonce. Spawn is linker-wrapped. The process is setpriv'd to uid 65534. /tests is 700 while it runs."
+category = "Hardware"
+subcategory = "RTL"
+tags = ["verilog", "mesi", "cache-coherence", "snoopy-bus", "l1-cache"]
+expert_time_estimate_hours = 8
+relevant_experience = "CPU cache design: MESI snooping, writeback, false sharing, and a cycle-accurate coherence checker."
+
+[verifier]
+timeout_sec = 600.0
+environment_mode = "separate"
+
+[agent]
+timeout_sec = 14400.0
+
+[environment]
+build_timeout_sec = 600.0
+cpus = 2
+memory_mb = 4096
+storage_mb = 10240
+gpus = 0
