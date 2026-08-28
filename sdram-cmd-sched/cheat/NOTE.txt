@@ -1,0 +1,7 @@
+display_pass.v — prints ALL GOOD on stdout. The scoreboard ignores stdout and only trusts a MAC'd SCORE record on fd 12.
+
+exit_grade.v — writes a fake SCORE line to fd 12. The parent hashes a 32-byte nonce the DUT never received.
+
+system_reward.v — $system into /logs/verifier/reward.txt. Directory is 700/root during the run, the sim is uid 65534, spawn is wrapped.
+
+serial_onebank.v — legal JEDEC commands and refresh, but only one DRAM request at a time. Misses the cycle budget on the dual-host runs.

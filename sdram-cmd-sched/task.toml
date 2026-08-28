@@ -1,0 +1,30 @@
+artifacts = ["/app/sdr4_mc.v"]
+
+[task]
+name = "afterquery/sdr4-mc"
+
+[metadata]
+author_name = "Yasharth Singh"
+author_email = "yasharthsingh1777@gmail.com"
+difficulty_explanation = "Keeping four banks in flight is the actual work. tFAW caps you at four ACT in ten clocks, tRRD spaces those ACT, the 16-bit bus is occupied for four beats per burst, and tWTR/read-to-write turnaround fight you on mixed traffic. On top of that a refresh has to land every 96 clocks: precharge whatever is open, wait tRP, REF, wait tRFC, without dropping a host request. Two hosts share one command bus with per-host read order. A legal single-bank loop misses the cycle budget."
+solution_explanation = "A bring-up counter does PREA, two REF, and MRS. Each bank tracks idle / waiting-for-CAS / waiting-for-PRE with earliest-legal timestamps. Host queues are four deep. CAS wins when the DQ bus is free; ACT uses round-robin across hosts if tRRD/tFAW/tRP allow; PRE closes a bank once tRAS and tRTP/tWR are met. About 36 clocks before tREFI the controller stops new ACT, drains CAS, PREA, then REF. Returned reads shift through a CL+BL pipe onto m*_rvalid."
+verification_explanation = "Verilator C++ scoreboard (dram_sb.cpp) owns a DRAM timing model: command decode, tFAW sliding window, DQ occupancy, per-host order, stored data, tREFI, and a per-run cycle cap. The sim is launched as uid 65534. It reads a 32-byte nonce from fd 11 before evaluating the DUT and writes a SCORE line on fd 12 whose SHA-256 covers that nonce. stdout is discarded. Linker wraps system/fork/exec. /tests is mode 700 while the binary runs."
+category = "Hardware"
+subcategory = "RTL"
+tags = ["verilog", "sdram", "jedec-timing", "memory-controller", "bank-scheduler"]
+expert_time_estimate_hours = 7
+relevant_experience = "Writing SDR/DDR memory controllers: bank machines, closed-page policy, JEDEC tFAW/tRRD/tRFC, and a cycle-accurate command checker."
+
+[verifier]
+timeout_sec = 600.0
+environment_mode = "separate"
+
+[agent]
+timeout_sec = 14400.0
+
+[environment]
+build_timeout_sec = 600.0
+cpus = 2
+memory_mb = 4096
+storage_mb = 10240
+gpus = 0
