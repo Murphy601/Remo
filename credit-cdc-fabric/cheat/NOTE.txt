@@ -1,0 +1,1 @@
+Toggle-sync on cr_ret. Looks fine when the clocks are close; on 1:7 several returns land in one clk_a sample and credits vanish. The data path is a real async FIFO so a 1:1 smoke run can pass. The ratio sweep should not.
