@@ -4,8 +4,8 @@ artifacts = ["/app/cdc_fabric.v"]
 name = "afterquery/credit-cdc-fabric"
 
 [metadata]
-author_name = "David Muiruri"
-author_email = "andreancarols@gmail.com"
+author_name = "Yasharth Singh"
+author_email = "yasharthsingh1777@gmail.com"
 difficulty_explanation = "The hard part is not wiring an async FIFO. It is keeping the credit loop honest when clk_b is 7x clk_a (consecutive cr_ret pulses must not collapse into one p_credit) and when clk_a is 5x clk_b (the write side bursts into a slow pop). A one-shot toggle synchronizer on cr_ret looks fine at 1:1 and dies on the ratio sweep. Same for a combo bypass that only works when the edges line up. Getting occupancy, valid/ready hold, and packet SOP/EOP through that loop without deadlock under delayed credit return is regular interconnect bring-up work, not a textbook copy-paste."
 solution_explanation = "FWFT dual-clock FIFO (Gray write/read pointers, depth 8) for the beat path. Credit returns are a wrapping count in clk_b, Gray-synced into clk_a, then turned into one p_credit pulse per increment. A small pending counter on clk_a serializes a burst of clk_b returns so none are lost when Fa:Fb = 1:7. No extra credits, no combo forward between the two clocks."
 verification_explanation = "The sealed TB instantiates the frozen pins, drives two independent clocks (listed ratios and phase offsets, including rst_a vs rst_b release order), and scoreboards every beat. Burst runs are 50000 packets; trickle runs stall the producer and delay cr_ret. Pass is lossless in-order delivery, matching credit counts after drain, no X, no truncated packet, no watchdog timeout. Functional crossing only — this is discrete-event sim, not analogue metastability."
