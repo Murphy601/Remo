@@ -20,7 +20,7 @@ Every file is **40–50 pages**, measured in LibreOffice.
 1. **Job title:** Order Picker
 2. **Years:** 1–5 (Order Picker from October 2023; diesel shop helper 2022–2023)
 3. **Field:** Operations / Logistics
-4. **Pages:** see FORM_ANSWERS (40–50 each, LibreOffice)
+4. **Pages:** 40–50 each (LibreOffice Writer → PDF)
 5. **Upload:** the `.docx` under `documents/` (submit the zip of docx files, not the GitHub repo)
 6–7. **Description and date:** see FORM_ANSWERS
 

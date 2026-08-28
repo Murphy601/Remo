@@ -1,623 +1,623 @@
 # Form answers (per document)
 
-These answers map to the intake questions for the 50 internal engineering documents in documents/.
+These answers map to the intake questions for the 50 warehouse and diesel-shop documents in documents/.
 
 Direct file links: [DOWNLOADS.md](../DOWNLOADS.md). All 50 as a zip: [documents.zip](../documents.zip).
 
 ## Answers that are the same for every file
 
-1. **Current or most recent job title:** Web Developer
-2. **Years of professional experience:** 5–10 (about six years, freelance 2020–present)
-3. **Field:** Software Engineering / Data Science
-4. **Pages:** 42–49 (counted with LibreOffice Writer → PDF)
+1. **Current or most recent job title:** Order Picker
+2. **Years of professional experience:** 1–5 (Order Picker from October 2023; diesel shop helper 2022–2023)
+3. **Field:** Operations / Logistics
+4. **Pages:** 40–50 (counted with LibreOffice Writer → PDF)
 
-Author on every document: Michael Gilfilian, Web Developer, Hillcrest Digital. Engagements covered: Harbor & Oak Outfitters, Lakeshore Hardware Group, and a 2023 IT support internship at Whetstone Industrial.
+Author on every document: Jeilen Jones, Order Picker, Pinecrest Fulfillment. Also covered: Ridgeway Diesel shop-helper work matching diesel and truck coursework (brakes, PM, electrical, fuel systems).
 
 ## Per-document answers (questions 4–7)
 
 | # | File | Pages | Words | Written | Description |
 |---|---|---|---|---|---|
-| 1 | `01-whetstone-azure-mailbox-requirements.docx` | 46 | 12838 | 14-03-2023 | Requirements cut for moving Whetstone user mailboxes to Exchange Online so IT, HRIS, and the intern share one scope after WTS-4418 was reopened. |
-| 2 | `02-whetstone-ticket-triage-design.docx` | 45 | 14174 | 04-04-2023 | Technical design for a Python helpdesk triage bot at Whetstone, written so Carla Nguyen and Brett Holtz share one classifier cut before WTS-4502 is built. |
-| 3 | `03-whetstone-imaging-sop.docx` | 45 | 14626 | 21-04-2023 | On-bench SOP for imaging Whetstone shop-floor laptops from the Intune golden, written for a cold run with exact commands and refuse conditions. |
-| 4 | `04-whetstone-aad-duplicate-incident.docx` | 45 | 14516 | 18-04-2023 | Incident report for duplicate Azure AD accounts after an HRIS feed retry, covering timeline, impact, and the refuse on auto-merge. |
-| 5 | `05-whetstone-azure-kickoff-notes.docx` | 48 | 14981 | 09-02-2023 | Decision-oriented kickoff notes for Whetstone Azure mailbox and identity work, written so a colleague can act without the recording. |
-| 6 | `06-whetstone-fileshare-memo.docx` | 47 | 12271 | 28-03-2023 | Recommendation memo asking Brett Holtz to approve Azure Files for three Whetstone shares and to refuse the IaaS file-server quote. |
-| 7 | `07-whetstone-vpn-mfa-runbook.docx` | 42 | 13997 | 11-04-2023 | On-call runbook for Whetstone plant VPN with MFA, written so a desk person who did not set it up can diagnose a failed login without waking Brett. |
-| 8 | `08-whetstone-imaging-test-notes.docx` | 48 | 14203 | 02-05-2023 | Acceptance notes for the Whetstone Windows 11 golden image, written so Owen and the intern share one pass/fail list before the golden is marked current. |
-| 9 | `09-harbor-shopify-theme-requirements.docx` | 46 | 14128 | 18-06-2020 | Requirements for the Harbor & Oak Shopify theme v1, written so Dana, Jenna, and the developer share one template cut after HBR-1104. |
-| 10 | `10-harbor-liquid-theme-design.docx` | 48 | 11996 | 04-08-2020 | Technical design for the Harbor & Oak Liquid theme, covering sections, metafields, and a pickup stub that will survive a checkout change. |
-| 11 | `11-harbor-seo-90day-notes.docx` | 48 | 11980 | 12-03-2021 | Decision notes from the Harbor & Oak 90-day SEO review, capturing the title pattern, collection index, and the refuse on city stuffing. |
-| 12 | `12-harbor-mothers-day-checkout-incident.docx` | 44 | 14368 | 11-05-2021 | Incident report for the Harbor & Oak Mother's Day checkout stall caused by a gift-wrap app 429, including timeline and the refuse on retries. |
-| 13 | `13-harbor-local-pickup-prd.docx` | 45 | 12010 | 22-07-2021 | Product requirements for Harbor & Oak local pickup, written for Dana, Evan, and the developer before the rate is turned on. |
-| 14 | `14-harbor-shopify-deploy-runbook.docx` | 48 | 14175 | 16-09-2021 | Deploy runbook for the Harbor & Oak Shopify theme, written so a cold publish does not hide pickup and so rollback is unpublish. |
-| 15 | `15-harbor-inventory-sync-design.docx` | 44 | 14347 | 09-11-2021 | Systems design for Harbor & Oak inventory sync, choosing a 15-minute POS poll over a live vendor webhook. |
-| 16 | `16-harbor-shopify-vs-react-memo.docx` | 43 | 12251 | 07-12-2021 | Recommendation memo telling Dana Whitlock to stay on Shopify for the Harbor & Oak storefront and to refuse a custom React rebuild. |
-| 17 | `17-harbor-product-photo-notes.docx` | 49 | 15019 | 14-12-2021 | Meeting notes locking Harbor & Oak product photo rules: size, format, alt text, and the refuse on uncompressed lifestyle galleries. |
-| 18 | `18-harbor-csv-load-sop.docx` | 47 | 14073 | 17-02-2022 | SOP for loading Harbor & Oak product CSVs, with a hard stop on blank SKUs and a dry-run count before any write. |
-| 19 | `19-harbor-ga4-double-count-incident.docx` | 45 | 12006 | 08-03-2022 | Incident report for Harbor & Oak GA4 double-counted purchases after the theme pixel and GTM both fired, with the one-pixel cut. |
-| 20 | `20-harbor-email-tool-design.docx` | 45 | 14448 | 26-04-2022 | Technical design for Harbor & Oak abandoned-cart email, choosing Klaviyo with pickup and POS suppress over a custom Node sender. |
-| 21 | `21-harbor-gift-card-prd.docx` | 43 | 14143 | 09-06-2022 | PRD for Harbor & Oak gift cards with a single Shopify ledger for in-store sale and online redeem, refusing a second-ledger app. |
-| 22 | `22-harbor-checkout-test-strategy.docx` | 46 | 12916 | 21-07-2022 | Checkout test strategy for Harbor & Oak, locking block-merge cases for pickup, wrap-off, gift card, and a single GA4 purchase event. |
-| 23 | `23-harbor-owner-integration-guide.docx` | 46 | 12822 | 25-08-2022 | Owner integration guide for Harbor & Oak: pickup shelf, product CSV, theme preview, and who to contact, written so Dana does not need a wiki. |
-| 24 | `24-harbor-wholesale-requirements.docx` | 47 | 12707 | 13-10-2022 | Requirements for Harbor & Oak wholesale v1: a hidden catalog and 11 tagged accounts, refusing a paid B2B app. |
-| 25 | `25-lakeshore-inventory-api-requirements.docx` | 44 | 12710 | 22-09-2022 | Requirements for the Lakeshore inventory position API v1, written so store ops and the developer share one scope after LSH-4401. |
-| 26 | `26-lakeshore-inventory-rest-design.docx` | 44 | 12722 | 03-11-2022 | REST design for the Lakeshore inventory API: storeId as CHAR(2), cursors, timeout, and 503 on replica lag. |
-| 27 | `27-lakeshore-four-store-systems-design.docx` | 47 | 11955 | 15-12-2022 | Systems design for Lakeshore four-store stock: POS as source, API in the middle, Woo as a projection, no pooled bin. |
-| 28 | `28-lakeshore-nightly-stock-runbook.docx` | 47 | 14635 | 16-02-2023 | On-call runbook for the Lakeshore nightly Woo stock projection, with checksum, zero-row paging, and a refuse on laptop reruns. |
-| 29 | `29-lakeshore-negative-onhand-incident.docx` | 45 | 12008 | 16-03-2023 | Incident report for Lakeshore negative on-hand after overlapping stock jobs, with clamp, lock, and the refuse on auto-backorder. |
-| 30 | `30-lakeshore-store-pickup-prd.docx` | 45 | 12504 | 04-05-2023 | PRD for Lakeshore four-store pickup: store picker, per-store quantity, 15:30 cutoff, no transfer-as-pickup. |
-| 31 | `31-lakeshore-woo-deploy-sop.docx` | 45 | 12059 | 22-06-2023 | Deploy SOP for four Lakeshore WooCommerce storefronts, blocking live wp-admin plugin updates after the May 18 pickup hide. |
-| 32 | `32-lakeshore-mongo-vs-mysql-memo.docx` | 48 | 12013 | 10-08-2023 | Recommendation memo keeping Lakeshore on-hand in MySQL and refusing a Mongo stock ledger after a contractor suggestion. |
-| 33 | `33-lakeshore-store-manager-notes.docx` | 47 | 11974 | 14-09-2023 | Store manager feedback notes for Lakeshore pickup, negative quantity, and weekend coverage, with owners and refused paths. |
-| 34 | `34-lakeshore-react-admin-design.docx` | 49 | 11966 | 26-10-2023 | Technical design for a React stock admin at Lakeshore that reads the inventory API and never writes Woo from the browser. |
-| 35 | `35-lakeshore-docker-vs-k8s-memo.docx` | 43 | 14502 | 18-01-2024 | Recommendation memo keeping Lakeshore WooCommerce on Docker Compose and Kubernetes only for inventory-api, refusing a four-site Helm move. |
-| 36 | `36-lakeshore-tls-cert-incident.docx` | 48 | 12012 | 12-02-2024 | Incident report for an expired TLS certificate on the Lakeshore pickup host, with renew windows and a refuse on an uninventoried wildcard. |
-| 37 | `37-lakeshore-aws-capacity-memo.docx` | 46 | 12095 | 07-03-2024 | Capacity memo for Lakeshore inventory-api on AWS, refusing a larger instance after a weekend graph that was Woo PHP, not the API. |
-| 38 | `38-lakeshore-react-vs-wp-adr.docx` | 49 | 12036 | 02-04-2024 | Architecture decision record keeping Lakeshore public storefronts on WooCommerce and the stock admin on React, with Luis as acceptor. |
-| 39 | `39-lakeshore-weekend-sale-load-test.docx` | 46 | 12022 | 28-05-2024 | Load test report for the Lakeshore Memorial Day sale soak at 2.4x Tuesday traffic, with fail gates and a refuse on 1x soak. |
-| 40 | `40-lakeshore-mysql-migration-sop.docx` | 42 | 13913 | 11-07-2024 | SOP for Lakeshore inventory MySQL schema changes using expand/contract, an 8 second lock budget, and no same-release column drop. |
-| 41 | `41-lakeshore-oncall-sop.docx` | 45 | 11965 | 22-08-2024 | On-call SOP for Lakeshore inventory-api and Woo projection, with named tells and a refuse on 'check Grafana' page bodies. |
-| 42 | `42-lakeshore-aws-terraform-design.docx` | 45 | 12880 | 19-09-2024 | Terraform design for Lakeshore inventory-api on AWS: four modules, stg/prod workspaces, one account, no 4k-line main.tf. |
-| 43 | `43-lakeshore-pos-exception-prd.docx` | 47 | 12031 | 16-01-2025 | PRD mapping Lakeshore POS stock-mismatch exceptions to six shared codes with cashier sentences, refusing raw HTTP status on the till. |
-| 44 | `44-lakeshore-seo-copy-rubric.docx` | 48 | 12016 | 20-02-2025 | Evaluation rubric for Lakeshore category copy and titles, failing city stuffing and locking a product-category-store pattern. |
-| 45 | `45-lakeshore-redis-stock-design.docx` | 43 | 14770 | 13-03-2025 | Technical design for a Redis cache in front of Lakeshore on-hand reads, with a 45s TTL and fail-open to MySQL instead of stale-as-fresh. |
-| 46 | `46-lakeshore-weekend-double-charge-postmortem.docx` | 45 | 14266 | 10-04-2025 | Postmortem for Lakeshore weekend double-charges on prepaid pickup, covering the missing idempotency key, 11 refunds, and the refuse on laptop capture retries. |
-| 47 | `47-hillcrest-client-onboard-sop.docx` | 44 | 12011 | 13-06-2024 | SOP for onboarding a Hillcrest Digital web client: access, staging host, ticket prefix, first deploy window, and a refuse on Slack password paste. |
-| 48 | `48-hillcrest-secrets-access-sop.docx` | 48 | 14871 | 25-07-2024 | SOP for Hillcrest Digital secrets and access: per-client vaults, seven-day expiry after pause, logged break-glass, no secrets in tickets. |
-| 49 | `49-hillcrest-staging-per-client-design.docx` | 44 | 13643 | 06-02-2025 | Technical design for per-client Hillcrest staging hosts, refusing a shared preview after a Harbor/Lakeshore leftover mix. |
-| 50 | `50-hillcrest-q3-pipeline-notes.docx` | 43 | 14795 | 07-08-2025 | Q3 pipeline notes for Hillcrest Digital: Lakeshore active work, Harbor maintenance, one new onboard maximum, and a refuse on two first-publishes in one week. |
+| 1 | `01-pinecrest-pick-path-sop.docx` | 45 | 14342 | 09-11-2023 | SOP for the Pinecrest building 2 dry pick path, locking RF location scans and refusing skip-scan to hit rate. |
+| 2 | `02-pinecrest-pack-station-sop.docx` | 44 | 14603 | 28-11-2023 | Pack-station SOP for Pinecrest dry outbound, requiring a green scale before tape and refusing tape-first packing. |
+| 3 | `03-pinecrest-pallet-jack-runbook.docx` | 44 | 11978 | 12-12-2023 | Runbook for Pinecrest electric pallet jacks: pre-op card, no riders, and a refuse on running a dead horn to finish a wave. |
+| 4 | `04-pinecrest-mispick-incident.docx` | 46 | 11982 | 16-01-2024 | Incident report for 14 Pinecrest mispicks after a Friday skip-scan wave, refusing pack-as-quality-wall as the fix. |
+| 5 | `05-pinecrest-rate-huddle-notes.docx` | 46 | 12043 | 25-01-2024 | Huddle notes locking Pinecrest dry pick rate at 310 UPH with a quality gate, refusing a 400 UPH post without that gate. |
+| 6 | `06-pinecrest-slotting-requirements.docx` | 47 | 12004 | 15-02-2024 | Requirements for Pinecrest forward-pick slotting of the top 80 SKUs into the golden zone, refusing a vendor overlay that never walked the aisle. |
+| 7 | `07-pinecrest-wave-pick-design.docx` | 47 | 12714 | 07-03-2024 | Design for Pinecrest building 2 wave picking: 24-line tote cap, discrete pick, refusing 90-line batch waves. |
+| 8 | `08-pinecrest-cooler-pick-notes.docx` | 45 | 11964 | 21-03-2024 | Notes locking Pinecrest cooler pick rules: coat, 45-minute max, RF wipe, and a refuse on skip-scan when the screen fogs. |
+| 9 | `09-pinecrest-overtime-memo.docx` | 46 | 11966 | 04-04-2024 | Memo to Tasha Quinn: keep Friday overtime at Pinecrest but refuse skip-scan as the way to make OT numbers. |
+| 10 | `10-pinecrest-rf-scanner-sop.docx` | 45 | 11972 | 18-04-2024 | SOP for Pinecrest RF guns: serial checkout, personal login, and battery swap before 30 percent, refusing shared logins. |
+| 11 | `11-pinecrest-damaged-freight-incident.docx` | 45 | 12005 | 03-05-2024 | Incident report for crushed inbound freight at Pinecrest door 3 that was received into pickable, with a refuse on letting pickers find damage. |
+| 12 | `12-pinecrest-cycle-count-sop.docx` | 45 | 14468 | 16-05-2024 | Cycle-count SOP for Pinecrest dry forward pick: blind counts, frozen bins, and a page on variance over 3 units. |
+| 13 | `13-pinecrest-dock-load-sop.docx` | 47 | 15007 | 30-05-2024 | Outbound load SOP for Pinecrest doors 1-4: seal photo, BOL, chocks, and a refuse on sealing later from the office. |
+| 14 | `14-pinecrest-lead-pusher-sop.docx` | 44 | 14267 | 13-06-2024 | SOP for loading pallets onto the Pinecrest lead pusher: square stacks, wrap to the shoe, rebuild leans, no riders. |
+| 15 | `15-pinecrest-safety-huddle-notes.docx` | 44 | 12002 | 27-06-2024 | Safety huddle notes for Pinecrest: horn, plate spotter, cooler coat, with near-misses on a board instead of a rate-only shout. |
+| 16 | `16-pinecrest-returns-prd.docx` | 45 | 11984 | 18-07-2024 | PRD for a Pinecrest returns lane into a quarantine cage, refusing dump-back onto the forward pick face. |
+| 17 | `17-pinecrest-labeler-incident.docx` | 46 | 12047 | 30-07-2024 | Incident report for Pinecrest pack labels printing the previous day's wave, with a refuse on mashing reprint. |
+| 18 | `18-pinecrest-uph-memo.docx` | 43 | 12481 | 15-08-2024 | Memo asking Marcus Hale to replace the public individual UPH rank board with team rate plus mispick, after skip-scan returned. |
+| 19 | `19-pinecrest-newhire-pick-guide.docx` | 45 | 11984 | 29-08-2024 | New-hire pick guide for Pinecrest building 2: five-day buddy, SOP list, and a refuse on day-one solo waves. |
+| 20 | `20-pinecrest-variance-incident.docx` | 46 | 11969 | 13-09-2024 | Incident report for a Pinecrest forward-pick ghost quantity on SKU 7721, refusing memory adjusts instead of a frozen blind count. |
+| 21 | `21-pinecrest-conveyor-jam-runbook.docx` | 42 | 14408 | 26-09-2024 | Runbook for a Pinecrest pack conveyor jam: e-stop and lockout before clearing, refusing a reach-in to save rate. |
+| 22 | `22-pinecrest-weekend-surge-notes.docx` | 42 | 13634 | 05-10-2024 | Weekend surge notes for Pinecrest: signed Saturday roster, cooler limits, and a refuse on hallway staffing. |
+| 23 | `23-pinecrest-lotcode-requirements.docx` | 50 | 12005 | 24-10-2024 | Requirements for Pinecrest lot-code picking on dairy and chemicals: FEFO, RF scan, WMS block, refusing a pack paper log. |
+| 24 | `24-pinecrest-carton-vs-pallet-memo.docx` | 48 | 12028 | 07-11-2024 | Memo switching Pinecrest orders of 8 or more cases to pallet case-pick, refusing carton-each as a way to dress up UPH. |
+| 25 | `25-pinecrest-short-pick-incident.docx` | 45 | 12509 | 21-11-2024 | Incident report for a Pinecrest short-pick confirmed empty on a full bin, requiring a photo and lead look before confirm-empty. |
+| 26 | `26-pinecrest-rf-battery-sop.docx` | 45 | 12167 | 05-12-2024 | SOP for Pinecrest RF batteries: swap under 30 percent, cage charge at end of shift, refusing tote-as-charger. |
+| 27 | `27-pinecrest-qa-audit-rubric.docx` | 45 | 12034 | 19-12-2024 | QA rubric for Pinecrest pick totes at pack: 1 in 20 audits on SKU, quantity, and lot, refusing neatness as the score. |
+| 28 | `28-pinecrest-paper-vs-rf-memo.docx` | 43 | 14346 | 16-01-2025 | Memo keeping Pinecrest on RF pick and refusing daily backup paper sheets after printer-outage leftovers. |
+| 29 | `29-pinecrest-outbound-seal-sop.docx` | 45 | 15070 | 30-01-2025 | SOP for Pinecrest outbound seals: BOL, physical seal, and photo must match, refusing after-the-fact BOL fixes. |
+| 30 | `30-pinecrest-wrong-sku-pack-incident.docx` | 48 | 11998 | 13-02-2025 | Incident report for Pinecrest look-alike bottles packed wrong, requiring separate slots and a refuse on color as a confirm. |
+| 31 | `31-pinecrest-staging-lane-design.docx` | 43 | 13921 | 27-02-2025 | Design for Pinecrest staging lanes: one lane per door, labels out, refusing a shared flex overflow lane. |
+| 32 | `32-pinecrest-shift-handoff-notes.docx` | 46 | 12026 | 13-03-2025 | Shift handoff notes for Pinecrest first-to-second: open waves, frozen bins, red-tagged jacks, refusing a verbal-only pass. |
+| 33 | `33-ridgeway-pm-checklist-sop.docx` | 44 | 12327 | 14-07-2022 | PM checklist SOP for Ridgeway Diesel bays 1-4, requiring initialed lines and refusing a dash-light as the PM. |
+| 34 | `34-ridgeway-air-brake-sop.docx` | 43 | 14891 | 11-08-2022 | Brake inspection SOP for Ridgeway Diesel: chock, soap, pushrod measure, refusing a wipe-and-send on hydraulic leaks. |
+| 35 | `35-ridgeway-fuel-tune-notes.docx` | 46 | 15137 | 08-09-2022 | Notes for Ridgeway Diesel fuel-system tune-ups: paired filters, prime, refusing long-crank after a dry filter. |
+| 36 | `36-ridgeway-nostart-incident.docx` | 44 | 12578 | 11-10-2022 | Incident report for a Ridgeway no-start after jumping a truck with a corroded ground, refusing jump-first diagnosis. |
+| 37 | `37-ridgeway-ac-electrical-sop.docx` | 47 | 15364 | 03-11-2022 | SOP for Ridgeway A/C and electrical accessory checks: fuse and clutch click before gauges, refusing recharge-first. |
+| 38 | `38-ridgeway-drivetrain-sop.docx` | 47 | 14422 | 22-11-2022 | Drivetrain inspection SOP for Ridgeway Diesel: hoist, pry, written play, refusing a clunk as normal for the miles. |
+| 39 | `39-ridgeway-weld-hydraulics-sop.docx` | 45 | 12255 | 15-12-2022 | SOP for welding and hydraulics at Ridgeway Diesel: screens, fire watch, capped lines, refusing a tack on a wet fitting. |
+| 40 | `40-ridgeway-steer-suspension-sop.docx` | 44 | 15257 | 19-01-2023 | Steering and suspension SOP for Ridgeway Diesel: inspect and repair before alignment, refusing align-first. |
+| 41 | `41-ridgeway-gas-vs-diesel-notes.docx` | 45 | 12549 | 09-02-2023 | Notes splitting Ridgeway gas and diesel bay practice: oil by spec, labeled jugs, refusing one-jug convenience. |
+| 42 | `42-ridgeway-tool-checkout-sop.docx` | 45 | 12138 | 02-03-2023 | Tool checkout SOP for Ridgeway Diesel scan tools and torque wrenches, refusing overnight leftovers in a customer cab. |
+| 43 | `43-ridgeway-parts-purchasing-sop.docx` | 44 | 12375 | 23-03-2023 | Parts purchasing SOP for Ridgeway Diesel: PO match and core tags, refusing install-first when a truck is blocking a bay. |
+| 44 | `44-ridgeway-writeup-requirements.docx` | 44 | 14975 | 13-04-2023 | Requirements for Ridgeway customer write-ups a tech can actually work: complaint, when, speed, last change, refusing three-word tickets. |
+| 45 | `45-ridgeway-comeback-incident.docx` | 40 | 13686 | 09-05-2023 | Comeback incident at Ridgeway after an unsigned PM belt line, treating a blank line as a shop skip rather than customer abuse. |
+| 46 | `46-ridgeway-hoist-safety-runbook.docx` | 41 | 13865 | 25-05-2023 | Hoist and jack-stand runbook for Ridgeway Diesel, refusing a quick look under a truck on a floor jack only. |
+| 47 | `47-ridgeway-emissions-notes.docx` | 42 | 14746 | 15-06-2023 | Emissions notes for Ridgeway Diesel: write codes and find cause before clear, refusing clear-and-see as diagnosis. |
+| 48 | `48-ridgeway-oil-sample-memo.docx` | 45 | 12949 | 06-07-2023 | Memo putting Ridgeway fleet PMs on an every-other oil sample, refusing samples only after an engine is already loud. |
+| 49 | `49-ridgeway-roadtest-sop.docx` | 43 | 14393 | 03-08-2023 | Road-test SOP for Ridgeway after brake, steer, or drivetrain work: marked route at 35, refusing a lot loop as the test. |
+| 50 | `50-ridgeway-shop-kickoff-notes.docx` | 49 | 14771 | 24-08-2023 | Kickoff notes for Ridgeway Diesel shop standards: PM sheets, tool board, write-ups, hoist stands, refusing a skip because the lot is full. |
 
-Page counts were measured by converting each `.docx` with LibreOffice and reading PDF page counts. Files are 42–49 pages. Word counts are ~11,955–15,019, so well above 150 words per page.
+Page counts were measured by converting each `.docx` with LibreOffice and reading PDF page counts. Files are 40–50 pages. Word counts are ~11,964–15,364, so well above 150 words per page.
 
 ## Full write-ups (copy/paste for question 6–7)
 
-### 1. Whetstone mailbox cutover to Exchange Online, v1 requirements
+### 1. SOP: zone pick path for building 2 dry
 
-- **File:** `documents/01-whetstone-azure-mailbox-requirements.docx`
-- **Doc ID:** WTS-REQ-2023-011
+- **File:** `documents/01-pinecrest-pick-path-sop.docx`
+- **Doc ID:** PCF-SOP-2023-014
+- **Type:** Runbook / SOP
+- **Form type (dropdown):** Runbook / SOPs
+- **4. Pages:** 45 (LibreOffice), 14342 words
+- **6. Description:** SOP for the Pinecrest building 2 dry pick path, locking RF location scans and refusing skip-scan to hit rate.
+- **7. Written:** 09-11-2023 (November 9, 2023)
+- **Role at the time:** Order Picker
+
+### 2. SOP: pack station 6 through 11, dry outbound
+
+- **File:** `documents/02-pinecrest-pack-station-sop.docx`
+- **Doc ID:** PCF-SOP-2023-022
+- **Type:** Runbook / SOP
+- **Form type (dropdown):** Runbook / SOPs
+- **4. Pages:** 44 (LibreOffice), 14603 words
+- **6. Description:** Pack-station SOP for Pinecrest dry outbound, requiring a green scale before tape and refusing tape-first packing.
+- **7. Written:** 28-11-2023 (November 28, 2023)
+- **Role at the time:** Order Picker
+
+### 3. Runbook: electric pallet jack on dock and pick aisles
+
+- **File:** `documents/03-pinecrest-pallet-jack-runbook.docx`
+- **Doc ID:** PCF-RB-2023-031
+- **Type:** Runbook / SOP
+- **Form type (dropdown):** Runbook / SOPs
+- **4. Pages:** 44 (LibreOffice), 11978 words
+- **6. Description:** Runbook for Pinecrest electric pallet jacks: pre-op card, no riders, and a refuse on running a dead horn to finish a wave.
+- **7. Written:** 12-12-2023 (December 12, 2023)
+- **Role at the time:** Order Picker
+
+### 4. Incident: 14 mispicks on wave 2-14 after skip-scan Friday
+
+- **File:** `documents/04-pinecrest-mispick-incident.docx`
+- **Doc ID:** PCF-INC-2024-008
+- **Type:** Incident report
+- **Form type (dropdown):** Incident report
+- **4. Pages:** 46 (LibreOffice), 11982 words
+- **6. Description:** Incident report for 14 Pinecrest mispicks after a Friday skip-scan wave, refusing pack-as-quality-wall as the fix.
+- **7. Written:** 16-01-2024 (January 16, 2024)
+- **Role at the time:** Order Picker
+
+### 5. Production rate huddle notes, January 25
+
+- **File:** `documents/05-pinecrest-rate-huddle-notes.docx`
+- **Doc ID:** PCF-MTG-2024-011
+- **Type:** Meeting notes
+- **Form type (dropdown):** Other
+- **4. Pages:** 46 (LibreOffice), 12043 words
+- **6. Description:** Huddle notes locking Pinecrest dry pick rate at 310 UPH with a quality gate, refusing a 400 UPH post without that gate.
+- **7. Written:** 25-01-2024 (January 25, 2024)
+- **Role at the time:** Order Picker
+
+### 6. Requirements: forward-pick slotting for top 80 SKUs
+
+- **File:** `documents/06-pinecrest-slotting-requirements.docx`
+- **Doc ID:** PCF-REQ-2024-018
 - **Type:** Requirements document
 - **Form type (dropdown):** Requirements doc
-- **4. Pages:** 46 (LibreOffice), 12838 words
-- **6. Description:** Requirements cut for moving Whetstone user mailboxes to Exchange Online so IT, HRIS, and the intern share one scope after WTS-4418 was reopened.
-- **7. Written:** 14-03-2023 (March 14, 2023)
-- **Role at the time:** IT Support Intern
+- **4. Pages:** 47 (LibreOffice), 12004 words
+- **6. Description:** Requirements for Pinecrest forward-pick slotting of the top 80 SKUs into the golden zone, refusing a vendor overlay that never walked the aisle.
+- **7. Written:** 15-02-2024 (February 15, 2024)
+- **Role at the time:** Order Picker
 
-### 2. Helpdesk ticket triage bot, technical design
+### 7. Wave pick design for building 2 dry
 
-- **File:** `documents/02-whetstone-ticket-triage-design.docx`
-- **Doc ID:** WTS-TDD-2023-018
+- **File:** `documents/07-pinecrest-wave-pick-design.docx`
+- **Doc ID:** PCF-TDD-2024-024
 - **Type:** Technical design document
 - **Form type (dropdown):** Technical design doc
-- **4. Pages:** 45 (LibreOffice), 14174 words
-- **6. Description:** Technical design for a Python helpdesk triage bot at Whetstone, written so Carla Nguyen and Brett Holtz share one classifier cut before WTS-4502 is built.
-- **7. Written:** 04-04-2023 (April 4, 2023)
-- **Role at the time:** IT Support Intern
+- **4. Pages:** 47 (LibreOffice), 12714 words
+- **6. Description:** Design for Pinecrest building 2 wave picking: 24-line tote cap, discrete pick, refusing 90-line batch waves.
+- **7. Written:** 07-03-2024 (March 7, 2024)
+- **Role at the time:** Order Picker
 
-### 3. Windows 11 golden-image SOP for shop-floor laptops
+### 8. Cooler versus dry pick notes, March 21
 
-- **File:** `documents/03-whetstone-imaging-sop.docx`
-- **Doc ID:** WTS-SOP-2023-022
-- **Type:** Runbook / SOP
-- **Form type (dropdown):** Runbook / SOPs
-- **4. Pages:** 45 (LibreOffice), 14626 words
-- **6. Description:** On-bench SOP for imaging Whetstone shop-floor laptops from the Intune golden, written for a cold run with exact commands and refuse conditions.
-- **7. Written:** 21-04-2023 (April 21, 2023)
-- **Role at the time:** IT Support Intern
-
-### 4. Incident: duplicate Azure AD accounts after HRIS feed retry
-
-- **File:** `documents/04-whetstone-aad-duplicate-incident.docx`
-- **Doc ID:** WTS-INC-2023-031
-- **Type:** Incident report
-- **Form type (dropdown):** Incident report
-- **4. Pages:** 45 (LibreOffice), 14516 words
-- **6. Description:** Incident report for duplicate Azure AD accounts after an HRIS feed retry, covering timeline, impact, and the refuse on auto-merge.
-- **7. Written:** 18-04-2023 (April 18, 2023)
-- **Role at the time:** IT Support Intern
-
-### 5. Azure mailbox and identity kickoff notes, February 9
-
-- **File:** `documents/05-whetstone-azure-kickoff-notes.docx`
-- **Doc ID:** WTS-MTG-2023-007
+- **File:** `documents/08-pinecrest-cooler-pick-notes.docx`
+- **Doc ID:** PCF-MTG-2024-029
 - **Type:** Meeting notes
 - **Form type (dropdown):** Other
-- **4. Pages:** 48 (LibreOffice), 14981 words
-- **6. Description:** Decision-oriented kickoff notes for Whetstone Azure mailbox and identity work, written so a colleague can act without the recording.
-- **7. Written:** 09-02-2023 (February 9, 2023)
-- **Role at the time:** IT Support Intern
+- **4. Pages:** 45 (LibreOffice), 11964 words
+- **6. Description:** Notes locking Pinecrest cooler pick rules: coat, 45-minute max, RF wipe, and a refuse on skip-scan when the screen fogs.
+- **7. Written:** 21-03-2024 (March 21, 2024)
+- **Role at the time:** Order Picker
 
-### 6. Memo: stop lifting fs01 into a Windows VM in Azure
+### 9. Memo: overtime is not a skip-scan license
 
-- **File:** `documents/06-whetstone-fileshare-memo.docx`
-- **Doc ID:** WTS-MEM-2023-014
+- **File:** `documents/09-pinecrest-overtime-memo.docx`
+- **Doc ID:** PCF-MEM-2024-033
 - **Type:** Recommendation memo
 - **Form type (dropdown):** Other
-- **4. Pages:** 47 (LibreOffice), 12271 words
-- **6. Description:** Recommendation memo asking Brett Holtz to approve Azure Files for three Whetstone shares and to refuse the IaaS file-server quote.
-- **7. Written:** 28-03-2023 (March 28, 2023)
-- **Role at the time:** IT Support Intern
+- **4. Pages:** 46 (LibreOffice), 11966 words
+- **6. Description:** Memo to Tasha Quinn: keep Friday overtime at Pinecrest but refuse skip-scan as the way to make OT numbers.
+- **7. Written:** 04-04-2024 (April 4, 2024)
+- **Role at the time:** Order Picker
 
-### 7. Runbook: plant VPN with MFA, no trusted-subnet exception
+### 10. SOP: RF gun login, battery, and location confirm
 
-- **File:** `documents/07-whetstone-vpn-mfa-runbook.docx`
-- **Doc ID:** WTS-RB-2023-019
+- **File:** `documents/10-pinecrest-rf-scanner-sop.docx`
+- **Doc ID:** PCF-SOP-2024-041
 - **Type:** Runbook / SOP
 - **Form type (dropdown):** Runbook / SOPs
-- **4. Pages:** 42 (LibreOffice), 13997 words
-- **6. Description:** On-call runbook for Whetstone plant VPN with MFA, written so a desk person who did not set it up can diagnose a failed login without waking Brett.
-- **7. Written:** 11-04-2023 (April 11, 2023)
-- **Role at the time:** IT Support Intern
+- **4. Pages:** 45 (LibreOffice), 11972 words
+- **6. Description:** SOP for Pinecrest RF guns: serial checkout, personal login, and battery swap before 30 percent, refusing shared logins.
+- **7. Written:** 18-04-2024 (April 18, 2024)
+- **Role at the time:** Order Picker
 
-### 8. Imaging acceptance notes, four shop-floor SKUs
+### 11. Incident: crushed freight on inbound door 3
 
-- **File:** `documents/08-whetstone-imaging-test-notes.docx`
-- **Doc ID:** WTS-TST-2023-024
-- **Type:** Test strategy notes
-- **Form type (dropdown):** Other
-- **4. Pages:** 48 (LibreOffice), 14203 words
-- **6. Description:** Acceptance notes for the Whetstone Windows 11 golden image, written so Owen and the intern share one pass/fail list before the golden is marked current.
-- **7. Written:** 02-05-2023 (May 2, 2023)
-- **Role at the time:** IT Support Intern
-
-### 9. Harbor & Oak Shopify theme v1 requirements
-
-- **File:** `documents/09-harbor-shopify-theme-requirements.docx`
-- **Doc ID:** HBR-REQ-2020-008
-- **Type:** Requirements document
-- **Form type (dropdown):** Requirements doc
-- **4. Pages:** 46 (LibreOffice), 14128 words
-- **6. Description:** Requirements for the Harbor & Oak Shopify theme v1, written so Dana, Jenna, and the developer share one template cut after HBR-1104.
-- **7. Written:** 18-06-2020 (June 18, 2020)
-- **Role at the time:** Web Developer
-
-### 10. Harbor & Oak Liquid theme design
-
-- **File:** `documents/10-harbor-liquid-theme-design.docx`
-- **Doc ID:** HBR-TDD-2020-021
-- **Type:** Technical design document
-- **Form type (dropdown):** Technical design doc
-- **4. Pages:** 48 (LibreOffice), 11996 words
-- **6. Description:** Technical design for the Harbor & Oak Liquid theme, covering sections, metafields, and a pickup stub that will survive a checkout change.
-- **7. Written:** 04-08-2020 (August 4, 2020)
-- **Role at the time:** Web Developer
-
-### 11. Harbor & Oak SEO 90-day notes, March 12
-
-- **File:** `documents/11-harbor-seo-90day-notes.docx`
-- **Doc ID:** HBR-MTG-2021-033
-- **Type:** Meeting notes
-- **Form type (dropdown):** Other
-- **4. Pages:** 48 (LibreOffice), 11980 words
-- **6. Description:** Decision notes from the Harbor & Oak 90-day SEO review, capturing the title pattern, collection index, and the refuse on city stuffing.
-- **7. Written:** 12-03-2021 (March 12, 2021)
-- **Role at the time:** Web Developer
-
-### 12. Incident: Mother's Day checkout 429 on gift-wrap app
-
-- **File:** `documents/12-harbor-mothers-day-checkout-incident.docx`
-- **Doc ID:** HBR-INC-2021-044
+- **File:** `documents/11-pinecrest-damaged-freight-incident.docx`
+- **Doc ID:** PCF-INC-2024-047
 - **Type:** Incident report
 - **Form type (dropdown):** Incident report
-- **4. Pages:** 44 (LibreOffice), 14368 words
-- **6. Description:** Incident report for the Harbor & Oak Mother's Day checkout stall caused by a gift-wrap app 429, including timeline and the refuse on retries.
-- **7. Written:** 11-05-2021 (May 11, 2021)
-- **Role at the time:** Web Developer
+- **4. Pages:** 45 (LibreOffice), 12005 words
+- **6. Description:** Incident report for crushed inbound freight at Pinecrest door 3 that was received into pickable, with a refuse on letting pickers find damage.
+- **7. Written:** 03-05-2024 (May 3, 2024)
+- **Role at the time:** Order Picker
 
-### 13. PRD: Harbor & Oak local pickup
+### 12. SOP: cycle count during first break, dry forward
 
-- **File:** `documents/13-harbor-local-pickup-prd.docx`
-- **Doc ID:** HBR-PRD-2021-052
-- **Type:** Product requirements document
-- **Form type (dropdown):** Product requirements doc
-- **4. Pages:** 45 (LibreOffice), 12010 words
-- **6. Description:** Product requirements for Harbor & Oak local pickup, written for Dana, Evan, and the developer before the rate is turned on.
-- **7. Written:** 22-07-2021 (July 22, 2021)
-- **Role at the time:** Web Developer
-
-### 14. Runbook: Harbor & Oak Shopify theme deploy
-
-- **File:** `documents/14-harbor-shopify-deploy-runbook.docx`
-- **Doc ID:** HBR-RB-2021-061
+- **File:** `documents/12-pinecrest-cycle-count-sop.docx`
+- **Doc ID:** PCF-SOP-2024-052
 - **Type:** Runbook / SOP
 - **Form type (dropdown):** Runbook / SOPs
-- **4. Pages:** 48 (LibreOffice), 14175 words
-- **6. Description:** Deploy runbook for the Harbor & Oak Shopify theme, written so a cold publish does not hide pickup and so rollback is unpublish.
-- **7. Written:** 16-09-2021 (September 16, 2021)
-- **Role at the time:** Web Developer
+- **4. Pages:** 45 (LibreOffice), 14468 words
+- **6. Description:** Cycle-count SOP for Pinecrest dry forward pick: blind counts, frozen bins, and a page on variance over 3 units.
+- **7. Written:** 16-05-2024 (May 16, 2024)
+- **Role at the time:** Order Picker
 
-### 15. Harbor & Oak inventory sync, systems design
+### 13. SOP: outbound load at doors 1-4
 
-- **File:** `documents/15-harbor-inventory-sync-design.docx`
-- **Doc ID:** HBR-SYS-2021-070
-- **Type:** Systems design document
-- **Form type (dropdown):** Systems design doc
-- **4. Pages:** 44 (LibreOffice), 14347 words
-- **6. Description:** Systems design for Harbor & Oak inventory sync, choosing a 15-minute POS poll over a live vendor webhook.
-- **7. Written:** 09-11-2021 (November 9, 2021)
-- **Role at the time:** Web Developer
+- **File:** `documents/13-pinecrest-dock-load-sop.docx`
+- **Doc ID:** PCF-SOP-2024-058
+- **Type:** Runbook / SOP
+- **Form type (dropdown):** Runbook / SOPs
+- **4. Pages:** 47 (LibreOffice), 15007 words
+- **6. Description:** Outbound load SOP for Pinecrest doors 1-4: seal photo, BOL, chocks, and a refuse on sealing later from the office.
+- **7. Written:** 30-05-2024 (May 30, 2024)
+- **Role at the time:** Order Picker
 
-### 16. Memo: stay on Shopify for storefront, React only for admin later
+### 14. SOP: load pallets to the lead pusher
 
-- **File:** `documents/16-harbor-shopify-vs-react-memo.docx`
-- **Doc ID:** HBR-MEM-2021-077
+- **File:** `documents/14-pinecrest-lead-pusher-sop.docx`
+- **Doc ID:** PCF-SOP-2024-064
+- **Type:** Runbook / SOP
+- **Form type (dropdown):** Runbook / SOPs
+- **4. Pages:** 44 (LibreOffice), 14267 words
+- **6. Description:** SOP for loading pallets onto the Pinecrest lead pusher: square stacks, wrap to the shoe, rebuild leans, no riders.
+- **7. Written:** 13-06-2024 (June 13, 2024)
+- **Role at the time:** Order Picker
+
+### 15. Safety huddle notes, June 27
+
+- **File:** `documents/15-pinecrest-safety-huddle-notes.docx`
+- **Doc ID:** PCF-MTG-2024-070
+- **Type:** Meeting notes
+- **Form type (dropdown):** Other
+- **4. Pages:** 44 (LibreOffice), 12002 words
+- **6. Description:** Safety huddle notes for Pinecrest: horn, plate spotter, cooler coat, with near-misses on a board instead of a rate-only shout.
+- **7. Written:** 27-06-2024 (June 27, 2024)
+- **Role at the time:** Order Picker
+
+### 16. PRD: returns lane, not back into forward pick
+
+- **File:** `documents/16-pinecrest-returns-prd.docx`
+- **Doc ID:** PCF-PRD-2024-077
+- **Type:** Product requirements document
+- **Form type (dropdown):** Product requirements doc
+- **4. Pages:** 45 (LibreOffice), 11984 words
+- **6. Description:** PRD for a Pinecrest returns lane into a quarantine cage, refusing dump-back onto the forward pick face.
+- **7. Written:** 18-07-2024 (July 18, 2024)
+- **Role at the time:** Order Picker
+
+### 17. Incident: pack labels printed yesterday's wave
+
+- **File:** `documents/17-pinecrest-labeler-incident.docx`
+- **Doc ID:** PCF-INC-2024-082
+- **Type:** Incident report
+- **Form type (dropdown):** Incident report
+- **4. Pages:** 46 (LibreOffice), 12047 words
+- **6. Description:** Incident report for Pinecrest pack labels printing the previous day's wave, with a refuse on mashing reprint.
+- **7. Written:** 30-07-2024 (July 30, 2024)
+- **Role at the time:** Order Picker
+
+### 18. Memo: units per hour is a team number, not a hunt
+
+- **File:** `documents/18-pinecrest-uph-memo.docx`
+- **Doc ID:** PCF-MEM-2024-088
 - **Type:** Recommendation memo
 - **Form type (dropdown):** Other
-- **4. Pages:** 43 (LibreOffice), 12251 words
-- **6. Description:** Recommendation memo telling Dana Whitlock to stay on Shopify for the Harbor & Oak storefront and to refuse a custom React rebuild.
-- **7. Written:** 07-12-2021 (December 7, 2021)
-- **Role at the time:** Web Developer
+- **4. Pages:** 43 (LibreOffice), 12481 words
+- **6. Description:** Memo asking Marcus Hale to replace the public individual UPH rank board with team rate plus mispick, after skip-scan returned.
+- **7. Written:** 15-08-2024 (August 15, 2024)
+- **Role at the time:** Order Picker
 
-### 17. Product photo pipeline notes, December 14
+### 19. New-hire pick integration guide, building 2
 
-- **File:** `documents/17-harbor-product-photo-notes.docx`
-- **Doc ID:** HBR-MTG-2021-081
-- **Type:** Meeting notes
-- **Form type (dropdown):** Other
-- **4. Pages:** 49 (LibreOffice), 15019 words
-- **6. Description:** Meeting notes locking Harbor & Oak product photo rules: size, format, alt text, and the refuse on uncompressed lifestyle galleries.
-- **7. Written:** 14-12-2021 (December 14, 2021)
-- **Role at the time:** Web Developer
-
-### 18. SOP: Harbor & Oak product CSV load
-
-- **File:** `documents/18-harbor-csv-load-sop.docx`
-- **Doc ID:** HBR-SOP-2022-012
-- **Type:** Runbook / SOP
-- **Form type (dropdown):** Runbook / SOPs
-- **4. Pages:** 47 (LibreOffice), 14073 words
-- **6. Description:** SOP for loading Harbor & Oak product CSVs, with a hard stop on blank SKUs and a dry-run count before any write.
-- **7. Written:** 17-02-2022 (February 17, 2022)
-- **Role at the time:** Web Developer
-
-### 19. Incident: GA4 double-count after theme and app both fired purchase
-
-- **File:** `documents/19-harbor-ga4-double-count-incident.docx`
-- **Doc ID:** HBR-INC-2022-019
-- **Type:** Incident report
-- **Form type (dropdown):** Incident report
-- **4. Pages:** 45 (LibreOffice), 12006 words
-- **6. Description:** Incident report for Harbor & Oak GA4 double-counted purchases after the theme pixel and GTM both fired, with the one-pixel cut.
-- **7. Written:** 08-03-2022 (March 8, 2022)
-- **Role at the time:** Web Developer
-
-### 20. Harbor & Oak abandoned-cart email design
-
-- **File:** `documents/20-harbor-email-tool-design.docx`
-- **Doc ID:** HBR-TDD-2022-028
-- **Type:** Technical design document
-- **Form type (dropdown):** Technical design doc
-- **4. Pages:** 45 (LibreOffice), 14448 words
-- **6. Description:** Technical design for Harbor & Oak abandoned-cart email, choosing Klaviyo with pickup and POS suppress over a custom Node sender.
-- **7. Written:** 26-04-2022 (April 26, 2022)
-- **Role at the time:** Web Developer
-
-### 21. PRD: Harbor & Oak gift cards, in-store and online
-
-- **File:** `documents/21-harbor-gift-card-prd.docx`
-- **Doc ID:** HBR-PRD-2022-034
-- **Type:** Product requirements document
-- **Form type (dropdown):** Product requirements doc
-- **4. Pages:** 43 (LibreOffice), 14143 words
-- **6. Description:** PRD for Harbor & Oak gift cards with a single Shopify ledger for in-store sale and online redeem, refusing a second-ledger app.
-- **7. Written:** 09-06-2022 (June 9, 2022)
-- **Role at the time:** Web Developer
-
-### 22. Harbor & Oak checkout test strategy
-
-- **File:** `documents/22-harbor-checkout-test-strategy.docx`
-- **Doc ID:** HBR-TST-2022-041
-- **Type:** Test strategy
-- **Form type (dropdown):** Other
-- **4. Pages:** 46 (LibreOffice), 12916 words
-- **6. Description:** Checkout test strategy for Harbor & Oak, locking block-merge cases for pickup, wrap-off, gift card, and a single GA4 purchase event.
-- **7. Written:** 21-07-2022 (July 21, 2022)
-- **Role at the time:** Web Developer
-
-### 23. Harbor & Oak owner integration guide
-
-- **File:** `documents/23-harbor-owner-integration-guide.docx`
-- **Doc ID:** HBR-DOC-2022-048
+- **File:** `documents/19-pinecrest-newhire-pick-guide.docx`
+- **Doc ID:** PCF-DOC-2024-094
 - **Type:** Integration guide
 - **Form type (dropdown):** Other
-- **4. Pages:** 46 (LibreOffice), 12822 words
-- **6. Description:** Owner integration guide for Harbor & Oak: pickup shelf, product CSV, theme preview, and who to contact, written so Dana does not need a wiki.
-- **7. Written:** 25-08-2022 (August 25, 2022)
-- **Role at the time:** Web Developer
+- **4. Pages:** 45 (LibreOffice), 11984 words
+- **6. Description:** New-hire pick guide for Pinecrest building 2: five-day buddy, SOP list, and a refuse on day-one solo waves.
+- **7. Written:** 29-08-2024 (August 29, 2024)
+- **Role at the time:** Order Picker
 
-### 24. Harbor & Oak wholesale v1 requirements
+### 20. Incident: forward-pick variance on SKU 7721 after ghost confirm
 
-- **File:** `documents/24-harbor-wholesale-requirements.docx`
-- **Doc ID:** HBR-REQ-2022-055
-- **Type:** Requirements document
-- **Form type (dropdown):** Requirements doc
-- **4. Pages:** 47 (LibreOffice), 12707 words
-- **6. Description:** Requirements for Harbor & Oak wholesale v1: a hidden catalog and 11 tagged accounts, refusing a paid B2B app.
-- **7. Written:** 13-10-2022 (October 13, 2022)
-- **Role at the time:** Web Developer
-
-### 25. Lakeshore inventory position API v1 requirements
-
-- **File:** `documents/25-lakeshore-inventory-api-requirements.docx`
-- **Doc ID:** LSH-REQ-2022-014
-- **Type:** Requirements document
-- **Form type (dropdown):** Requirements doc
-- **4. Pages:** 44 (LibreOffice), 12710 words
-- **6. Description:** Requirements for the Lakeshore inventory position API v1, written so store ops and the developer share one scope after LSH-4401.
-- **7. Written:** 22-09-2022 (September 22, 2022)
-- **Role at the time:** Web Developer
-
-### 26. Lakeshore inventory API REST design
-
-- **File:** `documents/26-lakeshore-inventory-rest-design.docx`
-- **Doc ID:** LSH-TDD-2022-022
-- **Type:** Technical design document
-- **Form type (dropdown):** Technical design doc
-- **4. Pages:** 44 (LibreOffice), 12722 words
-- **6. Description:** REST design for the Lakeshore inventory API: storeId as CHAR(2), cursors, timeout, and 503 on replica lag.
-- **7. Written:** 03-11-2022 (November 3, 2022)
-- **Role at the time:** Web Developer
-
-### 27. Lakeshore four-store stock path, systems design
-
-- **File:** `documents/27-lakeshore-four-store-systems-design.docx`
-- **Doc ID:** LSH-SYS-2022-031
-- **Type:** Systems design document
-- **Form type (dropdown):** Systems design doc
-- **4. Pages:** 47 (LibreOffice), 11955 words
-- **6. Description:** Systems design for Lakeshore four-store stock: POS as source, API in the middle, Woo as a projection, no pooled bin.
-- **7. Written:** 15-12-2022 (December 15, 2022)
-- **Role at the time:** Web Developer
-
-### 28. Runbook: Lakeshore nightly stock projection to Woo
-
-- **File:** `documents/28-lakeshore-nightly-stock-runbook.docx`
-- **Doc ID:** LSH-RB-2023-008
-- **Type:** Runbook / SOP
-- **Form type (dropdown):** Runbook / SOPs
-- **4. Pages:** 47 (LibreOffice), 14635 words
-- **6. Description:** On-call runbook for the Lakeshore nightly Woo stock projection, with checksum, zero-row paging, and a refuse on laptop reruns.
-- **7. Written:** 16-02-2023 (February 16, 2023)
-- **Role at the time:** Web Developer
-
-### 29. Incident: negative on-hand after overlapping stock jobs
-
-- **File:** `documents/29-lakeshore-negative-onhand-incident.docx`
-- **Doc ID:** LSH-INC-2023-017
+- **File:** `documents/20-pinecrest-variance-incident.docx`
+- **Doc ID:** PCF-INC-2024-101
 - **Type:** Incident report
 - **Form type (dropdown):** Incident report
-- **4. Pages:** 45 (LibreOffice), 12008 words
-- **6. Description:** Incident report for Lakeshore negative on-hand after overlapping stock jobs, with clamp, lock, and the refuse on auto-backorder.
-- **7. Written:** 16-03-2023 (March 16, 2023)
-- **Role at the time:** Web Developer
+- **4. Pages:** 46 (LibreOffice), 11969 words
+- **6. Description:** Incident report for a Pinecrest forward-pick ghost quantity on SKU 7721, refusing memory adjusts instead of a frozen blind count.
+- **7. Written:** 13-09-2024 (September 13, 2024)
+- **Role at the time:** Order Picker
 
-### 30. PRD: Lakeshore store pickup across four stores
+### 21. Runbook: pack conveyor jam between stations 8 and 9
 
-- **File:** `documents/30-lakeshore-store-pickup-prd.docx`
-- **Doc ID:** LSH-PRD-2023-026
-- **Type:** Product requirements document
-- **Form type (dropdown):** Product requirements doc
-- **4. Pages:** 45 (LibreOffice), 12504 words
-- **6. Description:** PRD for Lakeshore four-store pickup: store picker, per-store quantity, 15:30 cutoff, no transfer-as-pickup.
-- **7. Written:** 04-05-2023 (May 4, 2023)
-- **Role at the time:** Web Developer
-
-### 31. SOP: WooCommerce deploy for four Lakeshore storefronts
-
-- **File:** `documents/31-lakeshore-woo-deploy-sop.docx`
-- **Doc ID:** LSH-SOP-2023-033
+- **File:** `documents/21-pinecrest-conveyor-jam-runbook.docx`
+- **Doc ID:** PCF-RB-2024-108
 - **Type:** Runbook / SOP
 - **Form type (dropdown):** Runbook / SOPs
-- **4. Pages:** 45 (LibreOffice), 12059 words
-- **6. Description:** Deploy SOP for four Lakeshore WooCommerce storefronts, blocking live wp-admin plugin updates after the May 18 pickup hide.
-- **7. Written:** 22-06-2023 (June 22, 2023)
-- **Role at the time:** Web Developer
+- **4. Pages:** 42 (LibreOffice), 14408 words
+- **6. Description:** Runbook for a Pinecrest pack conveyor jam: e-stop and lockout before clearing, refusing a reach-in to save rate.
+- **7. Written:** 26-09-2024 (September 26, 2024)
+- **Role at the time:** Order Picker
 
-### 32. Memo: keep MySQL for stock, Mongo only for catalog extras
+### 22. Weekend surge notes, October 5
 
-- **File:** `documents/32-lakeshore-mongo-vs-mysql-memo.docx`
-- **Doc ID:** LSH-MEM-2023-041
-- **Type:** Recommendation memo
-- **Form type (dropdown):** Other
-- **4. Pages:** 48 (LibreOffice), 12013 words
-- **6. Description:** Recommendation memo keeping Lakeshore on-hand in MySQL and refusing a Mongo stock ledger after a contractor suggestion.
-- **7. Written:** 10-08-2023 (August 10, 2023)
-- **Role at the time:** Web Developer
-
-### 33. Store manager feedback notes, September 14
-
-- **File:** `documents/33-lakeshore-store-manager-notes.docx`
-- **Doc ID:** LSH-MTG-2023-049
+- **File:** `documents/22-pinecrest-weekend-surge-notes.docx`
+- **Doc ID:** PCF-MTG-2024-114
 - **Type:** Meeting notes
 - **Form type (dropdown):** Other
-- **4. Pages:** 47 (LibreOffice), 11974 words
-- **6. Description:** Store manager feedback notes for Lakeshore pickup, negative quantity, and weekend coverage, with owners and refused paths.
-- **7. Written:** 14-09-2023 (September 14, 2023)
-- **Role at the time:** Web Developer
+- **4. Pages:** 42 (LibreOffice), 13634 words
+- **6. Description:** Weekend surge notes for Pinecrest: signed Saturday roster, cooler limits, and a refuse on hallway staffing.
+- **7. Written:** 05-10-2024 (October 5, 2024)
+- **Role at the time:** Order Picker
 
-### 34. Lakeshore React stock admin, technical design
+### 23. Requirements: lot-code pick on dairy and chemicals
 
-- **File:** `documents/34-lakeshore-react-admin-design.docx`
-- **Doc ID:** LSH-TDD-2023-058
-- **Type:** Technical design document
-- **Form type (dropdown):** Technical design doc
-- **4. Pages:** 49 (LibreOffice), 11966 words
-- **6. Description:** Technical design for a React stock admin at Lakeshore that reads the inventory API and never writes Woo from the browser.
-- **7. Written:** 26-10-2023 (October 26, 2023)
-- **Role at the time:** Web Developer
+- **File:** `documents/23-pinecrest-lotcode-requirements.docx`
+- **Doc ID:** PCF-REQ-2024-121
+- **Type:** Requirements document
+- **Form type (dropdown):** Requirements doc
+- **4. Pages:** 50 (LibreOffice), 12005 words
+- **6. Description:** Requirements for Pinecrest lot-code picking on dairy and chemicals: FEFO, RF scan, WMS block, refusing a pack paper log.
+- **7. Written:** 24-10-2024 (October 24, 2024)
+- **Role at the time:** Order Picker
 
-### 35. Memo: Docker Compose for Woo, Kubernetes only for inventory-api
+### 24. Memo: case-pick pallet when the order is 8 cases or more
 
-- **File:** `documents/35-lakeshore-docker-vs-k8s-memo.docx`
-- **Doc ID:** LSH-MEM-2024-006
+- **File:** `documents/24-pinecrest-carton-vs-pallet-memo.docx`
+- **Doc ID:** PCF-MEM-2024-128
 - **Type:** Recommendation memo
 - **Form type (dropdown):** Other
-- **4. Pages:** 43 (LibreOffice), 14502 words
-- **6. Description:** Recommendation memo keeping Lakeshore WooCommerce on Docker Compose and Kubernetes only for inventory-api, refusing a four-site Helm move.
-- **7. Written:** 18-01-2024 (January 18, 2024)
-- **Role at the time:** Web Developer
+- **4. Pages:** 48 (LibreOffice), 12028 words
+- **6. Description:** Memo switching Pinecrest orders of 8 or more cases to pallet case-pick, refusing carton-each as a way to dress up UPH.
+- **7. Written:** 07-11-2024 (November 7, 2024)
+- **Role at the time:** Order Picker
 
-### 36. Incident: expired TLS certificate on pickup.lakeshore.internal
+### 25. Incident: short-pick confirmed empty on a full bin
 
-- **File:** `documents/36-lakeshore-tls-cert-incident.docx`
-- **Doc ID:** LSH-INC-2024-014
+- **File:** `documents/25-pinecrest-short-pick-incident.docx`
+- **Doc ID:** PCF-INC-2024-135
 - **Type:** Incident report
 - **Form type (dropdown):** Incident report
-- **4. Pages:** 48 (LibreOffice), 12012 words
-- **6. Description:** Incident report for an expired TLS certificate on the Lakeshore pickup host, with renew windows and a refuse on an uninventoried wildcard.
-- **7. Written:** 12-02-2024 (February 12, 2024)
-- **Role at the time:** Web Developer
+- **4. Pages:** 45 (LibreOffice), 12509 words
+- **6. Description:** Incident report for a Pinecrest short-pick confirmed empty on a full bin, requiring a photo and lead look before confirm-empty.
+- **7. Written:** 21-11-2024 (November 21, 2024)
+- **Role at the time:** Order Picker
 
-### 37. Memo: AWS capacity for weekend sales, stay on two API pods until 40 percent headroom fails
+### 26. SOP: RF battery swap and end-of-shift charge
 
-- **File:** `documents/37-lakeshore-aws-capacity-memo.docx`
-- **Doc ID:** LSH-MEM-2024-022
-- **Type:** Capacity memo
-- **Form type (dropdown):** Other
-- **4. Pages:** 46 (LibreOffice), 12095 words
-- **6. Description:** Capacity memo for Lakeshore inventory-api on AWS, refusing a larger instance after a weekend graph that was Woo PHP, not the API.
-- **7. Written:** 07-03-2024 (March 7, 2024)
-- **Role at the time:** Web Developer
-
-### 38. ADR: React admin for stock, WordPress stays the public storefront
-
-- **File:** `documents/38-lakeshore-react-vs-wp-adr.docx`
-- **Doc ID:** LSH-ADR-2024-029
-- **Type:** Architecture decision record
-- **Form type (dropdown):** Other
-- **4. Pages:** 49 (LibreOffice), 12036 words
-- **6. Description:** Architecture decision record keeping Lakeshore public storefronts on WooCommerce and the stock admin on React, with Luis as acceptor.
-- **7. Written:** 02-04-2024 (April 2, 2024)
-- **Role at the time:** Web Developer
-
-### 39. Load report: Lakeshore Memorial Day weekend sale
-
-- **File:** `documents/39-lakeshore-weekend-sale-load-test.docx`
-- **Doc ID:** LSH-TST-2024-037
-- **Type:** Load test report
-- **Form type (dropdown):** Other
-- **4. Pages:** 46 (LibreOffice), 12022 words
-- **6. Description:** Load test report for the Lakeshore Memorial Day sale soak at 2.4x Tuesday traffic, with fail gates and a refuse on 1x soak.
-- **7. Written:** 28-05-2024 (May 28, 2024)
-- **Role at the time:** Web Developer
-
-### 40. SOP: MySQL 8 schema change for inventory, expand then contract
-
-- **File:** `documents/40-lakeshore-mysql-migration-sop.docx`
-- **Doc ID:** LSH-SOP-2024-044
+- **File:** `documents/26-pinecrest-rf-battery-sop.docx`
+- **Doc ID:** PCF-SOP-2024-141
 - **Type:** Runbook / SOP
 - **Form type (dropdown):** Runbook / SOPs
-- **4. Pages:** 42 (LibreOffice), 13913 words
-- **6. Description:** SOP for Lakeshore inventory MySQL schema changes using expand/contract, an 8 second lock budget, and no same-release column drop.
-- **7. Written:** 11-07-2024 (July 11, 2024)
-- **Role at the time:** Web Developer
+- **4. Pages:** 45 (LibreOffice), 12167 words
+- **6. Description:** SOP for Pinecrest RF batteries: swap under 30 percent, cage charge at end of shift, refusing tote-as-charger.
+- **7. Written:** 05-12-2024 (December 5, 2024)
+- **Role at the time:** Order Picker
 
-### 41. On-call SOP for Lakeshore inventory-api and Woo projection
+### 27. Eval rubric: pick-tote audit at pack
 
-- **File:** `documents/41-lakeshore-oncall-sop.docx`
-- **Doc ID:** LSH-SOP-2024-051
-- **Type:** Runbook / SOP
-- **Form type (dropdown):** Runbook / SOPs
-- **4. Pages:** 45 (LibreOffice), 11965 words
-- **6. Description:** On-call SOP for Lakeshore inventory-api and Woo projection, with named tells and a refuse on 'check Grafana' page bodies.
-- **7. Written:** 22-08-2024 (August 22, 2024)
-- **Role at the time:** Web Developer
-
-### 42. Lakeshore AWS Terraform layout for inventory-api
-
-- **File:** `documents/42-lakeshore-aws-terraform-design.docx`
-- **Doc ID:** LSH-TDD-2024-059
-- **Type:** Technical design document
-- **Form type (dropdown):** Technical design doc
-- **4. Pages:** 45 (LibreOffice), 12880 words
-- **6. Description:** Terraform design for Lakeshore inventory-api on AWS: four modules, stg/prod workspaces, one account, no 4k-line main.tf.
-- **7. Written:** 19-09-2024 (September 19, 2024)
-- **Role at the time:** Web Developer
-
-### 43. PRD: POS exception codes for stock mismatch
-
-- **File:** `documents/43-lakeshore-pos-exception-prd.docx`
-- **Doc ID:** LSH-PRD-2025-007
-- **Type:** Product requirements document
-- **Form type (dropdown):** Product requirements doc
-- **4. Pages:** 47 (LibreOffice), 12031 words
-- **6. Description:** PRD mapping Lakeshore POS stock-mismatch exceptions to six shared codes with cashier sentences, refusing raw HTTP status on the till.
-- **7. Written:** 16-01-2025 (January 16, 2025)
-- **Role at the time:** Web Developer
-
-### 44. Eval rubric: Lakeshore category copy and title pattern
-
-- **File:** `documents/44-lakeshore-seo-copy-rubric.docx`
-- **Doc ID:** LSH-EVAL-2025-011
+- **File:** `documents/27-pinecrest-qa-audit-rubric.docx`
+- **Doc ID:** PCF-EVAL-2024-148
 - **Type:** Evaluation rubric
 - **Form type (dropdown):** Other
-- **4. Pages:** 48 (LibreOffice), 12016 words
-- **6. Description:** Evaluation rubric for Lakeshore category copy and titles, failing city stuffing and locking a product-category-store pattern.
-- **7. Written:** 20-02-2025 (February 20, 2025)
-- **Role at the time:** Web Developer
+- **4. Pages:** 45 (LibreOffice), 12034 words
+- **6. Description:** QA rubric for Pinecrest pick totes at pack: 1 in 20 audits on SKU, quantity, and lot, refusing neatness as the score.
+- **7. Written:** 19-12-2024 (December 19, 2024)
+- **Role at the time:** Order Picker
 
-### 45. Lakeshore Redis cache for on-hand reads, technical design
+### 28. Memo: stay on RF, do not go back to paper pick sheets
 
-- **File:** `documents/45-lakeshore-redis-stock-design.docx`
-- **Doc ID:** LSH-TDD-2025-018
-- **Type:** Technical design document
-- **Form type (dropdown):** Technical design doc
-- **4. Pages:** 43 (LibreOffice), 14770 words
-- **6. Description:** Technical design for a Redis cache in front of Lakeshore on-hand reads, with a 45s TTL and fail-open to MySQL instead of stale-as-fresh.
-- **7. Written:** 13-03-2025 (March 13, 2025)
-- **Role at the time:** Web Developer
+- **File:** `documents/28-pinecrest-paper-vs-rf-memo.docx`
+- **Doc ID:** PCF-MEM-2025-006
+- **Type:** Recommendation memo
+- **Form type (dropdown):** Other
+- **4. Pages:** 43 (LibreOffice), 14346 words
+- **6. Description:** Memo keeping Pinecrest on RF pick and refusing daily backup paper sheets after printer-outage leftovers.
+- **7. Written:** 16-01-2025 (January 16, 2025)
+- **Role at the time:** Order Picker
 
-### 46. Postmortem: weekend double-charge on pickup prepaid
+### 29. SOP: outbound seal, photo, and BOL match
 
-- **File:** `documents/46-lakeshore-weekend-double-charge-postmortem.docx`
-- **Doc ID:** LSH-INC-2025-024
-- **Type:** Incident report / postmortem
+- **File:** `documents/29-pinecrest-outbound-seal-sop.docx`
+- **Doc ID:** PCF-SOP-2025-012
+- **Type:** Runbook / SOP
+- **Form type (dropdown):** Runbook / SOPs
+- **4. Pages:** 45 (LibreOffice), 15070 words
+- **6. Description:** SOP for Pinecrest outbound seals: BOL, physical seal, and photo must match, refusing after-the-fact BOL fixes.
+- **7. Written:** 30-01-2025 (January 30, 2025)
+- **Role at the time:** Order Picker
+
+### 30. Incident: wrong SKU packed after look-alike bottles
+
+- **File:** `documents/30-pinecrest-wrong-sku-pack-incident.docx`
+- **Doc ID:** PCF-INC-2025-018
+- **Type:** Incident report
 - **Form type (dropdown):** Incident report
-- **4. Pages:** 45 (LibreOffice), 14266 words
-- **6. Description:** Postmortem for Lakeshore weekend double-charges on prepaid pickup, covering the missing idempotency key, 11 refunds, and the refuse on laptop capture retries.
-- **7. Written:** 10-04-2025 (April 10, 2025)
-- **Role at the time:** Web Developer
+- **4. Pages:** 48 (LibreOffice), 11998 words
+- **6. Description:** Incident report for Pinecrest look-alike bottles packed wrong, requiring separate slots and a refuse on color as a confirm.
+- **7. Written:** 13-02-2025 (February 13, 2025)
+- **Role at the time:** Order Picker
 
-### 47. Hillcrest Digital client onboard SOP
+### 31. Staging lane design for doors 1-4
 
-- **File:** `documents/47-hillcrest-client-onboard-sop.docx`
-- **Doc ID:** HIL-SOP-2024-031
-- **Type:** Runbook / SOP
-- **Form type (dropdown):** Runbook / SOPs
-- **4. Pages:** 44 (LibreOffice), 12011 words
-- **6. Description:** SOP for onboarding a Hillcrest Digital web client: access, staging host, ticket prefix, first deploy window, and a refuse on Slack password paste.
-- **7. Written:** 13-06-2024 (June 13, 2024)
-- **Role at the time:** Web Developer
-
-### 48. Hillcrest Digital secrets and access SOP
-
-- **File:** `documents/48-hillcrest-secrets-access-sop.docx`
-- **Doc ID:** HIL-SOP-2024-038
-- **Type:** Runbook / SOP
-- **Form type (dropdown):** Runbook / SOPs
-- **4. Pages:** 48 (LibreOffice), 14871 words
-- **6. Description:** SOP for Hillcrest Digital secrets and access: per-client vaults, seven-day expiry after pause, logged break-glass, no secrets in tickets.
-- **7. Written:** 25-07-2024 (July 25, 2024)
-- **Role at the time:** Web Developer
-
-### 49. Hillcrest staging-per-client design
-
-- **File:** `documents/49-hillcrest-staging-per-client-design.docx`
-- **Doc ID:** HIL-TDD-2025-009
+- **File:** `documents/31-pinecrest-staging-lane-design.docx`
+- **Doc ID:** PCF-TDD-2025-024
 - **Type:** Technical design document
 - **Form type (dropdown):** Technical design doc
-- **4. Pages:** 44 (LibreOffice), 13643 words
-- **6. Description:** Technical design for per-client Hillcrest staging hosts, refusing a shared preview after a Harbor/Lakeshore leftover mix.
-- **7. Written:** 06-02-2025 (February 6, 2025)
-- **Role at the time:** Web Developer
+- **4. Pages:** 43 (LibreOffice), 13921 words
+- **6. Description:** Design for Pinecrest staging lanes: one lane per door, labels out, refusing a shared flex overflow lane.
+- **7. Written:** 27-02-2025 (February 27, 2025)
+- **Role at the time:** Order Picker
 
-### 50. Hillcrest Q3 pipeline notes, August 7
+### 32. Shift handoff notes, first to second, March 13
 
-- **File:** `documents/50-hillcrest-q3-pipeline-notes.docx`
-- **Doc ID:** HIL-MTG-2025-016
+- **File:** `documents/32-pinecrest-shift-handoff-notes.docx`
+- **Doc ID:** PCF-MTG-2025-030
 - **Type:** Meeting notes
 - **Form type (dropdown):** Other
-- **4. Pages:** 43 (LibreOffice), 14795 words
-- **6. Description:** Q3 pipeline notes for Hillcrest Digital: Lakeshore active work, Harbor maintenance, one new onboard maximum, and a refuse on two first-publishes in one week.
-- **7. Written:** 07-08-2025 (August 7, 2025)
-- **Role at the time:** Web Developer
+- **4. Pages:** 46 (LibreOffice), 12026 words
+- **6. Description:** Shift handoff notes for Pinecrest first-to-second: open waves, frozen bins, red-tagged jacks, refusing a verbal-only pass.
+- **7. Written:** 13-03-2025 (March 13, 2025)
+- **Role at the time:** Order Picker
+
+### 33. SOP: preventative maintenance checklist, bay 1-4
+
+- **File:** `documents/33-ridgeway-pm-checklist-sop.docx`
+- **Doc ID:** RDW-SOP-2022-011
+- **Type:** Runbook / SOP
+- **Form type (dropdown):** Runbook / SOPs
+- **4. Pages:** 44 (LibreOffice), 12327 words
+- **6. Description:** PM checklist SOP for Ridgeway Diesel bays 1-4, requiring initialed lines and refusing a dash-light as the PM.
+- **7. Written:** 14-07-2022 (July 14, 2022)
+- **Role at the time:** Shop Helper
+
+### 34. SOP: air and hydraulic brake inspection
+
+- **File:** `documents/34-ridgeway-air-brake-sop.docx`
+- **Doc ID:** RDW-SOP-2022-018
+- **Type:** Runbook / SOP
+- **Form type (dropdown):** Runbook / SOPs
+- **4. Pages:** 43 (LibreOffice), 14891 words
+- **6. Description:** Brake inspection SOP for Ridgeway Diesel: chock, soap, pushrod measure, refusing a wipe-and-send on hydraulic leaks.
+- **7. Written:** 11-08-2022 (August 11, 2022)
+- **Role at the time:** Shop Helper
+
+### 35. Diesel fuel system tune-up notes, September 8
+
+- **File:** `documents/35-ridgeway-fuel-tune-notes.docx`
+- **Doc ID:** RDW-MTG-2022-024
+- **Type:** Meeting notes
+- **Form type (dropdown):** Other
+- **4. Pages:** 46 (LibreOffice), 15137 words
+- **6. Description:** Notes for Ridgeway Diesel fuel-system tune-ups: paired filters, prime, refusing long-crank after a dry filter.
+- **7. Written:** 08-09-2022 (September 8, 2022)
+- **Role at the time:** Shop Helper
+
+### 36. Incident: no-start after a battery jump with loose ground
+
+- **File:** `documents/36-ridgeway-nostart-incident.docx`
+- **Doc ID:** RDW-INC-2022-041
+- **Type:** Incident report
+- **Form type (dropdown):** Incident report
+- **4. Pages:** 44 (LibreOffice), 12578 words
+- **6. Description:** Incident report for a Ridgeway no-start after jumping a truck with a corroded ground, refusing jump-first diagnosis.
+- **7. Written:** 11-10-2022 (October 11, 2022)
+- **Role at the time:** Shop Helper
+
+### 37. SOP: A/C and electrical accessory checks
+
+- **File:** `documents/37-ridgeway-ac-electrical-sop.docx`
+- **Doc ID:** RDW-SOP-2022-055
+- **Type:** Runbook / SOP
+- **Form type (dropdown):** Runbook / SOPs
+- **4. Pages:** 47 (LibreOffice), 15364 words
+- **6. Description:** SOP for Ridgeway A/C and electrical accessory checks: fuse and clutch click before gauges, refusing recharge-first.
+- **7. Written:** 03-11-2022 (November 3, 2022)
+- **Role at the time:** Shop Helper
+
+### 38. SOP: heavy-duty drivetrain inspection
+
+- **File:** `documents/38-ridgeway-drivetrain-sop.docx`
+- **Doc ID:** RDW-SOP-2022-062
+- **Type:** Runbook / SOP
+- **Form type (dropdown):** Runbook / SOPs
+- **4. Pages:** 47 (LibreOffice), 14422 words
+- **6. Description:** Drivetrain inspection SOP for Ridgeway Diesel: hoist, pry, written play, refusing a clunk as normal for the miles.
+- **7. Written:** 22-11-2022 (November 22, 2022)
+- **Role at the time:** Shop Helper
+
+### 39. SOP: welding and hydraulics in the shop
+
+- **File:** `documents/39-ridgeway-weld-hydraulics-sop.docx`
+- **Doc ID:** RDW-SOP-2022-070
+- **Type:** Runbook / SOP
+- **Form type (dropdown):** Runbook / SOPs
+- **4. Pages:** 45 (LibreOffice), 12255 words
+- **6. Description:** SOP for welding and hydraulics at Ridgeway Diesel: screens, fire watch, capped lines, refusing a tack on a wet fitting.
+- **7. Written:** 15-12-2022 (December 15, 2022)
+- **Role at the time:** Shop Helper
+
+### 40. SOP: truck steering and suspension inspection
+
+- **File:** `documents/40-ridgeway-steer-suspension-sop.docx`
+- **Doc ID:** RDW-SOP-2023-008
+- **Type:** Runbook / SOP
+- **Form type (dropdown):** Runbook / SOPs
+- **4. Pages:** 44 (LibreOffice), 15257 words
+- **6. Description:** Steering and suspension SOP for Ridgeway Diesel: inspect and repair before alignment, refusing align-first.
+- **7. Written:** 19-01-2023 (January 19, 2023)
+- **Role at the time:** Shop Helper
+
+### 41. Gas versus diesel bay notes, February 9
+
+- **File:** `documents/41-ridgeway-gas-vs-diesel-notes.docx`
+- **Doc ID:** RDW-MTG-2023-014
+- **Type:** Meeting notes
+- **Form type (dropdown):** Other
+- **4. Pages:** 45 (LibreOffice), 12549 words
+- **6. Description:** Notes splitting Ridgeway gas and diesel bay practice: oil by spec, labeled jugs, refusing one-jug convenience.
+- **7. Written:** 09-02-2023 (February 9, 2023)
+- **Role at the time:** Shop Helper
+
+### 42. SOP: shop tool checkout and end-of-day board
+
+- **File:** `documents/42-ridgeway-tool-checkout-sop.docx`
+- **Doc ID:** RDW-SOP-2023-022
+- **Type:** Runbook / SOP
+- **Form type (dropdown):** Runbook / SOPs
+- **4. Pages:** 45 (LibreOffice), 12138 words
+- **6. Description:** Tool checkout SOP for Ridgeway Diesel scan tools and torque wrenches, refusing overnight leftovers in a customer cab.
+- **7. Written:** 02-03-2023 (March 2, 2023)
+- **Role at the time:** Shop Helper
+
+### 43. SOP: parts purchasing and receiving
+
+- **File:** `documents/43-ridgeway-parts-purchasing-sop.docx`
+- **Doc ID:** RDW-SOP-2023-031
+- **Type:** Runbook / SOP
+- **Form type (dropdown):** Runbook / SOPs
+- **4. Pages:** 44 (LibreOffice), 12375 words
+- **6. Description:** Parts purchasing SOP for Ridgeway Diesel: PO match and core tags, refusing install-first when a truck is blocking a bay.
+- **7. Written:** 23-03-2023 (March 23, 2023)
+- **Role at the time:** Shop Helper
+
+### 44. Requirements: customer write-up that a tech can work
+
+- **File:** `documents/44-ridgeway-writeup-requirements.docx`
+- **Doc ID:** RDW-REQ-2023-044
+- **Type:** Requirements document
+- **Form type (dropdown):** Requirements doc
+- **4. Pages:** 44 (LibreOffice), 14975 words
+- **6. Description:** Requirements for Ridgeway customer write-ups a tech can actually work: complaint, when, speed, last change, refusing three-word tickets.
+- **7. Written:** 13-04-2023 (April 13, 2023)
+- **Role at the time:** Shop Helper
+
+### 45. Incident: comeback after an unsigned PM skip
+
+- **File:** `documents/45-ridgeway-comeback-incident.docx`
+- **Doc ID:** RDW-INC-2023-070
+- **Type:** Incident report
+- **Form type (dropdown):** Incident report
+- **4. Pages:** 40 (LibreOffice), 13686 words
+- **6. Description:** Comeback incident at Ridgeway after an unsigned PM belt line, treating a blank line as a shop skip rather than customer abuse.
+- **7. Written:** 09-05-2023 (May 9, 2023)
+- **Role at the time:** Shop Helper
+
+### 46. Runbook: hoist and jack-stand safety
+
+- **File:** `documents/46-ridgeway-hoist-safety-runbook.docx`
+- **Doc ID:** RDW-RB-2023-077
+- **Type:** Runbook / SOP
+- **Form type (dropdown):** Runbook / SOPs
+- **4. Pages:** 41 (LibreOffice), 13865 words
+- **6. Description:** Hoist and jack-stand runbook for Ridgeway Diesel, refusing a quick look under a truck on a floor jack only.
+- **7. Written:** 25-05-2023 (May 25, 2023)
+- **Role at the time:** Shop Helper
+
+### 47. Emissions and derate notes, June 15
+
+- **File:** `documents/47-ridgeway-emissions-notes.docx`
+- **Doc ID:** RDW-MTG-2023-084
+- **Type:** Meeting notes
+- **Form type (dropdown):** Other
+- **4. Pages:** 42 (LibreOffice), 14746 words
+- **6. Description:** Emissions notes for Ridgeway Diesel: write codes and find cause before clear, refusing clear-and-see as diagnosis.
+- **7. Written:** 15-06-2023 (June 15, 2023)
+- **Role at the time:** Shop Helper
+
+### 48. Memo: oil sample on fleet PM, not only on a noise
+
+- **File:** `documents/48-ridgeway-oil-sample-memo.docx`
+- **Doc ID:** RDW-MEM-2023-091
+- **Type:** Recommendation memo
+- **Form type (dropdown):** Other
+- **4. Pages:** 45 (LibreOffice), 12949 words
+- **6. Description:** Memo putting Ridgeway fleet PMs on an every-other oil sample, refusing samples only after an engine is already loud.
+- **7. Written:** 06-07-2023 (July 6, 2023)
+- **Role at the time:** Shop Helper
+
+### 49. SOP: road test after brake, steer, or drivetrain work
+
+- **File:** `documents/49-ridgeway-roadtest-sop.docx`
+- **Doc ID:** RDW-SOP-2023-102
+- **Type:** Runbook / SOP
+- **Form type (dropdown):** Runbook / SOPs
+- **4. Pages:** 43 (LibreOffice), 14393 words
+- **6. Description:** Road-test SOP for Ridgeway after brake, steer, or drivetrain work: marked route at 35, refusing a lot loop as the test.
+- **7. Written:** 03-08-2023 (August 3, 2023)
+- **Role at the time:** Shop Helper
+
+### 50. Shop kickoff notes, August 24
+
+- **File:** `documents/50-ridgeway-shop-kickoff-notes.docx`
+- **Doc ID:** RDW-MTG-2023-110
+- **Type:** Meeting notes
+- **Form type (dropdown):** Other
+- **4. Pages:** 49 (LibreOffice), 14771 words
+- **6. Description:** Kickoff notes for Ridgeway Diesel shop standards: PM sheets, tool board, write-ups, hoist stands, refusing a skip because the lot is full.
+- **7. Written:** 24-08-2023 (August 24, 2023)
+- **Role at the time:** Shop Helper

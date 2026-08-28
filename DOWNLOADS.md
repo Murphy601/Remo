@@ -2,58 +2,58 @@
 
 Repo is public. Each link below is a direct `.docx` download (GitHub `raw`).
 
-- **All 50 as a zip:** [documents.zip](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents.zip)
-- Branch: `cursor/michael-gilfilian-docs-6e93`
+- **All 50 as a zip:** [documents.zip](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents.zip)
+- Branch: `cursor/jeilen-jones-docs-6e93`
 
 | # | Document | Direct download |
 |---|---|---|
-| 1 | Whetstone mailbox cutover to Exchange Online, v1 requirements | [01-whetstone-azure-mailbox-requirements.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/01-whetstone-azure-mailbox-requirements.docx) |
-| 2 | Helpdesk ticket triage bot, technical design | [02-whetstone-ticket-triage-design.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/02-whetstone-ticket-triage-design.docx) |
-| 3 | Windows 11 golden-image SOP for shop-floor laptops | [03-whetstone-imaging-sop.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/03-whetstone-imaging-sop.docx) |
-| 4 | Incident: duplicate Azure AD accounts after HRIS feed retry | [04-whetstone-aad-duplicate-incident.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/04-whetstone-aad-duplicate-incident.docx) |
-| 5 | Azure mailbox and identity kickoff notes, February 9 | [05-whetstone-azure-kickoff-notes.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/05-whetstone-azure-kickoff-notes.docx) |
-| 6 | Memo: stop lifting fs01 into a Windows VM in Azure | [06-whetstone-fileshare-memo.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/06-whetstone-fileshare-memo.docx) |
-| 7 | Runbook: plant VPN with MFA, no trusted-subnet exception | [07-whetstone-vpn-mfa-runbook.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/07-whetstone-vpn-mfa-runbook.docx) |
-| 8 | Imaging acceptance notes, four shop-floor SKUs | [08-whetstone-imaging-test-notes.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/08-whetstone-imaging-test-notes.docx) |
-| 9 | Harbor & Oak Shopify theme v1 requirements | [09-harbor-shopify-theme-requirements.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/09-harbor-shopify-theme-requirements.docx) |
-| 10 | Harbor & Oak Liquid theme design | [10-harbor-liquid-theme-design.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/10-harbor-liquid-theme-design.docx) |
-| 11 | Harbor & Oak SEO 90-day notes, March 12 | [11-harbor-seo-90day-notes.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/11-harbor-seo-90day-notes.docx) |
-| 12 | Incident: Mother's Day checkout 429 on gift-wrap app | [12-harbor-mothers-day-checkout-incident.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/12-harbor-mothers-day-checkout-incident.docx) |
-| 13 | PRD: Harbor & Oak local pickup | [13-harbor-local-pickup-prd.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/13-harbor-local-pickup-prd.docx) |
-| 14 | Runbook: Harbor & Oak Shopify theme deploy | [14-harbor-shopify-deploy-runbook.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/14-harbor-shopify-deploy-runbook.docx) |
-| 15 | Harbor & Oak inventory sync, systems design | [15-harbor-inventory-sync-design.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/15-harbor-inventory-sync-design.docx) |
-| 16 | Memo: stay on Shopify for storefront, React only for admin later | [16-harbor-shopify-vs-react-memo.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/16-harbor-shopify-vs-react-memo.docx) |
-| 17 | Product photo pipeline notes, December 14 | [17-harbor-product-photo-notes.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/17-harbor-product-photo-notes.docx) |
-| 18 | SOP: Harbor & Oak product CSV load | [18-harbor-csv-load-sop.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/18-harbor-csv-load-sop.docx) |
-| 19 | Incident: GA4 double-count after theme and app both fired purchase | [19-harbor-ga4-double-count-incident.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/19-harbor-ga4-double-count-incident.docx) |
-| 20 | Harbor & Oak abandoned-cart email design | [20-harbor-email-tool-design.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/20-harbor-email-tool-design.docx) |
-| 21 | PRD: Harbor & Oak gift cards, in-store and online | [21-harbor-gift-card-prd.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/21-harbor-gift-card-prd.docx) |
-| 22 | Harbor & Oak checkout test strategy | [22-harbor-checkout-test-strategy.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/22-harbor-checkout-test-strategy.docx) |
-| 23 | Harbor & Oak owner integration guide | [23-harbor-owner-integration-guide.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/23-harbor-owner-integration-guide.docx) |
-| 24 | Harbor & Oak wholesale v1 requirements | [24-harbor-wholesale-requirements.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/24-harbor-wholesale-requirements.docx) |
-| 25 | Lakeshore inventory position API v1 requirements | [25-lakeshore-inventory-api-requirements.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/25-lakeshore-inventory-api-requirements.docx) |
-| 26 | Lakeshore inventory API REST design | [26-lakeshore-inventory-rest-design.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/26-lakeshore-inventory-rest-design.docx) |
-| 27 | Lakeshore four-store stock path, systems design | [27-lakeshore-four-store-systems-design.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/27-lakeshore-four-store-systems-design.docx) |
-| 28 | Runbook: Lakeshore nightly stock projection to Woo | [28-lakeshore-nightly-stock-runbook.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/28-lakeshore-nightly-stock-runbook.docx) |
-| 29 | Incident: negative on-hand after overlapping stock jobs | [29-lakeshore-negative-onhand-incident.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/29-lakeshore-negative-onhand-incident.docx) |
-| 30 | PRD: Lakeshore store pickup across four stores | [30-lakeshore-store-pickup-prd.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/30-lakeshore-store-pickup-prd.docx) |
-| 31 | SOP: WooCommerce deploy for four Lakeshore storefronts | [31-lakeshore-woo-deploy-sop.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/31-lakeshore-woo-deploy-sop.docx) |
-| 32 | Memo: keep MySQL for stock, Mongo only for catalog extras | [32-lakeshore-mongo-vs-mysql-memo.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/32-lakeshore-mongo-vs-mysql-memo.docx) |
-| 33 | Store manager feedback notes, September 14 | [33-lakeshore-store-manager-notes.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/33-lakeshore-store-manager-notes.docx) |
-| 34 | Lakeshore React stock admin, technical design | [34-lakeshore-react-admin-design.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/34-lakeshore-react-admin-design.docx) |
-| 35 | Memo: Docker Compose for Woo, Kubernetes only for inventory-api | [35-lakeshore-docker-vs-k8s-memo.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/35-lakeshore-docker-vs-k8s-memo.docx) |
-| 36 | Incident: expired TLS certificate on pickup.lakeshore.internal | [36-lakeshore-tls-cert-incident.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/36-lakeshore-tls-cert-incident.docx) |
-| 37 | Memo: AWS capacity for weekend sales, stay on two API pods until 40 percent headroom fails | [37-lakeshore-aws-capacity-memo.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/37-lakeshore-aws-capacity-memo.docx) |
-| 38 | ADR: React admin for stock, WordPress stays the public storefront | [38-lakeshore-react-vs-wp-adr.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/38-lakeshore-react-vs-wp-adr.docx) |
-| 39 | Load report: Lakeshore Memorial Day weekend sale | [39-lakeshore-weekend-sale-load-test.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/39-lakeshore-weekend-sale-load-test.docx) |
-| 40 | SOP: MySQL 8 schema change for inventory, expand then contract | [40-lakeshore-mysql-migration-sop.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/40-lakeshore-mysql-migration-sop.docx) |
-| 41 | On-call SOP for Lakeshore inventory-api and Woo projection | [41-lakeshore-oncall-sop.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/41-lakeshore-oncall-sop.docx) |
-| 42 | Lakeshore AWS Terraform layout for inventory-api | [42-lakeshore-aws-terraform-design.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/42-lakeshore-aws-terraform-design.docx) |
-| 43 | PRD: POS exception codes for stock mismatch | [43-lakeshore-pos-exception-prd.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/43-lakeshore-pos-exception-prd.docx) |
-| 44 | Eval rubric: Lakeshore category copy and title pattern | [44-lakeshore-seo-copy-rubric.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/44-lakeshore-seo-copy-rubric.docx) |
-| 45 | Lakeshore Redis cache for on-hand reads, technical design | [45-lakeshore-redis-stock-design.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/45-lakeshore-redis-stock-design.docx) |
-| 46 | Postmortem: weekend double-charge on pickup prepaid | [46-lakeshore-weekend-double-charge-postmortem.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/46-lakeshore-weekend-double-charge-postmortem.docx) |
-| 47 | Hillcrest Digital client onboard SOP | [47-hillcrest-client-onboard-sop.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/47-hillcrest-client-onboard-sop.docx) |
-| 48 | Hillcrest Digital secrets and access SOP | [48-hillcrest-secrets-access-sop.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/48-hillcrest-secrets-access-sop.docx) |
-| 49 | Hillcrest staging-per-client design | [49-hillcrest-staging-per-client-design.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/49-hillcrest-staging-per-client-design.docx) |
-| 50 | Hillcrest Q3 pipeline notes, August 7 | [50-hillcrest-q3-pipeline-notes.docx](https://github.com/Murphy601/Remo/raw/cursor/michael-gilfilian-docs-6e93/documents/50-hillcrest-q3-pipeline-notes.docx) |
+| 1 | SOP: zone pick path for building 2 dry | [01-pinecrest-pick-path-sop.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/01-pinecrest-pick-path-sop.docx) |
+| 2 | SOP: pack station 6 through 11, dry outbound | [02-pinecrest-pack-station-sop.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/02-pinecrest-pack-station-sop.docx) |
+| 3 | Runbook: electric pallet jack on dock and pick aisles | [03-pinecrest-pallet-jack-runbook.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/03-pinecrest-pallet-jack-runbook.docx) |
+| 4 | Incident: 14 mispicks on wave 2-14 after skip-scan Friday | [04-pinecrest-mispick-incident.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/04-pinecrest-mispick-incident.docx) |
+| 5 | Production rate huddle notes, January 25 | [05-pinecrest-rate-huddle-notes.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/05-pinecrest-rate-huddle-notes.docx) |
+| 6 | Requirements: forward-pick slotting for top 80 SKUs | [06-pinecrest-slotting-requirements.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/06-pinecrest-slotting-requirements.docx) |
+| 7 | Wave pick design for building 2 dry | [07-pinecrest-wave-pick-design.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/07-pinecrest-wave-pick-design.docx) |
+| 8 | Cooler versus dry pick notes, March 21 | [08-pinecrest-cooler-pick-notes.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/08-pinecrest-cooler-pick-notes.docx) |
+| 9 | Memo: overtime is not a skip-scan license | [09-pinecrest-overtime-memo.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/09-pinecrest-overtime-memo.docx) |
+| 10 | SOP: RF gun login, battery, and location confirm | [10-pinecrest-rf-scanner-sop.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/10-pinecrest-rf-scanner-sop.docx) |
+| 11 | Incident: crushed freight on inbound door 3 | [11-pinecrest-damaged-freight-incident.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/11-pinecrest-damaged-freight-incident.docx) |
+| 12 | SOP: cycle count during first break, dry forward | [12-pinecrest-cycle-count-sop.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/12-pinecrest-cycle-count-sop.docx) |
+| 13 | SOP: outbound load at doors 1-4 | [13-pinecrest-dock-load-sop.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/13-pinecrest-dock-load-sop.docx) |
+| 14 | SOP: load pallets to the lead pusher | [14-pinecrest-lead-pusher-sop.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/14-pinecrest-lead-pusher-sop.docx) |
+| 15 | Safety huddle notes, June 27 | [15-pinecrest-safety-huddle-notes.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/15-pinecrest-safety-huddle-notes.docx) |
+| 16 | PRD: returns lane, not back into forward pick | [16-pinecrest-returns-prd.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/16-pinecrest-returns-prd.docx) |
+| 17 | Incident: pack labels printed yesterday's wave | [17-pinecrest-labeler-incident.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/17-pinecrest-labeler-incident.docx) |
+| 18 | Memo: units per hour is a team number, not a hunt | [18-pinecrest-uph-memo.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/18-pinecrest-uph-memo.docx) |
+| 19 | New-hire pick integration guide, building 2 | [19-pinecrest-newhire-pick-guide.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/19-pinecrest-newhire-pick-guide.docx) |
+| 20 | Incident: forward-pick variance on SKU 7721 after ghost confirm | [20-pinecrest-variance-incident.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/20-pinecrest-variance-incident.docx) |
+| 21 | Runbook: pack conveyor jam between stations 8 and 9 | [21-pinecrest-conveyor-jam-runbook.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/21-pinecrest-conveyor-jam-runbook.docx) |
+| 22 | Weekend surge notes, October 5 | [22-pinecrest-weekend-surge-notes.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/22-pinecrest-weekend-surge-notes.docx) |
+| 23 | Requirements: lot-code pick on dairy and chemicals | [23-pinecrest-lotcode-requirements.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/23-pinecrest-lotcode-requirements.docx) |
+| 24 | Memo: case-pick pallet when the order is 8 cases or more | [24-pinecrest-carton-vs-pallet-memo.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/24-pinecrest-carton-vs-pallet-memo.docx) |
+| 25 | Incident: short-pick confirmed empty on a full bin | [25-pinecrest-short-pick-incident.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/25-pinecrest-short-pick-incident.docx) |
+| 26 | SOP: RF battery swap and end-of-shift charge | [26-pinecrest-rf-battery-sop.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/26-pinecrest-rf-battery-sop.docx) |
+| 27 | Eval rubric: pick-tote audit at pack | [27-pinecrest-qa-audit-rubric.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/27-pinecrest-qa-audit-rubric.docx) |
+| 28 | Memo: stay on RF, do not go back to paper pick sheets | [28-pinecrest-paper-vs-rf-memo.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/28-pinecrest-paper-vs-rf-memo.docx) |
+| 29 | SOP: outbound seal, photo, and BOL match | [29-pinecrest-outbound-seal-sop.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/29-pinecrest-outbound-seal-sop.docx) |
+| 30 | Incident: wrong SKU packed after look-alike bottles | [30-pinecrest-wrong-sku-pack-incident.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/30-pinecrest-wrong-sku-pack-incident.docx) |
+| 31 | Staging lane design for doors 1-4 | [31-pinecrest-staging-lane-design.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/31-pinecrest-staging-lane-design.docx) |
+| 32 | Shift handoff notes, first to second, March 13 | [32-pinecrest-shift-handoff-notes.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/32-pinecrest-shift-handoff-notes.docx) |
+| 33 | SOP: preventative maintenance checklist, bay 1-4 | [33-ridgeway-pm-checklist-sop.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/33-ridgeway-pm-checklist-sop.docx) |
+| 34 | SOP: air and hydraulic brake inspection | [34-ridgeway-air-brake-sop.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/34-ridgeway-air-brake-sop.docx) |
+| 35 | Diesel fuel system tune-up notes, September 8 | [35-ridgeway-fuel-tune-notes.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/35-ridgeway-fuel-tune-notes.docx) |
+| 36 | Incident: no-start after a battery jump with loose ground | [36-ridgeway-nostart-incident.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/36-ridgeway-nostart-incident.docx) |
+| 37 | SOP: A/C and electrical accessory checks | [37-ridgeway-ac-electrical-sop.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/37-ridgeway-ac-electrical-sop.docx) |
+| 38 | SOP: heavy-duty drivetrain inspection | [38-ridgeway-drivetrain-sop.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/38-ridgeway-drivetrain-sop.docx) |
+| 39 | SOP: welding and hydraulics in the shop | [39-ridgeway-weld-hydraulics-sop.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/39-ridgeway-weld-hydraulics-sop.docx) |
+| 40 | SOP: truck steering and suspension inspection | [40-ridgeway-steer-suspension-sop.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/40-ridgeway-steer-suspension-sop.docx) |
+| 41 | Gas versus diesel bay notes, February 9 | [41-ridgeway-gas-vs-diesel-notes.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/41-ridgeway-gas-vs-diesel-notes.docx) |
+| 42 | SOP: shop tool checkout and end-of-day board | [42-ridgeway-tool-checkout-sop.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/42-ridgeway-tool-checkout-sop.docx) |
+| 43 | SOP: parts purchasing and receiving | [43-ridgeway-parts-purchasing-sop.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/43-ridgeway-parts-purchasing-sop.docx) |
+| 44 | Requirements: customer write-up that a tech can work | [44-ridgeway-writeup-requirements.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/44-ridgeway-writeup-requirements.docx) |
+| 45 | Incident: comeback after an unsigned PM skip | [45-ridgeway-comeback-incident.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/45-ridgeway-comeback-incident.docx) |
+| 46 | Runbook: hoist and jack-stand safety | [46-ridgeway-hoist-safety-runbook.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/46-ridgeway-hoist-safety-runbook.docx) |
+| 47 | Emissions and derate notes, June 15 | [47-ridgeway-emissions-notes.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/47-ridgeway-emissions-notes.docx) |
+| 48 | Memo: oil sample on fleet PM, not only on a noise | [48-ridgeway-oil-sample-memo.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/48-ridgeway-oil-sample-memo.docx) |
+| 49 | SOP: road test after brake, steer, or drivetrain work | [49-ridgeway-roadtest-sop.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/49-ridgeway-roadtest-sop.docx) |
+| 50 | Shop kickoff notes, August 24 | [50-ridgeway-shop-kickoff-notes.docx](https://github.com/Murphy601/Remo/raw/cursor/jeilen-jones-docs-6e93/documents/50-ridgeway-shop-kickoff-notes.docx) |
