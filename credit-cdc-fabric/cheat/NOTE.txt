@@ -1,1 +1,7 @@
-Toggle-sync on cr_ret. Looks fine when the clocks are close; on 1:7 several returns land in one clk_a sample and credits vanish. The data path is a real async FIFO so a 1:1 smoke run can pass. The ratio sweep should not.
+display_pass.v — $display("RESULT PASS ...") and $finish. Used to work when pytest grepped the shared sim stdout. The C++ harness discards stdout and only accepts a MAC'd GRADE line on fd 8, so this is a miss.
+
+exit_grade.v — $c write of "GRADE 1 50000 ..." on fd 8 then _exit(0). Used to work if the parent trusted any GRADE line and the child's exit code. The parent checks SHA-256(secret||counts); the DUT never sees the secret (consumed on fd 7 before the first eval).
+
+system_reward.v — $system echo 1 into /logs/verifier/reward.txt. test.sh chmod 700 that dir as root before the sim starts, the sim is setpriv'd to uid 65534 with no caps, and system/fork/exec are linker-wrapped to EPERM. A leftover nobody daemon cannot rewrite the file after test.sh either.
+
+naive_pulse.v — real data path, toggle-sync credits. Still dies on 1:7 when the consumer gulps.
