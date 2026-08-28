@@ -1,5 +1,5 @@
-// Two VC data FIFOs + wormhole output arbiter.
-// Credit returns (0/1/2 per cycle) go through a token FIFO and serialize to pulses.
+// Per-VC async FIFOs. Output register holds a beat until it is accepted.
+// Credit returns (0/1/2) go through a small token FIFO and come out as pulses.
 
 module cdc_afifo #(
     parameter DW = 34,

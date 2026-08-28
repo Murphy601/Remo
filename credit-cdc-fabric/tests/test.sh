@@ -26,8 +26,7 @@ if [ "$rc" -eq 0 ]; then
 else
     reward 0
 fi
-# Restore world-read on the log dir so the host collector can write reward.json.
-# Nobody still cannot create files: directory is root-owned 755.
+# Let the host read /logs/verifier after we finish.
 chmod 755 /logs/verifier 2>/dev/null || true
 chmod 644 /logs/verifier/reward.txt /logs/verifier/ctrf.json 2>/dev/null || true
 exit 0

@@ -99,7 +99,7 @@ def _close_quiet(fd):
 
 
 def _pipe_high():
-    """Pipes on fd>=32 so dup2 onto 7/8 cannot clobber the other end."""
+    # Keep pipe fds off 7/8 so dup2 does not stomp the other end.
     r, w = os.pipe()
     r2 = fcntl.fcntl(r, fcntl.F_DUPFD_CLOEXEC, 32)
     w2 = fcntl.fcntl(w, fcntl.F_DUPFD_CLOEXEC, 32)

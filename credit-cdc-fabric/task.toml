@@ -6,14 +6,14 @@ name = "afterquery/credit-cdc-fabric"
 [metadata]
 author_name = "Yasharth Singh"
 author_email = "yasharthsingh1777@gmail.com"
-difficulty_explanation = "A single Gray FIFO is not enough. Two producers may valid on the same clk_a cycle, so a 1-write-port mux drops a beat. Output is wormhole: lock to a VC until EOP, but between packets the consumer's c_allow mask can be stuck on the other VC for dozens of cycles — presenting the nonempty-but-disallowed VC deadlocks. Credits are per-VC counts of 0-2 per clk_b, not a 1-bit pulse; collapsing a 2 into one p_credit or crossing VC pools dies on the 1:7 packed-return config. Occupancy is 4 in flight per VC, so there is no slack for a leaked token."
-solution_explanation = "Separate FWFT dual-clock FIFOs per VC (Gray pointers, depth 8) with a wormhole arbiter on clk_b: lock on SOP, clear on EOP, idle pick among nonempty VCs that are in c_allow, round-robin when both are legal. Credit returns of 1 or 2 are pushed as a 2-bit token into a second async FIFO per VC and serialized to one p_credit pulse per clk_a. No combo path between clocks."
-verification_explanation = "A C++ Verilator harness (not a Verilog TB compiled with the DUT) drives both producers, the allow mask, and packed credit counts, and scoreboards each VC separately. Stdout/stderr are discarded. The parent hands a 32-byte secret on fd 7; the harness writes GRADE plus SHA-256(secret||counts) on fd 8. system/fork/exec are linker-wrapped to EPERM. The sim is setpriv'd to uid 65534; /tests is 700 root; /logs/verifier is 700 while the DUT runs. Same ratio/phase/reset/traffic/allow sweep as the instruction."
+difficulty_explanation = "The hard part is not wiring an async FIFO. Two producers can be valid on the same clk_a cycle, so one write port just loses a beat. On clk_b you have to stay on a VC until EOP, but between packets c_allow can sit on the other VC for a long stretch, and if you keep presenting the one that is not allowed you deadlock. Credit returns are a 2-bit count per VC (0, 1 or 2), not a pulse. A toggle on cr0_n[0] looks fine at 1:1 and drops a return of 2, and it also dies when clk_b is 7x clk_a. Only four credits in flight per VC, so a leaked token shows up."
+solution_explanation = "One FWFT dual-clock FIFO per VC (Gray write/read pointers, depth 8). An output register on clk_b holds the beat until c_ready and c_allow both accept it, stays on that VC until EOP, then picks among the VCs that have data and are allowed. Credit returns of 1 or 2 go through a second small async FIFO per VC and a counter on clk_a turns them into one p_credit pulse at a time. No combo path between the two clocks."
+verification_explanation = "A C++ Verilator harness, not a Verilog TB compiled with the DUT, drives both producers, the allow mask, and the packed credit counts, and checks each VC on its own. Stdout and stderr are thrown away. The parent gives the sim a 32-byte secret on fd 7 and only trusts a GRADE line on fd 8 whose SHA-256 matches. system/fork/exec are linker-wrapped to EPERM. The sim runs setpriv'd as uid 65534. /tests is 700 root. /logs/verifier is 700 while the DUT is running. Same ratio, phase, reset, traffic and allow sweep as the instruction."
 category = "Hardware"
 subcategory = "RTL"
-tags = ["verilog", "cdc", "credit-flow-control", "async-fifo", "virtual-channel", "wormhole"]
+tags = ["verilog", "cdc", "credit-flow-control", "async-fifo", "virtual-channel"]
 expert_time_estimate_hours = 8
-relevant_experience = "FPGA/ASIC interconnect bring-up: dual-clock virtual-channel links, wormhole switching, credit-based flow control, Gray-pointer FIFOs, and Verilator scoreboards for multi-ratio CDC."
+relevant_experience = "FPGA/ASIC interconnect: dual-clock links with more than one VC, credit flow control, Gray-pointer FIFOs, and Verilator scoreboards."
 
 [verifier]
 timeout_sec = 1800.0

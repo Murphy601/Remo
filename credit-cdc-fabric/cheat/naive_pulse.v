@@ -1,4 +1,4 @@
-// Pulse-toggle on cr0_n[0], VC0-only mux. Drops dual-issue and packed returns.
+// VC0 FIFO only. Toggle-sync on cr0_n[0].
 module cdc_afifo #(
     parameter DW = 34,
     parameter AW = 4
