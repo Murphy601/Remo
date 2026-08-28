@@ -22,4 +22,5 @@ COPY . /tests/
 
 RUN mkdir -p /app /logs/verifier \
     && chown root:root /tests /logs/verifier \
-    && chmod 700 /tests /logs/verifier
+    && chmod 700 /tests \
+    && chmod 755 /logs/verifier
