@@ -21,6 +21,9 @@ WRAP = (
 )
 
 # name, kind, nops, seed, deadline, rst_pad, hold
+# Deadlines vs this reference (cycles): 213/300, 135/250, 633/900, 520/750,
+# 786/1100, 152/280, 524/750, 189/320. Unused fraction of each bound is 29-46%.
+# c0_hits is the hit-vs-mem bound: a 1:1 passthrough takes 686 and must fail.
 CASES = [
     ("c0_hits", 0, 48, 3, 300, 0, 0),
     ("cross_read", 1, 8, 11, 250, 0, 0),
