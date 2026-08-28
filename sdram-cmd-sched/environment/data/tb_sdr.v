@@ -1,26 +1,26 @@
 `timescale 1ns/1ps
 
-// p0 only, 4 writes then 4 reads. Not the grader.
-module tb_smoke;
+// Host m0 only: four writes, four reads. Not the hidden scoreboard.
+module tb_sdr;
     reg clk = 1'b0;
     always #5 clk = ~clk;
 
     reg rst_n = 1'b0;
 
-    reg         p0_valid = 1'b0;
-    wire        p0_ready;
-    reg         p0_we    = 1'b0;
-    reg  [1:0]  p0_ba    = 2'b0;
-    reg  [12:0] p0_row   = 13'b0;
-    reg  [7:0]  p0_col   = 8'b0;
-    reg  [63:0] p0_wdata = 64'b0;
-    wire        p0_rvalid;
-    reg         p0_rready = 1'b1;
-    wire [63:0] p0_rdata;
+    reg         m0_valid = 1'b0;
+    wire        m0_ready;
+    reg         m0_wr    = 1'b0;
+    reg  [1:0]  m0_ba    = 2'b0;
+    reg  [12:0] m0_row   = 13'b0;
+    reg  [7:0]  m0_col   = 8'b0;
+    reg  [63:0] m0_wdata = 64'b0;
+    wire        m0_rvalid;
+    reg         m0_rready = 1'b1;
+    wire [63:0] m0_rdata;
 
-    wire        p1_ready;
-    wire        p1_rvalid;
-    wire [63:0] p1_rdata;
+    wire        m1_ready;
+    wire        m1_rvalid;
+    wire [63:0] m1_rdata;
 
     wire        cke, cs_n, ras_n, cas_n, we_n, dq_oe;
     wire [1:0]  ba;
@@ -54,14 +54,14 @@ module tb_smoke;
         end
     endfunction
 
-    sdram_sched dut (
+    sdr4_mc dut (
         .clk(clk), .rst_n(rst_n),
-        .p0_valid(p0_valid), .p0_ready(p0_ready), .p0_we(p0_we),
-        .p0_ba(p0_ba), .p0_row(p0_row), .p0_col(p0_col), .p0_wdata(p0_wdata),
-        .p0_rvalid(p0_rvalid), .p0_rready(p0_rready), .p0_rdata(p0_rdata),
-        .p1_valid(1'b0), .p1_ready(p1_ready), .p1_we(1'b0),
-        .p1_ba(2'b0), .p1_row(13'b0), .p1_col(8'b0), .p1_wdata(64'b0),
-        .p1_rvalid(p1_rvalid), .p1_rready(1'b1), .p1_rdata(p1_rdata),
+        .m0_valid(m0_valid), .m0_ready(m0_ready), .m0_wr(m0_wr),
+        .m0_ba(m0_ba), .m0_row(m0_row), .m0_col(m0_col), .m0_wdata(m0_wdata),
+        .m0_rvalid(m0_rvalid), .m0_rready(m0_rready), .m0_rdata(m0_rdata),
+        .m1_valid(1'b0), .m1_ready(m1_ready), .m1_wr(1'b0),
+        .m1_ba(2'b0), .m1_row(13'b0), .m1_col(8'b0), .m1_wdata(64'b0),
+        .m1_rvalid(m1_rvalid), .m1_rready(1'b1), .m1_rdata(m1_rdata),
         .cke(cke), .cs_n(cs_n), .ras_n(ras_n), .cas_n(cas_n), .we_n(we_n),
         .ba(ba), .a(a), .dq_o(dq_o), .dq_oe(dq_oe), .dq_i(dq_i)
     );
@@ -113,10 +113,10 @@ module tb_smoke;
     end
 
     always @(posedge clk) begin
-        if (rst_n && p0_rvalid && p0_rready) begin
-            if (p0_rdata !== {16'hA000 + recv_r[15:0], 16'hB000 + recv_r[15:0],
+        if (rst_n && m0_rvalid && m0_rready) begin
+            if (m0_rdata !== {16'hA000 + recv_r[15:0], 16'hB000 + recv_r[15:0],
                               16'hC000 + recv_r[15:0], 16'hD000 + recv_r[15:0]}) begin
-                $display("SMOKE FAIL data got=%h i=%0d", p0_rdata, recv_r);
+                $display("SMOKE FAIL data got=%h i=%0d", m0_rdata, recv_r);
                 fail = 1;
             end
             recv_r = recv_r + 1;
@@ -138,32 +138,32 @@ module tb_smoke;
         rst_n = 1'b1;
 
         waitc = 0;
-        while (!p0_ready && waitc < 200) begin
+        while (!m0_ready && waitc < 200) begin
             @(posedge clk);
             waitc = waitc + 1;
         end
-        if (!p0_ready) begin
+        if (!m0_ready) begin
             $display("SMOKE FAIL ready never rose");
             $finish;
         end
 
         for (i = 0; i < 4; i = i + 1) begin
-            p0_we = 1'b1;
-            p0_ba = i[1:0];
-            p0_row = i[12:0];
-            p0_col = 8'h00;
-            p0_wdata = {16'hA000 + i[15:0], 16'hB000 + i[15:0],
+            m0_wr = 1'b1;
+            m0_ba = i[1:0];
+            m0_row = i[12:0];
+            m0_col = 8'h00;
+            m0_wdata = {16'hA000 + i[15:0], 16'hB000 + i[15:0],
                         16'hC000 + i[15:0], 16'hD000 + i[15:0]};
-            p0_valid = 1'b1;
+            m0_valid = 1'b1;
             waitc = 0;
             begin : wait_w
                 forever begin
                     @(posedge clk);
                     waitc = waitc + 1;
-                    if (p0_ready) begin
+                    if (m0_ready) begin
                         sent_w = sent_w + 1;
-                        p0_valid = 1'b0;
-                        p0_we = 1'b0;
+                        m0_valid = 1'b0;
+                        m0_wr = 1'b0;
                         disable wait_w;
                     end
                     if (waitc > 400) begin
@@ -179,20 +179,20 @@ module tb_smoke;
 
         // 4 reads, same addresses
         for (i = 0; i < 4; i = i + 1) begin
-            p0_we = 1'b0;
-            p0_ba = i[1:0];
-            p0_row = i[12:0];
-            p0_col = 8'h00;
-            p0_wdata = 64'b0;
-            p0_valid = 1'b1;
+            m0_wr = 1'b0;
+            m0_ba = i[1:0];
+            m0_row = i[12:0];
+            m0_col = 8'h00;
+            m0_wdata = 64'b0;
+            m0_valid = 1'b1;
             waitc = 0;
             begin : wait_r
                 forever begin
                     @(posedge clk);
                     waitc = waitc + 1;
-                    if (p0_ready) begin
+                    if (m0_ready) begin
                         sent_r = sent_r + 1;
-                        p0_valid = 1'b0;
+                        m0_valid = 1'b0;
                         disable wait_r;
                     end
                     if (waitc > 400) begin

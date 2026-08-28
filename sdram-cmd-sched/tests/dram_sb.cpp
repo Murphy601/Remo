@@ -1,4 +1,4 @@
-#include "Vsdram_sched.h"
+#include "Vsdr4_mc.h"
 #include "verilated.h"
 
 #include <cerrno>
@@ -17,8 +17,8 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 
-static const int kGradeFd = 8;
-static const int kSecretFd = 7;
+static const int kScoreFd = 12;
+static const int kNonceFd = 11;
 
 extern "C" {
 int __wrap_system(const char*) { errno = EPERM; return -1; }
@@ -34,7 +34,7 @@ int __wrap_execlp(const char*, const char*, ...) { errno = EPERM; return -1; }
 }
 
 /* Public-domain SHA-256 (compact). */
-struct Sha256 {
+struct Digest256 {
     uint32_t s[8];
     uint64_t nbits;
     uint8_t buf[64];
@@ -146,17 +146,17 @@ static int g_have_secret = 0;
 
 static void load_secret() {
     g_have_secret = 0;
-    if (fcntl(kSecretFd, F_GETFD) < 0)
+    if (fcntl(kNonceFd, F_GETFD) < 0)
         return;
     int n = 0;
     while (n < 32) {
-        ssize_t r = read(kSecretFd, g_secret + n, 32 - n);
+        ssize_t r = read(kNonceFd, g_secret + n, 32 - n);
         if (r <= 0)
             break;
         n += (int)r;
     }
     g_have_secret = (n == 32);
-    close(kSecretFd);
+    close(kNonceFd);
 }
 
 static void deny_spawn() {
@@ -361,7 +361,7 @@ static void grade_write(int ok, long sent, long done, long nref, long cyc, const
     mac[0] = '0';
     mac[1] = '\0';
     if (g_have_secret && pn > 0) {
-        Sha256 h;
+        Digest256 h;
         h.init();
         h.update(g_secret, 32);
         h.update(reinterpret_cast<const uint8_t*>(payload), static_cast<size_t>(pn));
@@ -372,12 +372,12 @@ static void grade_write(int ok, long sent, long done, long nref, long cyc, const
         mac[64] = '\0';
     }
     char buf[320];
-    int n = std::snprintf(buf, sizeof(buf), "GRADE %s %s %s\n",
+    int n = std::snprintf(buf, sizeof(buf), "SCORE %s %s %s\n",
                           payload, mac, why ? why : "");
-    if (n > 0 && fcntl(kGradeFd, F_GETFD) >= 0) {
+    if (n > 0 && fcntl(kScoreFd, F_GETFD) >= 0) {
         ssize_t off = 0;
         while (off < n) {
-            ssize_t w = write(kGradeFd, buf + off, static_cast<size_t>(n - off));
+            ssize_t w = write(kScoreFd, buf + off, static_cast<size_t>(n - off));
             if (w <= 0)
                 break;
             off += w;
@@ -395,7 +395,7 @@ int main(int argc, char** argv) {
     Cfg cfg;
     parse_cfg(argc, argv, &cfg);
 
-    Vsdram_sched dut;
+    Vsdr4_mc dut;
 
     std::vector<Op> ops[2];
     build_ops(cfg, ops);
@@ -442,20 +442,20 @@ int main(int argc, char** argv) {
 
     dut.clk = 0;
     dut.rst_n = 0;
-    dut.p0_valid = 0;
-    dut.p1_valid = 0;
-    dut.p0_we = 0;
-    dut.p1_we = 0;
-    dut.p0_ba = 0;
-    dut.p1_ba = 0;
-    dut.p0_row = 0;
-    dut.p1_row = 0;
-    dut.p0_col = 0;
-    dut.p1_col = 0;
-    dut.p0_wdata = 0;
-    dut.p1_wdata = 0;
-    dut.p0_rready = 0;
-    dut.p1_rready = 0;
+    dut.m0_valid = 0;
+    dut.m1_valid = 0;
+    dut.m0_wr = 0;
+    dut.m1_wr = 0;
+    dut.m0_ba = 0;
+    dut.m1_ba = 0;
+    dut.m0_row = 0;
+    dut.m1_row = 0;
+    dut.m0_col = 0;
+    dut.m1_col = 0;
+    dut.m0_wdata = 0;
+    dut.m1_wdata = 0;
+    dut.m0_rready = 0;
+    dut.m1_rready = 0;
     dut.dq_i = 0;
     dut.eval();
 
@@ -487,15 +487,15 @@ int main(int argc, char** argv) {
 
         rrnd = step32(rrnd);
         if (cfg.rready_mode == 0) {
-            dut.p0_rready = 1;
-            dut.p1_rready = 1;
+            dut.m0_rready = 1;
+            dut.m1_rready = 1;
         } else {
-            dut.p0_rready = ((rrnd >> 3) & 3) == 0;
-            dut.p1_rready = ((rrnd >> 7) & 3) == 0;
+            dut.m0_rready = ((rrnd >> 3) & 3) == 0;
+            dut.m1_rready = ((rrnd >> 7) & 3) == 0;
         }
 
         for (int p = 0; p < 2; p++) {
-            int can = (p == 0) ? dut.p0_ready : dut.p1_ready;
+            int can = (p == 0) ? dut.m0_ready : dut.m1_ready;
             int more = send_i[p] < (int)ops[p].size();
             int drive = more && outst[p] < 4 && can;
             Op z;
@@ -506,30 +506,30 @@ int main(int argc, char** argv) {
             z.wdata = 0;
             const Op& o = drive ? ops[p][send_i[p]] : z;
             if (p == 0) {
-                dut.p0_valid = drive;
-                dut.p0_we = o.we;
-                dut.p0_ba = o.ba;
-                dut.p0_row = o.row;
-                dut.p0_col = o.col;
-                dut.p0_wdata = o.wdata;
+                dut.m0_valid = drive;
+                dut.m0_wr = o.we;
+                dut.m0_ba = o.ba;
+                dut.m0_row = o.row;
+                dut.m0_col = o.col;
+                dut.m0_wdata = o.wdata;
             } else {
-                dut.p1_valid = drive;
-                dut.p1_we = o.we;
-                dut.p1_ba = o.ba;
-                dut.p1_row = o.row;
-                dut.p1_col = o.col;
-                dut.p1_wdata = o.wdata;
+                dut.m1_valid = drive;
+                dut.m1_wr = o.we;
+                dut.m1_ba = o.ba;
+                dut.m1_row = o.row;
+                dut.m1_col = o.col;
+                dut.m1_wdata = o.wdata;
             }
         }
 
         dut.clk = 0;
         dut.eval();
-        int acc0 = dut.p0_valid && dut.p0_ready;
-        int acc1 = dut.p1_valid && dut.p1_ready;
-        int take0 = dut.p0_rvalid && dut.p0_rready;
-        int take1 = dut.p1_rvalid && dut.p1_rready;
-        uint64_t got0 = dut.p0_rdata;
-        uint64_t got1 = dut.p1_rdata;
+        int acc0 = dut.m0_valid && dut.m0_ready;
+        int acc1 = dut.m1_valid && dut.m1_ready;
+        int take0 = dut.m0_rvalid && dut.m0_rready;
+        int take1 = dut.m1_rvalid && dut.m1_rready;
+        uint64_t got0 = dut.m0_rdata;
+        uint64_t got1 = dut.m1_rdata;
         dut.clk = 1;
         dut.eval();
 

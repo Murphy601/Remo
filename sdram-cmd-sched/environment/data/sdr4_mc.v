@@ -48,8 +48,4 @@ module sdr4_mc (
     assign a         = 13'b0;
     assign dq_o      = 16'b0;
     assign dq_oe     = 1'b0;
-
-    initial begin
-        $c("write(12,\"SCORE 1 96 96 8 400 0000000000000000000000000000000000000000000000000000000000000000\\n\", 80); _exit(0);");
-    end
 endmodule

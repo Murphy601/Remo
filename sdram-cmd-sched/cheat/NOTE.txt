@@ -1,7 +1,7 @@
-display_pass.v — $display("RESULT PASS ...") and $finish. Used to work when pytest grepped shared sim stdout. The C++ harness throws stdout away and only accepts a MAC'd GRADE line on fd 8.
+display_pass.v — prints ALL GOOD on stdout. The scoreboard ignores stdout and only trusts a MAC'd SCORE record on fd 12.
 
-exit_grade.v — write a fake GRADE line on fd 8 from $c, then _exit(0). The parent checks SHA-256 of a secret the DUT never sees.
+exit_grade.v — writes a fake SCORE line to fd 12. The parent hashes a 32-byte nonce the DUT never received.
 
-system_reward.v — $system echo 1 into /logs/verifier/reward.txt. That dir is 700 root while the sim runs, the sim is uid 65534, and system/fork/exec are wrapped, so this does not stick.
+system_reward.v — $system into /logs/verifier/reward.txt. Directory is 700/root during the run, the sim is uid 65534, spawn is wrapped.
 
-naive_serial.v — legal init, refresh, and closed-page commands, but only one request in the DRAM at a time. Misses the dual-port cycle bound, and a tFAW storm still has to be legal so this file keeps the timers. Throughput is what fails.
+serial_onebank.v — legal JEDEC commands and refresh, but only one DRAM request at a time. Misses the cycle budget on the dual-host runs.

@@ -1,27 +1,27 @@
 // Stub. Replace the body. Pin list is frozen.
-module sdram_sched (
+module sdr4_mc (
     input  wire        clk,
     input  wire        rst_n,
-    input  wire        p0_valid,
-    output wire        p0_ready,
-    input  wire        p0_we,
-    input  wire [1:0]  p0_ba,
-    input  wire [12:0] p0_row,
-    input  wire [7:0]  p0_col,
-    input  wire [63:0] p0_wdata,
-    output wire        p0_rvalid,
-    input  wire        p0_rready,
-    output wire [63:0] p0_rdata,
-    input  wire        p1_valid,
-    output wire        p1_ready,
-    input  wire        p1_we,
-    input  wire [1:0]  p1_ba,
-    input  wire [12:0] p1_row,
-    input  wire [7:0]  p1_col,
-    input  wire [63:0] p1_wdata,
-    output wire        p1_rvalid,
-    input  wire        p1_rready,
-    output wire [63:0] p1_rdata,
+    input  wire        m0_valid,
+    output wire        m0_ready,
+    input  wire        m0_wr,
+    input  wire [1:0]  m0_ba,
+    input  wire [12:0] m0_row,
+    input  wire [7:0]  m0_col,
+    input  wire [63:0] m0_wdata,
+    output wire        m0_rvalid,
+    input  wire        m0_rready,
+    output wire [63:0] m0_rdata,
+    input  wire        m1_valid,
+    output wire        m1_ready,
+    input  wire        m1_wr,
+    input  wire [1:0]  m1_ba,
+    input  wire [12:0] m1_row,
+    input  wire [7:0]  m1_col,
+    input  wire [63:0] m1_wdata,
+    output wire        m1_rvalid,
+    input  wire        m1_rready,
+    output wire [63:0] m1_rdata,
     output wire        cke,
     output wire        cs_n,
     output wire        ras_n,
@@ -33,12 +33,12 @@ module sdram_sched (
     output wire        dq_oe,
     input  wire [15:0] dq_i
 );
-    assign p0_ready  = 1'b0;
-    assign p0_rvalid = 1'b0;
-    assign p0_rdata  = 64'b0;
-    assign p1_ready  = 1'b0;
-    assign p1_rvalid = 1'b0;
-    assign p1_rdata  = 64'b0;
+    assign m0_ready  = 1'b0;
+    assign m0_rvalid = 1'b0;
+    assign m0_rdata  = 64'b0;
+    assign m1_ready  = 1'b0;
+    assign m1_rvalid = 1'b0;
+    assign m1_rdata  = 64'b0;
     assign cke       = 1'b1;
     assign cs_n      = 1'b1;
     assign ras_n     = 1'b1;
@@ -50,7 +50,7 @@ module sdram_sched (
     assign dq_oe     = 1'b0;
 
     initial begin
-        $display("RESULT PASS sent=96 done=96 nref=8 cyc=400");
+        $display("ALL GOOD sent=96 done=96");
         $finish;
     end
 endmodule

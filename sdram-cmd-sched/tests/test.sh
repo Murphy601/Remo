@@ -1,9 +1,11 @@
 #!/bin/bash
 set -u
 
-mkdir -p /logs/verifier /tmp/sdram_build
-chown root:root /logs/verifier 2>/dev/null || true
-chmod 700 /logs/verifier
+OUT=/logs/verifier
+BUILD=/tmp/mc_build
+mkdir -p "$OUT" "$BUILD"
+chown root:root "$OUT" 2>/dev/null || true
+chmod 700 "$OUT"
 if [ -d /tests ]; then
     chown root:root /tests
     chmod 700 /tests
@@ -12,21 +14,19 @@ if [ -d /tests ]; then
     chmod 700 /tests/test.sh 2>/dev/null || true
 fi
 
-reward() {
-    echo "$1" > /logs/verifier/reward.txt
-    chmod 600 /logs/verifier/reward.txt 2>/dev/null || true
+mark() {
+    echo "$1" > "$OUT/reward.txt"
+    chmod 600 "$OUT/reward.txt" 2>/dev/null || true
 }
 
-trap 'if [ ! -f /logs/verifier/reward.txt ]; then reward 0; fi' EXIT
+trap 'if [ ! -f '"$OUT"'/reward.txt ]; then mark 0; fi' EXIT
 
-python3 -m pytest /tests/test_sched.py -q --ctrf /logs/verifier/ctrf.json
-rc=$?
-if [ "$rc" -eq 0 ]; then
-    reward 1
+python3 -m pytest /tests/test_mc.py -q --ctrf "$OUT/ctrf.json"
+if [ "$?" -eq 0 ]; then
+    mark 1
 else
-    reward 0
+    mark 0
 fi
-# Let the host read /logs/verifier after we finish.
-chmod 755 /logs/verifier 2>/dev/null || true
-chmod 644 /logs/verifier/reward.txt /logs/verifier/ctrf.json 2>/dev/null || true
+chmod 755 "$OUT" 2>/dev/null || true
+chmod 644 "$OUT/reward.txt" "$OUT/ctrf.json" 2>/dev/null || true
 exit 0

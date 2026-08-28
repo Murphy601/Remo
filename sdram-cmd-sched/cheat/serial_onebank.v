@@ -1,27 +1,27 @@
-// Closed-page SDRAM scheduler, 2 ports, 4 banks, BL=4, CL=3.
-module sdram_sched (
+// Closed-page 4-bank SDR controller, two host ports, BL=4, CL=3.
+module sdr4_mc (
     input  wire        clk,
     input  wire        rst_n,
-    input  wire        p0_valid,
-    output wire        p0_ready,
-    input  wire        p0_we,
-    input  wire [1:0]  p0_ba,
-    input  wire [12:0] p0_row,
-    input  wire [7:0]  p0_col,
-    input  wire [63:0] p0_wdata,
-    output wire        p0_rvalid,
-    input  wire        p0_rready,
-    output wire [63:0] p0_rdata,
-    input  wire        p1_valid,
-    output wire        p1_ready,
-    input  wire        p1_we,
-    input  wire [1:0]  p1_ba,
-    input  wire [12:0] p1_row,
-    input  wire [7:0]  p1_col,
-    input  wire [63:0] p1_wdata,
-    output wire        p1_rvalid,
-    input  wire        p1_rready,
-    output wire [63:0] p1_rdata,
+    input  wire        m0_valid,
+    output wire        m0_ready,
+    input  wire        m0_wr,
+    input  wire [1:0]  m0_ba,
+    input  wire [12:0] m0_row,
+    input  wire [7:0]  m0_col,
+    input  wire [63:0] m0_wdata,
+    output wire        m0_rvalid,
+    input  wire        m0_rready,
+    output wire [63:0] m0_rdata,
+    input  wire        m1_valid,
+    output wire        m1_ready,
+    input  wire        m1_wr,
+    input  wire [1:0]  m1_ba,
+    input  wire [12:0] m1_row,
+    input  wire [7:0]  m1_col,
+    input  wire [63:0] m1_wdata,
+    output wire        m1_rvalid,
+    input  wire        m1_rready,
+    output wire [63:0] m1_rdata,
     output reg         cke,
     output reg         cs_n,
     output reg         ras_n,
@@ -105,12 +105,12 @@ module sdram_sched (
     integer cap_p, cap_bt;
     integer npre_ok;
 
-    assign p0_ready  = rst_n && init_done && (outst[0] < 3'd4);
-    assign p1_ready  = rst_n && init_done && (outst[1] < 3'd4);
-    assign p0_rvalid = (rfn[0] != 3'd0);
-    assign p1_rvalid = (rfn[1] != 3'd0);
-    assign p0_rdata  = rfifo[0][rrp[0]];
-    assign p1_rdata  = rfifo[1][rrp[1]];
+    assign m0_ready  = rst_n && init_done && (outst[0] < 3'd4);
+    assign m1_ready  = rst_n && init_done && (outst[1] < 3'd4);
+    assign m0_rvalid = (rfn[0] != 3'd0);
+    assign m1_rvalid = (rfn[1] != 3'd0);
+    assign m0_rdata  = rfifo[0][rrp[0]];
+    assign m1_rdata  = rfifo[1][rrp[1]];
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -218,29 +218,29 @@ module sdram_sched (
                 end
             end
 
-            acc0 = (p0_valid && p0_ready) ? 1 : 0;
-            acc1 = (p1_valid && p1_ready) ? 1 : 0;
-            popr0 = (p0_rvalid && p0_rready) ? 1 : 0;
-            popr1 = (p1_rvalid && p1_rready) ? 1 : 0;
+            acc0 = (m0_valid && m0_ready) ? 1 : 0;
+            acc1 = (m1_valid && m1_ready) ? 1 : 0;
+            popr0 = (m0_rvalid && m0_rready) ? 1 : 0;
+            popr1 = (m1_rvalid && m1_rready) ? 1 : 0;
             pop0 = 0;
             pop1 = 0;
             decw0 = 0;
             decw1 = 0;
 
             if (acc0) begin
-                q_we[0][qwp[0]] <= p0_we;
-                q_ba[0][qwp[0]] <= p0_ba;
-                q_row[0][qwp[0]] <= p0_row;
-                q_col[0][qwp[0]] <= p0_col;
-                q_wd[0][qwp[0]] <= p0_wdata;
+                q_we[0][qwp[0]] <= m0_wr;
+                q_ba[0][qwp[0]] <= m0_ba;
+                q_row[0][qwp[0]] <= m0_row;
+                q_col[0][qwp[0]] <= m0_col;
+                q_wd[0][qwp[0]] <= m0_wdata;
                 qwp[0] <= qwp[0] + 2'd1;
             end
             if (acc1) begin
-                q_we[1][qwp[1]] <= p1_we;
-                q_ba[1][qwp[1]] <= p1_ba;
-                q_row[1][qwp[1]] <= p1_row;
-                q_col[1][qwp[1]] <= p1_col;
-                q_wd[1][qwp[1]] <= p1_wdata;
+                q_we[1][qwp[1]] <= m1_wr;
+                q_ba[1][qwp[1]] <= m1_ba;
+                q_row[1][qwp[1]] <= m1_row;
+                q_col[1][qwp[1]] <= m1_col;
+                q_wd[1][qwp[1]] <= m1_wdata;
                 qwp[1] <= qwp[1] + 2'd1;
             end
             if (popr0)

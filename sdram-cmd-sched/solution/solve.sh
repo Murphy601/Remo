@@ -1,3 +1,3 @@
 #!/bin/bash
 set -euo pipefail
-cp /solution/sdram_sched.v /app/sdram_sched.v
+cp /solution/sdr4_mc.v /app/sdr4_mc.v
