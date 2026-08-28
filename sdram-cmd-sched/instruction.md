@@ -1,10 +1,12 @@
 # sdr4_mc
 
-Write `/app/sdr4_mc.v`, module `sdr4_mc`. It is a memory controller: two host ports on one side, a 16-bit SDR SDRAM on the other. Four banks. Closed page. Burst length 4. One clock (10 ns, 50% duty). The pin list below is the whole interface.
+The file you edit is `/app/sdr4_mc.v`. Module name `sdr4_mc`.
 
-`/app/tb_sdr.v` is a local iverilog check — host m0 only, four stores then four loads. Hidden tests drive both hosts and score the DRAM command pins. The local check is not the grade.
+Two requestors, m0 and m1, valid/ready. Other side is a 16-bit SDR SDRAM: 4 banks, closed page, burst length 4. One clock, 10 ns.
 
-## Interface
+`/app/tb_sdr.v` only drives m0. Four writes, four reads, iverilog. The grader is a cycle-accurate model on the DRAM pins and it uses both hosts, refresh, tFAW, backpressure, and a cycle cap. Getting smoke green is not the same as passing.
+
+## Pins
 
 ```
 module sdr4_mc (
@@ -46,68 +48,60 @@ module sdr4_mc (
 );
 ```
 
-`rst_n` async, active low, held at least 8 cycles. After release, `cke` is 1 for the rest of the run. Host ready bits stay 0 until mode-register programming has finished. After reset, do not leave X or Z on outputs.
+`rst_n` is async, active low. It stays low for at least 8 clocks. After that `cke` is 1 and stays 1. Keep `m0_ready` / `m1_ready` at 0 until MRS is done. Once reset is released, no X or Z on the outputs.
 
-Host handshake is `m*_valid && m*_ready` on the rising edge. `m*_wr=1` writes; `m*_wr=0` reads. Depth 4 per host: a request counts until its WR goes out (writes) or until `m*_rvalid && m*_rready` (reads). Reads on one host come back in accept order. The two hosts are not ordered with each other. Both valids may be high together. Leave one host idle on a dual-host run and that run fails.
+## Hosts
 
-`m*_rvalid` holds `m*_rdata` until `m*_rready`. The tests drop `m*_rready` for long stretches.
+A request is taken when valid and ready are both 1 that rising edge. `m*_wr` 1 is a write, 0 is a read.
 
-Addresses from the two hosts do not collide, except one RAW sequence that writes then reads the same line on the same host. A location that was never written reads as 0.
+At most 4 outstanding per port. A write finishes when you issue WR. A read finishes when `m*_rvalid && m*_rready` takes the word. Reads have to come back in the order that port accepted them. The two ports are unordered vs each other. Both valids can be high the same clock. If m1 never gets service on a two-port run, that run fails.
 
-## SDRAM pins
+If rvalid is 1 and rready is 0, hold the same rdata. rready goes away for long stretches in some tests.
 
-Sample commands on the rising edge. Encoding is `CS# RAS# CAS# WE#`:
+The two ports don't alias, except the RAW case which is write-then-read of the same address on the same port. Never-written memory reads as 0.
 
-| command | encoding | notes |
-|---|---|---|
-| DESL | `cs_n=1` | NOP if `cs_n=0` and RAS/CAS/WE are 111 |
-| ACT | 0011 | `a` = row |
-| RD | 0101 | `a[7:0]` = column, `a[10]=0` |
-| WR | 0100 | same column rules |
-| PRE | 0010 | `a[10]=0` one bank, `a[10]=1` all banks |
-| REF | 0001 | all banks idle, tRP already met |
-| MRS | 0000 | `ba=0`, `a=13'h032` |
+## DRAM
 
-Closed page: no auto-precharge on RD/WR. Issue PRE yourself. Columns are BL-aligned (`col[1:0]=0`).
+Commands sampled on posedge. `CS# RAS# CAS# WE#`:
 
-CL=3, sequential BL=4. A 64-bit host word is four 16-bit beats, low halfword first: `[15:0]`, `[31:16]`, `[47:32]`, `[63:48]`.
+- DESL: `cs_n=1`. Or `cs_n=0` and 111 on RAS/CAS/WE (NOP).
+- ACT: 0011. `a` is the row.
+- RD: 0101. `a[7:0]` is the column. `a[10]` stays 0.
+- WR: 0100. Same column rule.
+- PRE: 0010. `a[10]=0` one bank, `a[10]=1` all banks.
+- REF: 0001.
+- MRS: 0000. `ba=0`, `a=13'h032` (BL=4, sequential, CL=3).
 
-On WR you drive `dq_oe` and `dq_o` for four cycles starting that command. On RD the first `dq_i` beat is CL rising edges later. DQ is half-duplex. A write window `WR..WR+3` and a read window `RD+CL..RD+CL+3` must not overlap. After a write, wait tWTR from the last write beat before RD. After a read, the earliest WR is the cycle after the last read beat.
+Closed page. Don't set A10 on RD/WR; close with PRE. `col[1:0]` is 0.
 
-## Timing (clocks)
+CL=3, BL=4 sequential. Four 16-bit beats. Low halfword first: `[15:0]`, then `[31:16]`, `[47:32]`, `[63:48]`.
 
-CL=3, BL=4, tRCD=3, tRP=3, tRAS=7, tRC=10, tRRD=2, tFAW=10, tWTR=2, tRTP=2, tWR=3, tRFC=10, tREFI=96, tMRD=2.
+On a write you drive `dq_oe`/`dq_o` for 4 clocks starting at WR. On a read the first `dq_i` beat is 3 clocks after RD. Those two windows can't overlap. After the last write beat, wait tWTR before RD. After the last read beat, the next WR is the clock after that.
 
-tRCD ACT→CAS same bank. tRP PRE→ACT or PRE→REF. tRAS ACT→PRE same bank. tRC ACT→ACT same bank. tRRD ACT→ACT any bank. tFAW: no more than four ACT in any 10 consecutive clocks. tRTP RD→PRE. tWR last write beat→PRE. tRFC after REF, NOP/DESL only. tREFI is a hard max between REF commands; issuing early is allowed.
+Clocks: CL=3, tRCD=3, tRP=3, tRAS=7, tRC=10, tRRD=2, tFAW=10, tWTR=2, tRTP=2, tWR=3, tRFC=10, tREFI=96, tMRD=2.
 
-Bring-up, before the first ACT/RD/WR: ≥8 idle clocks, PREA, tRP, REF, tRFC, REF, tRFC, MRS (`13'h032`), tMRD. Extra NOPs in the gaps are fine.
+tRCD is ACT to RD/WR on that bank. tRP is PRE to ACT or REF. tRAS is ACT to PRE. tRC is ACT to ACT same bank. tRRD is ACT to ACT any bank. tFAW: at most 4 ACT in any 10 clocks. tRTP is RD to PRE. tWR is last write beat to PRE. tRFC after REF, only NOP. tREFI is the max from REF to REF. Early REF is fine. Going past 96 is not.
 
-## Grade
+Init, before any ACT/RD/WR: wait 8, PREA, tRP, REF, tRFC, REF, tRFC, MRS, tMRD. Extra NOPs between those are ok. REF needs all banks precharged and tRP done.
 
-The hidden scoreboard runs at least:
+## What the TB actually checks
 
-1. 32 reads on m0, m1 quiet
-2. 48 reads on each host, all four banks
-3. write-then-read the same address on m0
-4. mixed reads and writes on both hosts
-5. a long stream that needs refresh after bring-up
-6. ACT traffic rotating banks 0-1-2-3 (tFAW)
-7. the dual-read pattern with `m*_rready` mostly low
-8. longer reset, then traffic
+Runs include:
 
-Seeds are baked into the scoreboard. Each run must:
+| run | what |
+|---|---|
+| m0 reads | 32 reads on m0, m1 idle |
+| both ports | 48 reads each, all 4 banks |
+| RAW | write then read the same line on m0 |
+| mix | reads and writes, both ports |
+| refresh | long enough that you have to REF again after init |
+| tFAW | banks 0,1,2,3 rotating |
+| backpressure | dual reads, rready mostly 0 |
+| late reset | rst_n held extra, then go |
 
-- return every read with the right 64-bit word, in that host's accept order
-- emit a WR with the right beats for every accepted write
-- issue only legal commands, no DQ clash
-- keep REF spacing ≤ tREFI
-- finish MRS before the first ACT
-- complete both hosts
-- finish inside the cycle budget for that run
+Right data, in the order that port accepted the reads. Writes have to actually go out as WR with those beats. Command timing has to hold, DQ included, and REF spacing stays under tREFI. MRS before the first ACT. Both ports finish. And it has to be inside the cycle bound; walking one bank at a time is too slow. Skip refresh and you fail tREFI. Only implementing m0 fails the two-port runs.
 
-A controller that walks one bank at a time, or that skips refresh, misses the budget or the timing check. Verilog-2001, one file.
-
-Local compile:
+One Verilog file is all you turn in. 2001 is fine.
 
 ```
 cd /app
