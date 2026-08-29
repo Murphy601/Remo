@@ -201,7 +201,6 @@ module mesi_pair (
                     ptg     = us ? tg1 : tg0;
                     pst_us  = line_st[us][pix];
                     phit_us = (pst_us != I) && (line_tg[us][pix] == ptg);
-                    // private: ignore the sibling. own dirty victim then fill.
                     wb_us    <= (pst_us == M) && !phit_us;
                     wb_sib   <= 1'b0;
                     do_copy  <= 1'b0;
@@ -221,11 +220,6 @@ module mesi_pair (
                     mw  <= 1'b1;
                     ma  <= {vtg, ix, beat, 2'b00};
                     mwd <= line_wd[us][ix][beat];
-                    mem_is_wr <= 1'b1;
-                end else if (wb_sib) begin
-                    mw  <= 1'b1;
-                    ma  <= {tg, ix, beat, 2'b00};
-                    mwd <= line_wd[ot][ix][beat];
                     mem_is_wr <= 1'b1;
                 end else begin
                     mw  <= 1'b0;
@@ -254,26 +248,7 @@ module mesi_pair (
                             line_st[us][ix] <= I;
                             wb_us <= 1'b0;
                             beat  <= 2'd0;
-                            if (wb_sib)
-                                bus <= ST_ISSUE;
-                            else if (do_copy)
-                                bus <= ST_COPY;
-                            else if (do_fill)
-                                bus <= ST_ISSUE;
-                            else
-                                bus <= ST_DONE;
-                        end
-                    end else if (wb_sib) begin
-                        if (beat != 2'd3) begin
-                            beat <= beat + 2'd1;
-                            bus  <= ST_ISSUE;
-                        end else begin
-                            wb_sib <= 1'b0;
-                            beat   <= 2'd0;
-                            if (do_copy)
-                                bus <= ST_COPY;
-                            else
-                                bus <= ST_DONE;
+                            bus   <= ST_ISSUE;
                         end
                     end else begin
                         line_wd[us][ix][beat] <= m_rdata;
@@ -290,7 +265,6 @@ module mesi_pair (
                 end
             end
             ST_COPY: begin
-                // hook. cache-to-cache copy / invalidate. not wired.
                 bus <= ST_DONE;
             end
             ST_DONE: begin
