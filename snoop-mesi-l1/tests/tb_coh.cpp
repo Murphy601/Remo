@@ -413,7 +413,10 @@ int main(int argc, char** argv) {
         top->c0_rready = r0;
         top->c1_rready = r1;
 
-        if (!m_rvalid && (!m_busy || top->m_valid))
+        // Same as /app/tb_coh.v: ready only while idle. Sample the master
+        // pre-edge — a DUT that drops m_valid the cycle after accept (or
+        // raises the next beat the cycle after taking m_rvalid) is legal.
+        if (!m_busy && !m_rvalid)
             top->m_ready = 1;
         else
             top->m_ready = 0;
@@ -458,6 +461,11 @@ int main(int argc, char** argv) {
         int mrr_pre = top->m_rready;
         int rv0_pre = top->c0_rvalid;
         int rv1_pre = top->c1_rvalid;
+        int mv_pre = top->m_valid;
+        int mw_pre = top->m_we;
+        int mrd_pre = top->m_ready;
+        uint16_t ma_pre = (uint16_t)top->m_addr;
+        uint32_t md_pre = (uint32_t)top->m_wdata;
 
         top->clk = 0;
         top->eval();
@@ -528,12 +536,12 @@ int main(int argc, char** argv) {
         if (m_rvalid && mrr_pre)
             m_rvalid = 0;
         if (!m_busy) {
-            if (top->m_valid && top->m_ready) {
+            if (mv_pre && mrd_pre) {
                 m_busy = 1;
                 m_cnt = 8;
-                m_isw = top->m_we;
-                m_a = top->m_addr;
-                m_wd = top->m_wdata;
+                m_isw = mw_pre;
+                m_a = ma_pre;
+                m_wd = md_pre;
                 if (m_isw)
                     n_mwr++;
                 else
