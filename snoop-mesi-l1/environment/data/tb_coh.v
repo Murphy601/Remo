@@ -150,6 +150,7 @@ module tb_coh;
         cpu_op(0, 1, 16'h0120, 32'hE2E2_0002, tmp);
         cpu_op(0, 1, 16'h0130, 32'hE3E3_0003, tmp);
         cpu_op(0, 1, 16'h0140, 32'hE4E4_0004, tmp);
+        cpu_op(0, 1, 16'h0180, 32'hE5E5_0005, tmp);
         cpu_op(1, 0, 16'h0100, 32'h0, tmp);
         if (tmp !== 32'hE0E0_0000) begin
             $display("SMOKE FAIL evict %h (write back the dirty victim)", tmp);

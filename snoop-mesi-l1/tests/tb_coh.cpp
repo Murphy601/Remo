@@ -275,14 +275,17 @@ int main(int argc, char** argv) {
     };
 
     switch (cfg.kind) {
-    case 0: { // cold line from mem, then c0 fills another line and hits
+    case 0: { // cold fill, then two tags in one set (2-way), then hits on both
         for (int w = 0; w < 4; w++)
             push(0, 0, line_word(7, w), 0);
         for (int w = 0; w < 4; w++)
             push(0, 1, line_word(4, w), 0xA0000000u + (uint32_t)w);
+        for (int w = 0; w < 4; w++)
+            push(0, 1, line_word(20, w), 0xB0000000u + (uint32_t)w);
         for (int i = 0; i < cfg.nops; i++) {
             int w = i & 3;
-            push(0, 0, line_word(4, w), 0);
+            int L = (i & 1) ? 20 : 4;
+            push(0, 0, line_word(L, w), 0);
         }
         break;
     }
@@ -311,8 +314,8 @@ int main(int argc, char** argv) {
         }
         break;
     }
-    case 4: { // dirty eviction: more than 4 lines on c0, then c1 reads victims
-        for (int L = 0; L < 8; L++)
+    case 4: { // 3 dirty lines per set (2-way + LRU), then c1 reads the victims
+        for (int L = 0; L < 12; L++)
             push(0, 1, line_word(L + 8, 0), 0xE1000000u + (uint32_t)L);
         for (int L = 0; L < 4; L++)
             push(1, 0, line_word(L + 8, 0), 0);
@@ -402,7 +405,7 @@ int main(int argc, char** argv) {
     int n_mrd = 0, n_mwr = 0;
     int cold_rd[4] = {0, 0, 0, 0};
     int vic_wr[4] = {0, 0, 0, 0};
-    int n_st4 = 0, n_refill = 0;
+    int n_st4 = 0, n_refill = 0, n_bounce = 0;
 
     while (ok && done < (int)script.size() && cyc < cfg.deadline) {
         int r0 = 1, r1 = 1;
@@ -551,13 +554,19 @@ int main(int argc, char** argv) {
                     for (int w = 0; w < 4; w++)
                         if (wa == line_word(7, w))
                             cold_rd[w]++;
+                    if (done >= 12) {
+                        uint16_t base = (uint16_t)(wa & ~0xFu);
+                        if (base == (uint16_t)(line_word(4, 0) & ~0xFu) ||
+                            base == (uint16_t)(line_word(20, 0) & ~0xFu))
+                            n_bounce++;
+                    }
                 }
                 if (cfg.kind == 4 && m_isw) {
                     for (int L = 0; L < 4; L++)
                         if (wa == line_word(L + 8, 0))
                             vic_wr[L]++;
                 }
-                if (cfg.kind == 4 && !m_isw && n_st4 >= 8) {
+                if (cfg.kind == 4 && !m_isw && n_st4 >= 12) {
                     uint16_t base = (uint16_t)(wa & ~0xFu);
                     for (int L = 0; L < 4; L++)
                         if (base == (uint16_t)(line_word(L + 8, 0) & ~0xFu))
@@ -603,12 +612,19 @@ int main(int argc, char** argv) {
                 ok = 0;
                 why = "no_fill";
             }
-            uint16_t a = line_word(4, w);
-            uint16_t wi = (uint16_t)(a >> 2);
-            if (wi < 16384 && mem[wi] != pat(a, cfg.seed)) {
+            uint16_t a4 = line_word(4, w);
+            uint16_t a20 = line_word(20, w);
+            uint16_t w4 = (uint16_t)(a4 >> 2);
+            uint16_t w20 = (uint16_t)(a20 >> 2);
+            if ((w4 < 16384 && mem[w4] != pat(a4, cfg.seed)) ||
+                (w20 < 16384 && mem[w20] != pat(a20, cfg.seed))) {
                 ok = 0;
                 why = "writethrough";
             }
+        }
+        if (n_bounce) {
+            ok = 0;
+            why = "bounce";
         }
     }
     if (ok && cfg.kind == 4 && n_mwr < 16) {
@@ -623,8 +639,24 @@ int main(int argc, char** argv) {
                 ok = 0;
                 why = "no_wb";
             }
+            for (int w = 1; w < 4; w++) {
+                uint16_t aw = line_word(L + 8, w);
+                uint16_t ww = (uint16_t)(aw >> 2);
+                if (ww < 16384 && mem[ww] != pat(aw, cfg.seed)) {
+                    ok = 0;
+                    why = "wb_pad";
+                }
+            }
         }
-        if (n_refill < 8) {
+        for (int L = 4; L < 12; L++) {
+            uint16_t a = line_word(L + 8, 0);
+            uint16_t wi = (uint16_t)(a >> 2);
+            if (wi < 16384 && mem[wi] != pat(a, cfg.seed)) {
+                ok = 0;
+                why = "writethrough";
+            }
+        }
+        if (n_refill < 12) {
             ok = 0;
             why = "no_refill";
         }
