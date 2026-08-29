@@ -2,7 +2,9 @@
 
 Two cores, each with a tiny L1. They share one slow memory port. The caches have to stay coherent (MESI). File is `/app/mesi_pair.v`, module `mesi_pair`.
 
-You get iverilog. That's it. The grade is a C++ Verilator board you cannot run here. `/app/tb_coh.v` is local smoke, 8-cycle mem slave. It does a c0 store, then a c1 load of that word, then c0 reads it again, then c1 writes the next word of the same line and c0 has to see that too. If smoke is red, snoops are broken. Smoke is still not the grade — hits, dirty eviction, ping-pong, rready, cycle cap live only in the grader. Duplicate the TB and throw those at yourself.
+You get iverilog. That's it. The grade is a C++ Verilator board you cannot run here. `/app/tb_coh.v` is the local bench, 8-cycle mem slave. It already does: c0 store then c1 load, false share on the next word, ping-pong one word, five dirty lines then c1 reads the victim, twelve hits with a clock check (HIT SLOW means you went to mem), rready held low, and c1 kicked while c0 is still in flight. If vvp is not SMOKE PASS, the grader will not save you. The grader still adds more traffic, a longer reset, and a tighter cycle cap.
+
+Hits are the cycle cap. After a line is in the cache a read is a few clocks, not eight plus a fill.
 
 ## Pins
 

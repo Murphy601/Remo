@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-// Local iverilog checks. Not the grader. Mem is an 8-cycle word slave.
+// Local iverilog. Not the C++ grade. 8-cycle word slave.
 module tb_coh;
     reg clk = 0;
     always #5 clk = ~clk;
@@ -22,7 +22,7 @@ module tb_coh;
     reg         m_rvalid = 0;
     reg  [31:0] m_rdata = 0;
     reg  [31:0] mem [0:16383];
-    integer     m_busy, m_cnt, i, fails, tmp;
+    integer     m_busy, m_cnt, i, fails, tmp, tmp2, cyc, t0, t1, n;
     reg         m_isw;
     reg  [15:0] m_a;
     reg  [31:0] m_wd;
@@ -41,6 +41,10 @@ module tb_coh;
     );
 
     always @(posedge clk) begin
+        if (!rst_n)
+            cyc <= 0;
+        else
+            cyc <= cyc + 1;
         if (!rst_n) begin
             m_busy <= 0; m_cnt <= 0; m_ready <= 1; m_rvalid <= 0;
         end else begin
@@ -76,27 +80,27 @@ module tb_coh;
         begin
             guard = 0;
             if (core == 0) begin
-                while (!c0_ready && guard < 4000) begin @(posedge clk); guard = guard + 1; end
+                while (!c0_ready && guard < 8000) begin @(posedge clk); guard = guard + 1; end
                 @(negedge clk);
                 c0_valid = 1; c0_we = we; c0_addr = addr; c0_wdata = wdata;
-                while (!(c0_valid && c0_ready) && guard < 4000) begin @(posedge clk); guard = guard + 1; end
+                while (!(c0_valid && c0_ready) && guard < 8000) begin @(posedge clk); guard = guard + 1; end
                 @(negedge clk); c0_valid = 0;
                 guard = 0;
-                while (!c0_rvalid && guard < 4000) begin @(posedge clk); guard = guard + 1; end
+                while (!c0_rvalid && guard < 8000) begin @(posedge clk); guard = guard + 1; end
                 rdata = c0_rdata;
                 @(negedge clk);
             end else begin
-                while (!c1_ready && guard < 4000) begin @(posedge clk); guard = guard + 1; end
+                while (!c1_ready && guard < 8000) begin @(posedge clk); guard = guard + 1; end
                 @(negedge clk);
                 c1_valid = 1; c1_we = we; c1_addr = addr; c1_wdata = wdata;
-                while (!(c1_valid && c1_ready) && guard < 4000) begin @(posedge clk); guard = guard + 1; end
+                while (!(c1_valid && c1_ready) && guard < 8000) begin @(posedge clk); guard = guard + 1; end
                 @(negedge clk); c1_valid = 0;
                 guard = 0;
-                while (!c1_rvalid && guard < 4000) begin @(posedge clk); guard = guard + 1; end
+                while (!c1_rvalid && guard < 8000) begin @(posedge clk); guard = guard + 1; end
                 rdata = c1_rdata;
                 @(negedge clk);
             end
-            if (guard >= 4000) begin
+            if (guard >= 8000) begin
                 $display("SMOKE FAIL timeout core=%0d a=%h", core, addr);
                 fails = fails + 1;
             end
@@ -117,16 +121,104 @@ module tb_coh;
             fails = fails + 1;
         end
 
-        cpu_op(0, 0, 16'h0040, 32'h0, tmp);
-        if (tmp !== 32'hA5A5_3210) begin
-            $display("SMOKE FAIL c0 lost %h", tmp);
-            fails = fails + 1;
-        end
-
         cpu_op(1, 1, 16'h0044, 32'hBEEF_0001, tmp);
         cpu_op(0, 0, 16'h0044, 32'h0, tmp);
         if (tmp !== 32'hBEEF_0001) begin
-            $display("SMOKE FAIL false-share word %h", tmp);
+            $display("SMOKE FAIL false-share %h", tmp);
+            fails = fails + 1;
+        end
+
+        cpu_op(0, 1, 16'h00C0, 32'h0000_00AA, tmp);
+        cpu_op(1, 1, 16'h00C0, 32'h0000_00BB, tmp);
+        cpu_op(0, 0, 16'h00C0, 32'h0, tmp);
+        if (tmp !== 32'h0000_00BB) begin
+            $display("SMOKE FAIL ping-pong %h", tmp);
+            fails = fails + 1;
+        end
+
+        cpu_op(0, 1, 16'h0100, 32'hE0E0_0000, tmp);
+        cpu_op(0, 1, 16'h0110, 32'hE1E1_0001, tmp);
+        cpu_op(0, 1, 16'h0120, 32'hE2E2_0002, tmp);
+        cpu_op(0, 1, 16'h0130, 32'hE3E3_0003, tmp);
+        cpu_op(0, 1, 16'h0140, 32'hE4E4_0004, tmp);
+        cpu_op(1, 0, 16'h0100, 32'h0, tmp);
+        if (tmp !== 32'hE0E0_0000) begin
+            $display("SMOKE FAIL evict %h (write back the dirty victim)", tmp);
+            fails = fails + 1;
+        end
+
+        cpu_op(0, 1, 16'h0200, 32'h1111_0001, tmp);
+        cpu_op(0, 1, 16'h0204, 32'h1111_0002, tmp);
+        cpu_op(0, 1, 16'h0208, 32'h1111_0003, tmp);
+        cpu_op(0, 1, 16'h020C, 32'h1111_0004, tmp);
+        t0 = cyc;
+        for (n = 0; n < 12; n = n + 1) begin
+            cpu_op(0, 0, 16'h0200, 32'h0, tmp);
+            if (tmp !== 32'h1111_0001) begin
+                $display("SMOKE FAIL hit data");
+                fails = fails + 1;
+            end
+        end
+        t1 = cyc;
+        if ((t1 - t0) > 110) begin
+            $display("SMOKE FAIL HIT SLOW %0d clocks for 12 reads — that line must hit, not go to mem", t1 - t0);
+            fails = fails + 1;
+        end else
+            $display("HITOK %0d", t1 - t0);
+
+        cpu_op(0, 1, 16'h0300, 32'h3333_0001, tmp);
+        @(negedge clk);
+        c0_rready = 0;
+        c0_valid = 1; c0_we = 0; c0_addr = 16'h0300;
+        n = 0;
+        while (!(c0_valid && c0_ready) && n < 4000) begin @(posedge clk); n = n + 1; end
+        @(negedge clk); c0_valid = 0;
+        n = 0;
+        while (!c0_rvalid && n < 4000) begin @(posedge clk); n = n + 1; end
+        if (!c0_rvalid) begin
+            $display("SMOKE FAIL rvalid never rose with rready=0");
+            fails = fails + 1;
+        end else begin
+            tmp = c0_rdata;
+            repeat (4) @(posedge clk);
+            if (!c0_rvalid || c0_rdata !== tmp) begin
+                $display("SMOKE FAIL rvalid dropped while rready=0");
+                fails = fails + 1;
+            end
+            if (tmp !== 32'h3333_0001) begin
+                $display("SMOKE FAIL hold data %h", tmp);
+                fails = fails + 1;
+            end
+        end
+        @(negedge clk); c0_rready = 1;
+        @(posedge clk);
+        @(negedge clk);
+
+        // c1 starts while c0 is still outstanding (disjoint lines)
+        while (!c0_ready) @(posedge clk);
+        @(negedge clk);
+        c0_valid = 1; c0_we = 1; c0_addr = 16'h0400; c0_wdata = 32'h0A0A_0001;
+        n = 0;
+        while (!(c0_valid && c0_ready) && n < 4000) begin @(posedge clk); n = n + 1; end
+        @(negedge clk); c0_valid = 0;
+        n = 0;
+        while (c0_ready && n < 40) begin @(posedge clk); n = n + 1; end
+        @(negedge clk);
+        c1_valid = 1; c1_we = 1; c1_addr = 16'h0410; c1_wdata = 32'h0B0B_0002;
+        n = 0;
+        while (!(c1_valid && c1_ready) && n < 4000) begin @(posedge clk); n = n + 1; end
+        if (n >= 4000) begin
+            $display("SMOKE FAIL split: c1_ready stayed 0 while c0 was in flight — one outstanding per CORE, not one for the chip");
+            fails = fails + 1;
+        end
+        @(negedge clk); c1_valid = 0;
+        n = 0;
+        while (!(c0_rvalid && c1_rvalid) && n < 8000) begin @(posedge clk); n = n + 1; end
+        @(negedge clk);
+        cpu_op(0, 0, 16'h0400, 32'h0, tmp);
+        cpu_op(1, 0, 16'h0410, 32'h0, tmp2);
+        if (tmp !== 32'h0A0A_0001 || tmp2 !== 32'h0B0B_0002) begin
+            $display("SMOKE FAIL split data %h %h", tmp, tmp2);
             fails = fails + 1;
         end
 
