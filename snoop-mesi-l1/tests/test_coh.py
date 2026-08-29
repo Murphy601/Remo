@@ -23,10 +23,10 @@ WRAP = (
 
 # name, kind, nops, seed, deadline, rst_pad, hold
 # Deadlines vs this 2-way reference (cycles): 343/600, 143/320, 677/1100,
-# 556/900, 1066/1700, 160/360, 561/900, 201/400. c0_hits holds two tags in
+# 556/900, 1090/1700, 160/360, 561/900, 201/400. c0_hits holds two tags in
 # one set; a direct-mapped 4-line pair times out or bounces under 600.
-# Hits extra=12 (4-word fill + 8 dirty stores). Evict extra=16 (12 stores
-# + 4 victim reads).
+# Hits extra=12 (4-word fill + 8 dirty stores). Evict extra=24 (12 stores
+# + 4 poisoned victim-word-1 reads + 8 retained hits).
 CASES = [
     ("c0_hits", 0, 48, 3, 600, 0, 0),
     ("cross_read", 1, 8, 11, 320, 0, 0),
@@ -50,7 +50,7 @@ def _want(row):
     if kind == 3:
         return 1 + nops * 2
     if kind == 4:
-        return 16
+        return 24
     if kind == 5:
         return nops * 4
     if kind == 6:

@@ -243,6 +243,13 @@ static uint32_t pat(uint16_t addr, uint32_t seed) {
     return 0xA5C30000u ^ (w * 2654435761u) ^ (seed * 0x9E3779B9u);
 }
 
+// Post-evict backing mutation. A 16k RAM that keeps the first fill and
+// only dummy-reads on refill still returns pat(); a real fill must take
+// this value from m_rdata.
+static uint32_t poke(uint16_t addr, uint32_t seed) {
+    return 0xD00F0000u ^ (uint32_t)addr ^ (seed * 0x85EBCA6Bu);
+}
+
 int main(int argc, char** argv) {
     load_key();
     lock_spawn();
@@ -314,11 +321,15 @@ int main(int argc, char** argv) {
         }
         break;
     }
-    case 4: { // 3 dirty lines per set (2-way + LRU), then c1 reads the victims
+    case 4: { // 3 dirty lines per set (2-way + LRU). After WB, mutate
+              // victim words 1-3; c1 must refill those, then c0 must still
+              // hit the eight retained dirty lines (private tags).
         for (int L = 0; L < 12; L++)
             push(0, 1, line_word(L + 8, 0), 0xE1000000u + (uint32_t)L);
         for (int L = 0; L < 4; L++)
-            push(1, 0, line_word(L + 8, 0), 0);
+            push(1, 0, line_word(L + 8, 1), 0);
+        for (int L = 4; L < 12; L++)
+            push(0, 0, line_word(L + 8, 0), 0);
         break;
     }
     case 5: { // split: disjoint indices, interleaved in the script (issued in parallel)
@@ -406,6 +417,7 @@ int main(int argc, char** argv) {
     int cold_rd[4] = {0, 0, 0, 0};
     int vic_wr[4] = {0, 0, 0, 0};
     int n_st4 = 0, n_refill = 0, n_bounce = 0;
+    int n_xwb = 0, poked = 0;
 
     while (ok && done < (int)script.size() && cyc < cfg.deadline) {
         int r0 = 1, r1 = 1;
@@ -450,7 +462,8 @@ int main(int argc, char** argv) {
         };
 
         if (seq_mode) {
-            if (!qseq.empty() && pend[0].empty() && pend[1].empty())
+            int hold_poke = (cfg.kind == 4 && n_st4 >= 12 && !poked);
+            if (!hold_poke && !qseq.empty() && pend[0].empty() && pend[1].empty())
                 try_issue(qseq.front().core, qseq.front());
         } else {
             for (int c = 0; c < 2; c++) {
@@ -550,6 +563,9 @@ int main(int argc, char** argv) {
                 else
                     n_mrd++;
                 uint16_t wa = (uint16_t)(m_a & ~3u);
+                if (cfg.kind == 1 && m_isw && wa == 0x0040 &&
+                    md_pre == 0xC1C10001u)
+                    n_xwb++;
                 if (cfg.kind == 0 && !m_isw) {
                     for (int w = 0; w < 4; w++)
                         if (wa == line_word(7, w))
@@ -588,6 +604,26 @@ int main(int argc, char** argv) {
                 m_busy = 0;
             }
         }
+        if (ok && cfg.kind == 4 && n_st4 >= 12 && n_mwr >= 16 && !poked &&
+            !m_busy && !m_rvalid) {
+            for (int L = 0; L < 4; L++) {
+                for (int w = 1; w < 4; w++) {
+                    uint16_t aw = line_word(L + 8, w);
+                    uint16_t ww = (uint16_t)(aw >> 2);
+                    if (ww >= 16384)
+                        continue;
+                    if (mem[ww] != pat(aw, cfg.seed)) {
+                        ok = 0;
+                        why = "wb_pad";
+                    } else {
+                        uint32_t pv = poke(aw, cfg.seed);
+                        mem[ww] = pv;
+                        gold[aw] = pv;
+                    }
+                }
+            }
+            poked = 1;
+        }
     }
 
     if (ok && done != (int)script.size()) {
@@ -601,6 +637,11 @@ int main(int argc, char** argv) {
     if (ok && (n_mrd + n_mwr) < 4) {
         ok = 0;
         why = "no_mem";
+    }
+    if (ok && cfg.kind == 1 &&
+        (n_xwb < 1 || mem[0x0040 >> 2] != 0xC1C10001u)) {
+        ok = 0;
+        why = "no_snoop_wb";
     }
     if (ok && cfg.kind == 0 && n_mrd < 4) {
         ok = 0;
@@ -639,14 +680,10 @@ int main(int argc, char** argv) {
                 ok = 0;
                 why = "no_wb";
             }
-            for (int w = 1; w < 4; w++) {
-                uint16_t aw = line_word(L + 8, w);
-                uint16_t ww = (uint16_t)(aw >> 2);
-                if (ww < 16384 && mem[ww] != pat(aw, cfg.seed)) {
-                    ok = 0;
-                    why = "wb_pad";
-                }
-            }
+        }
+        if (!poked) {
+            ok = 0;
+            why = "no_wb";
         }
         for (int L = 4; L < 12; L++) {
             uint16_t a = line_word(L + 8, 0);
