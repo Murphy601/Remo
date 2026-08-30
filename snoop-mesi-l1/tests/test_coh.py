@@ -22,19 +22,19 @@ WRAP = (
 )
 
 # name, kind, nops, seed, deadline, rst_pad, hold
-# Deadlines vs this 3-core 32B 4-way reference (cycles):
-# 685/1400, 246/500, 1205/2400, 988/2000, 2926/5200, 355/750, 996/2000, 413/750.
+# Deadlines vs this 4-core 32B 4-way + fetch-add reference are filled
+# after a measured run. Slack is left for a slower correct MESI quartet.
 # c0_hits keeps three dirty tags in one set and requires two accepts on c0
-# before the first response (no_dual). A 16-byte or 2-core pair fails.
+# before the first response (no_dual). A 16-byte or 3-core trio fails.
 CASES = [
     ("c0_hits", 0, 128, 3, 1400, 0, 0),
-    ("cross_read", 1, 8, 11, 500, 0, 0),
-    ("false_share", 2, 10, 19, 2400, 0, 0),
-    ("ping_pong", 3, 8, 29, 2000, 0, 0),
+    ("cross_read", 1, 8, 11, 800, 0, 0),
+    ("false_share", 2, 10, 19, 4000, 0, 0),
+    ("ping_pong", 3, 8, 29, 3000, 0, 0),
     ("evict_dirty", 4, 0, 41, 5200, 0, 0),
-    ("split_lines", 5, 8, 53, 750, 0, 0),
-    ("hold_rsp", 6, 8, 67, 2000, 0, 1),
-    ("late_rst", 7, 0, 79, 750, 20, 0),
+    ("split_lines", 5, 8, 53, 1200, 0, 0),
+    ("hold_rsp", 6, 8, 67, 3000, 0, 1),
+    ("late_rst", 7, 0, 79, 1500, 20, 0),
 ]
 
 
@@ -43,7 +43,7 @@ def _want(row):
     if kind == 0:
         return 11 + nops
     if kind == 1:
-        return 3 + nops
+        return 4 + nops
     if kind == 2:
         return nops * 2
     if kind == 3:
@@ -51,10 +51,10 @@ def _want(row):
     if kind == 4:
         return 52
     if kind == 5:
-        return nops * 6
+        return nops * 8
     if kind == 6:
         return nops * 2
-    return 9
+    return 16
 
 
 def _root():
