@@ -1,7 +1,7 @@
 artifacts = ["/app/female.stl", "/app/male.stl"]
 
 [task]
-name = "bayonet-seal-flange"
+name = "afterquery/bayonet-seal-flange"
 
 [metadata]
 author_name = "David Muiruri"
