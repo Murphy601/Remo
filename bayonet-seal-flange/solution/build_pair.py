@@ -66,9 +66,17 @@ def female_solid(x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
         & (np.abs(r - 33.20) <= 1.10)
         & (((ang - 14.0 + 360.0) % 360.0) <= 47.0)
     )
+    wf = (
+        33.50 * math.cos(math.radians(318.0)),
+        33.50 * math.sin(math.radians(318.0)),
+    )
+    weep_f = ((x - wf[0]) ** 2 + (y - wf[1]) ** 2) <= (1.25**2)
+    vice = (x <= -34.5) & (np.abs(y) <= 4.0) & (z >= 0.0) & (z <= 4.0)
     solid &= ~groove
     solid &= ~radial
     solid &= ~slot
+    solid &= ~weep_f
+    solid &= ~vice
 
     back = z >= 10.0
     solid &= ~back | ((r <= 25.0) & (r >= 17.0))
@@ -107,10 +115,16 @@ def male_solid(x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
         & (z <= 2.70)
         & (((x - pin_c[0]) ** 2 + (y - pin_c[1]) ** 2) <= (0.95**2))
     )
+    wm = (
+        33.50 * math.cos(math.radians(271.0)),
+        33.50 * math.sin(math.radians(271.0)),
+    )
+    weep_m = ((x - wm[0]) ** 2 + (y - wm[1]) ** 2) <= (1.25**2)
     solid = if_cap | if_barrel | if_lugs | if_pin
     solid &= (r >= 17.0) | if_pin
     pocket = (z >= -8.0) & (z <= -5.80) & (r < 18.25)
     solid &= ~pocket
+    solid &= ~weep_m
     return solid
 
 

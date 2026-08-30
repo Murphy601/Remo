@@ -1,5 +1,17 @@
 # bayonet-seal-flange
 
-Hardware / CAD. Mating Helios-M34 bayonet: vessel receiver and window cap.
+Hardware / CAD. Two-part Helios-M34 bayonet (receiver + window cap).
 
-Oracle writes the two binary STLs. Verifier ray-casts insert, ramp, lock, clock slot, and glands.
+## Maintainer notes
+
+`solution/build_pair.py` is an implicit solid, not a GUI CAD file. `female_solid` / `male_solid` are point-in-metal predicates. A 0.25 mm voxel grid is filled and only the solid/empty faces are written as binary STL. The male is modelled in the insert pose; lock is a +47° CCW rotation applied by the verifier.
+
+The 1.10 mm pull-in is extra lip height after each window's CCW edge (`_ramp_extra`), not a helix on the male.
+
+On this grid the oracle volumes are 19640 mm³ (female) and 30145 mm³ (male). Test bands (17500–22500, 27000–34000) are those values plus room for 0.2 mm edge breaks or a smoother CAD mesh. Probe points sit ≥0.4 mm inside or outside a face so tessellation should not flip them.
+
+Regenerate locally:
+
+`python3 solution/build_pair.py --outdir /tmp/helios`
+
+Then copy the two STLs to `/app` and run `tests/test_outputs.py`.

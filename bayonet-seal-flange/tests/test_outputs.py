@@ -73,8 +73,9 @@ def test_volumes(female_tris, male_tris):
     """Closed solids in the right mass range — a shell or a brick misses."""
     fv = signed_volume(female_tris)
     mv = signed_volume(male_tris)
-    assert 15000.0 < fv < 30000.0, f"female volume {fv:.1f}"
-    assert 20000.0 < mv < 38000.0, f"male volume {mv:.1f}"
+    # Oracle voxel volumes ~19600 / ~30000. Slack is 0.2 mm breaks + mesh flavour.
+    assert 17500.0 < fv < 22500.0, f"female volume {fv:.1f}"
+    assert 27000.0 < mv < 34000.0, f"male volume {mv:.1f}"
 
 
 def test_optical_bore_clear(female_tris, male_tris):
@@ -206,6 +207,30 @@ def test_wrong_clock_blocked(female_tris, male_tris):
     assert point_inside(male_tris, edge), "fat lug does not reach 17.5°"
     jammed = translate(rotate_z(edge, 107.0), -3.20)
     assert point_inside(female_tris, jammed), "fat lug fits the 107 window"
+
+
+def test_vice_flat(female_tris, male_tris):
+    """2 mm fixture flat on the female OD at 180°, not on the cap."""
+    assert not point_inside(female_tris, polar(35.4, 180.0, 2.0)), "vice flat missing"
+    assert point_inside(female_tris, polar(33.2, 180.0, 2.0)), "flat cut too deep"
+    assert point_inside(male_tris, polar(33.2, 180.0, -3.0)), "male got the vice flat"
+
+
+def test_weep_aligns(female_tris, male_tris):
+    """Ø2.5 weeps coincide only after +47°. Wrong male angle misses."""
+    assert not point_inside(female_tris, polar(33.50, 318.0, 5.0)), "female weep missing"
+    assert not point_inside(male_tris, polar(33.50, 271.0, -4.0)), "male weep missing"
+    assert point_inside(male_tris, polar(33.50, 318.0, -4.0)), "male weep already at 318"
+    locked = rotate_z(polar(33.50, 271.0, -4.0), LOCK)
+    assert abs(locked[0] - polar(33.50, 318.0, -4.0)[0]) < 0.35
+    assert not point_inside(female_tris, (locked[0], locked[1], 5.0))
+
+
+def test_cw_blocked(female_tris, male_tris):
+    """CW is the wrong sense — fat lug hits the lip mid-stroke."""
+    p = translate(rotate_z(polar(25.8, 0.0, 7.90), -30.0), -3.20)
+    assert point_inside(male_tris, polar(25.8, 0.0, 7.90))
+    assert point_inside(female_tris, p), "CW insert is clear"
 
 
 def test_parts_are_not_copies(female_tris, male_tris):

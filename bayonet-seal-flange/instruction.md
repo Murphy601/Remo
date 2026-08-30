@@ -1,17 +1,15 @@
 helios m34 receiver + cap. shop copy, rev D. throw out A/B/C, lock sense was wrong and the lugs were on a 120 grid which is how we got three-way clocking in the field.
 
-binary stl, millimetres.
+binary stl, millimetres. one body each. no step, no ascii, no zip.
 
-/app/female.stl
-/app/male.stl
-
-one body each. no step, no ascii, no zip. openscad is on the machine if you want it.
+`/app/female.stl`
+`/app/male.stl`
 
 origin on the axis. +Z into the vessel. female is z>=0, seal face at z=0. male comes from z<0.
 
 +X is the fat lug at the put-it-in pose, before you twist. looking along +Z, lock is CCW. 47 degrees, not 45, not 60. yes that is opposite a nikon. do not mail me.
 
-the ramp is the bit people miss. you do not seat the faces and then spin. you push until the lugs are through the windows (faces still 1.10 mm apart, male sitting 1.10 mm toward -Z) and THEN you twist 47°. the back of the lip is a ramp, 1.10 mm rise over those 47°, starting at the CCW edge of each window. that pull seats the faces and crushes the ring. a flat lip will either refuse to turn or it will not hold.
+the ramp is the bit people miss. you do not seat the faces and then spin. you push until the lugs are through the windows (faces still 1.10 mm apart, male sitting 1.10 mm toward -Z) and THEN you twist 47°. the back of the lip is a ramp, 1.10 mm rise over those 47°, starting at the CCW edge of each window. that pull seats the faces and crushes the ring. a flat lip will either refuse to turn or it will not hold. CW does not go in. I check that.
 
 female
 Ø72 from z=0 to z=10. then it steps. z=10 to z=12 is Ø50, and the bore there is only Ø34. do not run the 72 through. barrel clearance Ø48.30 from z=0 to z=10. lug race Ø56.40 from z=5.40 to z=10.
@@ -33,6 +31,10 @@ M3 ×4, Ø3.40 through the 10 mm flange, BCD 58, at 22 / 112 / 202 / 292. not on
 clock: male has a pin Ø1.90, axis at r=33.20, 14°, sticking +Z from his z=0 face out to z=2.70. female is not a round hole. it is a slot, same radius, 2.20 wide, z=0 to 3.20, sweeping 14° to 61° so the pin can travel the lock. a round hole jams at about ten degrees.
 
 stop in the race so you cannot walk past lock. 69° to 78°, z=6.80 to 9.20, r=24.20 to 28.20. key lug leading face should come up a couple of degrees short of it.
+
+fixture flat on the female only: 180°, 2 mm in from the Ø72, 8 mm wide, z=0 to 4. I pick it up on the mill vice. do not put a matching flat on the cap.
+
+leak-test weep Ø2.50 through the female flange at r=33.50, 318°. same hole through the male cap at r=33.50, 271° in the put-it-in pose, so they line up after the 47°. miss the 47° offset and I cannot pump it.
 
 male
 cap Ø68, z=-8 to 0. (the pin sits out near 33.2, a Ø64 cap misses it.)

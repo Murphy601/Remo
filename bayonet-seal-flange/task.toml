@@ -6,13 +6,23 @@ name = "afterquery/bayonet-seal-flange"
 [metadata]
 author_name = "Yasharth Singh"
 author_email = "yasharthsingh1777@gmail.com"
-difficulty_explanation = "Mating pair with an axial pull-in, not a flat twist. Lugs are 0/107/236 with three different widths, so a 120° pattern will not insert. Lock is 47° CCW and the lip +Z face is a 1.10 mm ramp that starts at each window's CCW edge — seat-then-spin leaves the faces short or the lugs buried. Face gland depth is from 22% crush on a 1.78 cord, plus a radial bore groove, a pin-in-slot clock, a race stop, and a Ø50 back wall. Usual misses: equal lugs, flat lip, round clock hole, barrel through the back, groove on the male."
-solution_explanation = "Female: Ø72 flange, Ø50×2 back wall, Ø48.30 bore, Ø56.40 race, three unequal windows, ramp on the lip back face (1.10 mm / 47° from each CCW window edge), HX-7 face groove (depth 1.78×0.78, width 1.40×1.78 about r=26.05), radial groove, M3 at 22/112/202/292 with vessel-side spotfaces, arc slot 14°–61° at r=33.20, stop at 69–78°. Male: Ø68 cap, Ø48 barrel to z=9.35, optic pocket, lugs 38/24/31° at 0/107/236, pin Ø1.90 at r=33.20 / 14°. Binary STL, mm."
-verification_explanation = "Ray-cast probes on the two STLs. Envelope and volume, both glands, bolt circle, back-wall step, unequal windows and lugs, ramp metal just CCW of a window, pin and slot, insert at dz=-1.10 with no clash, lock at +47° with lip blocking pull-out, stop present, and a +107° clock jamming the fat lug in a thin window. Ground truth is only in tests/. Tubes fail."
+difficulty_explanation = """This is work a mechanical designer who releases instrument housings and optical mounts would be paid to do: two parts that have to assemble, seal, clock, and lock, then go to a shop as STL. A focused expert spends the better part of a day getting the twist and the seals right.
+
+Humans fail the 3-D kinematics. They space the lugs 120° apart (this set is 0/107/236 with three widths), they seat the faces and then rotate (the spec requires a 1.10 mm pull-in while turning 47° CCW), they put a round hole where the clock pin has to travel, or they forget that the leak-test holes only line up after that 47° offset. Clockwise does not insert.
+
+Agents fail the same ways, and also skip the face-groove depth (you have to compute 22% squeeze on a 1.78 mm cord), put the groove on the male, run the barrel through the back wall, or omit the mill-vice flat. Size and volume of a pair of tubes is not enough — the grader transforms the male through insert, lock, wrong clock, and CW and checks metal vs air."""
+solution_explanation = """The reference is not a CAD GUI model. Each half is an implicit solid: a Python function that returns true when a point is metal. The female function starts as a stepped disk, then subtracts the bore, race, three windows, both grooves, bolt holes, clock slot, weep, and vice flat, and adds lip height after each window's CCW edge (that extra height is the 1.10 mm / 47° ramp) plus the race stop. The male function is the cap, barrel, three lugs, clock pin, optic pocket, and weep, all in the insert pose so a +47° rotation is the lock.
+
+Those functions are sampled on a 0.25 mm grid. Faces between solid and empty cells become a binary STL. 0.25 mm is coarse enough to run in seconds and fine enough that the verifier's probe points sit well inside or outside a surface. Alternative CAD that hits the same metal/air at those points also passes."""
+verification_explanation = """The verifier never runs agent code. It parses the two binary STLs and classifies probe points with majority ray-parity: three rays, odd crossings count as inside. Volume is the closed-mesh tet sum.
+
+Oracle volumes on this voxel grid are 19640 mm³ (female) and 30145 mm³ (male). Pass bands 17500–22500 and 27000–34000 are those numbers with slack for 0.2 mm edge breaks, a smoother CAD tessellation, or ±0.3 mm on non-critical walls. A solid brick or a thin tube falls outside. Bounding boxes are the ICD envelopes plus about 1.5 mm.
+
+Functional probes sit ≥0.4 mm inside features (groove troughs, lug cores, window air, ramp metal, slot travel, weep) so a change of mesh resolution cannot flip them. Transformed male points check insert at dz=-1.10 (no clash), lock at +47° (lip blocks pull-out, weeps coincide), +107° clock (fat lug jams), and CW (also jammed). Ground-truth coordinates live only in tests/. A 120° clone or two tubes fails that set."""
 category = "Hardware"
 subcategory = "CAD"
-tags = ["cad", "openscad", "bayonet", "o-ring", "mechanical-interface"]
-expert_time_estimate_hours = 10
+tags = ["cad", "stl", "bayonet", "o-ring", "mechanical-interface"]
+expert_time_estimate_hours = 12
 relevant_experience = "Instrument housings and optical-mechanical ICDs: bayonet receivers, face-seal glands, bolt circles, and shop handoff of mating STL pairs."
 
 [verifier]
