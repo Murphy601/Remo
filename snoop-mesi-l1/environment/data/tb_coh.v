@@ -137,26 +137,6 @@ module tb_coh;
             fails = fails + 1;
         end
 
-        cpu_op(0, 1, 16'h00C0, 32'h0000_00AA, tmp);
-        cpu_op(1, 1, 16'h00C0, 32'h0000_00BB, tmp);
-        cpu_op(0, 0, 16'h00C0, 32'h0, tmp);
-        if (tmp !== 32'h0000_00BB) begin
-            $display("SMOKE FAIL ping-pong %h", tmp);
-            fails = fails + 1;
-        end
-
-        cpu_op(0, 1, 16'h0100, 32'hE0E0_0000, tmp);
-        cpu_op(0, 1, 16'h0110, 32'hE1E1_0001, tmp);
-        cpu_op(0, 1, 16'h0120, 32'hE2E2_0002, tmp);
-        cpu_op(0, 1, 16'h0130, 32'hE3E3_0003, tmp);
-        cpu_op(0, 1, 16'h0140, 32'hE4E4_0004, tmp);
-        cpu_op(0, 1, 16'h0180, 32'hE5E5_0005, tmp);
-        cpu_op(1, 0, 16'h0100, 32'h0, tmp);
-        if (tmp !== 32'hE0E0_0000) begin
-            $display("SMOKE FAIL evict %h (write back the dirty victim)", tmp);
-            fails = fails + 1;
-        end
-
         cpu_op(0, 1, 16'h0200, 32'h1111_0001, tmp);
         cpu_op(0, 1, 16'h0204, 32'h1111_0002, tmp);
         cpu_op(0, 1, 16'h0208, 32'h1111_0003, tmp);
@@ -202,6 +182,33 @@ module tb_coh;
         end
         @(negedge clk); c0_rready = 1;
         @(posedge clk);
+        @(negedge clk);
+
+        // Two outstanding on c0: ready must rise again during a miss.
+        while (!c0_ready) @(posedge clk);
+        @(negedge clk);
+        c0_valid = 1; c0_we = 0; c0_addr = 16'h0500;
+        n = 0;
+        while (!(c0_valid && c0_ready) && n < 4000) begin @(posedge clk); n = n + 1; end
+        @(negedge clk); c0_valid = 0;
+        @(negedge clk);
+        c0_valid = 1; c0_we = 0; c0_addr = 16'h0200;
+        n = 0;
+        while (!(c0_valid && c0_ready) && n < 4000) begin @(posedge clk); n = n + 1; end
+        if (n >= 4000) begin
+            $display("SMOKE FAIL dual: c0_ready stayed 0 with one still in flight — two outstanding per core");
+            fails = fails + 1;
+        end
+        @(negedge clk); c0_valid = 0;
+        n = 0;
+        while (!c0_rvalid && n < 8000) begin @(posedge clk); n = n + 1; end
+        @(negedge clk); // take first rsp (in order)
+        n = 0;
+        while (!c0_rvalid && n < 8000) begin @(posedge clk); n = n + 1; end
+        if (c0_rdata !== 32'h1111_0001) begin
+            $display("SMOKE FAIL dual hit-under-miss data %h", c0_rdata);
+            fails = fails + 1;
+        end
         @(negedge clk);
 
         // c1 starts while c0 is still outstanding (disjoint lines)

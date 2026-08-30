@@ -22,17 +22,16 @@ WRAP = (
 )
 
 # name, kind, nops, seed, deadline, rst_pad, hold
-# Deadlines vs this 2-way reference (cycles): 343/600, 143/320, 677/1100,
-# 556/900, 1090/1700, 160/360, 561/900, 201/400. c0_hits holds two tags in
-# one set; a direct-mapped 4-line pair times out or bounces under 600.
-# Hits extra=12 (4-word fill + 8 dirty stores). Evict extra=24 (12 stores
-# + 4 poisoned victim-word-1 reads + 8 retained hits).
+# Deadlines vs this 4-way dual-outstanding reference (cycles):
+# 343/700, 143/320, 677/1100, 556/900, 1582/2400, 160/360, 561/900, 201/400.
+# c0_hits keeps three tags in one set and requires two accepts on c0
+# before the first response (no_dual). A 2-way pair times out.
 CASES = [
-    ("c0_hits", 0, 48, 3, 600, 0, 0),
+    ("c0_hits", 0, 48, 3, 700, 0, 0),
     ("cross_read", 1, 8, 11, 320, 0, 0),
     ("false_share", 2, 10, 19, 1100, 0, 0),
     ("ping_pong", 3, 8, 29, 900, 0, 0),
-    ("evict_dirty", 4, 0, 41, 1700, 0, 0),
+    ("evict_dirty", 4, 0, 41, 2400, 0, 0),
     ("split_lines", 5, 8, 53, 360, 0, 0),
     ("hold_rsp", 6, 8, 67, 900, 0, 1),
     ("late_rst", 7, 0, 79, 400, 20, 0),
@@ -42,7 +41,7 @@ CASES = [
 def _want(row):
     name, kind, nops, *_ = row
     if kind == 0:
-        return 12 + nops
+        return 16 + nops
     if kind == 1:
         return 2 + nops
     if kind == 2:
@@ -50,7 +49,7 @@ def _want(row):
     if kind == 3:
         return 1 + nops * 2
     if kind == 4:
-        return 24
+        return 52
     if kind == 5:
         return nops * 4
     if kind == 6:

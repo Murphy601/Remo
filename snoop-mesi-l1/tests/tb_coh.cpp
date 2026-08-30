@@ -282,16 +282,18 @@ int main(int argc, char** argv) {
     };
 
     switch (cfg.kind) {
-    case 0: { // cold fill, then two tags in one set (2-way), then hits on both
+    case 0: { // cold fill, then three tags in one set (4-way), then hits
         for (int w = 0; w < 4; w++)
             push(0, 0, line_word(7, w), 0);
         for (int w = 0; w < 4; w++)
             push(0, 1, line_word(4, w), 0xA0000000u + (uint32_t)w);
         for (int w = 0; w < 4; w++)
             push(0, 1, line_word(20, w), 0xB0000000u + (uint32_t)w);
+        for (int w = 0; w < 4; w++)
+            push(0, 1, line_word(36, w), 0xC0000000u + (uint32_t)w);
         for (int i = 0; i < cfg.nops; i++) {
             int w = i & 3;
-            int L = (i & 1) ? 20 : 4;
+            int L = (i % 3 == 0) ? 4 : (i % 3 == 1) ? 20 : 36;
             push(0, 0, line_word(L, w), 0);
         }
         break;
@@ -321,15 +323,20 @@ int main(int argc, char** argv) {
         }
         break;
     }
-    case 4: { // 3 dirty lines per set (2-way + LRU). After WB, mutate
-              // victim words 1-3; c1 must refill those, then c0 must still
-              // hit the eight retained dirty lines (private tags).
-        for (int L = 0; L < 12; L++)
+    case 4: { // 4-way LRU: 4 dirty tags per set, retouch first 3 so the
+              // 4th is LRU, 5th tag evicts it. Then poke victim pads.
+        for (int L = 0; L < 16; L++)
             push(0, 1, line_word(L + 8, 0), 0xE1000000u + (uint32_t)L);
+        for (int L = 0; L < 12; L++)
+            push(0, 1, line_word(L + 8, 0), 0xE2000000u + (uint32_t)L);
+        for (int s = 0; s < 4; s++)
+            push(0, 1, line_word(24 + s, 0), 0xE3000000u + (uint32_t)s);
         for (int L = 0; L < 4; L++)
-            push(1, 0, line_word(L + 8, 1), 0);
-        for (int L = 4; L < 12; L++)
+            push(1, 0, line_word(20 + L, 1), 0);
+        for (int L = 0; L < 12; L++)
             push(0, 0, line_word(L + 8, 0), 0);
+        for (int s = 0; s < 4; s++)
+            push(0, 0, line_word(24 + s, 0), 0);
         break;
     }
     case 5: { // split: disjoint indices, interleaved in the script (issued in parallel)
@@ -417,7 +424,7 @@ int main(int argc, char** argv) {
     int cold_rd[4] = {0, 0, 0, 0};
     int vic_wr[4] = {0, 0, 0, 0};
     int n_st4 = 0, n_refill = 0, n_bounce = 0;
-    int n_xwb = 0, poked = 0;
+    int n_xwb = 0, poked = 0, max_in0 = 0;
 
     while (ok && done < (int)script.size() && cyc < cfg.deadline) {
         int r0 = 1, r1 = 1;
@@ -462,9 +469,16 @@ int main(int argc, char** argv) {
         };
 
         if (seq_mode) {
-            int hold_poke = (cfg.kind == 4 && n_st4 >= 12 && !poked);
-            if (!hold_poke && !qseq.empty() && pend[0].empty() && pend[1].empty())
-                try_issue(qseq.front().core, qseq.front());
+            int hold_poke = (cfg.kind == 4 && n_st4 >= 32 && !poked);
+            if (!hold_poke && !qseq.empty()) {
+                int c = qseq.front().core;
+                if (cfg.kind == 0) {
+                    if ((int)pend[c].size() < 2)
+                        try_issue(c, qseq.front());
+                } else if (pend[0].empty() && pend[1].empty()) {
+                    try_issue(c, qseq.front());
+                }
+            }
         } else {
             for (int c = 0; c < 2; c++) {
                 if (pend[c].empty() && !qcore[c].empty())
@@ -519,6 +533,8 @@ int main(int argc, char** argv) {
             p.exp = gold.count(op.addr) ? gold[op.addr] : pat(op.addr, cfg.seed);
             pend[core].push_back(p);
             sent++;
+            if (core == 0 && (int)pend[0].size() > max_in0)
+                max_in0 = (int)pend[0].size();
         };
         take_fire(0);
         take_fire(1);
@@ -570,22 +586,23 @@ int main(int argc, char** argv) {
                     for (int w = 0; w < 4; w++)
                         if (wa == line_word(7, w))
                             cold_rd[w]++;
-                    if (done >= 12) {
+                    if (done >= 16) {
                         uint16_t base = (uint16_t)(wa & ~0xFu);
                         if (base == (uint16_t)(line_word(4, 0) & ~0xFu) ||
-                            base == (uint16_t)(line_word(20, 0) & ~0xFu))
+                            base == (uint16_t)(line_word(20, 0) & ~0xFu) ||
+                            base == (uint16_t)(line_word(36, 0) & ~0xFu))
                             n_bounce++;
                     }
                 }
                 if (cfg.kind == 4 && m_isw) {
                     for (int L = 0; L < 4; L++)
-                        if (wa == line_word(L + 8, 0))
+                        if (wa == line_word(20 + L, 0))
                             vic_wr[L]++;
                 }
-                if (cfg.kind == 4 && !m_isw && n_st4 >= 12) {
+                if (cfg.kind == 4 && !m_isw && n_st4 >= 32) {
                     uint16_t base = (uint16_t)(wa & ~0xFu);
                     for (int L = 0; L < 4; L++)
-                        if (base == (uint16_t)(line_word(L + 8, 0) & ~0xFu))
+                        if (base == (uint16_t)(line_word(20 + L, 0) & ~0xFu))
                             n_refill++;
                 }
             }
@@ -604,11 +621,11 @@ int main(int argc, char** argv) {
                 m_busy = 0;
             }
         }
-        if (ok && cfg.kind == 4 && n_st4 >= 12 && n_mwr >= 16 && !poked &&
+        if (ok && cfg.kind == 4 && n_st4 >= 32 && n_mwr >= 16 && !poked &&
             !m_busy && !m_rvalid) {
             for (int L = 0; L < 4; L++) {
                 for (int w = 1; w < 4; w++) {
-                    uint16_t aw = line_word(L + 8, w);
+                    uint16_t aw = line_word(20 + L, w);
                     uint16_t ww = (uint16_t)(aw >> 2);
                     if (ww >= 16384)
                         continue;
@@ -648,19 +665,22 @@ int main(int argc, char** argv) {
         why = "no_fill";
     }
     if (ok && cfg.kind == 0) {
+        if (max_in0 < 2) {
+            ok = 0;
+            why = "no_dual";
+        }
         for (int w = 0; w < 4; w++) {
             if (cold_rd[w] < 1) {
                 ok = 0;
                 why = "no_fill";
             }
-            uint16_t a4 = line_word(4, w);
-            uint16_t a20 = line_word(20, w);
-            uint16_t w4 = (uint16_t)(a4 >> 2);
-            uint16_t w20 = (uint16_t)(a20 >> 2);
-            if ((w4 < 16384 && mem[w4] != pat(a4, cfg.seed)) ||
-                (w20 < 16384 && mem[w20] != pat(a20, cfg.seed))) {
-                ok = 0;
-                why = "writethrough";
+            uint16_t tags[3] = {line_word(4, w), line_word(20, w), line_word(36, w)};
+            for (int t = 0; t < 3; t++) {
+                uint16_t wi = (uint16_t)(tags[t] >> 2);
+                if (wi < 16384 && mem[wi] != pat(tags[t], cfg.seed)) {
+                    ok = 0;
+                    why = "writethrough";
+                }
             }
         }
         if (n_bounce) {
@@ -674,9 +694,10 @@ int main(int argc, char** argv) {
     }
     if (ok && cfg.kind == 4) {
         for (int L = 0; L < 4; L++) {
-            uint16_t a = line_word(L + 8, 0);
+            uint16_t a = line_word(20 + L, 0);
             uint16_t wi = (uint16_t)(a >> 2);
-            if (vic_wr[L] < 1 || (wi < 16384 && mem[wi] != (0xE1000000u + (uint32_t)L))) {
+            if (vic_wr[L] < 1 ||
+                (wi < 16384 && mem[wi] != (0xE1000000u + 12u + (uint32_t)L))) {
                 ok = 0;
                 why = "no_wb";
             }
@@ -685,8 +706,16 @@ int main(int argc, char** argv) {
             ok = 0;
             why = "no_wb";
         }
-        for (int L = 4; L < 12; L++) {
+        for (int L = 0; L < 12; L++) {
             uint16_t a = line_word(L + 8, 0);
+            uint16_t wi = (uint16_t)(a >> 2);
+            if (wi < 16384 && mem[wi] != pat(a, cfg.seed)) {
+                ok = 0;
+                why = "writethrough";
+            }
+        }
+        for (int s = 0; s < 4; s++) {
+            uint16_t a = line_word(24 + s, 0);
             uint16_t wi = (uint16_t)(a >> 2);
             if (wi < 16384 && mem[wi] != pat(a, cfg.seed)) {
                 ok = 0;
