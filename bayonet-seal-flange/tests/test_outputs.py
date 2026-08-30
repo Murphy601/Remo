@@ -73,8 +73,8 @@ def test_volumes(female_tris, male_tris):
     """Closed solids in the right mass range — a shell or a brick misses."""
     fv = signed_volume(female_tris)
     mv = signed_volume(male_tris)
-    # Oracle voxel volumes ~19600 / ~30000. Slack is 0.2 mm breaks + mesh flavour.
-    assert 17500.0 < fv < 22500.0, f"female volume {fv:.1f}"
+    # Oracle voxel volumes ~19000 / ~30100. Slack is 0.2 mm breaks + mesh flavour.
+    assert 16500.0 < fv < 22500.0, f"female volume {fv:.1f}"
     assert 27000.0 < mv < 34000.0, f"male volume {mv:.1f}"
 
 
@@ -87,21 +87,23 @@ def test_optical_bore_clear(female_tris, male_tris):
 
 
 def test_female_face_gland(female_tris):
-    """HX-7 face groove from 22% crush / 1.40×cord about r=26.05."""
-    trough = (26.05, 0.0, 0.70)
-    land_out = (28.60, 0.0, 0.70)
-    land_in = (24.50, 0.0, 0.70)
+    """HX-7 face groove on a solid sector — not on a window centreline."""
+    # 200° sits between the 107 and 236 windows. θ=0 is the fat window;
+    # a face-through window (required for insert) has no land there.
+    trough = polar(26.05, 200.0, 0.70)
+    land_out = polar(28.60, 200.0, 0.70)
+    land_in = polar(24.50, 200.0, 0.70)
     assert not point_inside(female_tris, trough), "groove trough filled in"
     assert point_inside(female_tris, land_out), "no metal outside the gland"
     assert point_inside(female_tris, land_in), "no metal inside the gland"
 
 
 def test_radial_gland(female_tris, male_tris):
-    """Radial groove in the female bore; male barrel stays plain Ø48."""
-    assert not point_inside(female_tris, (24.80, 0.0, 2.60)), "radial groove missing"
-    assert point_inside(female_tris, (26.80, 0.0, 2.60)), "wall gone outside radial groove"
-    assert point_inside(male_tris, (23.40, 0.0, 2.60)), "male barrel missing"
-    assert not point_inside(male_tris, (24.80, 0.0, 2.60)), "male has a radial groove"
+    """Radial groove in the female bore on a solid sector; male barrel Ø48."""
+    assert not point_inside(female_tris, polar(24.80, 200.0, 2.60)), "radial groove missing"
+    assert point_inside(female_tris, polar(26.80, 200.0, 2.60)), "wall gone outside radial groove"
+    assert point_inside(male_tris, polar(23.40, 200.0, 2.60)), "male barrel missing"
+    assert not point_inside(male_tris, polar(24.80, 200.0, 2.60)), "male has a radial groove"
 
 
 def test_m3_and_spotface(female_tris):

@@ -88,13 +88,27 @@ def _ray_count(orig: np.ndarray, direction: np.ndarray, tris: np.ndarray) -> int
     return int(np.count_nonzero(hit))
 
 
-def point_inside(tris: np.ndarray, p, attempts: int = 3) -> bool:
+def point_inside(tris: np.ndarray, p, attempts: int = 5) -> bool:
+    """Majority ray-parity. Extra rays + micron jitter so a CAD facet edge
+    (common on $fn-aligned θ=0/90/180) cannot flip a probe."""
     p = np.asarray(p, dtype=np.float64)
     dirs = np.array(
         [
             [1.0, 0.037, 0.019],
             [0.023, 1.0, 0.041],
             [0.031, 0.017, 1.0],
+            [0.71, 0.62, 0.33],
+            [-0.41, 0.55, 0.73],
+        ],
+        dtype=np.float64,
+    )
+    jitter = np.array(
+        [
+            [0.0, 0.0, 0.0],
+            [3.7e-5, -2.1e-5, 1.3e-5],
+            [-1.9e-5, 4.4e-5, -2.8e-5],
+            [2.2e-5, 1.1e-5, -3.5e-5],
+            [-3.1e-5, -1.7e-5, 2.4e-5],
         ],
         dtype=np.float64,
     )
@@ -102,8 +116,8 @@ def point_inside(tris: np.ndarray, p, attempts: int = 3) -> bool:
     for i in range(attempts):
         d = dirs[i]
         d = d / np.linalg.norm(d)
-        votes += _ray_count(p, d, tris) % 2
-    return votes >= 2
+        votes += _ray_count(p + jitter[i], d, tris) % 2
+    return votes >= (attempts // 2 + 1)
 
 
 def rotate_z(p, deg: float):

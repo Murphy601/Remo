@@ -6,3 +6,6 @@ No ramp, no unequal lugs, no glands, no pin/slot, no stop.
 A 120° lug pattern, a flat lip, a round clock hole, a missing
 weep offset, or a CW-only twist also fails the sealed probes.
 
+Gland probes sit on a solid sector (~200°). A face-through window
+at 0° is correct and must not fail the groove land check.
+

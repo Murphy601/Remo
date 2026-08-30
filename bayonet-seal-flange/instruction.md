@@ -1,4 +1,4 @@
-helios m34 receiver + cap. shop copy, rev D. throw out A/B/C, lock sense was wrong and the lugs were on a 120 grid which is how we got three-way clocking in the field.
+helios m34 receiver + cap. shop copy, rev E. D ran the race to z=10 and wrote the windows like pockets — receiver came off in two pieces and the cap would not enter. throw out A/B/C/D. lock sense was wrong and the lugs were on a 120 grid which is how we got three-way clocking in the field.
 
 stl, millimetres. binary or ascii, I do not care. one body each. no step, no zip.
 
@@ -14,9 +14,9 @@ origin on the axis. +Z into the vessel. female is z>=0, seal face at z=0. male c
 the ramp is the bit people miss. you do not seat the faces and then spin. you push until the lugs are through the windows (faces still 1.10 mm apart, male sitting 1.10 mm toward -Z) and THEN you twist 47°. the back of the lip is a ramp. formula, so nobody has to guess: at angle θ, for each window let e be the CCW edge (centre + half-width). let α be the CCW angle from e to θ, 0 to 360. if α ≤ 47 the lip +Z face at that θ is z = 5.40 + 1.10×(α/47). if more than one window applies, take the larger add. on a window centreline there is no add, lip still ends at 5.40. a flat lip will not hold. CW does not go in. I check that.
 
 female
-Ø72 from z=0 to z=10. then it steps. z=10 to z=12 is Ø50, and the bore there is only Ø34. do not run the 72 through. barrel clearance Ø48.30 from z=0 to z=10. lug race Ø56.40 from z=5.40 to z=10.
+Ø72 from z=0 to z=10. then it steps. z=10 to z=12 is Ø50, and the bore there is only Ø34. do not run the 72 through. barrel clearance Ø48.30 from z=0 to z=10. lug race Ø56.40 from z=5.40 to z=9.40. stop the race there. a 0.6 mm web at z=9.40..10 keeps the Ø50 back step on the flange. race to z=10 undercuts that step and you hand me two solids.
 
-lip sits z=3.00 up to z=5.40 on the window centreline, then the formula above. metal is from r=24.15 out to the race. windows (cut the lip, not the OD):
+lip sits z=3.00 up to z=5.40 on the window centreline, then the formula above. metal is from r=24.15 out to the race. windows are through the seal face, z=0 to z=5.40 (cut the lip, not the OD). a pocket that starts at z=3.00 is a bowl — the lugs cannot climb in:
 
   fat    0°    46° wide
   one    107°  32° wide
@@ -29,9 +29,9 @@ HX-7 face ring. I already did the crush math. rectangular groove on the female z
   width 2.49
   depth 1.39
   so ID 49.61, OD 54.59
-male is just a flat land over that band.
+the three windows break the ring. still cut the groove on the solid sectors. male is just a flat land over that band.
 
-radial groove in the barrel bore, female only: z=1.90 to 3.30, 1.30 mm into the wall from Ø48.30 (so out to Ø50.90). male barrel stays Ø48 plain.
+radial groove in the barrel bore, female only: z=1.90 to 3.30, 1.30 mm into the wall from Ø48.30 (so out to Ø50.90). same story — gone in the windows, present on the solid bore. male barrel stays Ø48 plain.
 
 M3 ×4, Ø3.40 through the 10 mm flange, BCD 58, at 22 / 112 / 202 / 292. not on 45s. spotface Ø6.0 × 0.8 into the flange from the z=10 shoulder. keep them off the seal face.
 

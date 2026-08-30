@@ -83,10 +83,12 @@ def female_solid(x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
     solid &= ~(~back) | (r <= 36.0)
     solid &= ~((z < 10.0) & (r < 24.15))
 
-    in_band = (r >= 24.15) & (r < 28.20) & (z < 10.0)
+    # Race stops at 9.40 so a web remains under the Ø50 back step (one body).
+    in_band = (r >= 24.15) & (r < 28.20) & (z < 9.40)
     z_lip_hi = 5.40 + _ramp_extra(ang)
     win = _in_windows(ang)
-    solid &= ~((in_band) & win & (z >= 3.00) & (z <= 5.40))
+    # Windows are through the seal face — a z=3 pocket is a bowl the lugs cannot enter.
+    solid &= ~((r >= 24.15) & (r < 28.20) & win & (z >= 0.0) & (z <= 5.40))
 
     stop = (
         (z >= 6.80)
