@@ -64,6 +64,8 @@ MESI: I S E M. At most one M in the whole trio. E or M means both siblings are I
 
 A miss with both siblings I is eight word reads at `line_base+0/+4/+8/+12/+16/+20/+24/+28`. Dirty victim (replaced way is M, different tag): eight word writes at the old line_base before the fill. If another core needs a line you hold M, write those eight words back first. A store must drop every other copy to I. Replace E/S just drop that way. Four different tags on the same index can sit in the set. Once a line is in, keep using it — the mem port is 8 clocks per beat. A line that left every L1 has to come back from this port as it is now, not from a leftover copy you kept on the side.
 
+`addr[15:12] == 4'hF` is the device window. Those words do not sit in an L1. Each op is one word on the mem port — a store writes that word, a load returns what the backing store has now. Touching one word in the window does not give you the next word.
+
 Verilog-2001, one file.
 
 You have 14400 seconds to complete this task. Do not cheat by using online solutions or hints specific to this task.

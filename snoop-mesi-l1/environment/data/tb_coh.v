@@ -268,6 +268,9 @@ module tb_coh;
         issue0(0, A, 0, goldA); drain;
         issue0(0, A + 4, 0, mem[(A + 4) >> 2]); drain;
 
+        issue0(1, 16'hF010, 32'h0F0F0001, 0); drain;
+        issue1(0, 16'hF010, 0, 32'h0F0F0001); drain;
+
         if (fail) $display("FAIL");
         else $display("PASS");
         $finish;

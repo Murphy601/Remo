@@ -23,7 +23,7 @@ WRAP = (
 
 # name, kind, nops, seed, deadline, rst_pad, hold
 # Deadlines vs this 3-core 32B 4-way reference (cycles):
-# 685/1400, 246/500, 1205/2400, 988/2000, 2926/5200, 355/750, 996/2000, 359/750.
+# 685/1400, 246/500, 1205/2400, 988/2000, 2926/5200, 355/750, 996/2000, 413/750.
 # c0_hits keeps three dirty tags in one set and requires two accepts on c0
 # before the first response (no_dual). A 16-byte or 2-core pair fails.
 CASES = [
@@ -54,7 +54,7 @@ def _want(row):
         return nops * 6
     if kind == 6:
         return nops * 2
-    return 6
+    return 9
 
 
 def _root():

@@ -359,13 +359,16 @@ int main(int argc, char** argv) {
         }
         break;
     }
-    default: { // late reset then a short 3-core burst
+    default: { // late reset, short 3-core burst, then the device window
         push(0, 1, 0x0044, 0x77770001u);
         push(1, 0, 0x0044, 0);
         push(2, 0, 0x0044, 0);
         push(1, 1, 0x0048, 0x77770002u);
         push(0, 0, 0x0048, 0);
         push(2, 0, 0x0048, 0);
+        push(0, 1, 0xF040, 0xD1CE0001u);
+        push(1, 0, 0xF040, 0);
+        push(2, 0, 0xF044, 0);
         break;
     }
     }
@@ -430,6 +433,7 @@ int main(int argc, char** argv) {
     int vic_wr[4] = {0, 0, 0, 0};
     int n_st4 = 0, n_refill = 0, n_bounce = 0;
     int n_xwb = 0, poked = 0, max_in0 = 0;
+    int n_uc7 = 0, poked_uc = 0, n_ucwt = 0;
 
     while (ok && done < (int)script.size() && cyc < cfg.deadline) {
         int r0 = 1, r1 = 1, r2 = 1;
@@ -485,7 +489,8 @@ int main(int argc, char** argv) {
         };
 
         if (seq_mode) {
-            int hold_poke = (cfg.kind == 4 && n_st4 >= 32 && !poked);
+            int hold_poke = (cfg.kind == 4 && n_st4 >= 32 && !poked) ||
+                            (cfg.kind == 7 && n_uc7 >= 2 && !poked_uc);
             if (!hold_poke && !qseq.empty()) {
                 int c = qseq.front().core;
                 if (cfg.kind == 0) {
@@ -585,6 +590,8 @@ int main(int argc, char** argv) {
             }
             if (cfg.kind == 4 && p.we)
                 n_st4++;
+            if (cfg.kind == 7 && (p.addr >> 12) == 0xF)
+                n_uc7++;
             done++;
         };
         take_rsp(0);
@@ -608,6 +615,9 @@ int main(int argc, char** argv) {
                 if (cfg.kind == 1 && m_isw && wa == 0x0040 &&
                     md_pre == 0xC1C10001u)
                     n_xwb++;
+                if (cfg.kind == 7 && m_isw && wa == 0xF040 &&
+                    md_pre == 0xD1CE0001u)
+                    n_ucwt++;
                 if (cfg.kind == 0 && !m_isw) {
                     for (int w = 0; w < 8; w++)
                         if (wa == line_word(7, w))
@@ -666,6 +676,16 @@ int main(int argc, char** argv) {
                 }
             }
             poked = 1;
+        }
+        if (ok && cfg.kind == 7 && n_uc7 >= 2 && !poked_uc &&
+            !m_busy && !m_rvalid) {
+            uint16_t aw = 0xF044;
+            uint16_t ww = (uint16_t)(aw >> 2);
+            uint32_t pv = poke(aw, cfg.seed);
+            if (ww < 16384)
+                mem[ww] = pv;
+            gold[aw] = pv;
+            poked_uc = 1;
         }
     }
 
@@ -754,6 +774,10 @@ int main(int argc, char** argv) {
             ok = 0;
             why = "no_refill";
         }
+    }
+    if (ok && cfg.kind == 7 && (n_ucwt < 1 || !poked_uc)) {
+        ok = 0;
+        why = "no_uc";
     }
 
     emit_score(ok, sent, done, cyc, why);
