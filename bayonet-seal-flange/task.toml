@@ -4,8 +4,8 @@ artifacts = ["/app/female.stl", "/app/male.stl"]
 name = "afterquery/bayonet-seal-flange"
 
 [metadata]
-author_name = "David Muiruri"
-author_email = "andreancarols@gmail.com"
+author_name = "Yasharth Singh"
+author_email = "yasharthsingh1777@gmail.com"
 difficulty_explanation = "Mating pair with an axial pull-in, not a flat twist. Lugs are 0/107/236 with three different widths, so a 120° pattern will not insert. Lock is 47° CCW and the lip +Z face is a 1.10 mm ramp that starts at each window's CCW edge — seat-then-spin leaves the faces short or the lugs buried. Face gland depth is from 22% crush on a 1.78 cord, plus a radial bore groove, a pin-in-slot clock, a race stop, and a Ø50 back wall. Usual misses: equal lugs, flat lip, round clock hole, barrel through the back, groove on the male."
 solution_explanation = "Female: Ø72 flange, Ø50×2 back wall, Ø48.30 bore, Ø56.40 race, three unequal windows, ramp on the lip back face (1.10 mm / 47° from each CCW window edge), HX-7 face groove (depth 1.78×0.78, width 1.40×1.78 about r=26.05), radial groove, M3 at 22/112/202/292 with vessel-side spotfaces, arc slot 14°–61° at r=33.20, stop at 69–78°. Male: Ø68 cap, Ø48 barrel to z=9.35, optic pocket, lugs 38/24/31° at 0/107/236, pin Ø1.90 at r=33.20 / 14°. Binary STL, mm."
 verification_explanation = "Ray-cast probes on the two STLs. Envelope and volume, both glands, bolt circle, back-wall step, unequal windows and lugs, ramp metal just CCW of a window, pin and slot, insert at dz=-1.10 with no clash, lock at +47° with lip blocking pull-out, stop present, and a +107° clock jamming the fat lug in a thin window. Ground truth is only in tests/. Tubes fail."
