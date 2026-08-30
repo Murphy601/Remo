@@ -22,8 +22,8 @@ WRAP = (
 )
 
 # name, kind, nops, seed, deadline, rst_pad, hold
-# Deadlines vs this 4-core 32B 4-way + fetch-add reference are filled
-# after a measured run. Slack is left for a slower correct MESI quartet.
+# Deadlines vs this 4-core 32B 4-way + fetch-add reference (cycles):
+# 685/1400, 253/800, 1205/4000, 988/3000, 2926/5200, 454/1200, 1002/3000, 687/1500.
 # c0_hits keeps three dirty tags in one set and requires two accepts on c0
 # before the first response (no_dual). A 16-byte or 3-core trio fails.
 CASES = [
