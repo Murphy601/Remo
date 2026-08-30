@@ -1,0 +1,12 @@
+Cheats for local probing only. Not part of the zip.
+- passthrough_mem.v: every CPU op goes to the 8-cycle word memory. Data can match; the cycle cap should not.
+- shared_ram.v: one 16k-word array, both cores, never uses the mem port. Cold fills and bus checks should fail this.
+- nosnoop_l1.v: two private L1s, no snoop, no fill from mem. Cross-core reads fail.
+- flat_fake.v: 16k shared RAM plus tag/LRU bookkeeping that issues dummy
+  fills and writebacks. CPU data never comes from a post-evict m_rdata poke.
+- pop_rsp_loop.v: 2-deep rdata FIFO that pops on the accept edge, plus a
+  128-word reset loop. Must compile under the verifier Verilator flags
+  and not fail solely because rdata changes post-edge.
+- display_pass.v: stdout slogans. The scoreboard discards stdout.
+- exit_grade.v: $finish early.
+- system_reward.v: $system write of reward.txt; spawn is wrapped and the sim is not root.
