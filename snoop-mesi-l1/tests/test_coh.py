@@ -22,20 +22,18 @@ WRAP = (
 )
 
 # name, kind, nops, seed, deadline, rst_pad, hold
-# Deadlines vs this word-valid 4-way reference (cycles):
-# 209/550, 77/220, 260/700, 213/600, 334/900, 133/360, 225/600, 80/250.
-# Slack is for a correct pair that is slower. A full-line fill
-# fails data. A store that fetches the word it is about to
-# overwrite fails store_fill.
+# Deadlines vs this per-word MESI reference (cycles):
+# 236/550, 77/220, 94/250, 213/600, 334/900, 142/360, 225/600, 66/180.
+# A line-exclusive pair fails false_share / late_rst (false_wb).
 CASES = [
     ("c0_hits", 0, 48, 3, 550, 0, 0),
     ("cross_read", 1, 8, 11, 220, 0, 0),
-    ("false_share", 2, 10, 19, 700, 0, 0),
+    ("false_share", 2, 10, 19, 250, 0, 0),
     ("ping_pong", 3, 8, 29, 600, 0, 0),
     ("evict_dirty", 4, 0, 41, 900, 0, 0),
     ("split_lines", 5, 8, 53, 360, 0, 0),
     ("hold_rsp", 6, 8, 67, 600, 0, 1),
-    ("late_rst", 7, 0, 79, 250, 20, 0),
+    ("late_rst", 7, 0, 79, 180, 20, 0),
 ]
 
 
@@ -46,7 +44,7 @@ def _want(row):
     if kind == 1:
         return 3 + nops
     if kind == 2:
-        return nops * 2
+        return nops * 2 + 1
     if kind == 3:
         return 1 + nops * 2
     if kind == 4:
@@ -55,7 +53,7 @@ def _want(row):
         return nops * 4 + 4
     if kind == 6:
         return nops * 2
-    return 4
+    return 5
 
 
 def _root():

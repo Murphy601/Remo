@@ -307,13 +307,17 @@ int main(int argc, char** argv) {
             push((i & 1), 0, 0x0040, 0);
         break;
     }
-    case 2: { // false sharing: same line, different words
+    case 2: { // true false sharing: different words, no bounce of the other
         for (int i = 0; i < cfg.nops; i++) {
-            int w = (i & 1);
-            int c = (i & 1);
-            push(c, 1, (uint16_t)(0x0080 + w * 4), 0xF5000000u + (uint32_t)i);
-            push(c ^ 1, 0, (uint16_t)(0x0080 + w * 4), 0);
+            if ((i & 1) == 0) {
+                push(0, 1, 0x0080, 0xF5000000u + (uint32_t)i);
+                push(1, 1, 0x0084, 0xF6000000u + (uint32_t)i);
+            } else {
+                push(0, 0, 0x0080, 0);
+                push(1, 0, 0x0084, 0);
+            }
         }
+        push(0, 0, 0x0088, 0);
         break;
     }
     case 3: { // ping-pong one word
@@ -362,11 +366,12 @@ int main(int argc, char** argv) {
         }
         break;
     }
-    default: { // late reset then a short coherent burst
+    default: { // late reset, then two cores dirty different words
         push(0, 1, 0x0044, 0x77770001u);
-        push(1, 0, 0x0044, 0);
         push(1, 1, 0x0048, 0x77770002u);
-        push(0, 0, 0x0048, 0);
+        push(0, 0, 0x0044, 0);
+        push(1, 0, 0x0048, 0);
+        push(0, 0, 0x004C, 0);
         break;
     }
     }
@@ -429,7 +434,7 @@ int main(int argc, char** argv) {
     int vic_wr[4] = {0, 0, 0, 0};
     int n_st4 = 0, n_refill = 0, n_bounce = 0;
     int n_xwb = 0, poked = 0, poked_cold = 0, poked_x = 0, max_in0 = 0;
-    int n_overfill = 0, n_stfill = 0;
+    int n_overfill = 0, n_stfill = 0, n_false_wb = 0;
 
     while (ok && done < (int)script.size() && cyc < cfg.deadline) {
         int r0 = 1, r1 = 1;
@@ -611,6 +616,10 @@ int main(int argc, char** argv) {
                             n_bounce++;
                     }
                 }
+                if (cfg.kind == 2 && m_isw && (wa == 0x0080 || wa == 0x0084))
+                    n_false_wb++;
+                if (cfg.kind == 7 && m_isw && (wa == 0x0044 || wa == 0x0048))
+                    n_false_wb++;
                 if (cfg.kind == 4 && m_isw) {
                     for (int L = 0; L < 4; L++)
                         if (wa == line_word(20 + L, 0))
@@ -788,6 +797,24 @@ int main(int argc, char** argv) {
         }
     }
 
+    if (ok && cfg.kind == 2) {
+        uint16_t a0 = 0x0080, a1 = 0x0084;
+        if (n_false_wb ||
+            mem[a0 >> 2] != pat(a0, cfg.seed) ||
+            mem[a1 >> 2] != pat(a1, cfg.seed)) {
+            ok = 0;
+            why = "false_wb";
+        }
+    }
+    if (ok && cfg.kind == 7) {
+        uint16_t a0 = 0x0044, a1 = 0x0048;
+        if (n_false_wb ||
+            mem[a0 >> 2] != pat(a0, cfg.seed) ||
+            mem[a1 >> 2] != pat(a1, cfg.seed)) {
+            ok = 0;
+            why = "false_wb";
+        }
+    }
     emit_score(ok, sent, done, cyc, why);
     top->final();
     delete top;
