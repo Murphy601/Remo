@@ -13,9 +13,34 @@ import numpy as np
 DX = 0.25
 
 
+WINDOWS = ((0.0, 46.0), (107.0, 32.0), (236.0, 39.0))
+LUGS = ((0.0, 38.0), (107.0, 24.0), (236.0, 31.0))
+LOCK_DEG = 47.0
+RAMP_MM = 1.10
+M3_DEG = (22.0, 112.0, 202.0, 292.0)
+
+
 def _in_span(ang_deg: np.ndarray, center: float, span: float) -> np.ndarray:
     d = (ang_deg - center + 180.0) % 360.0 - 180.0
     return np.abs(d) <= (span / 2.0)
+
+
+def _in_windows(ang: np.ndarray) -> np.ndarray:
+    m = np.zeros_like(ang, dtype=bool)
+    for c, s in WINDOWS:
+        m |= _in_span(ang, c, s)
+    return m
+
+
+def _ramp_extra(ang: np.ndarray) -> np.ndarray:
+    extra = np.zeros_like(ang, dtype=np.float64)
+    for c, s in WINDOWS:
+        edge = c + s / 2.0
+        dccw = (ang - edge + 360.0) % 360.0
+        extra = np.maximum(
+            extra, np.where(dccw <= LOCK_DEG, RAMP_MM * (dccw / LOCK_DEG), 0.0)
+        )
+    return extra
 
 
 def female_solid(x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
@@ -24,59 +49,66 @@ def female_solid(x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
     solid = (z >= 0.0) & (z <= 12.0)
 
     hole = np.zeros_like(solid)
-    for k in range(4):
-        a = math.radians(45.0 + 90.0 * k)
+    for deg in M3_DEG:
+        a = math.radians(deg)
         cx, cy = 29.0 * math.cos(a), 29.0 * math.sin(a)
         d2 = (x - cx) ** 2 + (y - cy) ** 2
         hole |= d2 <= (1.70**2)
         hole |= (z >= 9.20) & (z <= 10.0) & (d2 <= (3.00**2))
     solid &= ~hole
 
-    groove = (z >= 0.0) & (z <= 1.40) & (r >= 25.00) & (r <= 27.10)
+    # 1.78 cord, 22% crush, width 1.40*cord, centreline r=26.05
+    groove = (z >= 0.0) & (z <= 1.388) & (r >= 24.804) & (r <= 27.296)
+    radial = (z >= 1.90) & (z <= 3.30) & (r >= 24.15) & (r <= 25.45)
+    slot = (
+        (z >= 0.0)
+        & (z <= 3.20)
+        & (np.abs(r - 33.20) <= 1.10)
+        & (((ang - 14.0 + 360.0) % 360.0) <= 47.0)
+    )
     solid &= ~groove
+    solid &= ~radial
+    solid &= ~slot
 
     back = z >= 10.0
     solid &= ~back | ((r <= 25.0) & (r >= 17.0))
-
-    front = ~back
-    solid &= ~front | (r <= 36.0)
+    solid &= ~(~back) | (r <= 36.0)
     solid &= ~((z < 10.0) & (r < 24.15))
 
+    in_band = (r >= 24.15) & (r < 28.20) & (z < 10.0)
+    z_lip_hi = 5.40 + _ramp_extra(ang)
+    win = _in_windows(ang)
+    solid &= ~((in_band) & win & (z >= 3.00) & (z <= 5.40))
+
     stop = (
-        (z >= 5.60)
-        & (z <= 8.00)
+        (z >= 6.80)
+        & (z <= 9.20)
         & (r >= 24.20)
         & (r <= 28.20)
-        & _in_span(ang, 76.0, 8.0)
+        & _in_span(ang, 73.5, 9.0)
     )
-    race = (z >= 5.40) & (z < 10.0) & (r < 28.20) & (r >= 24.15) & ~stop
-    notch = (
-        (z >= 3.00)
-        & (z <= 5.40)
-        & (r < 28.20)
-        & (r >= 24.15)
-        & (
-            _in_span(ang, 0.0, 46.0)
-            | _in_span(ang, 120.0, 34.0)
-            | _in_span(ang, 240.0, 34.0)
-        )
-    )
+    race = in_band & (z > z_lip_hi) & ~stop
     solid &= ~race
-    solid &= ~notch
     return solid
 
 
 def male_solid(x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
     r = np.hypot(x, y)
     ang = np.degrees(np.arctan2(y, x))
-    if_cap = (z >= -8.0) & (z <= 0.0) & (r <= 32.0)
-    if_barrel = (z >= 0.0) & (z <= 9.50) & (r <= 24.0)
-    lug_z = (z >= 5.60) & (z <= 8.00) & (r >= 24.00) & (r <= 27.60)
-    if_key = lug_z & _in_span(ang, 0.0, 38.0)
-    if_r1 = lug_z & _in_span(ang, 120.0, 26.0)
-    if_r2 = lug_z & _in_span(ang, 240.0, 26.0)
-    solid = if_cap | if_barrel | if_key | if_r1 | if_r2
-    solid &= r >= 17.0
+    if_cap = (z >= -8.0) & (z <= 0.0) & (r <= 34.0)
+    if_barrel = (z >= 0.0) & (z <= 9.35) & (r <= 24.0)
+    lug_z = (z >= 6.70) & (z <= 9.10) & (r >= 24.00) & (r <= 27.60)
+    if_lugs = np.zeros_like(lug_z)
+    for c, s in LUGS:
+        if_lugs |= lug_z & _in_span(ang, c, s)
+    pin_c = (33.20 * math.cos(math.radians(14.0)), 33.20 * math.sin(math.radians(14.0)))
+    if_pin = (
+        (z >= 0.0)
+        & (z <= 2.70)
+        & (((x - pin_c[0]) ** 2 + (y - pin_c[1]) ** 2) <= (0.95**2))
+    )
+    solid = if_cap | if_barrel | if_lugs | if_pin
+    solid &= (r >= 17.0) | if_pin
     pocket = (z >= -8.0) & (z <= -5.80) & (r < 18.25)
     solid &= ~pocket
     return solid
@@ -247,7 +279,7 @@ def main() -> None:
     )
     m_tris, m_vol = build_one(
         male_solid,
-        ((-33.0, 33.0), (-33.0, 33.0), (-8.25, 9.75)),
+        ((-35.0, 35.0), (-35.0, 35.0), (-8.25, 9.60)),
         out / "male.stl",
     )
     print(f"female triangles={f_tris} volume={f_vol:.1f} mm3")

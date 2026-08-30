@@ -1,18 +1,18 @@
 artifacts = ["/app/female.stl", "/app/male.stl"]
 
 [task]
-name = "afterquery/bayonet-seal-flange"
+name = "bayonet-seal-flange"
 
 [metadata]
 author_name = "David Muiruri"
 author_email = "andreancarols@gmail.com"
-difficulty_explanation = "This is a mating pair, not a single body from a drawing. The agent has to hold one frame, a keyed insert pose, a 50° CCW lock, a face gland, a bolt circle with spotfaces, a race-and-lip bayonet, a hard stop, and a back-wall step at once. The usual failure is three equal lugs (it inserts in three poses), lock the wrong way, run the barrel through the Ø50 seat, or put the groove on the male. Volume and bounding box of a tube will not pass — the grader samples the lip, the race, the gland, the stop, and transformed male points at insert, mid-stroke, lock, and the blocked clock."
-solution_explanation = "Build the female as a Ø72 flange with a Ø50 × 2 mm back wall, subtract the Ø48.30 barrel bore, the Ø56.40 race, three unequally wide lip windows, the HX-7 rectangular gland, and four spotfaced M3 holes, then add the 72–80° race stop. Build the male as a Ø64 cap, Ø48 barrel that stops at z = 9.50, a Ø36.50 optic pocket, and one 38° key lug plus two 26° lugs. Export both as binary STL in millimetres."
-verification_explanation = "The verifier loads the two binary STLs and ray-casts a sealed probe set. It checks envelopes and volumes, empty optical bore, female gland trough, M3 plus spotface, back-wall step, key-lug vs regular-lug metal, insert clearance at 0°, pull-out block at +50°, hard stop, and that a +120° clock jams the fat lug in a thin window. Ground-truth points live only in tests/. A pair of tubes with the right bbox fails the lip/lug/gland probes."
+difficulty_explanation = "Mating pair with an axial pull-in, not a flat twist. Lugs are 0/107/236 with three different widths, so a 120° pattern will not insert. Lock is 47° CCW and the lip +Z face is a 1.10 mm ramp that starts at each window's CCW edge — seat-then-spin leaves the faces short or the lugs buried. Face gland depth is from 22% crush on a 1.78 cord, plus a radial bore groove, a pin-in-slot clock, a race stop, and a Ø50 back wall. Usual misses: equal lugs, flat lip, round clock hole, barrel through the back, groove on the male."
+solution_explanation = "Female: Ø72 flange, Ø50×2 back wall, Ø48.30 bore, Ø56.40 race, three unequal windows, ramp on the lip back face (1.10 mm / 47° from each CCW window edge), HX-7 face groove (depth 1.78×0.78, width 1.40×1.78 about r=26.05), radial groove, M3 at 22/112/202/292 with vessel-side spotfaces, arc slot 14°–61° at r=33.20, stop at 69–78°. Male: Ø68 cap, Ø48 barrel to z=9.35, optic pocket, lugs 38/24/31° at 0/107/236, pin Ø1.90 at r=33.20 / 14°. Binary STL, mm."
+verification_explanation = "Ray-cast probes on the two STLs. Envelope and volume, both glands, bolt circle, back-wall step, unequal windows and lugs, ramp metal just CCW of a window, pin and slot, insert at dz=-1.10 with no clash, lock at +47° with lip blocking pull-out, stop present, and a +107° clock jamming the fat lug in a thin window. Ground truth is only in tests/. Tubes fail."
 category = "Hardware"
 subcategory = "CAD"
 tags = ["cad", "openscad", "bayonet", "o-ring", "mechanical-interface"]
-expert_time_estimate_hours = 6
+expert_time_estimate_hours = 10
 relevant_experience = "Instrument housings and optical-mechanical ICDs: bayonet receivers, face-seal glands, bolt circles, and shop handoff of mating STL pairs."
 
 [verifier]
@@ -20,7 +20,7 @@ timeout_sec = 300.0
 environment_mode = "separate"
 
 [agent]
-timeout_sec = 14400.0
+timeout_sec = 18000.0
 
 [environment]
 build_timeout_sec = 600.0

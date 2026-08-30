@@ -1,78 +1,55 @@
-HELIOS-M34 bayonet — receiver + window cap
-ICD-H34-09  rev C2   (C2 is the released one. A and B had the lock going the other way. Do not use those.)
+helios m34 receiver + cap. shop copy, rev D. throw out A/B/C, lock sense was wrong and the lugs were on a 120 grid which is how we got three-way clocking in the field.
 
-I need both halves, not a look-alike of one part. These have to assemble on the bench. Binary STL, millimetres, one solid per file:
+binary stl, millimetres.
 
-  /app/female.stl     receiver. Stays on the vessel.
-  /app/male.stl       window cap. The bit you twist on.
+/app/female.stl
+/app/male.stl
 
-OpenSCAD is already on the box if you want it. Use something else if you prefer. I do not want STEP, ASCII STL, or a zip.
+one body each. no step, no ascii, no zip. openscad is on the machine if you want it.
 
-Frame
------
-Axis on the origin. +Z is the insertion direction, into the vessel. Female lives at z >= 0. Her sealing face is the z = 0 plane. Male comes in from z < 0 and is seated when his z = 0 face is against hers.
+origin on the axis. +Z into the vessel. female is z>=0, seal face at z=0. male comes from z<0.
 
-+X is the key-lug centre at the INSERT pose (before you twist). Looking along +Z, lock is CCW. I know that is the other way from a Nikon F. Do not write me about it. We scrapped a batch last year when a vendor mirrored the lugs.
++X is the fat lug at the put-it-in pose, before you twist. looking along +Z, lock is CCW. 47 degrees, not 45, not 60. yes that is opposite a nikon. do not mail me.
 
-Female — receiver
------------------
-Overall:
-  z = 0 to 10     flange, Ø72
-  z = 10 to 12    tube seat / back wall, Ø50. This is a real step. The Ø72 does not run through.
+the ramp is the bit people miss. you do not seat the faces and then spin. you push until the lugs are through the windows (faces still 1.10 mm apart, male sitting 1.10 mm toward -Z) and THEN you twist 47°. the back of the lip is a ramp, 1.10 mm rise over those 47°, starting at the CCW edge of each window. that pull seats the faces and crushes the ring. a flat lip will either refuse to turn or it will not hold.
 
-Bores (female):
-  z = 0 to 10     barrel clearance Ø48.30
-  z = 10 to 12    optical only, Ø34.00   (the back wall closes down)
-  z = 5.40 to 10  lug race, Ø56.40. This is a counterbore on the barrel hole. Male's lugs live here after they pass the lip.
+female
+Ø72 from z=0 to z=10. then it steps. z=10 to z=12 is Ø50, and the bore there is only Ø34. do not run the 72 through. barrel clearance Ø48.30 from z=0 to z=10. lug race Ø56.40 from z=5.40 to z=10.
 
-Retainer lip:
-  z = 3.00 to 5.40
-  material from r = 24.15 out to the race wall, except three windows:
-    key window   centred on +X (0°), 46° wide
-    two regulars centred at 120° and 240°, 34° wide each
-  Windows cut the lip out to the race diameter so the lugs can pass. They do not cut the flange OD.
+lip sits z=3.00 up to z=5.40 on the window centreline. after a window's CCW edge the +Z face of that lip climbs 1.10 mm over 47°. metal is from r=24.15 out to the race. windows (cut the lip, not the OD):
 
-O-ring gland (HX-7, 1.78 cord — we already did the crush math, do not reinvent it):
-  rectangular groove in the z = 0 face, into +Z
-  ID 50.00   OD 54.20   depth 1.40
-  That sits in the flange meat outside the barrel hole. Male just needs a flat land over that annulus. Groove is on the female.
+  fat    0°    46° wide
+  one    107°  32° wide
+  other  236°  39° wide
 
-Bolt circle:
-  4 × M3 clear, Ø3.40 through the 10 mm flange
-  BCD 58.00, at 45° / 135° / 225° / 315°
-  Spotface Ø6.00 × 0.8 deep on the vessel-side shoulder (into the flange from z = 10 toward z = 9.2). Not on the seal face — I do not want a washer on the O-ring land. Holes sit at r = 29 so they miss the Ø50 tube seat.
+those are not 120 apart. if you put them 120 apart it will not go together.
 
-Hard stop in the race:
-  a block so you cannot twist past lock
-  72° to 80° (absolute, same frame as above)
-  z = 5.60 to 8.00
-  r = 24.20 to 28.20
-  The key lug's leading face comes up against this at lock. Leave a couple of degrees of air. Do not omit it — we had caps walk past lock in rev A.
+HX-7 face ring, 1.78 cord. 22% crush. rectangular. groove width is 1.40 × the cord. groove centreline at r=26.05. depth you can work out. female, z=0 face, into +Z. male is just a flat land over that band.
 
-Male — window cap
------------------
-Cap:   Ø64, z = -8 to 0
-Barrel: Ø48.00, z = 0 to 9.50. Stop short of the female back wall. If you run the barrel to z = 12 you will hit her.
-Through bore Ø34.00
-Optic pocket on the -Z face of the cap: Ø36.50 × 2.20 deep (z = -8.00 to -5.80). The step down to Ø34 is the retention lip for a 2 mm window. Do not bore 36.5 all the way through.
+also a radial groove in the barrel bore, female only: z=1.90 to 3.30, 1.30 mm into the wall from Ø48.30. male barrel stays Ø48 plain.
 
-Lugs, sitting in the race when seated:
-  z = 5.60 to 8.00
-  r = 24.00 to 27.60
-  key lug     38° wide, centred on +X at INSERT
-  two regulars 26° wide, centred at 120° and 240° at INSERT
+M3 ×4, Ø3.40 through the 10 mm flange, BCD 58, at 22 / 112 / 202 / 292. not on 45s. spotface Ø6.0 × 0.8 into the flange from the z=10 shoulder. keep them off the seal face.
 
-Three identical lugs will go in in three poses. That fails. The fat lug is the clock.
+clock: male has a pin Ø1.90, axis at r=33.20, 14°, sticking +Z from his z=0 face out to z=2.70. female is not a round hole. it is a slot, same radius, 2.20 wide, z=0 to 3.20, sweeping 14° to 61° so the pin can travel the lock. a round hole jams at about ten degrees.
 
-Assembly
---------
-1. Line up the key lug with the fat window (+X).
-2. Push +Z. Lugs have to clear the lip windows. The fat lug will not go through a 34° window — that is on purpose.
-3. When the z = 0 faces meet, twist 50° CCW looking along +Z. Lugs park in the race, behind the lip. You should not be able to pull -Z without twisting back.
-4. Stop block kills further CCW.
+stop in the race so you cannot walk past lock. 69° to 78°, z=6.80 to 9.20, r=24.20 to 28.20. key lug leading face should come up a couple of degrees short of it.
 
-Clearances I already put in the numbers (0.15 mm on the barrel, etc.). Do not add your own "just in case" slop on the lug span or the window widths. Off by a few degrees and either it will not insert or it will not lock.
+male
+cap Ø68, z=-8 to 0. (the pin sits out near 33.2, a Ø64 cap misses it.)
+barrel Ø48.00, z=0 to 9.35. the female back wall is at z=10. if you make this 12 you hit her.
+through Ø34.
+optic pocket on the -Z of the cap: Ø36.50 × 2.20 deep, z=-8.00 to -5.80. then it steps to Ø34. do not bore 36.5 through.
 
-Break edges 0.2 max if you want. I am not grading fillets. I am grading whether the pair mates, clocks, seals, and stops.
+lugs, on the barrel, z=6.70 to 9.10, r=24.00 to 27.60, at the put-it-in pose:
 
-You have 14400 seconds to complete this task. Do not cheat by using online solutions or hints specific to this task.
+  fat    0°    38° wide
+  one    107°  24° wide
+  other  236°  31° wide
+
+three the same width, or 120 spacing, and it inserts three ways. that is a reject.
+
+put the fat lug on the fat window. push +Z. twist 47° CCW. you should not be able to pull -Z without twisting back. stop kills more CCW.
+
+I already put the 0.15 on the barrel. do not add slop to the lug spans or the windows. 0.2 break-edges if you like, I am not looking at fillets.
+
+You have 18000 seconds to complete this task. Do not cheat by using online solutions or hints specific to this task.

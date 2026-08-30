@@ -1,6 +1,5 @@
-# afterquery/bayonet-seal-flange
+# bayonet-seal-flange
 
-Hardware / CAD. Mating Helios-M34 bayonet: female vessel receiver and male window cap, from a written ICD (not a 2D drawing reconstruction).
+Hardware / CAD. Mating Helios-M34 bayonet: vessel receiver and window cap.
 
-Oracle: `solution/build_pair.py` voxelises the ICD and writes binary STLs.
-Verifier: sealed point-in-mesh probes at insert, lock, wrong clock, gland, stop, and back-wall step.
+Oracle writes the two binary STLs. Verifier ray-casts insert, ramp, lock, clock slot, and glands.

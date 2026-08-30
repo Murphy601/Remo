@@ -11,6 +11,8 @@ from stlutil import bbox, load_binary_stl, point_inside, rotate_z, signed_volume
 
 FEMALE = Path("/app/female.stl")
 MALE = Path("/app/male.stl")
+LOCK = 47.0
+PROUD = -1.10
 
 
 def polar(r: float, deg: float, z: float):
@@ -57,22 +59,22 @@ def test_female_bbox(female_tris):
 
 
 def test_male_bbox(male_tris):
-    """Male envelope: Ø64 cap, barrel to z = 9.5, cap down to z = -8."""
+    """Male envelope: Ø68 cap, barrel to z = 9.35, cap down to z = -8."""
     lo, hi = bbox(male_tris)
-    assert lo[0] < -30.5 and hi[0] > 30.5
-    assert hi[0] < 34.5 and hi[1] < 34.5
+    assert lo[0] < -32.5 and hi[0] > 32.5
+    assert hi[0] < 36.5 and hi[1] < 36.5
     assert lo[2] < -7.3
     assert lo[2] > -9.2
-    assert hi[2] > 8.8
-    assert hi[2] < 10.6
+    assert hi[2] > 8.6
+    assert hi[2] < 10.4
 
 
 def test_volumes(female_tris, male_tris):
     """Closed solids in the right mass range — a shell or a brick misses."""
     fv = signed_volume(female_tris)
     mv = signed_volume(male_tris)
-    assert 15000.0 < fv < 28000.0, f"female volume {fv:.1f}"
-    assert 19000.0 < mv < 34000.0, f"male volume {mv:.1f}"
+    assert 15000.0 < fv < 30000.0, f"female volume {fv:.1f}"
+    assert 20000.0 < mv < 38000.0, f"male volume {mv:.1f}"
 
 
 def test_optical_bore_clear(female_tris, male_tris):
@@ -83,25 +85,35 @@ def test_optical_bore_clear(female_tris, male_tris):
         assert not point_inside(male_tris, p), f"male blocked at {p}"
 
 
-def test_female_gland(female_tris):
-    """HX-7 rectangular groove on the female z = 0 face, metal beside it."""
+def test_female_face_gland(female_tris):
+    """HX-7 face groove from 22% crush / 1.40×cord about r=26.05."""
     trough = (26.05, 0.0, 0.70)
-    land_out = (28.50, 0.0, 0.70)
-    land_in = (24.70, 0.0, 0.70)
+    land_out = (28.60, 0.0, 0.70)
+    land_in = (24.50, 0.0, 0.70)
     assert not point_inside(female_tris, trough), "groove trough filled in"
     assert point_inside(female_tris, land_out), "no metal outside the gland"
     assert point_inside(female_tris, land_in), "no metal inside the gland"
 
 
+def test_radial_gland(female_tris, male_tris):
+    """Radial groove in the female bore; male barrel stays plain Ø48."""
+    assert not point_inside(female_tris, (24.80, 0.0, 2.60)), "radial groove missing"
+    assert point_inside(female_tris, (26.80, 0.0, 2.60)), "wall gone outside radial groove"
+    assert point_inside(male_tris, (23.40, 0.0, 2.60)), "male barrel missing"
+    assert not point_inside(male_tris, (24.80, 0.0, 2.60)), "male has a radial groove"
+
+
 def test_m3_and_spotface(female_tris):
-    """4 × Ø3.4 on a 58 BCD, with Ø6 × 0.8 spotfaces on the seal face."""
-    for deg in (45.0, 135.0, 225.0, 315.0):
+    """4 × Ø3.4 on a 58 BCD at 22/112/202/292, spotfaces on the z=10 shoulder."""
+    for deg in (22.0, 112.0, 202.0, 292.0):
         hole = polar(29.0, deg, 5.0)
         spot = polar(29.0, deg, 9.60)
-        metal = polar(29.0, deg + 12.0, 5.0)
+        metal = polar(29.0, deg + 14.0, 5.0)
         assert not point_inside(female_tris, hole), f"M3 not open at {deg}"
         assert not point_inside(female_tris, spot), f"spotface missing at {deg}"
         assert point_inside(female_tris, metal), f"flange vanished near {deg}"
+    # default 45° pattern is wrong
+    assert point_inside(female_tris, polar(29.0, 45.0, 5.0)), "M3 landed on 45s"
 
 
 def test_back_wall_step(female_tris):
@@ -111,72 +123,89 @@ def test_back_wall_step(female_tris):
     assert point_inside(female_tris, (30.0, 0.0, 2.0)), "flange OD missing"
 
 
-def test_key_window_and_retainers(female_tris):
-    """Fat window on +X, thin windows at 120/240, lip metal at 90°."""
-    assert not point_inside(female_tris, polar(26.2, 0.0, 4.20)), "key window closed"
-    assert not point_inside(female_tris, polar(26.2, 120.0, 4.20)), "120 window closed"
-    assert not point_inside(female_tris, polar(26.2, 240.0, 4.20)), "240 window closed"
-    assert point_inside(female_tris, polar(26.2, 90.0, 4.20)), "retainer gone at 90"
-    assert point_inside(female_tris, polar(26.2, 180.0, 4.20)), "retainer gone at 180"
-    # race empty on the key line after the lip
-    assert not point_inside(female_tris, polar(26.2, 0.0, 6.80)), "race filled at 0"
+def test_unequal_windows(female_tris):
+    """Windows at 0/107/236, not 120. Lip metal where a 120 pattern would cut."""
+    assert not point_inside(female_tris, polar(26.2, 0.0, 4.20)), "fat window closed"
+    assert not point_inside(female_tris, polar(26.2, 107.0, 4.20)), "107 window closed"
+    assert not point_inside(female_tris, polar(26.2, 236.0, 4.20)), "236 window closed"
+    assert point_inside(female_tris, polar(26.2, 85.0, 4.20)), "lip gone at 85"
+    assert point_inside(female_tris, polar(26.2, 180.0, 4.20)), "lip gone at 180"
+    assert point_inside(female_tris, polar(26.2, 70.0, 4.20)), "lip gone at 70"
+    assert not point_inside(female_tris, polar(26.2, 0.0, 7.40)), "race filled at 0"
 
 
-def test_male_lugs(male_tris):
-    """One 38° key lug on +X and two 26° regulars. No lug at 60°."""
-    assert point_inside(male_tris, polar(25.8, 0.0, 6.80)), "key lug missing"
-    assert point_inside(male_tris, polar(25.8, 12.0, 6.80)), "key lug too narrow"
-    assert point_inside(male_tris, polar(25.8, 120.0, 6.80)), "120 lug missing"
-    assert point_inside(male_tris, polar(25.8, 240.0, 6.80)), "240 lug missing"
-    assert not point_inside(male_tris, polar(25.8, 60.0, 6.80)), "extra lug at 60"
-    assert not point_inside(male_tris, polar(25.8, 20.4, 6.80)), "key lug too wide"
+def test_ramp_on_lip(female_tris):
+    """Lip +Z face climbs after a window's CCW edge. Flat lip fails this."""
+    # key window CCW edge is 23°. at 35° (~12° into the ramp) rise ~0.28
+    assert point_inside(female_tris, polar(26.2, 35.0, 5.55)), "no ramp after fat window"
+    assert not point_inside(female_tris, polar(26.2, 0.0, 5.55)), "ramp filled the window"
+    # further along the key ramp, near lock, lip is higher
+    assert point_inside(female_tris, polar(26.2, 60.0, 6.10)), "ramp died before lock"
+
+
+def test_male_lugs_and_pin(male_tris):
+    """Unequal lugs at 0/107/236 and the clock pin at r=33.20 / 14°."""
+    assert point_inside(male_tris, polar(25.8, 0.0, 7.90)), "fat lug missing"
+    assert point_inside(male_tris, polar(25.8, 14.0, 7.90)), "fat lug too narrow"
+    assert point_inside(male_tris, polar(25.8, 107.0, 7.90)), "107 lug missing"
+    assert point_inside(male_tris, polar(25.8, 236.0, 7.90)), "236 lug missing"
+    assert not point_inside(male_tris, polar(25.8, 120.0, 7.90)), "extra lug at 120"
+    assert not point_inside(male_tris, polar(25.8, 20.4, 7.90)), "fat lug too wide"
+    assert point_inside(male_tris, polar(33.20, 14.0, 1.30)), "clock pin missing"
     assert point_inside(male_tris, (20.5, 0.0, 3.0)), "barrel missing"
-    assert point_inside(male_tris, (20.0, 0.0, -4.0)), "cap missing"
+    assert point_inside(male_tris, (22.0, 0.0, -4.0)), "cap missing"
     assert not point_inside(male_tris, (20.0, 0.0, 11.0)), "barrel hits the back wall"
 
 
+def test_clock_slot(female_tris):
+    """Arc slot 14°–61°, not a round hole."""
+    assert not point_inside(female_tris, polar(33.20, 14.0, 1.50)), "slot closed at 14"
+    assert not point_inside(female_tris, polar(33.20, 40.0, 1.50)), "slot does not travel"
+    assert point_inside(female_tris, polar(33.20, 8.0, 1.50)), "slot opened the wrong way"
+    assert point_inside(female_tris, polar(33.20, 70.0, 1.50)), "slot ran past lock"
+
+
 def test_insert_no_clash(female_tris, male_tris):
-    """Seated at 0° and mid-stroke at 0°, male metal is not inside female."""
+    """At the proud insert pose (dz=-1.10) male metal is not inside female."""
     samples = [
-        (20.0, 0.0, -4.0),
+        (22.0, 0.0, -4.0),
         (20.5, 0.0, 3.0),
-        polar(25.8, 0.0, 6.80),
-        polar(25.8, 120.0, 6.80),
-        polar(25.8, 240.0, 6.80),
-        (0.0, 20.5, 4.0),
+        polar(25.8, 0.0, 7.90),
+        polar(25.8, 107.0, 7.90),
+        polar(25.8, 236.0, 7.90),
+        polar(33.20, 14.0, 1.30),
     ]
     for p in samples:
         assert point_inside(male_tris, p), f"sample not in male {p}"
-        assert not point_inside(female_tris, p), f"seated clash at {p}"
-        mid = translate(p, -2.50)
-        assert not point_inside(female_tris, mid), f"insert clash at {mid}"
+        proud = translate(p, PROUD)
+        assert not point_inside(female_tris, proud), f"insert clash at {proud}"
+        mid = translate(p, -3.20)
+        assert not point_inside(female_tris, mid), f"stroke clash at {mid}"
 
 
 def test_lock_retention(female_tris, male_tris):
-    """+50° CCW: lugs sit in the race, lip blocks a -Z pull."""
-    key = polar(25.8, 0.0, 6.80)
-    locked = rotate_z(key, 50.0)
+    """+47° CCW, faces seated: lugs in the race, lip blocks a -Z pull."""
+    key = polar(25.8, 0.0, 7.90)
+    locked = rotate_z(key, LOCK)
     assert point_inside(male_tris, key)
     assert not point_inside(female_tris, locked), "lug buried in female at lock"
-    behind = polar(25.8, 50.0, 4.20)
-    assert point_inside(female_tris, behind), "no lip behind the locked key lug"
-    # locked regular
-    reg = rotate_z(polar(25.8, 120.0, 6.80), 50.0)
-    assert not point_inside(female_tris, reg)
+    behind = polar(25.8, LOCK, 4.20)
+    assert point_inside(female_tris, behind), "no lip behind the locked fat lug"
+    assert not point_inside(female_tris, polar(33.20, 54.0, 1.30)), "slot closed at lock travel"
 
 
 def test_hard_stop(female_tris):
-    """Race stop at 72–80° so the cap cannot walk past lock."""
-    assert point_inside(female_tris, polar(26.2, 76.0, 6.80)), "hard stop missing"
-    assert not point_inside(female_tris, polar(26.2, 50.0, 6.80)), "race closed at lock"
+    """Race stop at 69–78° so the cap cannot walk past lock."""
+    assert point_inside(female_tris, polar(26.2, 73.5, 8.00)), "hard stop missing"
+    assert not point_inside(female_tris, polar(26.2, LOCK, 8.00)), "race closed at lock"
 
 
 def test_wrong_clock_blocked(female_tris, male_tris):
-    """Fat lug will not pass a 34° window — +120° clock is jammed."""
-    edge = polar(25.8, 18.5, 6.80)
-    assert point_inside(male_tris, edge), "key lug does not reach 18.5°"
-    jammed = translate(rotate_z(edge, 120.0), -2.50)
-    assert point_inside(female_tris, jammed), "key lug fits a thin window (wrong clock works)"
+    """Fat lug will not pass the 32° window at 107°."""
+    edge = polar(25.8, 17.5, 7.90)
+    assert point_inside(male_tris, edge), "fat lug does not reach 17.5°"
+    jammed = translate(rotate_z(edge, 107.0), -3.20)
+    assert point_inside(female_tris, jammed), "fat lug fits the 107 window"
 
 
 def test_parts_are_not_copies(female_tris, male_tris):
