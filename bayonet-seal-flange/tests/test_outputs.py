@@ -42,7 +42,7 @@ def test_files_exist():
 
 
 def test_binary_stl_sane(female_tris, male_tris):
-    """Binary STL, enough triangles that this is not a 12-face box."""
+    """STL (binary or ASCII), enough triangles that this is not a 12-face box."""
     assert female_tris.shape[0] >= 400
     assert male_tris.shape[0] >= 400
 

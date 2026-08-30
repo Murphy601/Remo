@@ -1,7 +1,8 @@
-"""Binary STL load + point-in-mesh. Used only by the sealed verifier."""
+"""STL load (binary or ASCII) + point-in-mesh. Used only by the sealed verifier."""
 
 from __future__ import annotations
 
+import re
 import struct
 from pathlib import Path
 
@@ -10,25 +11,50 @@ import numpy as np
 EPS = 1e-8
 
 
-def load_binary_stl(path: Path) -> np.ndarray:
+def load_stl(path: Path) -> np.ndarray:
     data = path.read_bytes()
+    if len(data) < 80:
+        raise ValueError(f"{path} too small to be an STL")
+    if _looks_binary(data):
+        return _load_binary(data, path)
+    return _load_ascii(data, path)
+
+
+# old name — tests and any leftover imports
+load_binary_stl = load_stl
+
+
+def _looks_binary(data: bytes) -> bool:
     if len(data) < 84:
-        raise ValueError(f"{path} too small to be a binary STL")
-    # ASCII STL starts with "solid" and is newline text. A binary file can
-    # coincidentally start with those bytes, so also require the size match.
+        return False
     n = struct.unpack_from("<I", data, 80)[0]
-    expect = 84 + n * 50
-    if expect != len(data):
-        raise ValueError(
-            f"{path} is not a binary STL (size {len(data)} vs {expect} for {n} tris)"
-        )
+    return 84 + n * 50 == len(data) and n >= 1
+
+
+def _load_binary(data: bytes, path: Path) -> np.ndarray:
+    n = struct.unpack_from("<I", data, 80)[0]
     if n < 20:
         raise ValueError(f"{path} has only {n} triangles")
     rec = np.frombuffer(data, dtype=np.dtype("<u1"), offset=84)
     rec = rec.reshape(n, 50)
-    # 12 float32 after the normal: 9 vertex coords
     verts = rec[:, 12:48].view("<f4").reshape(n, 3, 3).astype(np.float64)
     return verts
+
+
+def _load_ascii(data: bytes, path: Path) -> np.ndarray:
+    text = data.decode("utf-8", errors="ignore")
+    # vertex lines; three in a row make a triangle
+    nums = re.findall(
+        r"^\s*vertex\s+([+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)"
+        r"\s+([+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)"
+        r"\s+([+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)",
+        text,
+        flags=re.MULTILINE,
+    )
+    if len(nums) < 60 or len(nums) % 3 != 0:
+        raise ValueError(f"{path} is not a usable ASCII STL ({len(nums)} vertices)")
+    pts = np.array(nums, dtype=np.float64).reshape(-1, 3, 3)
+    return pts
 
 
 def signed_volume(tris: np.ndarray) -> float:
