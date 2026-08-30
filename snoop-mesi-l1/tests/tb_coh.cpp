@@ -491,6 +491,11 @@ int main(int argc, char** argv) {
         int mrr_pre = top->m_rready;
         int rv0_pre = top->c0_rvalid;
         int rv1_pre = top->c1_rvalid;
+        // Same as rvalid and as /app/tb_coh.v: take rdata with the
+        // handshake. A 2-deep response FIFO that retires the slot on
+        // this edge is legal — post-edge rdata may be the next slot.
+        uint32_t rd0_pre = (uint32_t)top->c0_rdata;
+        uint32_t rd1_pre = (uint32_t)top->c1_rdata;
         int mv_pre = top->m_valid;
         int mw_pre = top->m_we;
         int mrd_pre = top->m_ready;
@@ -542,7 +547,7 @@ int main(int argc, char** argv) {
         auto take_rsp = [&](int core) {
             int rv = core ? rv1_pre : rv0_pre;
             int rr = core ? r1 : r0;
-            uint32_t rd = core ? top->c1_rdata : top->c0_rdata;
+            uint32_t rd = core ? rd1_pre : rd0_pre;
             if (!(rv && rr))
                 return;
             if (pend[core].empty()) {

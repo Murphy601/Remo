@@ -72,7 +72,9 @@ def sim():
     cmd = [
         "verilator", "--cc", "--exe", "--build",
         "--top-module", "mesi_pair",
+        "--unroll-count", "4096",
         "-Wno-fatal", "-Wno-WIDTH", "-Wno-UNOPTFLAT", "-Wno-CASEINCOMPLETE",
+        "-Wno-BLKLOOPINIT", "-Wno-INITIALDLY", "-Wno-UNOPTTHREADS",
         "-CFLAGS", "-O2 -std=c++17",
         "-LDFLAGS", WRAP,
         "-Mdir", OBJ,
