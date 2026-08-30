@@ -419,6 +419,7 @@ int main(int argc, char** argv) {
         top->c3_rready = 1;
         top->m_ready = 1;
         top->m_rvalid = 0;
+        top->m_rid = 0;
         top->m_rdata = 0;
         for (int i = 0; i < n; i++) {
             top->clk = 0;
@@ -442,10 +443,20 @@ int main(int argc, char** argv) {
     uint32_t mem[16384];
     for (int i = 0; i < 16384; i++)
         mem[i] = pat((uint16_t)(i << 2), cfg.seed);
-    int m_busy = 0, m_cnt = 0, m_isw = 0;
-    uint16_t m_a = 0;
-    uint32_t m_wd = 0;
-    int m_rvalid = 0;
+    struct Mslot {
+        int busy;
+        int cnt;
+        int isw;
+        int id;
+        int ord;
+        uint16_t a;
+        uint32_t wd;
+    };
+    Mslot sl[2];
+    sl[0].busy = sl[1].busy = 0;
+    sl[0].cnt = sl[1].cnt = 0;
+    int accn = 0, presenting = -1, max_minf = 0;
+    int m_rvalid = 0, m_rid = 0;
     uint32_t m_rdata = 0;
     int n_mrd = 0, n_mwr = 0;
     int cold_rd[8] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -467,14 +478,17 @@ int main(int argc, char** argv) {
         top->c2_rready = r2;
         top->c3_rready = r3;
 
-        // Same as /app/tb_coh.v: ready only while idle. Sample the master
-        // pre-edge — a DUT that drops m_valid the cycle after accept (or
-        // raises the next beat the cycle after taking m_rvalid) is legal.
-        if (!m_busy && !m_rvalid)
-            top->m_ready = 1;
-        else
-            top->m_ready = 0;
+        // Same as /app/tb_coh.v: two slots. m_ready while fewer than two
+        // are still outstanding (a presenting rsp still occupies a slot).
+        // Sample the master pre-edge.
+        {
+            int ninf = sl[0].busy + sl[1].busy;
+            if (ninf > max_minf)
+                max_minf = ninf;
+            top->m_ready = (ninf < 2) ? 1 : 0;
+        }
         top->m_rvalid = m_rvalid;
+        top->m_rid = m_rid;
         top->m_rdata = m_rdata;
 
         top->c0_valid = 0;
@@ -564,6 +578,7 @@ int main(int argc, char** argv) {
         uint32_t rd3_pre = (uint32_t)top->c3_rdata;
         int mv_pre = top->m_valid;
         int mw_pre = top->m_we;
+        int mid_pre = top->m_id;
         int mrd_pre = top->m_ready;
         uint16_t ma_pre = (uint16_t)top->m_addr;
         uint32_t md_pre = (uint32_t)top->m_wdata;
@@ -659,30 +674,51 @@ int main(int argc, char** argv) {
         take_rsp(2);
         take_rsp(3);
 
-        if (m_rvalid && mrr_pre)
+        if (m_rvalid && mrr_pre) {
+            if (presenting == 0)
+                sl[0].busy = 0;
+            else if (presenting == 1)
+                sl[1].busy = 0;
             m_rvalid = 0;
-        if (!m_busy) {
-            if (mv_pre && mrd_pre) {
-                m_busy = 1;
-                m_cnt = 8;
-                m_isw = mw_pre;
-                m_a = ma_pre;
-                m_wd = md_pre;
-                if (m_isw)
+            presenting = -1;
+        }
+        for (int s = 0; s < 2; s++) {
+            if (sl[s].busy && sl[s].cnt != 0)
+                sl[s].cnt--;
+        }
+        if (mv_pre && mrd_pre) {
+            int s = !sl[0].busy ? 0 : 1;
+            if (sl[0].busy && sl[1].busy) {
+                ok = 0;
+                why = "mem_overflow";
+            } else {
+                if ((sl[0].busy && sl[0].id == mid_pre) ||
+                    (sl[1].busy && sl[1].id == mid_pre)) {
+                    ok = 0;
+                    why = "id_reuse";
+                }
+                sl[s].busy = 1;
+                sl[s].cnt = 8;
+                sl[s].isw = mw_pre;
+                sl[s].id = mid_pre;
+                sl[s].ord = accn++;
+                sl[s].a = ma_pre;
+                sl[s].wd = md_pre;
+                if (mw_pre)
                     n_mwr++;
                 else
                     n_mrd++;
-                uint16_t wa = (uint16_t)(m_a & ~3u);
-                if (cfg.kind == 1 && m_isw && wa == 0x0040 &&
+                uint16_t wa = (uint16_t)(ma_pre & ~3u);
+                if (cfg.kind == 1 && mw_pre && wa == 0x0040 &&
                     md_pre == 0xC1C10001u)
                     n_xwb++;
-                if (cfg.kind == 7 && m_isw && wa == 0xF040 &&
+                if (cfg.kind == 7 && mw_pre && wa == 0xF040 &&
                     md_pre == 0xD1CE0001u)
                     n_ucwt++;
-                if (cfg.kind == 7 && m_isw && wa == 0xF048 &&
+                if (cfg.kind == 7 && mw_pre && wa == 0xF048 &&
                     md_pre == (pat(0xF048, cfg.seed) + 9u))
                     n_ucamo++;
-                if (cfg.kind == 0 && !m_isw) {
+                if (cfg.kind == 0 && !mw_pre) {
                     for (int w = 0; w < 8; w++)
                         if (wa == line_word(7, w))
                             cold_rd[w]++;
@@ -694,35 +730,42 @@ int main(int argc, char** argv) {
                             n_bounce++;
                     }
                 }
-                if (cfg.kind == 4 && m_isw) {
+                if (cfg.kind == 4 && mw_pre) {
                     for (int L = 0; L < 4; L++)
                         if (wa == line_word(20 + L, 0))
                             vic_wr[L]++;
                 }
-                if (cfg.kind == 4 && !m_isw && n_st4 >= 32) {
+                if (cfg.kind == 4 && !mw_pre && n_st4 >= 32) {
                     uint16_t base = (uint16_t)(wa & ~0x1Fu);
                     for (int L = 0; L < 4; L++)
                         if (base == (uint16_t)(line_word(20 + L, 0) & ~0x1Fu))
                             n_refill++;
                 }
             }
-        } else {
-            if (m_cnt != 0)
-                m_cnt--;
-            else if (!m_rvalid) {
-                uint16_t wi = (uint16_t)(m_a >> 2);
+        }
+        if (!m_rvalid) {
+            int pick = -1;
+            if (sl[0].busy && sl[0].cnt == 0 && sl[1].busy && sl[1].cnt == 0)
+                pick = (sl[1].ord > sl[0].ord) ? 1 : 0;
+            else if (sl[0].busy && sl[0].cnt == 0)
+                pick = 0;
+            else if (sl[1].busy && sl[1].cnt == 0)
+                pick = 1;
+            if (pick >= 0) {
+                uint16_t wi = (uint16_t)(sl[pick].a >> 2);
                 if (wi < 16384) {
-                    if (m_isw)
-                        mem[wi] = m_wd;
-                    m_rdata = m_isw ? 0u : mem[wi];
+                    if (sl[pick].isw)
+                        mem[wi] = sl[pick].wd;
+                    m_rdata = sl[pick].isw ? 0u : mem[wi];
                 } else
                     m_rdata = 0;
+                m_rid = sl[pick].id;
                 m_rvalid = 1;
-                m_busy = 0;
+                presenting = pick;
             }
         }
         if (ok && cfg.kind == 4 && n_st4 >= 32 && n_mwr >= 32 && !poked &&
-            !m_busy && !m_rvalid) {
+            !sl[0].busy && !sl[1].busy && !m_rvalid) {
             for (int L = 0; L < 4; L++) {
                 for (int w = 1; w < 8; w++) {
                     uint16_t aw = line_word(20 + L, w);
@@ -742,7 +785,7 @@ int main(int argc, char** argv) {
             poked = 1;
         }
         if (ok && cfg.kind == 7 && n_uc7 >= 2 && !poked_uc &&
-            !m_busy && !m_rvalid) {
+            !sl[0].busy && !sl[1].busy && !m_rvalid) {
             uint16_t aw = 0xF044;
             uint16_t ww = (uint16_t)(aw >> 2);
             uint32_t pv = poke(aw, cfg.seed);
@@ -778,6 +821,10 @@ int main(int argc, char** argv) {
         if (max_in0 < 2) {
             ok = 0;
             why = "no_dual";
+        }
+        if (max_minf < 2) {
+            ok = 0;
+            why = "no_pipemem";
         }
         for (int w = 0; w < 8; w++) {
             if (cold_rd[w] < 1) {

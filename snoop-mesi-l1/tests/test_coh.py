@@ -22,8 +22,9 @@ WRAP = (
 )
 
 # name, kind, nops, seed, deadline, rst_pad, hold
-# Deadlines vs this 4-core 32B 4-way + fetch-add reference (cycles):
-# 685/1400, 253/800, 1205/4000, 988/3000, 2926/5200, 454/1200, 1002/3000, 687/1500.
+# Deadlines vs this 4-core 32B + 2-deep OoO mem reference (cycles):
+# 485/1400, 153/800, 655/4000, 538/3000, 1526/5200, 254/1200, 549/3000, 431/1500.
+# c0_hits also requires two mem requests in flight (no_pipemem).
 # c0_hits keeps three dirty tags in one set and requires two accepts on c0
 # before the first response (no_dual). A 16-byte or 3-core trio fails.
 CASES = [

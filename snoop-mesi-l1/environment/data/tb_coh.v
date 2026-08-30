@@ -33,11 +33,11 @@ module tb_coh;
     wire [31:0] c3_rdata;
     wire       c3_rready = 1'b1;
 
-    wire        m_valid, m_we;
+    wire        m_valid, m_we, m_id;
     wire [15:0] m_addr;
     wire [31:0] m_wdata;
     wire        m_ready;
-    wire        m_rvalid;
+    wire        m_rvalid, m_rid;
     wire [31:0] m_rdata;
     wire        m_rready;
 
@@ -55,9 +55,9 @@ module tb_coh;
         .c3_valid(c3_valid), .c3_ready(c3_ready), .c3_we(c3_we), .c3_amo(c3_amo),
         .c3_addr(c3_addr), .c3_wdata(c3_wdata),
         .c3_rvalid(c3_rvalid), .c3_rready(c3_rready), .c3_rdata(c3_rdata),
-        .m_valid(m_valid), .m_ready(m_ready), .m_we(m_we),
+        .m_valid(m_valid), .m_ready(m_ready), .m_we(m_we), .m_id(m_id),
         .m_addr(m_addr), .m_wdata(m_wdata),
-        .m_rvalid(m_rvalid), .m_rready(m_rready), .m_rdata(m_rdata)
+        .m_rvalid(m_rvalid), .m_rid(m_rid), .m_rready(m_rready), .m_rdata(m_rdata)
     );
 
     localparam MEM_WORDS = 16384;
@@ -68,49 +68,72 @@ module tb_coh;
             mem[mi] = 32'hC0DE0000 ^ (mi * 32'h01010101);
     end
 
-    integer m_busy, m_cnt, m_isw, n_mrd, n_mwr;
-    integer m_slot;
-    integer m_wd_hold;
-    integer m_rv;
-    integer m_rd_hold;
+    integer n_mrd, n_mwr;
+    integer b0, b1, c0, c1, w0, w1, sl0, sl1, id0, id1, ord0, ord1, accn;
+    integer wd0, wd1;
+    integer m_rv, m_rd_hold, m_rid_hold, pres;
 
     initial begin
-        m_busy = 0; m_cnt = 0; m_isw = 0; m_slot = 0;
-        n_mrd = 0; n_mwr = 0; m_wd_hold = 0; m_rv = 0; m_rd_hold = 0;
+        n_mrd = 0; n_mwr = 0;
+        b0 = 0; b1 = 0; c0 = 0; c1 = 0; accn = 0;
+        m_rv = 0; m_rd_hold = 0; m_rid_hold = 0; pres = -1;
+        wd0 = 0; wd1 = 0;
     end
 
-    assign m_ready  = rst_n && !m_busy && !m_rv;
+    assign m_ready  = rst_n && ((b0 + b1) < 2);
     assign m_rvalid = rst_n && m_rv;
     assign m_rdata  = m_rd_hold;
+    assign m_rid    = m_rid_hold;
 
     always @(posedge clk) begin
         if (!rst_n) begin
-            m_busy <= 0; m_cnt <= 0; m_isw <= 0; m_rv <= 0;
+            b0 = 0; b1 = 0; c0 = 0; c1 = 0; accn = 0;
+            m_rv = 0; pres = -1;
         end else begin
-            if (m_rv && m_rready)
-                m_rv <= 0;
-            if (!m_busy) begin
-                if (m_valid && m_ready) begin
-                    m_busy <= 1;
-                    m_cnt  <= 8;
-                    m_isw  <= m_we;
-                    m_slot <= m_addr[15:2];
-                    m_wd_hold <= m_wdata;
-                    if (m_we)
-                        n_mwr <= n_mwr + 1;
-                    else
-                        n_mrd <= n_mrd + 1;
+            begin : mem_step
+                integer can_acc;
+                can_acc = (b0 + b1) < 2;
+                if (m_rv && m_rready) begin
+                    if (pres == 0) b0 = 0;
+                    else if (pres == 1) b1 = 0;
+                    m_rv = 0;
+                    pres = -1;
                 end
-            end else begin
-                if (m_cnt != 0)
-                    m_cnt <= m_cnt - 1;
-                else if (!m_rv) begin
-                    if (m_isw)
-                        mem[m_slot] <= m_wd_hold;
-                    m_rd_hold <= m_isw ? 32'h0 : mem[m_slot];
-                    m_rv <= 1;
-                    m_busy <= 0;
+                if (b0 && c0 != 0) c0 = c0 - 1;
+                if (b1 && c1 != 0) c1 = c1 - 1;
+                if (m_valid && can_acc) begin
+                if (!b0) begin
+                    b0 = 1; c0 = 8; w0 = m_we; sl0 = m_addr[15:2];
+                    wd0 = m_wdata; id0 = m_id; ord0 = accn;
+                end else begin
+                    b1 = 1; c1 = 8; w1 = m_we; sl1 = m_addr[15:2];
+                    wd1 = m_wdata; id1 = m_id; ord1 = accn;
                 end
+                accn = accn + 1;
+                if (m_we) n_mwr = n_mwr + 1;
+                else n_mrd = n_mrd + 1;
+            end
+            if (!m_rv) begin
+                if (b0 && c0 == 0 && b1 && c1 == 0)
+                    pres = (ord1 > ord0) ? 1 : 0;
+                else if (b0 && c0 == 0)
+                    pres = 0;
+                else if (b1 && c1 == 0)
+                    pres = 1;
+                else
+                    pres = -1;
+                if (pres == 0) begin
+                    if (w0) mem[sl0] = wd0;
+                    m_rd_hold = w0 ? 32'h0 : mem[sl0];
+                    m_rid_hold = id0;
+                    m_rv = 1;
+                end else if (pres == 1) begin
+                    if (w1) mem[sl1] = wd1;
+                    m_rd_hold = w1 ? 32'h0 : mem[sl1];
+                    m_rid_hold = id1;
+                    m_rv = 1;
+                end
+            end
             end
         end
     end
