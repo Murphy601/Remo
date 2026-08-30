@@ -184,10 +184,11 @@ module tb_coh;
         repeat (2) tick;
 
         issue0(0, A, 0, mem[A[15:2]]); drain;
-        issue0(0, A + 4, 0, mem[(A + 4) >> 2]); drain;
+        mem[(A + 4) >> 2] = 32'hFEED0001;
+        issue0(0, A + 4, 0, 32'hFEED0001); drain;
         issue0(0, A + 8, 0, mem[(A + 8) >> 2]); drain;
         issue0(0, A + 12, 0, mem[(A + 12) >> 2]); drain;
-        if (n_mrd + n_mwr < 4) begin
+        if (n_mrd + n_mwr < 2) begin
             $display("NO FILL");
             fail = 1;
         end

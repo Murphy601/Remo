@@ -298,9 +298,11 @@ int main(int argc, char** argv) {
         }
         break;
     }
-    case 1: { // c0 store, c1 load that word, then extra hits
+    case 1: { // c0 store, c1 load that word, then c1 load of the
+              // next word after the scoreboard mutates it
         push(0, 1, 0x0040, 0xC1C10001u);
         push(1, 0, 0x0040, 0);
+        push(1, 0, 0x0044, 0);
         for (int i = 0; i < cfg.nops; i++)
             push((i & 1), 0, 0x0040, 0);
         break;
@@ -348,6 +350,8 @@ int main(int argc, char** argv) {
             push(0, 0, line_word(1, i & 3), 0);
             push(1, 0, line_word(2, i & 3), 0);
         }
+        for (int w = 0; w < 4; w++)
+            push(0, 0, line_word(9, w), 0);
         break;
     }
     case 6: { // hold rready; mixed traffic
@@ -424,7 +428,8 @@ int main(int argc, char** argv) {
     int cold_rd[4] = {0, 0, 0, 0};
     int vic_wr[4] = {0, 0, 0, 0};
     int n_st4 = 0, n_refill = 0, n_bounce = 0;
-    int n_xwb = 0, poked = 0, max_in0 = 0;
+    int n_xwb = 0, poked = 0, poked_cold = 0, poked_x = 0, max_in0 = 0;
+    int n_overfill = 0, n_stfill = 0;
 
     while (ok && done < (int)script.size() && cyc < cfg.deadline) {
         int r0 = 1, r1 = 1;
@@ -469,7 +474,9 @@ int main(int argc, char** argv) {
         };
 
         if (seq_mode) {
-            int hold_poke = (cfg.kind == 4 && n_st4 >= 32 && !poked);
+            int hold_poke = (cfg.kind == 4 && n_st4 >= 32 && !poked) ||
+                            (cfg.kind == 0 && sent >= 1 && !poked_cold) ||
+                            (cfg.kind == 1 && sent >= 2 && !poked_x);
             if (!hold_poke && !qseq.empty()) {
                 int c = qseq.front().core;
                 if (cfg.kind == 0) {
@@ -591,6 +598,11 @@ int main(int argc, char** argv) {
                     for (int w = 0; w < 4; w++)
                         if (wa == line_word(7, w))
                             cold_rd[w]++;
+                    if (!poked_cold) {
+                        for (int w = 1; w < 4; w++)
+                            if (wa == line_word(7, w))
+                                n_overfill++;
+                    }
                     if (done >= 16) {
                         uint16_t base = (uint16_t)(wa & ~0xFu);
                         if (base == (uint16_t)(line_word(4, 0) & ~0xFu) ||
@@ -603,6 +615,11 @@ int main(int argc, char** argv) {
                     for (int L = 0; L < 4; L++)
                         if (wa == line_word(20 + L, 0))
                             vic_wr[L]++;
+                }
+                if (cfg.kind == 4 && !m_isw && n_st4 < 16) {
+                    for (int L = 0; L < 16; L++)
+                        if (wa == line_word(L + 8, 0))
+                            n_stfill++;
                 }
                 if (cfg.kind == 4 && !m_isw && n_st4 >= 32) {
                     uint16_t base = (uint16_t)(wa & ~0xFu);
@@ -626,7 +643,29 @@ int main(int argc, char** argv) {
                 m_busy = 0;
             }
         }
-        if (ok && cfg.kind == 4 && n_st4 >= 32 && n_mwr >= 16 && !poked &&
+        if (ok && cfg.kind == 0 && done >= 1 && !poked_cold &&
+            !m_busy && !m_rvalid) {
+            for (int w = 1; w < 4; w++) {
+                uint16_t aw = line_word(7, w);
+                uint16_t ww = (uint16_t)(aw >> 2);
+                if (ww >= 16384)
+                    continue;
+                uint32_t pv = poke(aw, cfg.seed);
+                mem[ww] = pv;
+                gold[aw] = pv;
+            }
+            poked_cold = 1;
+        }
+        if (ok && cfg.kind == 1 && done >= 2 && !poked_x &&
+            !m_busy && !m_rvalid) {
+            uint16_t aw = 0x0044;
+            uint16_t ww = (uint16_t)(aw >> 2);
+            uint32_t pv = poke(aw, cfg.seed);
+            mem[ww] = pv;
+            gold[aw] = pv;
+            poked_x = 1;
+        }
+        if (ok && cfg.kind == 4 && n_st4 >= 32 && n_mwr >= 4 && !poked &&
             !m_busy && !m_rvalid) {
             for (int L = 0; L < 4; L++) {
                 for (int w = 1; w < 4; w++) {
@@ -656,16 +695,28 @@ int main(int argc, char** argv) {
         ok = 0;
         why = "inflight";
     }
-    if (ok && (n_mrd + n_mwr) < 4) {
+    if (ok && (n_mrd + n_mwr) < 1) {
         ok = 0;
         why = "no_mem";
+    }
+    if (ok && cfg.kind == 1 && !poked_x) {
+        ok = 0;
+        why = "no_snoop_wb";
     }
     if (ok && cfg.kind == 1 &&
         (n_xwb < 1 || mem[0x0040 >> 2] != 0xC1C10001u)) {
         ok = 0;
         why = "no_snoop_wb";
     }
+    if (ok && cfg.kind == 0 && n_overfill) {
+        ok = 0;
+        why = "overfill";
+    }
     if (ok && cfg.kind == 0 && n_mrd < 4) {
+        ok = 0;
+        why = "no_fill";
+    }
+    if (ok && cfg.kind == 0 && !poked_cold) {
         ok = 0;
         why = "no_fill";
     }
@@ -693,7 +744,11 @@ int main(int argc, char** argv) {
             why = "bounce";
         }
     }
-    if (ok && cfg.kind == 4 && n_mwr < 16) {
+    if (ok && cfg.kind == 4 && n_stfill) {
+        ok = 0;
+        why = "store_fill";
+    }
+    if (ok && cfg.kind == 4 && n_mwr < 4) {
         ok = 0;
         why = "no_wb";
     }
@@ -727,7 +782,7 @@ int main(int argc, char** argv) {
                 why = "writethrough";
             }
         }
-        if (n_refill < 12) {
+        if (n_refill < 4) {
             ok = 0;
             why = "no_refill";
         }
