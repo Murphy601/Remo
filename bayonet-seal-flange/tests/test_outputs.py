@@ -88,11 +88,11 @@ def test_optical_bore_clear(female_tris, male_tris):
 
 def test_female_face_gland(female_tris):
     """HX-7 face groove on a solid sector — not on a window centreline."""
-    # 200° sits between the 107 and 236 windows. θ=0 is the fat window;
-    # a face-through window (required for insert) has no land there.
-    trough = polar(26.05, 200.0, 0.70)
-    land_out = polar(28.60, 200.0, 0.70)
-    land_in = polar(24.50, 200.0, 0.70)
+    # 160° sits between the 107 and 236 windows, clear of the M3 at 202°.
+    # θ=0 is the fat window; a face-through window has no land there.
+    trough = polar(26.05, 160.0, 0.70)
+    land_out = polar(31.00, 160.0, 0.70)
+    land_in = polar(24.50, 160.0, 0.70)
     assert not point_inside(female_tris, trough), "groove trough filled in"
     assert point_inside(female_tris, land_out), "no metal outside the gland"
     assert point_inside(female_tris, land_in), "no metal inside the gland"
@@ -100,10 +100,10 @@ def test_female_face_gland(female_tris):
 
 def test_radial_gland(female_tris, male_tris):
     """Radial groove in the female bore on a solid sector; male barrel Ø48."""
-    assert not point_inside(female_tris, polar(24.80, 200.0, 2.60)), "radial groove missing"
-    assert point_inside(female_tris, polar(26.80, 200.0, 2.60)), "wall gone outside radial groove"
-    assert point_inside(male_tris, polar(23.40, 200.0, 2.60)), "male barrel missing"
-    assert not point_inside(male_tris, polar(24.80, 200.0, 2.60)), "male has a radial groove"
+    assert not point_inside(female_tris, polar(24.80, 160.0, 2.60)), "radial groove missing"
+    assert point_inside(female_tris, polar(26.80, 160.0, 2.60)), "wall gone outside radial groove"
+    assert point_inside(male_tris, polar(23.40, 160.0, 2.60)), "male barrel missing"
+    assert not point_inside(male_tris, polar(24.80, 160.0, 2.60)), "male has a radial groove"
 
 
 def test_m3_and_spotface(female_tris):

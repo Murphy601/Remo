@@ -18,7 +18,7 @@ verification_explanation = """The verifier never runs agent code. It parses the 
 
 Oracle volumes on this voxel grid sit near 19000 mm³ (female) and 30100 mm³ (male). Pass bands 16500–22500 and 27000–34000 are those numbers with slack for 0.2 mm edge breaks, a smoother CAD tessellation, or ±0.3 mm on non-critical walls. A solid brick or a thin tube falls outside. Bounding boxes are the ICD envelopes plus about 1.5 mm.
 
-Gland probes sit on a solid sector (~200°), not on a window centreline — a face-through window (required for insert) has no land at 0°. Other functional probes sit ≥0.4 mm inside features (lug cores, window air, ramp metal, slot travel, weep) so a change of mesh resolution cannot flip them. Transformed male points check insert at dz=-1.10 (no clash), lock at +47° (lip blocks pull-out, weeps coincide), +107° clock (fat lug jams), and CW (also jammed). Ground-truth coordinates live only in tests/. A 120° clone or two tubes fails that set."""
+Gland probes sit on a solid sector (~160°), not on a window centreline — a face-through window (required for insert) has no land at 0°. Other functional probes sit ≥0.4 mm inside features (lug cores, window air, ramp metal, slot travel, weep) so a change of mesh resolution cannot flip them. Transformed male points check insert at dz=-1.10 (no clash), lock at +47° (lip blocks pull-out, weeps coincide), +107° clock (fat lug jams), and CW (also jammed). Ground-truth coordinates live only in tests/. A 120° clone or two tubes fails that set."""
 category = "Hardware"
 subcategory = "CAD"
 tags = ["cad", "stl", "bayonet", "o-ring", "mechanical-interface"]

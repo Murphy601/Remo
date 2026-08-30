@@ -8,7 +8,7 @@ Hardware / CAD. Two-part Helios-M34 bayonet (receiver + window cap).
 
 Windows are cut from the seal face (z=0 to 5.40). The race stops at z=9.40 so the Ø50 back step stays attached. The 1.10 mm pull-in is extra lip height after each window's CCW edge (`_ramp_extra`), not a helix on the male.
 
-Gland probes in the grader sit near 200°, not on a window centreline. Volume bands (16500–22500, 27000–34000) allow 0.2 mm edge breaks or a smoother CAD mesh. Probe points sit ≥0.4 mm inside or outside a face so tessellation should not flip them.
+Gland probes in the grader sit near 160°, not on a window centreline. Volume bands (16500–22500, 27000–34000) allow 0.2 mm edge breaks or a smoother CAD mesh. Probe points sit ≥0.4 mm inside or outside a face so tessellation should not flip them.
 
 Regenerate locally:
 
