@@ -1,0 +1,11 @@
+Deliberate misses. These are not run by the harness.
+
+fake_tubes.py writes two coaxial tubes with a plausible envelope and
+volume. No key lug, no unequal windows, no gland, no race stop. The
+probe set rejects it.
+
+A copied female written to both paths fails test_parts_are_not_copies
+and the male lug probes.
+
+An ASCII STL or a 12-triangle bounding box fails the binary / triangle
+count checks.
