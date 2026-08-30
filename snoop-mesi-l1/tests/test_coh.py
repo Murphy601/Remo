@@ -22,28 +22,28 @@ WRAP = (
 )
 
 # name, kind, nops, seed, deadline, rst_pad, hold
-# Deadlines vs this 4-way dual-outstanding reference (cycles):
-# 343/700, 143/320, 677/1100, 556/900, 1582/2400, 160/360, 561/900, 201/400.
-# c0_hits keeps three tags in one set and requires two accepts on c0
-# before the first response (no_dual). A 2-way pair times out.
+# Deadlines vs this 3-core 32B 4-way reference (cycles):
+# 685/1400, 246/500, 1205/2400, 988/2000, 2926/5200, 355/750, 996/2000, 359/750.
+# c0_hits keeps three dirty tags in one set and requires two accepts on c0
+# before the first response (no_dual). A 16-byte or 2-core pair fails.
 CASES = [
-    ("c0_hits", 0, 48, 3, 700, 0, 0),
-    ("cross_read", 1, 8, 11, 320, 0, 0),
-    ("false_share", 2, 10, 19, 1100, 0, 0),
-    ("ping_pong", 3, 8, 29, 900, 0, 0),
-    ("evict_dirty", 4, 0, 41, 2400, 0, 0),
-    ("split_lines", 5, 8, 53, 360, 0, 0),
-    ("hold_rsp", 6, 8, 67, 900, 0, 1),
-    ("late_rst", 7, 0, 79, 400, 20, 0),
+    ("c0_hits", 0, 128, 3, 1400, 0, 0),
+    ("cross_read", 1, 8, 11, 500, 0, 0),
+    ("false_share", 2, 10, 19, 2400, 0, 0),
+    ("ping_pong", 3, 8, 29, 2000, 0, 0),
+    ("evict_dirty", 4, 0, 41, 5200, 0, 0),
+    ("split_lines", 5, 8, 53, 750, 0, 0),
+    ("hold_rsp", 6, 8, 67, 2000, 0, 1),
+    ("late_rst", 7, 0, 79, 750, 20, 0),
 ]
 
 
 def _want(row):
     name, kind, nops, *_ = row
     if kind == 0:
-        return 16 + nops
+        return 11 + nops
     if kind == 1:
-        return 2 + nops
+        return 3 + nops
     if kind == 2:
         return nops * 2
     if kind == 3:
@@ -51,10 +51,10 @@ def _want(row):
     if kind == 4:
         return 52
     if kind == 5:
-        return nops * 4
+        return nops * 6
     if kind == 6:
         return nops * 2
-    return 4
+    return 6
 
 
 def _root():
