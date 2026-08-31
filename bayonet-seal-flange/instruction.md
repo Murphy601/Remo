@@ -1,4 +1,4 @@
-helios m34 receiver + cap. shop copy, rev E. D ran the race to z=10 and wrote the windows like pockets — receiver came off in two pieces and the cap would not enter. throw out A/B/C/D. lock sense was wrong and the lugs were on a 120 grid which is how we got three-way clocking in the field.
+helios m34 receiver + cap. shop copy, rev E. D wrote the windows like pockets starting at z=3 — the cap would not enter. throw out A/B/C/D. lock sense was wrong and the lugs were on a 120 grid which is how we got three-way clocking in the field.
 
 stl, millimetres. binary or ascii, I do not care. one body each. no step, no zip.
 
@@ -14,7 +14,7 @@ origin on the axis. +Z into the vessel. female is z>=0, seal face at z=0. male c
 the ramp is the bit people miss. you do not seat the faces and then spin. you push until the lugs are through the windows (faces still 1.10 mm apart, male sitting 1.10 mm toward -Z) and THEN you twist 47°. the back of the lip is a ramp. formula, so nobody has to guess: at angle θ, for each window let e be the CCW edge (centre + half-width). let α be the CCW angle from e to θ, 0 to 360. if α ≤ 47 the lip +Z face at that θ is z = 5.40 + 1.10×(α/47). if more than one window applies, take the larger add. on a window centreline there is no add, lip still ends at 5.40. a flat lip will not hold. CW does not go in. I check that.
 
 female
-Ø72 from z=0 to z=10. then it steps. z=10 to z=12 is Ø50, and the bore there is only Ø34. do not run the 72 through. barrel clearance Ø48.30 from z=0 to z=10. lug race Ø56.40 from z=5.40 to z=9.40. stop the race there. a 0.6 mm web at z=9.40..10 keeps the Ø50 back step on the flange. race to z=10 undercuts that step and you hand me two solids.
+Ø72 from z=0 to z=10. then it steps. z=10 to z=12 is Ø50, and the bore there is only Ø34. do not run the 72 through. barrel clearance Ø48.30 from z=0 to z=10. lug race Ø56.40 from z=5.40 to z=10.
 
 lip sits z=3.00 up to z=5.40 on the window centreline, then the formula above. metal is from r=24.15 out to the race. windows are through the seal face, z=0 to z=5.40 (cut the lip, not the OD). a pocket that starts at z=3.00 is a bowl — the lugs cannot climb in:
 
