@@ -71,7 +71,7 @@ def female_solid(x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
         33.50 * math.sin(math.radians(318.0)),
     )
     weep_f = ((x - wf[0]) ** 2 + (y - wf[1]) ** 2) <= (1.25**2)
-    vice = (x <= -34.0) & (np.abs(y) <= 4.0) & (z >= 0.0) & (z <= 4.0)
+    vice = (x <= -34.5) & (np.abs(y) <= 4.0) & (z >= 0.0) & (z <= 4.0)
     solid &= ~groove
     solid &= ~radial
     solid &= ~slot
@@ -105,7 +105,7 @@ def female_solid(x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
 def male_solid(x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
     r = np.hypot(x, y)
     ang = np.degrees(np.arctan2(y, x))
-    if_cap = (z >= -8.0) & (z <= 0.0) & (r <= 35.0)
+    if_cap = (z >= -8.0) & (z <= 0.0) & (r <= 34.0)
     if_barrel = (z >= 0.0) & (z <= 9.35) & (r <= 24.0)
     lug_z = (z >= 6.70) & (z <= 9.10) & (r >= 24.00) & (r <= 27.60)
     if_lugs = np.zeros_like(lug_z)
@@ -295,7 +295,7 @@ def main() -> None:
     )
     m_tris, m_vol = build_one(
         male_solid,
-        ((-36.0, 36.0), (-36.0, 36.0), (-8.25, 9.60)),
+        ((-35.0, 35.0), (-35.0, 35.0), (-8.25, 9.60)),
         out / "male.stl",
     )
     print(f"female triangles={f_tris} volume={f_vol:.1f} mm3")

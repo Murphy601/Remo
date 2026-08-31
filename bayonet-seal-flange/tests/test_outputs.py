@@ -59,10 +59,10 @@ def test_female_bbox(female_tris):
 
 
 def test_male_bbox(male_tris):
-    """Male envelope: Ø70 cap, barrel to z = 9.35, cap down to z = -8."""
+    """Male envelope: Ø68 cap, barrel to z = 9.35, cap down to z = -8."""
     lo, hi = bbox(male_tris)
-    assert lo[0] < -33.0 and hi[0] > 33.0
-    assert hi[0] < 38.0 and hi[1] < 38.0
+    assert lo[0] < -32.5 and hi[0] > 32.5
+    assert hi[0] < 36.5 and hi[1] < 36.5
     assert lo[2] < -7.3
     assert lo[2] > -9.2
     assert hi[2] > 8.6
@@ -73,9 +73,9 @@ def test_volumes(female_tris, male_tris):
     """Closed solids in the right mass range — a shell or a brick misses."""
     fv = signed_volume(female_tris)
     mv = signed_volume(male_tris)
-    # Slack covers 0.2 mm breaks, Ø68 vs Ø70 cap, and CAD vs voxel tessellation.
-    assert 15000.0 < fv < 24000.0, f"female volume {fv:.1f}"
-    assert 25000.0 < mv < 37000.0, f"male volume {mv:.1f}"
+    # Oracle voxel volumes ~19000 / ~30100. Slack is 0.2 mm breaks + mesh flavour.
+    assert 16500.0 < fv < 22500.0, f"female volume {fv:.1f}"
+    assert 27000.0 < mv < 34000.0, f"male volume {mv:.1f}"
 
 
 def test_optical_bore_clear(female_tris, male_tris):
@@ -135,26 +135,28 @@ def test_unequal_windows(female_tris):
     assert point_inside(female_tris, polar(26.2, 180.0, 4.20)), "lip gone at 180"
     assert point_inside(female_tris, polar(26.2, 70.0, 4.20)), "lip gone at 70"
     assert not point_inside(female_tris, polar(26.2, 0.0, 7.40)), "race filled at 0"
+    # Through the seal face, not a z=3 lip pocket. r=24.50 at θ=0 is gland-inner
+    # land if the window stops at z=3; lugs at r=24–27.6 cannot enter that bowl.
+    assert not point_inside(female_tris, polar(24.50, 0.0, 0.70)), "fat window is a pocket, not through the face"
 
 
 def test_ramp_on_lip(female_tris):
     """Lip +Z face climbs after a window's CCW edge. Flat lip fails this."""
-    # fat e=23°. θ=35° → z=5.681. probe 0.18 mm under that face.
-    assert point_inside(female_tris, polar(26.2, 35.0, 5.50)), "no ramp after fat window"
+    # key window CCW edge is 23°. at 35° (~12° into the ramp) rise ~0.28
+    assert point_inside(female_tris, polar(26.2, 35.0, 5.55)), "no ramp after fat window"
     assert not point_inside(female_tris, polar(26.2, 0.0, 5.55)), "ramp filled the window"
-    # θ=60° → z=6.266. probe well under the face so a coarse tessellation still hits.
-    assert point_inside(female_tris, polar(26.2, 60.0, 5.90)), "ramp died before lock"
+    # further along the key ramp, near lock, lip is higher
+    assert point_inside(female_tris, polar(26.2, 60.0, 6.10)), "ramp died before lock"
 
 
 def test_male_lugs_and_pin(male_tris):
     """Unequal lugs at 0/107/236 and the clock pin at r=33.20 / 14°."""
     assert point_inside(male_tris, polar(25.8, 0.0, 7.90)), "fat lug missing"
-    assert point_inside(male_tris, polar(25.8, 15.0, 7.90)), "fat lug too narrow"
+    assert point_inside(male_tris, polar(25.8, 14.0, 7.90)), "fat lug too narrow"
     assert point_inside(male_tris, polar(25.8, 107.0, 7.90)), "107 lug missing"
     assert point_inside(male_tris, polar(25.8, 236.0, 7.90)), "236 lug missing"
     assert not point_inside(male_tris, polar(25.8, 120.0, 7.90)), "extra lug at 120"
-    # 38° span is ±19°. 22° is 3° past the edge — slack for $fn faceting.
-    assert not point_inside(male_tris, polar(25.8, 22.0, 7.90)), "fat lug too wide"
+    assert not point_inside(male_tris, polar(25.8, 20.4, 7.90)), "fat lug too wide"
     assert point_inside(male_tris, polar(33.20, 14.0, 1.30)), "clock pin missing"
     assert point_inside(male_tris, (20.5, 0.0, 3.0)), "barrel missing"
     assert point_inside(male_tris, (22.0, 0.0, -4.0)), "cap missing"
@@ -206,17 +208,16 @@ def test_hard_stop(female_tris):
 
 def test_wrong_clock_blocked(female_tris, male_tris):
     """Fat lug will not pass the 32° window at 107°."""
-    edge = polar(25.8, 16.0, 7.90)
-    assert point_inside(male_tris, edge), "fat lug does not reach 16°"
+    edge = polar(25.8, 17.5, 7.90)
+    assert point_inside(male_tris, edge), "fat lug does not reach 17.5°"
     jammed = translate(rotate_z(edge, 107.0), -3.20)
     assert point_inside(female_tris, jammed), "fat lug fits the 107 window"
 
 
 def test_vice_flat(female_tris, male_tris):
     """2 mm fixture flat on the female OD at 180°, not on the cap."""
-    assert not point_inside(female_tris, polar(35.5, 180.0, 2.0)), "vice flat missing"
-    # r=32 at 180° is x=-32, 2 mm inside a 2 mm flat.
-    assert point_inside(female_tris, polar(32.0, 180.0, 2.0)), "flat cut too deep"
+    assert not point_inside(female_tris, polar(35.4, 180.0, 2.0)), "vice flat missing"
+    assert point_inside(female_tris, polar(33.2, 180.0, 2.0)), "flat cut too deep"
     assert point_inside(male_tris, polar(33.2, 180.0, -3.0)), "male got the vice flat"
 
 

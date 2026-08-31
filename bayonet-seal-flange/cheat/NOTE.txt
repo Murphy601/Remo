@@ -9,6 +9,3 @@ weep offset, or a CW-only twist also fails the sealed probes.
 Gland probes sit on a solid sector (~160°). A face-through window
 at 0° is correct and must not fail the groove land check.
 
-The shop copy now lists worked ramp heights, the slot annulus,
-the vice plane, and a Ø70 cap so pin and weep actually land.
-
