@@ -134,15 +134,24 @@ def test_unequal_windows(female_tris):
     assert point_inside(female_tris, polar(26.2, 180.0, 4.20)), "lip gone at 180"
     assert point_inside(female_tris, polar(26.2, 70.0, 4.20)), "lip gone at 70"
     assert not point_inside(female_tris, polar(26.2, 0.0, 7.40)), "race filled at 0"
+    # 4° a side on a 38° lug → fat window ±23°. 25° must still be lip.
+    assert point_inside(female_tris, polar(26.2, 25.0, 4.20)), "fat window too wide"
+    # 24° lug + 4° a side → 107 window ±16°. 18° off-centre must be lip.
+    assert point_inside(female_tris, polar(26.2, 125.0, 4.20)), "107 window too wide"
 
 
 def test_ramp_on_lip(female_tris):
-    """Lip +Z face climbs after a window's CCW edge. Flat lip fails this."""
-    # key window CCW edge is 23°. at 35° (~12° into the ramp) rise ~0.28
-    assert point_inside(female_tris, polar(26.2, 35.0, 5.55)), "no ramp after fat window"
+    """Lip +Z face is a constant-pitch helicoid from each window's CCW edge."""
+    # fat CCW edge 23°. 30° is 7° in (z=5.564). a step that jumps to 6.50 fails air.
+    assert point_inside(female_tris, polar(26.2, 30.0, 5.48)), "no ramp just after fat CCW edge"
+    assert not point_inside(female_tris, polar(26.2, 30.0, 5.72)), "ramp jumped too high at 30"
     assert not point_inside(female_tris, polar(26.2, 0.0, 5.55)), "ramp filled the window"
-    # further along the key ramp, near lock, lip is higher
+    # 60° is 37° in (z=6.266). 70° is the lock heading (z=6.50).
     assert point_inside(female_tris, polar(26.2, 60.0, 6.10)), "ramp died before lock"
+    assert not point_inside(female_tris, polar(26.2, 60.0, 6.45)), "ramp overshot 60"
+    # 68° is 45° in (z=6.453). 70° is the drop-back, so probe short of it.
+    assert point_inside(female_tris, polar(26.2, 68.0, 6.25)), "ramp short of lock height"
+    assert not point_inside(female_tris, polar(26.2, 80.0, 5.55)), "ramp ran past 47"
 
 
 def test_male_lugs_and_pin(male_tris):
