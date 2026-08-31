@@ -1,0 +1,6 @@
+Cheats for local probing only. Not part of the zip.
+- serial_ch.v: legal copies, but channel 0 runs to idle before channel 1 gets a beat. both_rr's short-idle check should fail.
+- wipe_flags.v: writeback of descriptor word 3 is 32'h80000000, wiping irq/tag/len. preserve fails.
+- display_pass.v: stdout slogans. The scoreboard discards stdout.
+- exit_grade.v: $finish early / fake DMA line. The parent hashes a nonce the DUT never received.
+- system_reward.v: $system write of reward.txt; spawn is wrapped and the sim is not root.
