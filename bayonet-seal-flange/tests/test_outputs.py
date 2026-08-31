@@ -73,8 +73,8 @@ def test_volumes(female_tris, male_tris):
     """Closed solids in the right mass range — a shell or a brick misses."""
     fv = signed_volume(female_tris)
     mv = signed_volume(male_tris)
-    # Oracle voxel volumes ~19000 / ~30100. Slack is 0.2 mm breaks + mesh flavour.
-    assert 16500.0 < fv < 22500.0, f"female volume {fv:.1f}"
+    # Oracle voxel volumes ~19600 / ~30000. Slack is 0.2 mm breaks + mesh flavour.
+    assert 17500.0 < fv < 22500.0, f"female volume {fv:.1f}"
     assert 27000.0 < mv < 34000.0, f"male volume {mv:.1f}"
 
 
@@ -87,11 +87,10 @@ def test_optical_bore_clear(female_tris, male_tris):
 
 
 def test_female_face_gland(female_tris):
-    """HX-7 face groove on a solid sector — not on a window centreline."""
+    """HX-7 face groove from 22% crush / 1.40×cord about r=26.05, on a solid sector."""
     # 160° sits between the 107 and 236 windows, clear of the M3 at 202°.
-    # θ=0 is the fat window; a face-through window has no land there.
     trough = polar(26.05, 160.0, 0.70)
-    land_out = polar(31.00, 160.0, 0.70)
+    land_out = polar(28.60, 160.0, 0.70)
     land_in = polar(24.50, 160.0, 0.70)
     assert not point_inside(female_tris, trough), "groove trough filled in"
     assert point_inside(female_tris, land_out), "no metal outside the gland"
@@ -135,9 +134,6 @@ def test_unequal_windows(female_tris):
     assert point_inside(female_tris, polar(26.2, 180.0, 4.20)), "lip gone at 180"
     assert point_inside(female_tris, polar(26.2, 70.0, 4.20)), "lip gone at 70"
     assert not point_inside(female_tris, polar(26.2, 0.0, 7.40)), "race filled at 0"
-    # Through the seal face, not a z=3 lip pocket. r=24.50 at θ=0 is gland-inner
-    # land if the window stops at z=3; lugs at r=24–27.6 cannot enter that bowl.
-    assert not point_inside(female_tris, polar(24.50, 0.0, 0.70)), "fat window is a pocket, not through the face"
 
 
 def test_ramp_on_lip(female_tris):

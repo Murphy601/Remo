@@ -86,8 +86,7 @@ def female_solid(x: np.ndarray, y: np.ndarray, z: np.ndarray) -> np.ndarray:
     in_band = (r >= 24.15) & (r < 28.20) & (z < 10.0)
     z_lip_hi = 5.40 + _ramp_extra(ang)
     win = _in_windows(ang)
-    # Windows are through the seal face — a z=3 pocket is a bowl the lugs cannot enter.
-    solid &= ~((r >= 24.15) & (r < 28.20) & win & (z >= 0.0) & (z <= 5.40))
+    solid &= ~((in_band) & win & (z >= 3.00) & (z <= 5.40))
 
     stop = (
         (z >= 6.80)

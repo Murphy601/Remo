@@ -1,4 +1,4 @@
-helios m34 receiver + cap. shop copy, rev E. D wrote the windows like pockets starting at z=3 — the cap would not enter. throw out A/B/C/D. lock sense was wrong and the lugs were on a 120 grid which is how we got three-way clocking in the field.
+helios m34 receiver + cap. shop copy, rev D. throw out A/B/C, lock sense was wrong and the lugs were on a 120 grid which is how we got three-way clocking in the field.
 
 stl, millimetres. binary or ascii, I do not care. one body each. no step, no zip.
 
@@ -16,7 +16,7 @@ the ramp is the bit people miss. you do not seat the faces and then spin. you pu
 female
 Ø72 from z=0 to z=10. then it steps. z=10 to z=12 is Ø50, and the bore there is only Ø34. do not run the 72 through. barrel clearance Ø48.30 from z=0 to z=10. lug race Ø56.40 from z=5.40 to z=10.
 
-lip sits z=3.00 up to z=5.40 on the window centreline, then the formula above. metal is from r=24.15 out to the race. windows are through the seal face, z=0 to z=5.40 (cut the lip, not the OD). a pocket that starts at z=3.00 is a bowl — the lugs cannot climb in:
+lip sits z=3.00 up to z=5.40 on the window centreline, then the formula above. metal is from r=24.15 out to the race. windows (cut the lip, not the OD):
 
   fat    0°    46° wide
   one    107°  32° wide
@@ -29,9 +29,9 @@ HX-7 face ring. I already did the crush math. rectangular groove on the female z
   width 2.49
   depth 1.39
   so ID 49.61, OD 54.59
-the three windows break the ring. still cut the groove on the solid sectors. male is just a flat land over that band.
+male is just a flat land over that band.
 
-radial groove in the barrel bore, female only: z=1.90 to 3.30, 1.30 mm into the wall from Ø48.30 (so out to Ø50.90). same story — gone in the windows, present on the solid bore. male barrel stays Ø48 plain.
+radial groove in the barrel bore, female only: z=1.90 to 3.30, 1.30 mm into the wall from Ø48.30 (so out to Ø50.90). male barrel stays Ø48 plain.
 
 M3 ×4, Ø3.40 through the 10 mm flange, BCD 58, at 22 / 112 / 202 / 292. not on 45s. spotface Ø6.0 × 0.8 into the flange from the z=10 shoulder. keep them off the seal face.
 
