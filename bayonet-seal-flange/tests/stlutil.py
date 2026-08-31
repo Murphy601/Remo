@@ -88,7 +88,7 @@ def _ray_count(orig: np.ndarray, direction: np.ndarray, tris: np.ndarray) -> int
     return int(np.count_nonzero(hit))
 
 
-def point_inside(tris: np.ndarray, p, attempts: int = 5) -> bool:
+def point_inside(tris: np.ndarray, p, attempts: int = 7) -> bool:
     """Majority ray-parity. Extra rays + micron jitter so a CAD facet edge
     (common on $fn-aligned θ=0/90/180) cannot flip a probe."""
     p = np.asarray(p, dtype=np.float64)
@@ -99,6 +99,8 @@ def point_inside(tris: np.ndarray, p, attempts: int = 5) -> bool:
             [0.031, 0.017, 1.0],
             [0.71, 0.62, 0.33],
             [-0.41, 0.55, 0.73],
+            [0.22, -0.67, 0.71],
+            [-0.63, -0.28, 0.72],
         ],
         dtype=np.float64,
     )
@@ -109,6 +111,8 @@ def point_inside(tris: np.ndarray, p, attempts: int = 5) -> bool:
             [-1.9e-5, 4.4e-5, -2.8e-5],
             [2.2e-5, 1.1e-5, -3.5e-5],
             [-3.1e-5, -1.7e-5, 2.4e-5],
+            [1.4e-5, 3.3e-5, -1.8e-5],
+            [-2.5e-5, 1.6e-5, 3.9e-5],
         ],
         dtype=np.float64,
     )
