@@ -1,0 +1,14 @@
+Deliberate misses. Not run by the harness.
+
+fake_tubes.py writes two coaxial tubes with a similar envelope.
+No ramp, no unequal lugs, no glands, no pin/slot, no stop.
+
+A 120° lug pattern, a flat lip, a round clock hole, a missing
+weep offset, or a CW-only twist also fails the sealed probes.
+
+Gland probes sit on a solid sector (~160°). A face-through window
+at 0° is correct and must not fail the groove land check.
+
+The shop copy now lists worked ramp heights, the slot annulus,
+the vice plane, and a Ø70 cap so pin and weep actually land.
+
