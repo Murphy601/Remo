@@ -16,6 +16,8 @@
     "plumbline::infill_command.the_json_object_carries_the_named_keys",
     "plumbline::infill_command.the_top_level_usage_lists_infill",
     "plumbline::infill_edges.a_depth_flag_overrides_the_neighbour",
+    "plumbline::infill_edges.a_heading_of_one_eighty_prints_zero",
+    "plumbline::infill_edges.a_heading_of_two_seventy_wraps_to_ninety",
     "plumbline::infill_edges.a_long_east_west_hole_takes_a_heading_near_ninety",
     "plumbline::infill_edges.a_missing_surface_file_names_the_path",
     "plumbline::infill_edges.a_missing_surface_is_refused",
@@ -28,10 +30,12 @@
     "plumbline::infill_edges.crosslines_are_written_next_to_the_main_file",
     "plumbline::infill_edges.pieces_shorter_than_min_length_are_dropped",
     "plumbline::infill_edges.quoted_survey_names_round_trip_through_json",
+    "plumbline::infill_edges.remainder_closes_when_the_paint_covers_the_hole",
     "plumbline::infill_edges.remainder_stays_open_when_the_swath_is_too_narrow",
     "plumbline::infill_edges.shoalest_neighbour_follows_the_water_next_to_the_hole",
     "plumbline::infill_edges.spacing_can_be_set_directly_and_depth_is_still_reported",
-    "plumbline::infill_edges.swath_from_the_config_changes_the_spacing"
+    "plumbline::infill_edges.swath_from_the_config_changes_the_spacing",
+    "plumbline::infill_edges.the_swath_flag_narrows_spacing"
   ],
   "p2p_node_ids": [
     "plumbline::calibration.a_minimum_at_the_edge_of_the_range_says_so",

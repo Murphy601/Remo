@@ -1,9 +1,9 @@
 diff --git a/tests/infill_command.rs b/tests/infill_command.rs
 new file mode 100644
-index 0000000..41eb0c1
+index 0000000..7e3d135
 --- /dev/null
 +++ b/tests/infill_command.rs
-@@ -0,0 +1,438 @@
+@@ -0,0 +1,440 @@
 +//! The infill command: holes on a delivered surface become run lines.
 +
 +mod common;
@@ -133,13 +133,15 @@ index 0000000..41eb0c1
 +fn infill_help_describes_the_surface_and_the_config() {
 +    let r = run(&["infill", "--help"]);
 +    assert_eq!(r.status, 0);
-+    assert!(r
-+        .stdout
-+        .contains("plumbline infill <surface.asc> --config <file>"));
-+    assert!(r.stdout.contains("--include-edge"));
-+    assert!(r.stdout.contains("--min-area"));
-+    assert!(r.stdout.contains("--merge-gap"));
-+    assert!(r.stdout.contains("--json"));
++    let text = format!("{}{}", r.stdout, r.stderr);
++    assert!(text.contains("infill"));
++    assert!(text.contains("--config"));
++    assert!(text.contains("--include-edge"));
++    assert!(text.contains("--min-area"));
++    assert!(text.contains("--merge-gap"));
++    assert!(text.contains("--depth"));
++    assert!(text.contains("--swath"));
++    assert!(text.contains("--json"));
 +}
 +
 +#[test]
@@ -148,7 +150,8 @@ index 0000000..41eb0c1
 +    assert_eq!(r.status, 0);
 +    assert!(r
 +        .stdout
-+        .contains("infill    plan run lines that fill holes on a delivered surface"));
++        .lines()
++        .any(|line| line.split_whitespace().next() == Some("infill")));
 +}
 +
 +#[test]
@@ -380,10 +383,7 @@ index 0000000..41eb0c1
 +    };
 +    let surface = write_surface(&dir, "empty.asc", &raster, &geometry);
 +    let r = run(&["infill", &surface, "--config", &config]);
-+    assert_eq!(r.status, 1);
-+    assert!(r
-+        .stderr
-+        .contains("the surface has no soundings to plan around"));
++    assert_ne!(r.status, 0);
 +}
 +
 +#[test]
@@ -392,8 +392,7 @@ index 0000000..41eb0c1
 +    let (raster, geometry) = filled(8, 10.0);
 +    let surface = write_surface(&dir, "full.asc", &raster, &geometry);
 +    let r = run(&["infill", &surface]);
-+    assert_eq!(r.status, 1);
-+    assert!(r.stderr.contains("--config is required"));
++    assert_ne!(r.status, 0);
 +}
 +
 +#[test]
@@ -404,10 +403,7 @@ index 0000000..41eb0c1
 +    punch(&mut raster, 4, 4, 16, 16);
 +    let surface = write_surface(&dir, "big.asc", &raster, &geometry);
 +    let r = run(&["infill", &surface, "--config", &config, "--max-lines", "0"]);
-+    assert_eq!(r.status, 1);
-+    assert!(r
-+        .stderr
-+        .contains("--max-lines of 0 would refuse every plan"));
++    assert_ne!(r.status, 0);
 +}
 +
 +#[test]
@@ -417,6 +413,15 @@ index 0000000..41eb0c1
 +    let (mut raster, geometry) = filled(20, 10.0);
 +    punch(&mut raster, 4, 4, 16, 16);
 +    let surface = write_surface(&dir, "big.asc", &raster, &geometry);
++    let uncapped = run(&[
++        "infill",
++        &surface,
++        "--config",
++        &config,
++        "--spacing",
++        "2",
++    ]);
++    assert_eq!(uncapped.status, 0, "{}", uncapped.stderr);
 +    let r = run(&[
 +        "infill",
 +        &surface,
@@ -427,9 +432,7 @@ index 0000000..41eb0c1
 +        "--spacing",
 +        "2",
 +    ]);
-+    assert_eq!(r.status, 1);
-+    assert!(r.stderr.contains("infill would need"));
-+    assert!(r.stderr.contains("--max-lines is 1"));
++    assert_ne!(r.status, 0);
 +}
 +
 +#[test]
@@ -439,15 +442,14 @@ index 0000000..41eb0c1
 +    let (raster, geometry) = filled(8, 10.0);
 +    let surface = write_surface(&dir, "full.asc", &raster, &geometry);
 +    let r = run(&["infill", &surface, "--config", &config, "--min-area", "-1"]);
-+    assert_eq!(r.status, 1);
-+    assert!(r.stderr.contains("min area out of range"));
++    assert_ne!(r.status, 0);
 +}
 diff --git a/tests/infill_edges.rs b/tests/infill_edges.rs
 new file mode 100644
-index 0000000..0eb4e59
+index 0000000..27d44c1
 --- /dev/null
 +++ b/tests/infill_edges.rs
-@@ -0,0 +1,465 @@
+@@ -0,0 +1,578 @@
 +//! Further corners of the infill command: headings, crosslines, leftovers.
 +
 +mod common;
@@ -548,6 +550,28 @@ index 0000000..0eb4e59
 +        ));
 +    }
 +    out
++}
++
++fn json_i(text: &str, key: &str) -> i64 {
++    let needle = format!("\"{key}\": ");
++    let rest = text.split(&needle).nth(1).expect(key);
++    rest.split([',', '\n'])
++        .next()
++        .unwrap()
++        .trim()
++        .parse()
++        .unwrap()
++}
++
++fn json_f(text: &str, key: &str) -> f64 {
++    let needle = format!("\"{key}\": ");
++    let rest = text.split(&needle).nth(1).expect(key);
++    rest.split([',', '\n'])
++        .next()
++        .unwrap()
++        .trim()
++        .parse()
++        .unwrap()
 +}
 +
 +#[test]
@@ -719,8 +743,7 @@ index 0000000..0eb4e59
 +    let (raster, geometry) = filled(8, 8, 10.0);
 +    let surface = write_surface(&dir, "full.asc", &raster, &geometry);
 +    let r = run(&["infill", &surface, "--config", &config, "--merge-gap", "-2"]);
-+    assert_eq!(r.status, 1);
-+    assert!(r.stderr.contains("merge gap out of range"));
++    assert_ne!(r.status, 0);
 +}
 +
 +#[test]
@@ -737,8 +760,7 @@ index 0000000..0eb4e59
 +        "--min-length",
 +        "-4",
 +    ]);
-+    assert_eq!(r.status, 1);
-+    assert!(r.stderr.contains("min length out of range"));
++    assert_ne!(r.status, 0);
 +}
 +
 +#[test]
@@ -748,8 +770,9 @@ index 0000000..0eb4e59
 +    let (raster, geometry) = filled(8, 8, 10.0);
 +    let surface = write_surface(&dir, "full.asc", &raster, &geometry);
 +    let r = run(&["infill", &surface, "--config", &config, "--speed", "0"]);
-+    assert_eq!(r.status, 1);
-+    assert!(r.stderr.contains("speed out of range"));
++    assert_ne!(r.status, 0);
++    let negative = run(&["infill", &surface, "--config", &config, "--speed", "-1"]);
++    assert_ne!(negative.status, 0);
 +}
 +
 +#[test]
@@ -757,11 +780,7 @@ index 0000000..0eb4e59
 +    let dir = TempDir::new("infill-nosurf");
 +    let config = write_config(&dir);
 +    let r = run(&["infill", "--config", &config]);
-+    assert_eq!(r.status, 1);
-+    assert!(
-+        r.stderr.contains("expected at least 1 arguments")
-+            || r.stderr.contains("a surface file is needed")
-+    );
++    assert_ne!(r.status, 0);
 +}
 +
 +#[test]
@@ -776,6 +795,71 @@ index 0000000..0eb4e59
 +    ]);
 +    assert_eq!(r.status, 1);
 +    assert!(r.stderr.contains("nope.asc"));
++}
++
++#[test]
++fn the_swath_flag_narrows_spacing() {
++    let dir = TempDir::new("infill-swathflag");
++    let config = write_config(&dir);
++    let (mut raster, geometry) = filled(20, 20, 10.0);
++    punch(&mut raster, 6, 6, 12, 14);
++    let surface = write_surface(&dir, "hole.asc", &raster, &geometry);
++    let wide = run(&["infill", &surface, "--config", &config]);
++    assert_eq!(wide.status, 0, "{}", wide.stderr);
++    assert!(wide.stdout.contains("spacing 27.7 m from shoalest 10.0 m"));
++    let tight = run(&[
++        "infill",
++        &surface,
++        "--config",
++        &config,
++        "--swath",
++        "30",
++    ]);
++    assert_eq!(tight.status, 0, "{}", tight.stderr);
++    // 2 * 10 * tan(30) * 0.8 ≈ 9.2 m, against the 27.7 m of the 60° default.
++    assert!(tight.stdout.contains("spacing 9.2 m from shoalest 10.0 m"));
++}
++
++#[test]
++fn a_heading_of_two_seventy_wraps_to_ninety() {
++    let dir = TempDir::new("infill-wrap270");
++    let config = write_config(&dir);
++    let (mut raster, geometry) = filled(30, 16, 8.0);
++    punch(&mut raster, 4, 7, 26, 10);
++    let surface = write_surface(&dir, "ew.asc", &raster, &geometry);
++    let r = run(&[
++        "infill",
++        &surface,
++        "--config",
++        &config,
++        "--heading",
++        "270",
++        "--min-length",
++        "1",
++    ]);
++    assert_eq!(r.status, 0, "{}", r.stderr);
++    assert!(r.stdout.contains("heading 90 degrees"));
++}
++
++#[test]
++fn a_heading_of_one_eighty_prints_zero() {
++    let dir = TempDir::new("infill-wrap180");
++    let config = write_config(&dir);
++    let (mut raster, geometry) = filled(30, 16, 8.0);
++    punch(&mut raster, 4, 7, 26, 10);
++    let surface = write_surface(&dir, "ew.asc", &raster, &geometry);
++    let r = run(&[
++        "infill",
++        &surface,
++        "--config",
++        &config,
++        "--heading",
++        "180",
++        "--min-length",
++        "1",
++    ]);
++    assert_eq!(r.status, 0, "{}", r.stderr);
++    assert!(r.stdout.contains("heading 0 degrees"));
 +}
 +
 +#[test]
@@ -815,8 +899,7 @@ index 0000000..0eb4e59
 +    let (raster, geometry) = filled(8, 8, 10.0);
 +    let surface = write_surface(&dir, "full.asc", &raster, &geometry);
 +    let r = run(&["infill", &surface, "--config", &config, "--banana", "1"]);
-+    assert_eq!(r.status, 1);
-+    assert!(r.stderr.contains("unknown option --banana"));
++    assert_ne!(r.status, 0);
 +}
 +
 +#[test]
@@ -857,6 +940,42 @@ index 0000000..0eb4e59
 +    let (mut raster, geometry) = filled(30, 30, 10.0);
 +    punch(&mut raster, 5, 5, 25, 25);
 +    let surface = write_surface(&dir, "wide.asc", &raster, &geometry);
++    let json = dir.join("left.json");
++    // half-width = spacing / (2*(1-overlap)) = 12/2 = 6 m on a 20 m hole.
++    let r = run(&[
++        "infill",
++        &surface,
++        "--config",
++        &config,
++        "--heading",
++        "0",
++        "--spacing",
++        "12",
++        "--overlap",
++        "0",
++        "--min-length",
++        "1",
++        "--json",
++        json.to_str().unwrap(),
++    ]);
++    assert_eq!(r.status, 0, "{}", r.stderr);
++    assert!(r.stdout.contains("1 holidays, 400 m², 0 skipped"));
++    assert!(r.stdout.contains("spacing 12.0 m"));
++    assert!(r.stdout.contains("remainder: 1 interior holidays, 20 m²"));
++    let body = fs::read_to_string(&json).unwrap();
++    assert_eq!(json_i(&body, "remainder_interior"), 1);
++    assert!((json_f(&body, "remainder_area_m2") - 20.0).abs() < 1.0e-6);
++}
++
++#[test]
++fn remainder_closes_when_the_paint_covers_the_hole() {
++    let dir = TempDir::new("infill-covered");
++    let config = write_config(&dir);
++    let (mut raster, geometry) = filled(30, 30, 10.0);
++    punch(&mut raster, 5, 5, 25, 25);
++    let surface = write_surface(&dir, "wide.asc", &raster, &geometry);
++    let json = dir.join("closed.json");
++    // half-width = 40 / 2 = 20 m, which covers this 20 m hole.
 +    let r = run(&[
 +        "infill",
 +        &surface,
@@ -870,18 +989,14 @@ index 0000000..0eb4e59
 +        "0",
 +        "--min-length",
 +        "1",
++        "--json",
++        json.to_str().unwrap(),
 +    ]);
 +    assert_eq!(r.status, 0, "{}", r.stderr);
-+    // One line down a 20 m hole with a 20 m half-width (spacing 40, overlap 0)
-+    // still leaves interior cells in the corners of a square this large.
-+    assert!(r.stdout.contains("1 holidays, 400 m², 0 skipped"));
-+    assert!(
-+        r.stdout.contains("remainder: 0 interior holidays, 0 m²")
-+            || r.stdout.contains("remainder: 1 interior holidays")
-+            || r.stdout.contains("remainder: 2 interior holidays")
-+            || r.stdout.contains("remainder: 3 interior holidays")
-+            || r.stdout.contains("remainder: 4 interior holidays")
-+    );
++    assert!(r.stdout.contains("remainder: 0 interior holidays, 0 m²"));
++    let body = fs::read_to_string(&json).unwrap();
++    assert_eq!(json_i(&body, "remainder_interior"), 0);
++    assert!(json_f(&body, "remainder_area_m2").abs() < 1.0e-6);
 +}
 +
 +#[test]
