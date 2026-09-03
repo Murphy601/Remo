@@ -1333,3 +1333,5 @@ index d6da68c..588cf1b 100644
  pub use block::Block;
 +pub use infill::{plan_infill, InfillOptions, InfillResult};
  pub use lines::{plan_crosslines, plan_lines, spacing_for, Plan, PlannedLine};
+
+
