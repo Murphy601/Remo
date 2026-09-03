@@ -1,0 +1,1337 @@
+diff --git a/src/cli/help.rs b/src/cli/help.rs
+index 2ed80e3..90c00a4 100644
+--- a/src/cli/help.rs
++++ b/src/cli/help.rs
+@@ -17,6 +17,7 @@ commands:
+   cast      what two sound speed casts do to the same beams
+   compare   compare two surfaces, for crossline analysis
+   plan      lay out run lines over a survey block
++  infill    plan run lines that fill holes on a delivered surface
+   simulate  write a synthetic ping file, for testing a configuration
+ 
+ run plumbline <command> --help for the options of one command
+@@ -112,6 +113,34 @@ options:
+   --out <file>        write the lines out
+ ";
+ 
++/// Usage for the infill command.
++pub const INFILL: &str = "\
++plumbline infill <surface.asc> --config <file>
++
++Plans run lines through the coverage holes on a delivered surface. Gaps that
++touch the grid edge are ignored unless --include-edge is set, because those
++are usually the grid being bigger than the work. Nearby holes are merged into
++one campaign. Lines are clipped to the empty cells, so a populated strip
++through a hole splits a line in two.
++
++options:
++  --config <file>     survey configuration, required
++  --min-area <m2>     skip holidays smaller than this, default four cells
++  --merge-gap <m>     merge holes this close, default two cell sizes
++  --heading <deg>     line heading, default the long axis of each campaign
++  --depth <metres>    depth for spacing, default shoalest neighbour
++  --swath <degrees>   half angle, default cleaning.max_swath_angle or 60
++  --overlap <0 to 1>  fraction of a swath the next line repeats, default 0.2
++  --spacing <metres>  set the spacing directly instead
++  --speed <m/s>       survey speed for the time estimate, default 3
++  --min-length <m>    drop clipped pieces shorter than this, default two cells
++  --max-lines <n>     refuse a plan with more main lines than this
++  --include-edge      also plan gaps that touch the grid edge
++  --crosslines        plan a sparse set across the main heading
++  --out <file>        write the lines, same format as plan
++  --json <file>       write the same numbers as json
++";
++
+ /// Usage for the simulate command.
+ pub const SIMULATE: &str = "\
+ plumbline simulate <output.pbf>
+@@ -137,6 +166,7 @@ pub fn for_command(command: Option<&str>) -> &'static str {
+         Some("cast") => CAST,
+         Some("compare") => COMPARE,
+         Some("plan") => PLAN,
++        Some("infill") => INFILL,
+         Some("simulate") => SIMULATE,
+         _ => USAGE,
+     }
+diff --git a/src/cli/infill.rs b/src/cli/infill.rs
+new file mode 100644
+index 0000000..f04f6c9
+--- /dev/null
++++ b/src/cli/infill.rs
+@@ -0,0 +1,117 @@
++//! The infill command: holes on a surface in, run lines out.
++
++use std::fs;
++use std::path::Path;
++
++use crate::cli::args::{Args, Spec};
++use crate::config::survey::SurveyConfig;
++use crate::error::{Error, Result};
++use crate::grid::estimator::{DepthRaster, Estimator};
++use crate::io::ascii_grid::read_ascii_grid;
++use crate::planning::infill::{
++    format_json, format_report, plan_infill, write_lines, InfillOptions,
++};
++use crate::units::Angle;
++
++/// What this command accepts.
++pub fn spec() -> Spec {
++    Spec::new()
++        .option("config")
++        .option("min-area")
++        .option("merge-gap")
++        .option("heading")
++        .option("depth")
++        .option("swath")
++        .option("overlap")
++        .option("spacing")
++        .option("speed")
++        .option("min-length")
++        .option("max-lines")
++        .option("out")
++        .option("json")
++        .flag("include-edge")
++        .flag("crosslines")
++        .positional(1, Some(1))
++}
++
++/// Run the command.
++pub fn run(args: &Args) -> Result<String> {
++    args.check(&spec())?;
++
++    let surface = args
++        .positional
++        .first()
++        .ok_or_else(|| Error::Config("a surface file is needed".into()))?;
++    let config_path = args.value("config")?;
++    let config = SurveyConfig::read(config_path)?;
++    let grid = read_ascii_grid(surface)?;
++    let raster = DepthRaster {
++        columns: grid.geometry.columns,
++        rows: grid.geometry.rows,
++        depths: grid.values,
++        estimator: Estimator::Shoalest,
++    };
++
++    let swath_default = config.swath_limit.unwrap_or(60.0);
++    let mut options = InfillOptions::defaults(grid.geometry.cell_size, swath_default)?;
++    options.include_edge = args.flag("include-edge");
++    options.crosslines = args.flag("crosslines");
++
++    if args.has("min-area") {
++        options.min_area = args.number("min-area")?;
++    }
++    if args.has("merge-gap") {
++        options.merge_gap = args.number("merge-gap")?;
++    }
++    if args.has("heading") {
++        options.heading = Some(Angle::from_degrees(args.number("heading")?));
++    }
++    if args.has("depth") {
++        options.depth = Some(args.number("depth")?);
++    }
++    if args.has("swath") {
++        options.swath = Angle::from_degrees(args.number("swath")?);
++    }
++    if args.has("overlap") {
++        options.overlap = args.number("overlap")?;
++    }
++    if args.has("spacing") {
++        options.spacing = Some(args.number("spacing")?);
++    }
++    if args.has("speed") {
++        options.speed = args.number("speed")?;
++    }
++    if args.has("min-length") {
++        options.min_length = args.number("min-length")?;
++    }
++    if args.has("max-lines") {
++        let n = args.number("max-lines")?;
++        if n != n.trunc() || n < 0.0 {
++            return Err(Error::Config(format!(
++                "--max-lines should be a whole number, it is {n}"
++            )));
++        }
++        options.max_lines = Some(n as usize);
++    }
++
++    let result = plan_infill(&raster, &grid.geometry, &config.name, options)?;
++
++    let mut wrote = Vec::new();
++    if args.has("out") {
++        let path = args.value("out")?;
++        write_lines(Path::new(path), &result.lines)?;
++        wrote.push(path.to_string());
++        if options.crosslines {
++            let cross_path = format!("{path}.crosslines");
++            write_lines(Path::new(&cross_path), &result.crosslines)?;
++            wrote.push(cross_path);
++        }
++    }
++    if args.has("json") {
++        let path = args.value("json")?;
++        fs::write(path, format_json(&result, options.speed)).map_err(|e| Error::io(path, e))?;
++        wrote.push(path.to_string());
++    }
++
++    Ok(format_report(&result, options.speed, &wrote))
++}
+diff --git a/src/cli/mod.rs b/src/cli/mod.rs
+index 398f313..1713d54 100644
+--- a/src/cli/mod.rs
++++ b/src/cli/mod.rs
+@@ -8,6 +8,7 @@ pub mod cast;
+ pub mod compare;
+ pub mod grid;
+ pub mod help;
++pub mod infill;
+ pub mod info;
+ pub mod plan;
+ pub mod reduce;
+diff --git a/src/main.rs b/src/main.rs
+index 12f6b37..d7e7375 100644
+--- a/src/main.rs
++++ b/src/main.rs
+@@ -3,7 +3,7 @@
+ use std::process::ExitCode;
+ 
+ use plumbline::cli::args::Args;
+-use plumbline::cli::{cast, compare, grid, help, info, plan, reduce, simulate};
++use plumbline::cli::{cast, compare, grid, help, infill, info, plan, reduce, simulate};
+ 
+ fn main() -> ExitCode {
+     let raw: Vec<String> = std::env::args().skip(1).collect();
+@@ -30,6 +30,7 @@ fn main() -> ExitCode {
+         Some("compare") => compare::run(&args),
+         Some("grid") => grid::run(&args),
+         Some("plan") => plan::run(&args),
++        Some("infill") => infill::run(&args),
+         Some("reduce") => reduce::run(&args),
+         Some("simulate") => simulate::run(&args),
+         Some(other) => {
+diff --git a/src/planning/clip.rs b/src/planning/clip.rs
+new file mode 100644
+index 0000000..6bb4e8a
+--- /dev/null
++++ b/src/planning/clip.rs
+@@ -0,0 +1,151 @@
++//! Clipping a straight run line to the empty cells of a campaign.
++//!
++//! A line that crosses a hole and then a strip of good data and then another
++//! hole is two lines, not one. Running the populated strip again is wasted
++//! water and it also pulls the overlap arithmetic out of shape, because the
++//! boat would be covering cells the original survey already owns. The clipper
++//! walks the candidate line, keeps the stretches that sit on empty cells, and
++//! throws away pieces too short to be worth a turn.
++
++use crate::geodesy::utm::Projected;
++use crate::grid::geometry::GridGeometry;
++use crate::planning::lines::PlannedLine;
++
++/// One contiguous stretch of a candidate line that sits on empty cells.
++#[derive(Debug, Clone, Copy, PartialEq)]
++pub struct Segment {
++    /// Start of the stretch.
++    pub start: Projected,
++    /// End of the stretch.
++    pub end: Projected,
++}
++
++impl Segment {
++    /// Length in metres.
++    pub fn length(&self) -> f64 {
++        self.start.distance_to(&self.end)
++    }
++
++    /// Drop stretches shorter than `min_length`.
++    pub fn long_enough(&self, min_length: f64) -> bool {
++        self.length() + 1.0e-9 >= min_length
++    }
++}
++
++/// Walk a candidate line and keep the parts that fall on `mask`.
++///
++/// `mask` is row-major and the same shape as `geometry`. Sampling is at half
++/// a cell, which is enough to notice a one-cell populated bridge and not so
++/// fine that a long line becomes expensive. Each kept run is extended to the
++/// edges of the cells it covers so the written line matches what `plan`
++/// writes for a rectangular block of the same size.
++pub fn clip_to_mask(
++    start: Projected,
++    end: Projected,
++    geometry: &GridGeometry,
++    mask: &[bool],
++    min_length: f64,
++) -> Vec<Segment> {
++    let length = start.distance_to(&end);
++    if !(length.is_finite() && length > 0.0) {
++        return Vec::new();
++    }
++    let step = (geometry.cell_size * 0.5).max(0.05);
++    let samples = ((length / step).ceil() as usize).max(2);
++    let de = (end.east - start.east) / length;
++    let dn = (end.north - start.north) / length;
++
++    let mut on_hole = Vec::with_capacity(samples);
++    for i in 0..samples {
++        let t = if samples == 1 {
++            0.0
++        } else {
++            length * i as f64 / (samples - 1) as f64
++        };
++        let p = Projected::new(start.east + de * t, start.north + dn * t);
++        let index = geometry.index_of(p);
++        let hit = geometry
++            .offset_of(index)
++            .map(|o| mask.get(o).copied().unwrap_or(false))
++            .unwrap_or(false);
++        on_hole.push((t, p, hit));
++    }
++
++    let mut runs: Vec<Segment> = Vec::new();
++    let mut run_start: Option<(f64, Projected)> = None;
++    let mut last_hit: Option<(f64, Projected)> = None;
++
++    for &(t, p, hit) in &on_hole {
++        if hit {
++            if run_start.is_none() {
++                run_start = Some((t, p));
++            }
++            last_hit = Some((t, p));
++        } else if let (Some(s), Some(e)) = (run_start.take(), last_hit.take()) {
++            push_run(&mut runs, s.1, e.1, de, dn, geometry);
++        }
++    }
++    if let (Some(s), Some(e)) = (run_start, last_hit) {
++        push_run(&mut runs, s.1, e.1, de, dn, geometry);
++    }
++
++    runs.into_iter()
++        .filter(|s| s.long_enough(min_length))
++        .collect()
++}
++
++fn push_run(
++    runs: &mut Vec<Segment>,
++    start: Projected,
++    end: Projected,
++    de: f64,
++    dn: f64,
++    geometry: &GridGeometry,
++) {
++    // Nudge each end out by a quarter cell so a run that only sampled cell
++    // centres still covers the cell it is meant to fill.
++    let pad = geometry.cell_size * 0.25;
++    let start = Projected::new(start.east - de * pad, start.north - dn * pad);
++    let end = Projected::new(end.east + de * pad, end.north + dn * pad);
++    if start.distance_to(&end) > 0.0 {
++        runs.push(Segment { start, end });
++    }
++}
++
++/// Turn clipped segments into numbered planned lines.
++pub fn segments_to_lines(segments: &[Segment], first_number: usize) -> Vec<PlannedLine> {
++    segments
++        .iter()
++        .enumerate()
++        .map(|(i, s)| PlannedLine {
++            number: first_number + i,
++            start: s.start,
++            end: s.end,
++        })
++        .collect()
++}
++
++/// Shortest distance from a point to a finite line segment.
++pub fn distance_to_segment(point: Projected, start: Projected, end: Projected) -> f64 {
++    let abe = end.east - start.east;
++    let abn = end.north - start.north;
++    let length2 = abe * abe + abn * abn;
++    if length2 <= 1.0e-18 {
++        return point.distance_to(&start);
++    }
++    let t = ((point.east - start.east) * abe + (point.north - start.north) * abn) / length2;
++    let t = t.clamp(0.0, 1.0);
++    let closest = Projected::new(start.east + t * abe, start.north + t * abn);
++    point.distance_to(&closest)
++}
++
++/// True when a cell centre lies within `half_width` of any of the lines.
++pub fn cell_covered_by_lines(
++    cell_centre: Projected,
++    lines: &[PlannedLine],
++    half_width: f64,
++) -> bool {
++    lines
++        .iter()
++        .any(|line| distance_to_segment(cell_centre, line.start, line.end) <= half_width + 1.0e-9)
++}
+diff --git a/src/planning/heading.rs b/src/planning/heading.rs
+new file mode 100644
+index 0000000..f963749
+--- /dev/null
++++ b/src/planning/heading.rs
+@@ -0,0 +1,105 @@
++//! Heading of a campaign from the shape of its empty cells.
++//!
++//! A long thin hole should be run along its length, not across it, or the boat
++//! spends the day turning. The heading that does that is the first principal
++//! axis of the empty cell centres, expressed the same way the block planner
++//! expresses a heading: clockwise from grid north.
++
++use crate::geodesy::utm::Projected;
++use crate::grid::geometry::{CellIndex, GridGeometry};
++use crate::units::Angle;
++
++use super::holes::Campaign;
++
++/// Principal-axis heading of a campaign, wrapped into `[0, 180)`.
++///
++/// Reciprocal headings are the same scheme: running 90 degrees and running
++/// 270 degrees lays the same lines. Wrapping into a half turn keeps the
++/// default stable and stops a nearly-square hole flipping between two answers
++/// that differ only in direction.
++pub fn principal_heading(campaign: &Campaign, geometry: &GridGeometry) -> Angle {
++    let points: Vec<Projected> = campaign
++        .cells()
++        .map(|cell| geometry.centre_of(cell))
++        .collect();
++    heading_of_points(&points)
++}
++
++/// Principal-axis heading of a cloud of projected points.
++pub fn heading_of_points(points: &[Projected]) -> Angle {
++    if points.len() < 2 {
++        return Angle::ZERO;
++    }
++
++    let n = points.len() as f64;
++    let mut mean_e = 0.0;
++    let mut mean_n = 0.0;
++    for p in points {
++        mean_e += p.east;
++        mean_n += p.north;
++    }
++    mean_e /= n;
++    mean_n /= n;
++
++    let mut cov_ee = 0.0;
++    let mut cov_nn = 0.0;
++    let mut cov_en = 0.0;
++    for p in points {
++        let de = p.east - mean_e;
++        let dn = p.north - mean_n;
++        cov_ee += de * de;
++        cov_nn += dn * dn;
++        cov_en += de * dn;
++    }
++
++    // Eigenvector of the 2x2 covariance for the larger eigenvalue. The
++    // degenerate case (a round hole, or every cell the same) falls back to
++    // north so the caller still has a number to print.
++    let trace = cov_ee + cov_nn;
++    let det = cov_ee * cov_nn - cov_en * cov_en;
++    let disc = (trace * trace / 4.0 - det).max(0.0).sqrt();
++    let lambda = trace / 2.0 + disc;
++    let (east, north) = if cov_en.abs() > 1.0e-12 {
++        (lambda - cov_nn, cov_en)
++    } else if cov_ee >= cov_nn {
++        (1.0, 0.0)
++    } else {
++        (0.0, 1.0)
++    };
++    if east * east + north * north < 1.0e-18 {
++        return Angle::ZERO;
++    }
++    wrap_half(Angle::from_radians(east.atan2(north)))
++}
++
++/// Reduce a heading into `[0, 180)`.
++pub fn wrap_half(heading: Angle) -> Angle {
++    let mut deg = heading.wrapped().degrees();
++    while deg >= 180.0 {
++        deg -= 180.0;
++    }
++    Angle::from_degrees(deg)
++}
++
++/// Unit direction of a heading, as `(east, north)`.
++pub fn along(heading: Angle) -> (f64, f64) {
++    let (sin_hd, cos_hd) = heading.sin_cos();
++    (sin_hd, cos_hd)
++}
++
++/// Unit direction across a heading, pointing to the right of along.
++pub fn across(heading: Angle) -> (f64, f64) {
++    let (e, n) = along(heading);
++    (n, -e)
++}
++
++/// Whether a cell centre is closer to a heading's along-axis than a width.
++pub fn projected_offset(
++    cell: CellIndex,
++    geometry: &GridGeometry,
++    origin: Projected,
++    across_dir: (f64, f64),
++) -> f64 {
++    let p = geometry.centre_of(cell);
++    (p.east - origin.east) * across_dir.0 + (p.north - origin.north) * across_dir.1
++}
+diff --git a/src/planning/holes.rs b/src/planning/holes.rs
+new file mode 100644
+index 0000000..e6b993a
+--- /dev/null
++++ b/src/planning/holes.rs
+@@ -0,0 +1,321 @@
++//! Empty cells on a delivered surface, grouped the way a boat would see them.
++//!
++//! Coverage analysis already reports holidays as bounding boxes. Infill needs
++//! the cells themselves: a C-shaped gap and the rectangle that bounds it are
++//! not the same piece of water, and a line laid through the bounding box
++//! surveys seabed that is already good. This module flood-fills the holes,
++//! keeps the cell lists, and merges holes that sit close enough that one
++//! campaign should cover them together.
++
++use crate::error::{Error, Result};
++use crate::grid::estimator::DepthRaster;
++use crate::grid::geometry::{CellIndex, GridGeometry};
++
++/// One contiguous run of empty cells.
++#[derive(Debug, Clone, PartialEq)]
++pub struct Hole {
++    /// Cells in this hole, in the order the flood fill visited them.
++    pub cells: Vec<CellIndex>,
++    /// True when any cell sits on the outer edge of the grid.
++    pub on_edge: bool,
++    /// Area in square metres.
++    pub area: f64,
++}
++
++impl Hole {
++    /// Number of empty cells.
++    pub fn cell_count(&self) -> usize {
++        self.cells.len()
++    }
++
++    /// Axis-aligned bounding box of the cells, as inclusive indices.
++    pub fn index_bounds(&self) -> Option<(CellIndex, CellIndex)> {
++        let first = self.cells.first()?;
++        let mut min_c = first.column;
++        let mut max_c = first.column;
++        let mut min_r = first.row;
++        let mut max_r = first.row;
++        for cell in &self.cells {
++            min_c = min_c.min(cell.column);
++            max_c = max_c.max(cell.column);
++            min_r = min_r.min(cell.row);
++            max_r = max_r.max(cell.row);
++        }
++        Some((CellIndex::new(min_c, min_r), CellIndex::new(max_c, max_r)))
++    }
++
++    /// Bounding box in metres, lower left and upper right corners of the
++    /// cells, not of their centres.
++    pub fn metre_bounds(&self, geometry: &GridGeometry) -> Option<(f64, f64, f64, f64)> {
++        let (lo, hi) = self.index_bounds()?;
++        Some((
++            geometry.origin_east + lo.column as f64 * geometry.cell_size,
++            geometry.origin_north + lo.row as f64 * geometry.cell_size,
++            geometry.origin_east + (hi.column as f64 + 1.0) * geometry.cell_size,
++            geometry.origin_north + (hi.row as f64 + 1.0) * geometry.cell_size,
++        ))
++    }
++
++    /// Longest side of the bounding box, in metres.
++    pub fn extent(&self, geometry: &GridGeometry) -> f64 {
++        match self.metre_bounds(geometry) {
++            Some((e0, n0, e1, n1)) => (e1 - e0).max(n1 - n0),
++            None => 0.0,
++        }
++    }
++}
++
++/// A set of holes that will be planned as one campaign.
++///
++/// Merging is about the boat, not about connectivity on the grid. Two gaps
++/// twenty metres apart with a thin strip of data between them are still one
++/// trip if the merge gap is wider than that strip.
++#[derive(Debug, Clone, PartialEq)]
++pub struct Campaign {
++    /// Holes that belong together.
++    pub holes: Vec<Hole>,
++}
++
++impl Campaign {
++    /// Every empty cell in the campaign.
++    pub fn cells(&self) -> impl Iterator<Item = CellIndex> + '_ {
++        self.holes.iter().flat_map(|h| h.cells.iter().copied())
++    }
++
++    /// Combined area in square metres.
++    pub fn area(&self) -> f64 {
++        self.holes.iter().map(|h| h.area).sum()
++    }
++
++    /// True when any member hole touches the grid edge.
++    pub fn on_edge(&self) -> bool {
++        self.holes.iter().any(|h| h.on_edge)
++    }
++
++    /// Bounding box of every member hole, in metres.
++    pub fn metre_bounds(&self, geometry: &GridGeometry) -> Option<(f64, f64, f64, f64)> {
++        let mut iter = self.holes.iter().filter_map(|h| h.metre_bounds(geometry));
++        let first = iter.next()?;
++        let mut bounds = first;
++        for next in iter {
++            bounds.0 = bounds.0.min(next.0);
++            bounds.1 = bounds.1.min(next.1);
++            bounds.2 = bounds.2.max(next.2);
++            bounds.3 = bounds.3.max(next.3);
++        }
++        Some(bounds)
++    }
++
++    /// A lookup mask: true at offsets that belong to this campaign.
++    pub fn mask(&self, geometry: &GridGeometry) -> Vec<bool> {
++        let mut mask = vec![false; geometry.cell_count()];
++        for cell in self.cells() {
++            if let Some(offset) = geometry.offset_of(cell) {
++                mask[offset] = true;
++            }
++        }
++        mask
++    }
++}
++
++/// Find the empty regions on a raster.
++///
++/// Four-way connectivity, matching the coverage report. Two cells that only
++/// touch at a corner are not a hole a vessel can sail through.
++pub fn discover(raster: &DepthRaster, geometry: &GridGeometry) -> Vec<Hole> {
++    let columns = raster.columns;
++    let rows = raster.rows;
++    let total = columns * rows;
++    let mut seen = vec![false; total];
++    let mut holes = Vec::new();
++    let mut stack = Vec::new();
++    let cell_area = geometry.cell_size * geometry.cell_size;
++
++    for start in 0..total {
++        if seen[start] || raster.depths[start].is_some() {
++            continue;
++        }
++        let mut cells = Vec::new();
++        let mut on_edge = false;
++        stack.clear();
++        stack.push(start);
++        seen[start] = true;
++
++        while let Some(offset) = stack.pop() {
++            let column = offset % columns;
++            let row = offset / columns;
++            cells.push(CellIndex::new(column as i64, row as i64));
++            if column == 0 || row == 0 || column + 1 == columns || row + 1 == rows {
++                on_edge = true;
++            }
++            let push = |c: usize, r: usize, stack: &mut Vec<usize>, seen: &mut Vec<bool>| {
++                let o = r * columns + c;
++                if !seen[o] && raster.depths[o].is_none() {
++                    seen[o] = true;
++                    stack.push(o);
++                }
++            };
++            if column > 0 {
++                push(column - 1, row, &mut stack, &mut seen);
++            }
++            if column + 1 < columns {
++                push(column + 1, row, &mut stack, &mut seen);
++            }
++            if row > 0 {
++                push(column, row - 1, &mut stack, &mut seen);
++            }
++            if row + 1 < rows {
++                push(column, row + 1, &mut stack, &mut seen);
++            }
++        }
++
++        holes.push(Hole {
++            area: cells.len() as f64 * cell_area,
++            cells,
++            on_edge,
++        });
++    }
++
++    holes.sort_by(|a, b| b.cells.len().cmp(&a.cells.len()));
++    holes
++}
++
++/// Drop holes that should not be planned.
++///
++/// Edge holes are the grid being larger than the work, unless the caller has
++/// asked to include them. Area is the cutoff for specks that are one noisy
++/// cell rather than a gap a boat can fill.
++pub fn filter(holes: Vec<Hole>, include_edge: bool, min_area: f64) -> (Vec<Hole>, usize) {
++    let mut kept = Vec::new();
++    let mut skipped = 0;
++    for hole in holes {
++        if !include_edge && hole.on_edge {
++            skipped += 1;
++            continue;
++        }
++        if hole.area + 1.0e-12 < min_area {
++            skipped += 1;
++            continue;
++        }
++        kept.push(hole);
++    }
++    (kept, skipped)
++}
++
++/// How far apart two bounding boxes are, in metres.
++///
++/// Overlapping or touching boxes have distance zero. The value is the gap
++/// between the nearest edges otherwise, which is what you want when deciding
++/// whether a boat that came for one hole should bother with the next.
++fn bbox_gap(a: (f64, f64, f64, f64), b: (f64, f64, f64, f64)) -> f64 {
++    let gap_east = if a.2 < b.0 {
++        b.0 - a.2
++    } else if b.2 < a.0 {
++        a.0 - b.2
++    } else {
++        0.0
++    };
++    let gap_north = if a.3 < b.1 {
++        b.1 - a.3
++    } else if b.3 < a.1 {
++        a.1 - b.3
++    } else {
++        0.0
++    };
++    (gap_east * gap_east + gap_north * gap_north).sqrt()
++}
++
++/// Group holes whose bounding boxes sit within `merge_gap` metres.
++pub fn campaigns(
++    holes: Vec<Hole>,
++    geometry: &GridGeometry,
++    merge_gap: f64,
++) -> Result<Vec<Campaign>> {
++    if !merge_gap.is_finite() || merge_gap < 0.0 {
++        return Err(Error::domain(
++            "merge gap",
++            merge_gap,
++            "finite and not negative",
++        ));
++    }
++    if holes.is_empty() {
++        return Ok(Vec::new());
++    }
++
++    let bounds: Vec<Option<(f64, f64, f64, f64)>> =
++        holes.iter().map(|h| h.metre_bounds(geometry)).collect();
++    let n = holes.len();
++    let mut parent: Vec<usize> = (0..n).collect();
++
++    fn find(parent: &mut [usize], mut i: usize) -> usize {
++        while parent[i] != i {
++            let p = parent[i];
++            parent[i] = parent[p];
++            i = p;
++        }
++        i
++    }
++
++    for i in 0..n {
++        let Some(a) = bounds[i] else { continue };
++        for (j, bound_b) in bounds.iter().enumerate().skip(i + 1) {
++            let Some(b) = *bound_b else { continue };
++            if bbox_gap(a, b) <= merge_gap {
++                let pi = find(&mut parent, i);
++                let pj = find(&mut parent, j);
++                if pi != pj {
++                    parent[pj] = pi;
++                }
++            }
++        }
++    }
++
++    let mut groups: Vec<Vec<Hole>> = vec![Vec::new(); n];
++    for (i, hole) in holes.into_iter().enumerate() {
++        let p = find(&mut parent, i);
++        groups[p].push(hole);
++    }
++
++    let mut out: Vec<Campaign> = groups
++        .into_iter()
++        .filter(|g| !g.is_empty())
++        .map(|holes| Campaign { holes })
++        .collect();
++    out.sort_by(|a, b| {
++        b.area()
++            .partial_cmp(&a.area())
++            .unwrap_or(std::cmp::Ordering::Equal)
++    });
++    Ok(out)
++}
++
++/// Shoalest populated cell that shares an edge or a corner with the campaign.
++///
++/// Spacing has to come off the shallowest water next to the hole, because that
++/// is where the swath is narrowest. Using a depth from the other side of the
++/// block would plan lines too far apart and leave the hole still open.
++pub fn shoalest_neighbour(
++    raster: &DepthRaster,
++    geometry: &GridGeometry,
++    campaign: &Campaign,
++) -> Option<f64> {
++    let mut best: Option<f64> = None;
++    for cell in campaign.cells() {
++        for neighbour in cell.neighbourhood() {
++            if neighbour == cell {
++                continue;
++            }
++            let Some(offset) = geometry.offset_of(neighbour) else {
++                continue;
++            };
++            let Some(depth) = raster.depths[offset] else {
++                continue;
++            };
++            best = Some(match best {
++                Some(d) => d.min(depth),
++                None => depth,
++            });
++        }
++    }
++    best
++}
+diff --git a/src/planning/infill.rs b/src/planning/infill.rs
+new file mode 100644
+index 0000000..0f71ea9
+--- /dev/null
++++ b/src/planning/infill.rs
+@@ -0,0 +1,506 @@
++//! Planning run lines that fill the holes on a delivered surface.
++//!
++//! The regular block planner is the wrong tool once a survey has already been
++//! run: going back over the whole rectangle repeats water that is already
++//! good. What is left is the interior holidays, grouped into campaigns, with
++//! lines clipped to the empty cells so a populated bridge splits a line in
++//! two. Remainder is what is still open after a swath of the planned spacing
++//! has been painted around every kept line.
++
++use crate::error::{Error, Result};
++use crate::grid::estimator::DepthRaster;
++use crate::grid::geometry::GridGeometry;
++use crate::planning::block::Block;
++use crate::planning::clip::{cell_covered_by_lines, clip_to_mask, segments_to_lines};
++use crate::planning::heading::{along, principal_heading, wrap_half};
++use crate::planning::holes::{campaigns, discover, filter, shoalest_neighbour, Campaign};
++use crate::planning::lines::{plan_crosslines, plan_lines, spacing_for, Plan, PlannedLine};
++use crate::qc::coverage::analyse;
++use crate::units::Angle;
++
++/// Inputs that decide an infill plan.
++#[derive(Debug, Clone, Copy, PartialEq)]
++pub struct InfillOptions {
++    /// Include gaps that touch the grid edge.
++    pub include_edge: bool,
++    /// Holidays smaller than this, in square metres, are skipped.
++    pub min_area: f64,
++    /// Merge holes whose bounding boxes sit this close, in metres.
++    pub merge_gap: f64,
++    /// Heading to run on. `None` takes the long axis of each campaign.
++    pub heading: Option<Angle>,
++    /// Depth used to work out spacing. `None` takes the shoalest neighbour.
++    pub depth: Option<f64>,
++    /// Line spacing. `None` uses [`spacing_for`] with depth, swath and overlap.
++    pub spacing: Option<f64>,
++    /// Swath half angle.
++    pub swath: Angle,
++    /// Fraction of a swath that neighbouring lines repeat.
++    pub overlap: f64,
++    /// Drop clipped pieces shorter than this, in metres.
++    pub min_length: f64,
++    /// Refuse a plan with more main lines than this. `None` means no cap.
++    pub max_lines: Option<usize>,
++    /// Also plan a sparse set of crosslines.
++    pub crosslines: bool,
++    /// Survey speed for the hour estimate, metres per second.
++    pub speed: f64,
++}
++
++impl InfillOptions {
++    /// Defaults that match the command line when nothing extra is passed.
++    ///
++    /// `cell_size` is taken from the surface, not from the configuration:
++    /// four cells of a 0.5 m grid is a different hole to four cells of a
++    /// 5 m grid, and the surface is the thing that has the holes in it.
++    pub fn defaults(cell_size: f64, swath_degrees: f64) -> Result<Self> {
++        if !(cell_size.is_finite() && cell_size > 0.0) {
++            return Err(Error::domain("cell size", cell_size, "finite and positive"));
++        }
++        Ok(InfillOptions {
++            include_edge: false,
++            min_area: 4.0 * cell_size * cell_size,
++            merge_gap: 2.0 * cell_size,
++            heading: None,
++            depth: None,
++            spacing: None,
++            swath: Angle::from_degrees(swath_degrees),
++            overlap: 0.2,
++            min_length: 2.0 * cell_size,
++            max_lines: None,
++            crosslines: false,
++            speed: 3.0,
++        })
++    }
++}
++
++/// One campaign after it has been planned.
++#[derive(Debug, Clone, PartialEq)]
++pub struct CampaignPlan {
++    /// The holes this plan fills.
++    pub campaign: Campaign,
++    /// Heading that was used.
++    pub heading: Angle,
++    /// Spacing that was used.
++    pub spacing: f64,
++    /// Depth that produced the spacing, when one was available.
++    pub shoalest: Option<f64>,
++    /// Main-scheme lines, clipped to the hole.
++    pub lines: Vec<PlannedLine>,
++    /// Crosslines, clipped the same way.
++    pub crosslines: Vec<PlannedLine>,
++}
++
++/// Everything the infill command reports on.
++#[derive(Debug, Clone, PartialEq)]
++pub struct InfillResult {
++    /// Name of the survey, from the configuration.
++    pub survey: String,
++    /// Campaigns that were planned, largest first.
++    pub campaigns: Vec<CampaignPlan>,
++    /// Holidays that were skipped (edge, or under the area cutoff).
++    pub skipped: usize,
++    /// Combined area of the campaigns, square metres.
++    pub area_m2: f64,
++    /// Heading printed for the report: the first campaign's, or zero.
++    pub heading: Angle,
++    /// Spacing printed for the report: the first campaign's, or zero.
++    pub spacing: f64,
++    /// Shoalest depth printed for the report.
++    pub shoalest: f64,
++    /// Main lines across every campaign, numbered from one.
++    pub lines: Vec<PlannedLine>,
++    /// Crosslines across every campaign, numbered from one.
++    pub crosslines: Vec<PlannedLine>,
++    /// Interior holidays still open after the planned swaths are painted.
++    pub remainder_interior: usize,
++    /// Combined area of those remaining interior holidays.
++    pub remainder_area_m2: f64,
++}
++
++impl InfillResult {
++    /// Total on-line length of the main scheme.
++    pub fn length_m(&self) -> f64 {
++        self.lines.iter().map(PlannedLine::length).sum()
++    }
++
++    /// Hours at the requested speed, main scheme only, including turns.
++    pub fn hours_at(&self, speed: f64) -> f64 {
++        if speed <= 0.0 {
++            return f64::INFINITY;
++        }
++        let line: f64 = self.length_m();
++        let turn: f64 = self
++            .lines
++            .windows(2)
++            .map(|w| w[0].end.distance_to(&w[1].start))
++            .sum();
++        (line + turn) / speed / 3600.0
++    }
++}
++
++/// Plan infill lines over the holes of a surface.
++pub fn plan_infill(
++    raster: &DepthRaster,
++    geometry: &GridGeometry,
++    survey: &str,
++    options: InfillOptions,
++) -> Result<InfillResult> {
++    if raster.columns != geometry.columns || raster.rows != geometry.rows {
++        return Err(Error::Config(
++            "raster and geometry disagree about the shape of the grid".into(),
++        ));
++    }
++    if raster.populated() == 0 {
++        return Err(Error::Config(
++            "the surface has no soundings to plan around".into(),
++        ));
++    }
++    if !options.min_area.is_finite() || options.min_area < 0.0 {
++        return Err(Error::domain(
++            "min area",
++            options.min_area,
++            "finite and not negative",
++        ));
++    }
++    if !options.min_length.is_finite() || options.min_length < 0.0 {
++        return Err(Error::domain(
++            "min length",
++            options.min_length,
++            "finite and not negative",
++        ));
++    }
++    if let Some(max) = options.max_lines {
++        if max == 0 {
++            return Err(Error::Config(
++                "--max-lines of 0 would refuse every plan".into(),
++            ));
++        }
++    }
++    if options.speed <= 0.0 {
++        return Err(Error::domain("speed", options.speed, "positive"));
++    }
++
++    let discovered = discover(raster, geometry);
++    let (kept, skipped) = filter(discovered, options.include_edge, options.min_area);
++    let groups = campaigns(kept, geometry, options.merge_gap)?;
++
++    let mut campaign_plans = Vec::new();
++    for group in groups {
++        campaign_plans.push(plan_campaign(raster, geometry, &group, options)?);
++    }
++
++    let mut lines = Vec::new();
++    let mut crosses = Vec::new();
++    for plan in &campaign_plans {
++        lines.extend(plan.lines.iter().copied());
++        crosses.extend(plan.crosslines.iter().copied());
++    }
++    for (i, line) in lines.iter_mut().enumerate() {
++        line.number = i + 1;
++    }
++    for (i, line) in crosses.iter_mut().enumerate() {
++        line.number = i + 1;
++    }
++
++    if let Some(max) = options.max_lines {
++        if lines.len() > max {
++            return Err(Error::Config(format!(
++                "infill would need {} lines, --max-lines is {max}",
++                lines.len()
++            )));
++        }
++    }
++
++    let area_m2 = campaign_plans.iter().map(|c| c.campaign.area()).sum();
++    let heading = campaign_plans
++        .first()
++        .map(|c| c.heading)
++        .unwrap_or(Angle::ZERO);
++    let spacing = campaign_plans.first().map(|c| c.spacing).unwrap_or(0.0);
++    let shoalest = campaign_plans
++        .first()
++        .and_then(|c| c.shoalest)
++        .unwrap_or(0.0);
++
++    let (remainder_interior, remainder_area_m2) =
++        remainder(raster, geometry, &lines, spacing, options.overlap);
++
++    Ok(InfillResult {
++        survey: survey.to_string(),
++        campaigns: campaign_plans,
++        skipped,
++        area_m2,
++        heading,
++        spacing,
++        shoalest,
++        lines,
++        crosslines: crosses,
++        remainder_interior,
++        remainder_area_m2,
++    })
++}
++
++fn plan_campaign(
++    raster: &DepthRaster,
++    geometry: &GridGeometry,
++    campaign: &Campaign,
++    options: InfillOptions,
++) -> Result<CampaignPlan> {
++    let heading = match options.heading {
++        Some(h) => wrap_half(h),
++        None => principal_heading(campaign, geometry),
++    };
++    let shoalest = match options.depth {
++        Some(d) => Some(d),
++        None => shoalest_neighbour(raster, geometry, campaign),
++    };
++    let spacing = match options.spacing {
++        Some(s) => {
++            if !(s.is_finite() && s > 0.0) {
++                return Err(Error::domain("spacing", s, "finite and positive"));
++            }
++            s
++        }
++        None => {
++            let depth = shoalest.ok_or_else(|| {
++                Error::Config("no populated cell next to the hole to take a depth from".into())
++            })?;
++            spacing_for(depth, options.swath, options.overlap)?
++        }
++    };
++
++    let Some(bounds) = campaign.metre_bounds(geometry) else {
++        return Ok(CampaignPlan {
++            campaign: campaign.clone(),
++            heading,
++            spacing,
++            shoalest,
++            lines: Vec::new(),
++            crosslines: Vec::new(),
++        });
++    };
++
++    // A little pad so the first and last candidate lines sit on the hole
++    // rather than a cell outside it. plan_lines already insets by half a
++    // spacing from the bounding box; the pad stops a hole one cell wider
++    // than the spacing from vanishing.
++    let pad = geometry.cell_size * 0.51;
++    let block = Block::rectangle(
++        "hole",
++        bounds.0 - pad,
++        bounds.1 - pad,
++        bounds.2 + pad,
++        bounds.3 + pad,
++    )?;
++
++    let raw = plan_lines(&block, heading, spacing)?;
++    let mask = campaign.mask(geometry);
++    let mut clipped = Vec::new();
++    for line in &raw.lines {
++        let segs = clip_to_mask(line.start, line.end, geometry, &mask, options.min_length);
++        clipped.extend(segments_to_lines(&segs, clipped.len() + 1));
++    }
++
++    // One line down the long axis when spacing is wider than the hole and
++    // the bounding-box planner produced nothing that survived the clip.
++    if clipped.is_empty() {
++        let along_dir = along(heading);
++        let centre = crate::geodesy::utm::Projected::new(
++            (bounds.0 + bounds.2) / 2.0,
++            (bounds.1 + bounds.3) / 2.0,
++        );
++        let span = (bounds.2 - bounds.0).hypot(bounds.3 - bounds.1) + spacing;
++        let start = crate::geodesy::utm::Projected::new(
++            centre.east - along_dir.0 * span,
++            centre.north - along_dir.1 * span,
++        );
++        let end = crate::geodesy::utm::Projected::new(
++            centre.east + along_dir.0 * span,
++            centre.north + along_dir.1 * span,
++        );
++        let segs = clip_to_mask(start, end, geometry, &mask, options.min_length);
++        clipped.extend(segments_to_lines(&segs, 1));
++    }
++
++    let mut plan = Plan {
++        block: "hole".into(),
++        spacing,
++        heading,
++        lines: clipped,
++    };
++    plan.alternate_directions();
++
++    let mut cross = Vec::new();
++    if options.crosslines && !plan.lines.is_empty() {
++        let mut raw_cross = plan_crosslines(&block, &raw)?;
++        raw_cross.alternate_directions();
++        for line in &raw_cross.lines {
++            let segs = clip_to_mask(line.start, line.end, geometry, &mask, options.min_length);
++            cross.extend(segments_to_lines(&segs, cross.len() + 1));
++        }
++    }
++
++    Ok(CampaignPlan {
++        campaign: campaign.clone(),
++        heading,
++        spacing,
++        shoalest,
++        lines: plan.lines,
++        crosslines: cross,
++    })
++}
++
++fn remainder(
++    raster: &DepthRaster,
++    geometry: &GridGeometry,
++    lines: &[PlannedLine],
++    spacing: f64,
++    overlap: f64,
++) -> (usize, f64) {
++    if lines.is_empty() {
++        let coverage = analyse(raster, geometry);
++        let interior: Vec<_> = coverage.interior_holidays().collect();
++        let area: f64 = interior.iter().map(|h| h.area).sum();
++        return (interior.len(), area);
++    }
++    let denom = 2.0 * (1.0 - overlap).max(1.0e-6);
++    let half_width = spacing / denom;
++    let mut painted = raster.clone();
++    for (offset, depth) in painted.depths.iter_mut().enumerate() {
++        if depth.is_some() {
++            continue;
++        }
++        let Some(index) = geometry.index_at_offset(offset) else {
++            continue;
++        };
++        let centre = geometry.centre_of(index);
++        if cell_covered_by_lines(centre, lines, half_width) {
++            *depth = Some(1.0);
++        }
++    }
++    let coverage = analyse(&painted, geometry);
++    let interior: Vec<_> = coverage.interior_holidays().collect();
++    let area: f64 = interior.iter().map(|h| h.area).sum();
++    (interior.len(), area)
++}
++
++/// The text report the command prints.
++pub fn format_report(result: &InfillResult, speed: f64, wrote: &[String]) -> String {
++    let holidays = result
++        .campaigns
++        .iter()
++        .map(|c| c.campaign.holes.len())
++        .sum::<usize>();
++    let mut out = String::new();
++    out.push_str(&format!("infill of {}:\n", result.survey));
++    out.push_str(&format!(
++        "{} holidays, {} m², {} skipped\n",
++        holidays,
++        display_zero(result.area_m2, 0),
++        result.skipped
++    ));
++    if holidays > 0 {
++        out.push_str(&format!(
++            "heading {} degrees, spacing {} m from shoalest {} m\n",
++            display_zero(result.heading.degrees(), 0),
++            display_zero(result.spacing, 1),
++            display_zero(result.shoalest, 1)
++        ));
++        out.push_str(&format!(
++            "{} lines, {} m on line, {} hours at {} m/s\n",
++            result.lines.len(),
++            display_zero(result.length_m(), 1),
++            display_zero(result.hours_at(speed), 2),
++            display_zero(speed, 1)
++        ));
++    } else {
++        out.push_str("0 lines\n");
++    }
++    out.push_str(&format!(
++        "remainder: {} interior holidays, {} m²\n",
++        result.remainder_interior,
++        display_zero(result.remainder_area_m2, 0)
++    ));
++    for path in wrote {
++        out.push_str(&format!("wrote {path}\n"));
++    }
++    out
++}
++
++/// Format a quantity without IEEE negative zero leaking into the report.
++fn display_zero(value: f64, decimals: usize) -> String {
++    let v = if value.is_finite() && value.abs() >= 1.0e-12 {
++        value
++    } else {
++        0.0
++    };
++    match decimals {
++        0 => format!("{v:.0}"),
++        1 => format!("{v:.1}"),
++        2 => format!("{v:.2}"),
++        _ => format!("{v:.6}"),
++    }
++}
++
++/// The JSON object `--json` writes.
++pub fn format_json(result: &InfillResult, speed: f64) -> String {
++    let holidays = result
++        .campaigns
++        .iter()
++        .map(|c| c.campaign.holes.len())
++        .sum::<usize>();
++    let survey = escape_json(&result.survey);
++    format!(
++        "{{\n  \"survey\": \"{survey}\",\n  \"holidays\": {holidays},\n  \"skipped\": {},\n  \"area_m2\": {},\n  \"heading_deg\": {},\n  \"spacing_m\": {},\n  \"shoalest_m\": {},\n  \"lines\": {},\n  \"length_m\": {},\n  \"hours\": {},\n  \"remainder_interior\": {},\n  \"remainder_area_m2\": {}\n}}\n",
++        result.skipped,
++        display_zero(result.area_m2, 6),
++        display_zero(result.heading.degrees(), 6),
++        display_zero(result.spacing, 6),
++        display_zero(result.shoalest, 6),
++        result.lines.len(),
++        display_zero(result.length_m(), 6),
++        display_zero(result.hours_at(speed), 6),
++        result.remainder_interior,
++        display_zero(result.remainder_area_m2, 6)
++    )
++}
++
++fn escape_json(text: &str) -> String {
++    let mut out = String::with_capacity(text.len());
++    for c in text.chars() {
++        match c {
++            '"' => out.push_str("\\\""),
++            '\\' => out.push_str("\\\\"),
++            '\n' => out.push_str("\\n"),
++            '\r' => out.push_str("\\r"),
++            '\t' => out.push_str("\\t"),
++            c if (c as u32) < 0x20 => {
++                use std::fmt::Write as _;
++                let _ = write!(out, "\\u{:04x}", c as u32);
++            }
++            c => out.push(c),
++        }
++    }
++    out
++}
++
++/// Write a plan file in the same format `plan --out` uses.
++pub fn write_lines(path: &std::path::Path, lines: &[PlannedLine]) -> Result<()> {
++    use std::fs::File;
++    use std::io::{BufWriter, Write};
++    let file = File::create(path).map_err(|e| Error::io(path, e))?;
++    let mut out = BufWriter::new(file);
++    writeln!(out, "# line start_east start_north end_east end_north")
++        .map_err(|e| Error::io(path, e))?;
++    for line in lines {
++        writeln!(
++            out,
++            "{} {:.2} {:.2} {:.2} {:.2}",
++            line.number, line.start.east, line.start.north, line.end.east, line.end.north
++        )
++        .map_err(|e| Error::io(path, e))?;
++    }
++    out.flush().map_err(|e| Error::io(path, e))?;
++    Ok(())
++}
+diff --git a/src/planning/mod.rs b/src/planning/mod.rs
+index d6da68c..588cf1b 100644
+--- a/src/planning/mod.rs
++++ b/src/planning/mod.rs
+@@ -1,7 +1,12 @@
+ //! Planning the lines before anything gets wet.
+ 
+ pub mod block;
++pub mod clip;
++pub mod heading;
++pub mod holes;
++pub mod infill;
+ pub mod lines;
+ 
+ pub use block::Block;
++pub use infill::{plan_infill, InfillOptions, InfillResult};
+ pub use lines::{plan_crosslines, plan_lines, spacing_for, Plan, PlannedLine};
+
+
